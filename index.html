@@ -804,26 +804,19 @@
           const body = new URLSearchParams();
           for (const [k, v] of fd.entries()) body.append(k, v);
 
-          const res = await fetch(APPS_SCRIPT_URL, {
+          // Apps Script Web Apps respond with a 302 redirect to googleusercontent.com.
+          // Cross-origin browsers (especially Safari) can't read that response,
+          // so we use mode:'no-cors' to fire-and-forget. The POST DOES reach
+          // Apps Script; we just can't read the JSON back. Verify in the
+          // Deal Log tab if you ever doubt a submission.
+          await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            body: body,
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+            mode: 'no-cors',
+            body: body, // fetch auto-sets Content-Type: application/x-www-form-urlencoded;charset=UTF-8
           });
 
-          const text = await res.text();
-          let payload = null;
-          try { payload = JSON.parse(text); } catch (_) {}
-
-          if (payload && payload.ok) {
-            setStatus('ok', 'Submitted. Deal logged to the Commission Tracker.');
-            form.reset();
-          } else if (payload && payload.error) {
-            setStatus('err', 'Server error: ' + payload.error);
-          } else {
-            // No JSON returned — assume success.
-            setStatus('ok', 'Submitted. Check the Deal Log tab to confirm.');
-            form.reset();
-          }
+          setStatus('ok', 'Submitted. Check the Deal Log tab to confirm.');
+          form.reset();
         } catch (err) {
           setStatus('err', 'Network error: ' + (err && err.message ? err.message : err));
         } finally {
