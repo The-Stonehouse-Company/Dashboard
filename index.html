@@ -524,6 +524,241 @@
     }
 
     /* =========================================================
+       Open House — kiosk state machine
+       ========================================================= */
+    .oh-state[hidden] { display: none !important; }
+
+    /* Setup card */
+    .oh-setup-card {
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+      padding: 36px 32px;
+      max-width: 560px;
+    }
+    .oh-setup-card .field { margin-bottom: 22px; }
+    .oh-setup-card input[type=text] {
+      width: 100%;
+      font: inherit; font-size: 16px;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--rule-strong);
+      padding: 12px 14px;
+      transition: border-color .15s, background .15s;
+    }
+    .oh-setup-card input[type=text]:focus {
+      outline: none;
+      border-color: var(--text);
+      background: var(--bg-elev-2);
+    }
+    .oh-setup-actions {
+      display: flex; gap: 12px; justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    /* Active state header */
+    .oh-active-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 24px; margin-bottom: 28px; flex-wrap: wrap;
+    }
+    .oh-active-meta { flex: 1 1 auto; }
+    .oh-active-property {
+      font-family: var(--font-display);
+      font-size: clamp(22px, 3vw, 32px);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      line-height: 1.15;
+      margin-top: 8px;
+    }
+    .oh-active-agent {
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+    }
+    .oh-active-counter {
+      text-align: right;
+      min-width: 100px;
+    }
+    .oh-active-counter-num {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 5vw, 56px);
+      line-height: 1;
+      color: var(--text);
+    }
+    .oh-active-counter-label {
+      margin-top: 6px;
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-x-wide);
+    }
+
+    /* Sign-in card (visitor types here during active state) */
+    .oh-signin-card {
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+      padding: 28px 32px;
+      margin-bottom: 28px;
+    }
+    .oh-signin-card input[type=text],
+    .oh-signin-card input[type=email],
+    .oh-signin-card input[type=tel] {
+      width: 100%;
+      font: inherit; font-size: 16px;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--rule-strong);
+      padding: 12px 14px;
+      transition: border-color .15s, background .15s;
+    }
+    .oh-signin-card input:focus {
+      outline: none;
+      border-color: var(--text);
+      background: var(--bg-elev-2);
+    }
+    .oh-signin-actions {
+      margin-top: 18px;
+      display: flex; justify-content: flex-end;
+    }
+    .oh-signin-actions .btn { padding: 14px 32px; font-size: 12px; }
+
+    /* Recent signed-in this session */
+    .oh-recent-wrap {
+      border: 1px solid var(--rule-strong);
+      background: var(--bg-elev);
+      overflow-x: auto;
+      margin-bottom: 28px;
+    }
+    .oh-recent-wrap .agent-table { min-width: 480px; }
+
+    /* Active footer */
+    .oh-active-foot {
+      text-align: right;
+    }
+
+    /* Concluded card */
+    .oh-concluded-card {
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+      padding: 36px 32px;
+      max-width: 720px;
+    }
+    .oh-concluded-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+    .oh-concluded-meta strong {
+      color: var(--text);
+      font-family: var(--font-display);
+      font-weight: 400;
+      letter-spacing: 0.04em;
+    }
+    .oh-concluded-actions {
+      display: flex; gap: 12px; flex-wrap: wrap;
+    }
+
+    /* =========================================================
+       Open House — sign-in share card (legacy / unused — kept for safety)
+       ========================================================= */
+    .signin-share {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 32px;
+      align-items: center;
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+      padding: 32px;
+    }
+    .signin-share-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 18px;
+      max-width: 520px;
+    }
+    .signin-property-setup {
+      margin-bottom: 22px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .signin-property-field {
+      margin-bottom: 12px;
+    }
+    .signin-property-field input[type=text] {
+      width: 100%;
+      font: inherit; font-size: 14px;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--rule-strong);
+      padding: 11px 12px;
+      transition: border-color .15s, background .15s;
+    }
+    .signin-property-field input[type=text]:focus {
+      outline: none;
+      border-color: var(--text);
+      background: var(--bg-elev-2);
+    }
+    .signin-property-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 14px 0 10px;
+    }
+    .signin-property-status {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+    }
+    .signin-property-status.is-set { color: var(--text-muted); }
+
+    .signin-share-url-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .signin-share-url {
+      flex: 1 1 280px;
+      font-family: ui-monospace, "SF Mono", "Menlo", monospace;
+      font-size: 11px;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--rule-strong);
+      padding: 10px 12px;
+      white-space: nowrap;
+      overflow-x: auto;
+    }
+    .btn-small {
+      padding: 9px 18px;
+      font-size: 10px;
+    }
+    .signin-qr {
+      text-align: center;
+    }
+    .signin-qr img {
+      display: block;
+      background: var(--bg-elev);
+      padding: 8px;
+      border: 1px solid var(--rule-strong);
+    }
+    .signin-qr-caption {
+      margin-top: 10px;
+      font-size: 9px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-x-wide);
+    }
+    @media (max-width: 720px) {
+      .signin-share { grid-template-columns: 1fr; }
+      .signin-qr img { margin: 0 auto; }
+    }
+
+    /* =========================================================
        Template cards (reusable grid for marketing assets, etc.)
        ========================================================= */
     .subpanel-intro {
@@ -689,6 +924,7 @@
       <nav class="subtabbar" role="tablist" aria-label="Sales sections" data-subtab-parent="sales">
         <button class="subtab" role="tab" aria-controls="subpanel-sales-commissions" aria-selected="true"  data-subkey="commissions">Commissions</button>
         <button class="subtab" role="tab" aria-controls="subpanel-sales-marketing"   aria-selected="false" data-subkey="marketing">Marketing Templates</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-sales-openhouse"   aria-selected="false" data-subkey="openhouse">Open House</button>
       </nav>
 
       <div class="subpanel" id="subpanel-sales-commissions" role="tabpanel" aria-hidden="false" tabindex="0">
@@ -742,6 +978,138 @@
             <span class="action-arrow" aria-hidden="true">→</span>
           </button>
         </div>
+      </div>
+
+      <div class="subpanel" id="subpanel-sales-openhouse" role="tabpanel" aria-hidden="true" tabindex="0">
+
+        <!-- ============= STATE: IDLE (no open house running) ============= -->
+        <div class="oh-state oh-state-idle" data-oh-state="idle">
+          <section class="stats-section">
+            <div class="stats-section-head">
+              <div>
+                <div class="stats-eyebrow">Sales Division · Open House</div>
+                <h2 style="font-family:var(--font-display);font-size:22px;letter-spacing:0.08em;text-transform:uppercase;margin:6px 0 0;">Kiosk</h2>
+              </div>
+            </div>
+
+            <div class="placeholder" style="text-align:left; padding:48px 32px;">
+              <p style="font-size:13px; color:var(--text-muted); margin:0 0 24px; max-width:560px;">
+                Run an open house from this device. Tap <strong>Start a New Open House</strong>, enter your name and the property, then hand the device to visitors so they can sign in.
+                When you finish, you'll be able to download the visitor list and every sign-in will also be saved to the master sheet.
+              </p>
+              <button class="btn" type="button" id="oh-start-btn">Start a New Open House</button>
+            </div>
+          </section>
+        </div>
+
+        <!-- ============= STATE: SETUP (agent fills in details) ============= -->
+        <div class="oh-state oh-state-setup" data-oh-state="setup" hidden>
+          <section class="stats-section">
+            <div class="stats-section-head">
+              <div>
+                <div class="stats-eyebrow">New Open House</div>
+                <h2 style="font-family:var(--font-display);font-size:22px;letter-spacing:0.08em;text-transform:uppercase;margin:6px 0 0;">Set Up</h2>
+              </div>
+            </div>
+
+            <div class="oh-setup-card">
+              <div class="field">
+                <label class="field-label" for="oh-setup-agent">Hosting Agent <span class="req">*</span></label>
+                <input id="oh-setup-agent" type="text" placeholder="Ryan Stonehouse" autocomplete="off" />
+              </div>
+              <div class="field">
+                <label class="field-label" for="oh-setup-property">Property Address <span class="req">*</span></label>
+                <input id="oh-setup-property" type="text" placeholder="715 Davis Dr, Franklin, TN 37067" autocomplete="off" />
+              </div>
+              <div class="oh-setup-actions">
+                <button class="btn ghost btn-small" type="button" id="oh-setup-cancel">Cancel</button>
+                <button class="btn" type="button" id="oh-setup-start">Begin Open House</button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- ============= STATE: ACTIVE (open house in progress, visitors signing in) ============= -->
+        <div class="oh-state oh-state-active" data-oh-state="active" hidden>
+          <section class="stats-section">
+            <div class="oh-active-head">
+              <div class="oh-active-meta">
+                <div class="stats-eyebrow">Open House in Progress</div>
+                <div class="oh-active-property" id="oh-active-property"></div>
+                <div class="oh-active-agent" id="oh-active-agent"></div>
+              </div>
+              <div class="oh-active-counter">
+                <div class="oh-active-counter-num" id="oh-active-count">0</div>
+                <div class="oh-active-counter-label">Signed in</div>
+              </div>
+            </div>
+
+            <div class="oh-signin-card">
+              <form id="oh-signin-form" autocomplete="off" novalidate>
+                <div class="form-grid">
+                  <div class="full">
+                    <label class="field-label" for="oh-v-name">Full Name <span class="req">*</span></label>
+                    <input id="oh-v-name" name="full_name" type="text" required placeholder="First and last name" />
+                  </div>
+                  <div>
+                    <label class="field-label" for="oh-v-email">Email <span class="req">*</span></label>
+                    <input id="oh-v-email" name="email" type="email" required placeholder="you@example.com" />
+                  </div>
+                  <div>
+                    <label class="field-label" for="oh-v-phone">Phone <span class="req">*</span></label>
+                    <input id="oh-v-phone" name="phone" type="tel" required placeholder="(555) 123-4567" />
+                  </div>
+                </div>
+                <div class="oh-signin-actions">
+                  <button class="btn" type="submit" id="oh-signin-submit">Sign In</button>
+                </div>
+                <div class="form-status" id="oh-signin-status" role="status" aria-live="polite"></div>
+              </form>
+            </div>
+
+            <div class="oh-recent-wrap">
+              <div class="stats-eyebrow" style="margin-bottom:10px;">Signed in this session</div>
+              <table class="agent-table" aria-label="Visitors signed in during this open house">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                  </tr>
+                </thead>
+                <tbody id="oh-recent-body">
+                  <tr class="empty-row"><td colspan="4">No visitors yet — first sign-in will appear here.</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="oh-active-foot">
+              <button class="btn ghost" type="button" id="oh-finish-btn">Finish Open House</button>
+            </div>
+          </section>
+        </div>
+
+        <!-- ============= STATE: CONCLUDED (download + reset) ============= -->
+        <div class="oh-state oh-state-concluded" data-oh-state="concluded" hidden>
+          <section class="stats-section">
+            <div class="stats-section-head">
+              <div>
+                <div class="stats-eyebrow">Open House Concluded</div>
+                <h2 style="font-family:var(--font-display);font-size:22px;letter-spacing:0.08em;text-transform:uppercase;margin:6px 0 0;" id="oh-concluded-title">Wrap-up</h2>
+              </div>
+            </div>
+
+            <div class="oh-concluded-card">
+              <div class="oh-concluded-meta" id="oh-concluded-meta"></div>
+              <div class="oh-concluded-actions">
+                <button class="btn" type="button" id="oh-download-btn">Download Visitor List</button>
+                <button class="btn ghost" type="button" id="oh-new-btn">Start Another Open House</button>
+              </div>
+            </div>
+          </section>
+        </div>
+
       </div>
 
       <div class="subpanel" id="subpanel-sales-marketing" role="tabpanel" aria-hidden="true" tabindex="0">
@@ -1144,6 +1512,273 @@
       }
 
       loadStats();
+    })();
+
+    // ============================================================
+    // Open House — kiosk state machine
+    //
+    // States: idle → setup → active → concluded → idle
+    //
+    //  idle:       "Start a New Open House" button.
+    //  setup:      Agent enters their name + property address. "Begin Open House"
+    //              moves to active; "Cancel" returns to idle.
+    //  active:     Sign-in form for visitors. Each submit:
+    //                1) POSTs to the Google Form (master sheet, fire-and-forget)
+    //                2) Appends to the in-session list
+    //                3) Persists to localStorage so a page reload mid-event
+    //                   doesn't lose data.
+    //              Visitor count + per-visitor table update live.
+    //              "Finish Open House" moves to concluded.
+    //  concluded:  Summary + "Download Visitor List" button (generates a CSV
+    //              from the session list) + "Start Another" returns to setup.
+    //
+    // Master Google Form: 5 fields in order: property, agent, name, email, phone.
+    // FORM_URL + FIELD_MAP below need to be filled in once the form exists.
+    // ============================================================
+    (function () {
+      // ----- Backend config (Google Form for master Open House log) -----
+      const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScKPysMS8r4RViT5llaD8ogEZNtKimhJs2rvQ_x3Lpy6ZmBwQ/formResponse";
+      const FIELD_MAP = {
+        property_address: "entry.901945291",
+        agent:            "entry.235271748",
+        full_name:        "entry.650535805",
+        email:            "entry.1256359805",
+        phone:            "entry.1135110564",
+      };
+
+      // ----- Persistence keys -----
+      const LS_SESSION = 'stonehouse.openhouse.session.v1';
+
+      // ----- State -----
+      let session = null; // { state, agent, property, startedAt, signIns: [{ts, name, email, phone}] }
+
+      const stateNodes = {
+        idle:      document.querySelector('[data-oh-state="idle"]'),
+        setup:     document.querySelector('[data-oh-state="setup"]'),
+        active:    document.querySelector('[data-oh-state="active"]'),
+        concluded: document.querySelector('[data-oh-state="concluded"]'),
+      };
+      function showState(name) {
+        Object.entries(stateNodes).forEach(([k, n]) => {
+          if (!n) return;
+          if (k === name) n.removeAttribute('hidden');
+          else            n.setAttribute('hidden', '');
+        });
+      }
+
+      function loadSession() {
+        try {
+          const raw = localStorage.getItem(LS_SESSION);
+          if (!raw) return null;
+          return JSON.parse(raw);
+        } catch (_) { return null; }
+      }
+      function saveSession(s) {
+        if (!s) localStorage.removeItem(LS_SESSION);
+        else    localStorage.setItem(LS_SESSION, JSON.stringify(s));
+      }
+
+      // ----- Format helpers -----
+      const dtFmt = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+      const timeFmt = new Intl.DateTimeFormat('en-US', { timeStyle: 'short' });
+
+      function escapeHTML(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        }[c]));
+      }
+      function csvEscape(v) {
+        const s = String(v == null ? '' : v);
+        if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+        return s;
+      }
+
+      // ----- Render helpers -----
+      function renderActive() {
+        if (!session) return;
+        document.getElementById('oh-active-property').textContent = session.property;
+        document.getElementById('oh-active-agent').textContent    = 'Hosted by ' + session.agent;
+        document.getElementById('oh-active-count').textContent    = session.signIns.length;
+        const tbody = document.getElementById('oh-recent-body');
+        if (session.signIns.length === 0) {
+          tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No visitors yet — first sign-in will appear here.</td></tr>';
+        } else {
+          // newest first
+          tbody.innerHTML = session.signIns.slice().reverse().map(v => (
+            '<tr>' +
+              '<td>' + timeFmt.format(new Date(v.ts)) + '</td>' +
+              '<td class="col-agent">' + escapeHTML(v.full_name) + '</td>' +
+              '<td>' + escapeHTML(v.email) + '</td>' +
+              '<td>' + escapeHTML(v.phone) + '</td>' +
+            '</tr>'
+          )).join('');
+        }
+      }
+
+      // ----- Submit a sign-in to the master Google Form (fire-and-forget) -----
+      async function submitToMaster(visitor) {
+        if (!FORM_URL) return; // not configured yet — silently skip
+        try {
+          const body = new URLSearchParams();
+          const data = {
+            property_address: session.property,
+            agent:            session.agent,
+            full_name:        visitor.full_name,
+            email:            visitor.email,
+            phone:            visitor.phone,
+          };
+          for (const [k, v] of Object.entries(data)) {
+            const entry = FIELD_MAP[k];
+            if (entry) body.append(entry, v);
+          }
+          await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body });
+        } catch (err) {
+          console.warn('Master log submit failed:', err);
+        }
+      }
+
+      // ============================================================
+      // Wire up controls
+      // ============================================================
+
+      // Idle → Setup
+      document.getElementById('oh-start-btn').addEventListener('click', () => {
+        document.getElementById('oh-setup-agent').value = '';
+        document.getElementById('oh-setup-property').value = '';
+        showState('setup');
+        setTimeout(() => document.getElementById('oh-setup-agent').focus(), 50);
+      });
+
+      // Setup → Idle (cancel)
+      document.getElementById('oh-setup-cancel').addEventListener('click', () => {
+        showState('idle');
+      });
+
+      // Setup → Active (begin)
+      document.getElementById('oh-setup-start').addEventListener('click', () => {
+        const agent    = document.getElementById('oh-setup-agent').value.trim();
+        const property = document.getElementById('oh-setup-property').value.trim();
+        if (!agent || !property) {
+          alert('Please enter both your name and the property address before starting.');
+          return;
+        }
+        session = {
+          state: 'active',
+          agent: agent,
+          property: property,
+          startedAt: new Date().toISOString(),
+          signIns: [],
+        };
+        saveSession(session);
+        renderActive();
+        showState('active');
+        setTimeout(() => document.getElementById('oh-v-name').focus(), 50);
+      });
+
+      // Active: visitor sign-in submit
+      const signinForm = document.getElementById('oh-signin-form');
+      const signinStatus = document.getElementById('oh-signin-status');
+      const signinSubmit = document.getElementById('oh-signin-submit');
+      signinForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        signinStatus.className = 'form-status';
+        signinStatus.textContent = '';
+        if (!signinForm.checkValidity()) { signinForm.reportValidity(); return; }
+
+        const visitor = {
+          ts:        new Date().toISOString(),
+          full_name: document.getElementById('oh-v-name').value.trim(),
+          email:     document.getElementById('oh-v-email').value.trim(),
+          phone:     document.getElementById('oh-v-phone').value.trim(),
+        };
+        session.signIns.push(visitor);
+        saveSession(session);
+        renderActive();
+
+        // Fire-and-forget master-sheet log
+        submitToMaster(visitor);
+
+        // Reset for next visitor
+        signinForm.reset();
+        signinStatus.className = 'form-status show ok';
+        signinStatus.textContent = 'Signed in: ' + visitor.full_name + '. Ready for the next visitor.';
+        setTimeout(() => document.getElementById('oh-v-name').focus(), 50);
+      });
+
+      // Active → Concluded
+      document.getElementById('oh-finish-btn').addEventListener('click', () => {
+        if (!session) return;
+        if (!confirm('Finish this open house? You\'ll be able to download the visitor list.')) return;
+        session.state = 'concluded';
+        session.endedAt = new Date().toISOString();
+        saveSession(session);
+        renderConcluded();
+        showState('concluded');
+      });
+
+      // Concluded view
+      function renderConcluded() {
+        if (!session) return;
+        document.getElementById('oh-concluded-title').textContent = session.property;
+        const started = new Date(session.startedAt);
+        const ended   = new Date(session.endedAt || Date.now());
+        const minutes = Math.max(1, Math.round((ended - started) / 60000));
+        const dur = minutes < 60
+          ? minutes + ' min'
+          : (Math.floor(minutes / 60) + 'h ' + (minutes % 60) + 'm');
+        document.getElementById('oh-concluded-meta').innerHTML =
+          '<strong>' + session.signIns.length + '</strong> visitor' + (session.signIns.length === 1 ? '' : 's') +
+          ' over ' + dur + ', hosted by ' + escapeHTML(session.agent) + '.<br>' +
+          'Started ' + dtFmt.format(started) + ' · Ended ' + dtFmt.format(ended) + '.';
+      }
+
+      // Concluded → CSV download
+      document.getElementById('oh-download-btn').addEventListener('click', () => {
+        if (!session || !session.signIns) return;
+        const rows = [
+          ['Timestamp', 'Property', 'Agent', 'Full Name', 'Email', 'Phone'],
+          ...session.signIns.map(v => [
+            v.ts, session.property, session.agent, v.full_name, v.email, v.phone,
+          ]),
+        ];
+        const csv = rows.map(r => r.map(csvEscape).join(',')).join('\r\n');
+        const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+
+        // Filename: open-house_2026-05-17_715-Davis-Dr.csv
+        const dateStr = (session.startedAt || new Date().toISOString()).slice(0, 10);
+        const safeProp = session.property.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').slice(0, 60) || 'property';
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'open-house_' + dateStr + '_' + safeProp + '.csv';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 500);
+      });
+
+      // Concluded → start another
+      document.getElementById('oh-new-btn').addEventListener('click', () => {
+        saveSession(null);
+        session = null;
+        document.getElementById('oh-setup-agent').value = '';
+        document.getElementById('oh-setup-property').value = '';
+        showState('setup');
+        setTimeout(() => document.getElementById('oh-setup-agent').focus(), 50);
+      });
+
+      // ============================================================
+      // On load — restore session if mid-open-house
+      // ============================================================
+      session = loadSession();
+      if (session && session.state === 'active') {
+        renderActive();
+        showState('active');
+      } else if (session && session.state === 'concluded') {
+        renderConcluded();
+        showState('concluded');
+      } else {
+        session = null;
+        showState('idle');
+      }
     })();
 
     // ============================================================
