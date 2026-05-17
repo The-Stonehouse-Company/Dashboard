@@ -697,14 +697,33 @@
     //  - Opens via the Sales tab "Submit Commission" button
     //  - Closes on X, Cancel, ESC, or click on the dim overlay
     //  - Focus is trapped inside the modal while open
-    //  - Submit: POSTs the form to APPS_SCRIPT_URL if configured;
-    //    otherwise shows a friendly "not connected" message.
-    //  - To wire up the backend: deploy /Sales Division/Apps Script - Code.gs
-    //    as a Web App (see docs/apps-script-deployment.md) and paste
-    //    the /exec URL into APPS_SCRIPT_URL below.
+    //  - Submit: POSTs the form to a Google Form's /formResponse endpoint.
+    //    Google Form is linked to "Sales Commission Tracker" sheet; submissions
+    //    land in the "Form Responses 1" tab automatically.
+    //  - Backend rationale: Apps Script Web App POST routing was broken at
+    //    Google's infrastructure level for the admin account, so we pivoted
+    //    to Google Forms (battle-tested public POST endpoint, no deployment dance).
     // ============================================================
     (function () {
-      const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwqhC4OGkdksUkcUCjcjsB2DVnrCqvu5hbnMbeanXe15-z5qJYuywfrMkF3EfXy1br/exec";
+      // Google Form's /formResponse endpoint — anyone can POST, no auth needed.
+      const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSf2wLOSRM4BZ1skQLnYwZ7yRbZrq12y9y75ZYD8aVnv2AKVyw/formResponse";
+
+      // Map our friendly form field names → Google Form's entry.NNN IDs.
+      // To regenerate: form ⋮ menu → Get pre-filled link → fill placeholders →
+      // Get link → the URL contains entry.NNN=value pairs.
+      const FIELD_MAP = {
+        agent:                   'entry.1153957354',
+        agent_email:             'entry.482372652',
+        date_of_closing:         'entry.1679525932',
+        property_address:        'entry.1716998286',
+        side:                    'entry.1654616245',
+        closing_attorney:        'entry.670492195',
+        transaction_coordinator: 'entry.287208090',
+        sales_price:             'entry.1036024591',
+        gross_commission:        'entry.1386990860',
+        net_to_agent:            'entry.422963887',
+        net_to_brokerage:        'entry.1200991005'
+      };
 
       const overlay   = document.getElementById('commission-modal-overlay');
       const modal     = document.getElementById('commission-modal');
@@ -785,12 +804,10 @@
           return;
         }
 
-        if (!APPS_SCRIPT_URL) {
+        if (!FORM_URL) {
           setStatus(
             'warn',
-            'Form is not connected to the Apps Script yet. ' +
-            'Deploy /Sales Division/Apps Script - Code.gs as a Web App and ' +
-            'paste the /exec URL into APPS_SCRIPT_URL near the bottom of index.html.'
+            'Form is not connected yet. Set FORM_URL near the bottom of index.html.'
           );
           return;
         }
@@ -800,22 +817,26 @@
         submitBtn.textContent = 'Submitting…';
 
         try {
+          // Re-map our friendly field names (agent, agent_email, etc.)
+          // to Google Form's entry.NNN keys before submitting.
           const fd = new FormData(form);
           const body = new URLSearchParams();
-          for (const [k, v] of fd.entries()) body.append(k, v);
+          for (const [k, v] of fd.entries()) {
+            const entryKey = FIELD_MAP[k];
+            if (entryKey) body.append(entryKey, v);
+          }
 
-          // Apps Script Web Apps respond with a 302 redirect to googleusercontent.com.
-          // Cross-origin browsers (especially Safari) can't read that response,
-          // so we use mode:'no-cors' to fire-and-forget. The POST DOES reach
-          // Apps Script; we just can't read the JSON back. Verify in the
-          // Deal Log tab if you ever doubt a submission.
-          await fetch(APPS_SCRIPT_URL, {
+          // Google Forms doesn't return CORS headers on its /formResponse
+          // endpoint, so we use mode:'no-cors' to fire-and-forget. The POST
+          // DOES reach Forms; we just can't read the response.
+          // Verify submissions in the "Form Responses 1" tab of the sheet.
+          await fetch(FORM_URL, {
             method: 'POST',
             mode: 'no-cors',
-            body: body, // fetch auto-sets Content-Type: application/x-www-form-urlencoded;charset=UTF-8
+            body: body,
           });
 
-          setStatus('ok', 'Submitted. Check the Deal Log tab to confirm.');
+          setStatus('ok', 'Submitted. Check the sheet to confirm.');
           form.reset();
         } catch (err) {
           setStatus('err', 'Network error: ' + (err && err.message ? err.message : err));
