@@ -423,6 +423,107 @@
     body.modal-open { overflow: hidden; }
 
     /* =========================================================
+       Stats section (headline tiles + table)
+       ========================================================= */
+    .stats-section { margin-bottom: 56px; }
+    .stats-section-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 22px; flex-wrap: wrap; gap: 10px;
+    }
+    .stats-eyebrow {
+      font-size: 10px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: var(--tracking-x-wide);
+    }
+    .stats-updated {
+      font-size: 10px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: var(--tracking-wide);
+    }
+
+    .stat-tiles {
+      display: grid; gap: 1px;
+      grid-template-columns: repeat(2, 1fr);
+      background: var(--rule-strong);
+      border: 1px solid var(--rule-strong);
+      margin-bottom: 24px;
+    }
+    .stat-tile {
+      background: var(--bg-elev);
+      padding: 32px 28px;
+      min-height: 130px;
+    }
+    .stat-tile .stat-label {
+      font-size: 10px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: var(--tracking-x-wide);
+      margin-bottom: 14px;
+    }
+    .stat-tile .stat-value {
+      font-family: var(--font-display);
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1;
+      color: var(--text);
+    }
+    .stat-tile .stat-meta {
+      margin-top: 12px;
+      font-size: 11px; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: var(--tracking-wide);
+    }
+    .stat-tile.is-loading .stat-value,
+    .stat-tile.is-loading .stat-meta { color: var(--text-dim); }
+    .stat-tile.is-loading .stat-value { animation: shimmer 1.4s ease-in-out infinite; }
+    @keyframes shimmer {
+      0%   { opacity: .35; }
+      50%  { opacity: .8;  }
+      100% { opacity: .35; }
+    }
+    @media (max-width: 700px) {
+      .stat-tiles { grid-template-columns: 1fr; }
+    }
+
+    .agent-table-wrap {
+      border: 1px solid var(--rule-strong);
+      background: var(--bg-elev);
+      overflow-x: auto;
+    }
+    .agent-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      min-width: 640px;
+    }
+    .agent-table thead th {
+      text-align: left;
+      font-weight: 300;
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--rule-strong);
+      white-space: nowrap;
+    }
+    .agent-table tbody td {
+      padding: 16px 18px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--rule);
+      white-space: nowrap;
+    }
+    .agent-table tbody tr:last-child td { border-bottom: 0; }
+    .agent-table tbody td.col-agent {
+      color: var(--text);
+      font-family: var(--font-display);
+      font-size: 14px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .agent-table tbody td.col-num { color: var(--text); }
+    .agent-table .empty-row td {
+      text-align: center;
+      color: var(--text-dim);
+      padding: 40px 18px;
+      font-style: italic;
+    }
+
+    /* =========================================================
        Template cards (reusable grid for marketing assets, etc.)
        ========================================================= */
     .subpanel-intro {
@@ -591,18 +692,55 @@
       </nav>
 
       <div class="subpanel" id="subpanel-sales-commissions" role="tabpanel" aria-hidden="false" tabindex="0">
+
+        <!-- ============= Headline stats ============= -->
+        <section class="stats-section" aria-labelledby="sales-stats-title">
+          <div class="stats-section-head">
+            <div>
+              <div class="stats-eyebrow">Sales Division · Year to date</div>
+              <h2 id="sales-stats-title" style="font-family:var(--font-display);font-size:22px;letter-spacing:0.08em;text-transform:uppercase;margin:6px 0 0;">The Tape</h2>
+            </div>
+            <div class="stats-updated" id="stats-updated">Loading…</div>
+          </div>
+
+          <div class="stat-tiles">
+            <div class="stat-tile is-loading" data-key="volume">
+              <div class="stat-label">Total Sales Volume</div>
+              <div class="stat-value" id="stat-volume">—</div>
+              <div class="stat-meta">Year-to-date</div>
+            </div>
+            <div class="stat-tile is-loading" data-key="gross">
+              <div class="stat-label">Total Gross Commission</div>
+              <div class="stat-value" id="stat-gross">—</div>
+              <div class="stat-meta">Year-to-date</div>
+            </div>
+          </div>
+
+          <div class="agent-table-wrap">
+            <table class="agent-table" aria-label="Per agent year-to-date">
+              <thead>
+                <tr>
+                  <th>Agent</th>
+                  <th>Deals</th>
+                  <th>Sales Volume</th>
+                  <th>Gross Commission</th>
+                  <th>Net to Agent</th>
+                </tr>
+              </thead>
+              <tbody id="agent-table-body">
+                <tr class="empty-row"><td colspan="5">Loading agents…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ============= Actions ============= -->
         <div class="action-grid">
           <button class="primary-action" type="button" id="open-commission-modal" aria-haspopup="dialog" aria-controls="commission-modal">
             <span class="action-label">Submit Commission</span>
             <span class="action-sub">Log a closed transaction to the Commission Tracker</span>
             <span class="action-arrow" aria-hidden="true">→</span>
           </button>
-        </div>
-
-        <div class="placeholder">
-          <div class="mark">— Placeholder —</div>
-          <h2>More tools coming</h2>
-          <p>YTD totals, agent leaderboard, and recent deals will live here next.</p>
         </div>
       </div>
 
@@ -842,6 +980,156 @@
 
       // Year in footer
       document.getElementById('year').textContent = new Date().getFullYear();
+    })();
+
+    // ============================================================
+    // Sales stats loader
+    //  - Fetches the published Dashboard tab CSV
+    //  - Parses Team Totals row + Per Agent rows
+    //  - Populates the .stat-tiles and the agent table
+    //  - Runs on every page load (publish-to-web has ~5min cache)
+    // ============================================================
+    (function () {
+      const STATS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRfvMXPBK_C_WrdtReMRbdPBbTqAjrdBf3baofirXBCF9m7txvm-8Rrmb9o2gJwJ-TshnPWmJy53olY/pub?gid=225119981&single=true&output=csv";
+
+      const usd = new Intl.NumberFormat('en-US', {
+        style: 'currency', currency: 'USD', maximumFractionDigits: 0,
+      });
+      const usdCompact = new Intl.NumberFormat('en-US', {
+        style: 'currency', currency: 'USD', notation: 'compact', maximumFractionDigits: 2,
+      });
+      const int = new Intl.NumberFormat('en-US');
+
+      function parseMoney(s) {
+        if (!s) return 0;
+        const n = Number(String(s).replace(/[$,\s]/g, ''));
+        return isNaN(n) ? 0 : n;
+      }
+      function parseIntSafe(s) {
+        if (!s) return 0;
+        const n = parseInt(String(s).replace(/[,\s]/g, ''), 10);
+        return isNaN(n) ? 0 : n;
+      }
+
+      // Minimal CSV parser — handles quoted fields with embedded commas.
+      function parseCSV(text) {
+        const rows = [];
+        for (const line of text.split(/\r?\n/)) {
+          const cells = [];
+          let cur = '';
+          let inQuotes = false;
+          for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (inQuotes) {
+              if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+              else if (ch === '"') { inQuotes = false; }
+              else { cur += ch; }
+            } else {
+              if (ch === '"') { inQuotes = true; }
+              else if (ch === ',') { cells.push(cur); cur = ''; }
+              else { cur += ch; }
+            }
+          }
+          cells.push(cur);
+          rows.push(cells);
+        }
+        return rows;
+      }
+
+      function setTile(id, value, loadingState) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = value;
+        const tile = el.closest('.stat-tile');
+        if (tile) tile.classList.toggle('is-loading', !!loadingState);
+      }
+
+      function renderEmpty(message) {
+        setTile('stat-volume', '—');
+        setTile('stat-gross', '—');
+        document.getElementById('agent-table-body').innerHTML =
+          '<tr class="empty-row"><td colspan="5">' + message + '</td></tr>';
+        document.getElementById('stats-updated').textContent = message;
+      }
+
+      async function loadStats() {
+        try {
+          // Cache-bust so a hard refresh always gets the latest cached snapshot.
+          const url = STATS_CSV_URL + '&t=' + Date.now();
+          const res = await fetch(url, { cache: 'no-store' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const text = await res.text();
+          const rows = parseCSV(text);
+
+          // Find the team totals values row by anchoring on the header above it.
+          let teamValuesRow = null;
+          for (let i = 0; i < rows.length - 1; i++) {
+            if (rows[i].some((c) => /Total Team Sales Volume/i.test(c))) {
+              teamValuesRow = rows[i + 1]; break;
+            }
+          }
+          // Dashboard tab layout: column B = Sales Volume, D = Gross Commission.
+          const salesVolume   = teamValuesRow ? parseMoney(teamValuesRow[1]) : 0;
+          const grossComm     = teamValuesRow ? parseMoney(teamValuesRow[3]) : 0;
+
+          setTile('stat-volume', usdCompact.format(salesVolume), false);
+          setTile('stat-gross',  usdCompact.format(grossComm),  false);
+
+          // Find Per Agent header row, then collect rows below it.
+          let agentHeaderIdx = -1;
+          for (let i = 0; i < rows.length; i++) {
+            const r = rows[i];
+            if (r.some((c) => c.trim() === 'Agent') && r.some((c) => /Deals Closed/i.test(c))) {
+              agentHeaderIdx = i; break;
+            }
+          }
+          const agents = [];
+          if (agentHeaderIdx >= 0) {
+            for (let i = agentHeaderIdx + 1; i < rows.length; i++) {
+              const r = rows[i];
+              const name = (r[1] || '').trim();
+              if (!name) continue;
+              agents.push({
+                name:           name,
+                deals:          parseIntSafe(r[2]),
+                salesVolume:    parseMoney(r[3]),
+                grossCommission:parseMoney(r[4]),
+                netToAgent:     parseMoney(r[5]),
+              });
+            }
+          }
+
+          const tbody = document.getElementById('agent-table-body');
+          if (agents.length === 0) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No deals logged yet.</td></tr>';
+          } else {
+            tbody.innerHTML = agents.map((a) => (
+              '<tr>' +
+                '<td class="col-agent">' + escapeHTML(a.name) + '</td>' +
+                '<td class="col-num">'   + int.format(a.deals) + '</td>' +
+                '<td class="col-num">'   + usd.format(a.salesVolume) + '</td>' +
+                '<td class="col-num">'   + usd.format(a.grossCommission) + '</td>' +
+                '<td class="col-num">'   + usd.format(a.netToAgent) + '</td>' +
+              '</tr>'
+            )).join('');
+          }
+
+          const now = new Date();
+          document.getElementById('stats-updated').textContent =
+            'Updated ' + now.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+        } catch (err) {
+          console.error('Stats fetch failed:', err);
+          renderEmpty('Stats unavailable — could not reach the sheet.');
+        }
+      }
+
+      function escapeHTML(s) {
+        return String(s).replace(/[&<>"']/g, (c) => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        }[c]));
+      }
+
+      loadStats();
     })();
 
     // ============================================================
