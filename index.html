@@ -984,26 +984,27 @@
 
     // ============================================================
     // Sales stats loader
-    //  - Fetches the published Dashboard tab CSV
-    //  - Parses Team Totals row + Per Agent rows
-    //  - Populates the .stat-tiles and the agent table
-    //  - Runs on every page load (publish-to-web has ~5min cache)
+    //  - Fetches the Dashboard tab as CSV via Google's direct export URL.
+    //  - Parses Team Totals row + Per Agent rows.
+    //  - Populates the .stat-tiles and the agent table.
+    //  - Runs on every page load. Real-time (no publish cache).
     //
-    // CORS workaround:
-    //  Google's published-CSV URL issues a 307 redirect from docs.google.com
-    //  to googleusercontent.com. The 307 response lacks Access-Control-
-    //  Allow-Origin headers, so browsers block the redirect even though the
-    //  final destination would have allowed cross-origin reads. We route the
-    //  fetch through the api.allorigins.win public CORS proxy, which fetches
-    //  the CSV server-side and re-serves it with permissive CORS headers.
+    // Cross-origin: Google returns proper Access-Control-Allow-Origin
+    // headers (echoing the requesting origin) when the sheet is shared as
+    // "Anyone with the link can view." Browsers send Origin automatically,
+    // so no proxy is required.
     //
-    //  If allorigins ever becomes unreliable, swap PROXY_PREFIX for another
-    //  CORS proxy (e.g. a Cloudflare Worker you own), or run our own.
+    // If the sheet's sharing is ever locked back down to "Restricted,"
+    // this fetch will fail and the dashboard will fall back to "Stats
+    // unavailable." Fix by re-enabling "Anyone with the link can view"
+    // or routing through a Cloudflare Worker.
     // ============================================================
     (function () {
-      const RAW_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRfvMXPBK_C_WrdtReMRbdPBbTqAjrdBf3baofirXBCF9m7txvm-8Rrmb9o2gJwJ-TshnPWmJy53olY/pub?gid=225119981&single=true&output=csv";
-      const PROXY_PREFIX  = "https://api.allorigins.win/raw?url=";
-      const STATS_CSV_URL = PROXY_PREFIX + encodeURIComponent(RAW_CSV_URL);
+      const SHEET_ID      = "1U8meiUo-zKaYaaJcbyXXXyxx17MGaZP89f7JcqNNErs";
+      const DASHBOARD_GID = "225119981";
+      const STATS_CSV_URL =
+        "https://docs.google.com/spreadsheets/d/" + SHEET_ID +
+        "/export?format=csv&gid=" + DASHBOARD_GID;
 
       const usd = new Intl.NumberFormat('en-US', {
         style: 'currency', currency: 'USD', maximumFractionDigits: 0,
