@@ -2,9 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>The Stonehouse Company — Internal Dashboard</title>
   <meta name="description" content="Internal company dashboard for The Stonehouse Company. Four divisions, one workspace." />
+
+  <!-- Home-screen / PWA -->
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Stonehouse" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1352,27 +1362,32 @@
 
     // ============================================================
     // Sales stats loader
-    //  - Fetches the Dashboard tab as CSV via Google's direct export URL.
+    //  - Fetches the Dashboard tab via Google's gviz JSON endpoint.
     //  - Parses Team Totals row + Per Agent rows.
     //  - Populates the .stat-tiles and the agent table.
     //  - Runs on every page load. Real-time (no publish cache).
     //
-    // Cross-origin: Google returns proper Access-Control-Allow-Origin
-    // headers (echoing the requesting origin) when the sheet is shared as
-    // "Anyone with the link can view." Browsers send Origin automatically,
-    // so no proxy is required.
+    // Why gviz JSON (not /export?format=csv):
+    //  /export issues a 307 redirect to googleusercontent.com. The browser
+    //  must follow that redirect with proper CORS handling on EACH hop.
+    //  - From file:// pages, the browser sends Origin: null and the CORS
+    //    check fails.
+    //  - From some browsers (Safari especially), the redirect's follow-up
+    //    request also sends Origin: null even when started from a normal
+    //    HTTPS page.
+    //  gviz JSON is served directly with no redirect (single 200 + CORS
+    //  headers), which avoids both issues.
     //
-    // If the sheet's sharing is ever locked back down to "Restricted,"
-    // this fetch will fail and the dashboard will fall back to "Stats
-    // unavailable." Fix by re-enabling "Anyone with the link can view"
-    // or routing through a Cloudflare Worker.
+    // Requirements:
+    //  Sheet must be shared as "Anyone with the link can view." Otherwise
+    //  gviz returns an auth wall and the fetch errors.
     // ============================================================
     (function () {
-      const SHEET_ID      = "1U8meiUo-zKaYaaJcbyXXXyxx17MGaZP89f7JcqNNErs";
-      const DASHBOARD_GID = "225119981";
+      const SHEET_ID   = "1U8meiUo-zKaYaaJcbyXXXyxx17MGaZP89f7JcqNNErs";
+      const SHEET_TAB  = "Dashboard";
       const STATS_CSV_URL =
         "https://docs.google.com/spreadsheets/d/" + SHEET_ID +
-        "/export?format=csv&gid=" + DASHBOARD_GID;
+        "/gviz/tq?tqx=out:json&sheet=" + encodeURIComponent(SHEET_TAB);
 
       const usd = new Intl.NumberFormat('en-US', {
         style: 'currency', currency: 'USD', maximumFractionDigits: 0,
@@ -1393,29 +1408,26 @@
         return isNaN(n) ? 0 : n;
       }
 
-      // Minimal CSV parser — handles quoted fields with embedded commas.
-      function parseCSV(text) {
-        const rows = [];
-        for (const line of text.split(/\r?\n/)) {
-          const cells = [];
-          let cur = '';
-          let inQuotes = false;
-          for (let i = 0; i < line.length; i++) {
-            const ch = line[i];
-            if (inQuotes) {
-              if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
-              else if (ch === '"') { inQuotes = false; }
-              else { cur += ch; }
-            } else {
-              if (ch === '"') { inQuotes = true; }
-              else if (ch === ',') { cells.push(cur); cur = ''; }
-              else { cur += ch; }
-            }
-          }
-          cells.push(cur);
-          rows.push(cells);
+      // Parse gviz JSONP response into a 2D array of text values.
+      // Response shape: /*O_o*/\ngoogle.visualization.Query.setResponse({...});
+      // Each cell is either null or { v: <raw>, f?: <formatted> }.
+      function parseGvizJson(text) {
+        const match = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
+        if (!match) throw new Error('gviz response in unexpected format');
+        const data = JSON.parse(match[1]);
+        if (data.status !== 'ok') {
+          const msg = (data.errors && data.errors[0] && data.errors[0].detailed_message)
+            || data.status;
+          throw new Error('gviz status: ' + msg);
         }
-        return rows;
+        return (data.table.rows || []).map((r) =>
+          (r.c || []).map((cell) => {
+            if (cell == null) return '';
+            if (cell.f != null) return String(cell.f);
+            if (cell.v != null) return String(cell.v);
+            return '';
+          })
+        );
       }
 
       function setTile(id, value, loadingState) {
@@ -1441,7 +1453,7 @@
           const res = await fetch(url, { cache: 'no-store' });
           if (!res.ok) throw new Error('HTTP ' + res.status);
           const text = await res.text();
-          const rows = parseCSV(text);
+          const rows = parseGvizJson(text);
 
           // Find the team totals values row by anchoring on the header above it.
           let teamValuesRow = null;
@@ -1450,33 +1462,41 @@
               teamValuesRow = rows[i + 1]; break;
             }
           }
-          // Dashboard tab layout: column B = Sales Volume, D = Gross Commission.
+          // Team totals values row layout: col 1 = Sales Volume, col 3 = Gross Commission.
           const salesVolume   = teamValuesRow ? parseMoney(teamValuesRow[1]) : 0;
           const grossComm     = teamValuesRow ? parseMoney(teamValuesRow[3]) : 0;
 
           setTile('stat-volume', usdCompact.format(salesVolume), false);
           setTile('stat-gross',  usdCompact.format(grossComm),  false);
 
-          // Find Per Agent header row, then collect rows below it.
-          let agentHeaderIdx = -1;
+          // Find Per Agent table: anchor on "Per Agent (YTD)" → next non-empty
+          // row is the "Agent" header → rows after that are agent data.
+          // (gviz collapses merged headers, so we can't rely on multiple
+          // header strings being present in the same row like CSV did.)
+          let perAgentIdx = -1;
           for (let i = 0; i < rows.length; i++) {
-            const r = rows[i];
-            if (r.some((c) => c.trim() === 'Agent') && r.some((c) => /Deals Closed/i.test(c))) {
-              agentHeaderIdx = i; break;
+            if (rows[i].some((c) => /Per Agent/i.test(c))) {
+              perAgentIdx = i; break;
             }
           }
           const agents = [];
-          if (agentHeaderIdx >= 0) {
-            for (let i = agentHeaderIdx + 1; i < rows.length; i++) {
+          if (perAgentIdx >= 0) {
+            // Skip the "Per Agent (YTD)" row and the "Agent" header row beneath it.
+            for (let i = perAgentIdx + 2; i < rows.length; i++) {
               const r = rows[i];
               const name = (r[1] || '').trim();
-              if (!name) continue;
+              if (!name || /Per Agent/i.test(name) || name === 'Agent') continue;
+              // gviz drops the Deals Closed value (col 2) because column-type
+              // inference reads it as date-typed from upstream cells. Compute
+              // deals as Buyer-Side (col 7) + Seller-Side (col 8) instead;
+              // matches the Dashboard tab's per-agent breakdown.
+              const deals = parseIntSafe(r[7]) + parseIntSafe(r[8]);
               agents.push({
-                name:           name,
-                deals:          parseIntSafe(r[2]),
-                salesVolume:    parseMoney(r[3]),
-                grossCommission:parseMoney(r[4]),
-                netToAgent:     parseMoney(r[5]),
+                name:            name,
+                deals:           deals,
+                salesVolume:     parseMoney(r[3]),
+                grossCommission: parseMoney(r[4]),
+                netToAgent:      parseMoney(r[5]),
               });
             }
           }
