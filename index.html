@@ -171,6 +171,217 @@
       margin-bottom: 64px;
     }
 
+    /* Action grid (primary CTAs inside a tab) */
+    .action-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      margin-bottom: 48px;
+    }
+    .primary-action {
+      display: flex; flex-direction: column; align-items: flex-start;
+      gap: 8px;
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+      color: var(--text);
+      padding: 28px 28px 26px;
+      cursor: pointer;
+      text-align: left;
+      font: inherit;
+      transition: background .2s, border-color .2s, transform .05s;
+      position: relative;
+    }
+    .primary-action:hover {
+      background: #181818;
+      border-color: var(--text);
+    }
+    .primary-action:active { transform: translateY(1px); }
+    .primary-action:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+    .primary-action .action-label {
+      font-family: var(--font-display);
+      font-size: 22px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+    .primary-action .action-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+    }
+    .primary-action .action-arrow {
+      position: absolute; top: 24px; right: 24px;
+      font-family: var(--font-display);
+      font-size: 16px; color: var(--text-dim);
+      transition: color .2s, transform .2s;
+    }
+    .primary-action:hover .action-arrow {
+      color: var(--text);
+      transform: translateX(3px);
+    }
+
+    /* =========================================================
+       Modal (commission form)
+       ========================================================= */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: flex-start; justify-content: center;
+      padding: 5vh 20px;
+      overflow-y: auto;
+    }
+    .modal-overlay[aria-hidden="false"] { display: flex; }
+
+    .modal {
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+      width: 100%; max-width: 760px;
+      margin: auto;
+      animation: modalIn .25s ease both;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 28px 32px 22px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .modal-title-group { display: flex; flex-direction: column; gap: 6px; }
+    .modal-eyebrow {
+      font-size: 10px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: var(--tracking-x-wide);
+    }
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 26px; letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .modal-close {
+      background: transparent; border: 1px solid var(--rule-strong);
+      color: var(--text-muted);
+      width: 36px; height: 36px;
+      font-size: 18px; line-height: 1;
+      cursor: pointer; transition: color .2s, border-color .2s;
+    }
+    .modal-close:hover { color: var(--text); border-color: var(--text); }
+    .modal-close:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+    .modal-body { padding: 24px 32px; }
+
+    fieldset {
+      border: 0; padding: 0; margin: 0 0 28px;
+    }
+    legend {
+      font-size: 10px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: var(--tracking-x-wide);
+      margin-bottom: 16px;
+      padding: 0;
+    }
+    .form-grid {
+      display: grid; gap: 16px;
+      grid-template-columns: 1fr 1fr;
+    }
+    .form-grid .full { grid-column: 1 / -1; }
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+
+    label {
+      display: block;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+      margin-bottom: 6px;
+    }
+    label .req { color: var(--text); margin-left: 2px; }
+
+    input[type=text], input[type=email], input[type=date],
+    input[type=number], select {
+      width: 100%;
+      font: inherit; font-size: 14px; font-weight: 300;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--rule-strong);
+      padding: 11px 12px;
+      transition: border-color .15s, background .15s;
+      -webkit-appearance: none; appearance: none;
+    }
+    input[type=date] {
+      color-scheme: dark;
+    }
+    select {
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+        linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+      background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+      padding-right: 32px;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--text);
+      background: var(--bg-elev-2);
+    }
+    input::placeholder { color: var(--text-dim); }
+
+    .currency { position: relative; }
+    .currency::before {
+      content: '$';
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--text-dim); font-size: 14px;
+    }
+    .currency input { padding-left: 24px; }
+
+    .modal-foot {
+      padding: 22px 32px 28px;
+      border-top: 1px solid var(--rule);
+      display: flex; align-items: center; gap: 14px; justify-content: flex-end;
+    }
+    .btn {
+      font: inherit;
+      padding: 13px 26px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+      border: 1px solid var(--text);
+      background: var(--text); color: var(--bg);
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .btn:hover { background: transparent; color: var(--text); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn.ghost {
+      background: transparent; color: var(--text-muted);
+      border-color: var(--rule-strong);
+    }
+    .btn.ghost:hover { color: var(--text); border-color: var(--text); background: transparent; }
+    .btn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+    .form-status {
+      margin: 0 32px 18px;
+      padding: 12px 14px;
+      font-size: 12px;
+      border: 1px solid var(--rule-strong);
+      background: var(--bg);
+      color: var(--text-muted);
+      display: none;
+    }
+    .form-status.show { display: block; }
+    .form-status.ok  { color: #b6e3c5; border-color: #1f3a2a; }
+    .form-status.err { color: #f4b9b9; border-color: #4a1f1f; }
+    .form-status.warn { color: #e8d49a; border-color: #4a3a1f; }
+
+    body.modal-open { overflow: hidden; }
+
     /* Empty-state card */
     .placeholder {
       border: 1px solid var(--rule);
@@ -261,10 +472,19 @@
     <section class="panel" id="panel-sales" role="tabpanel" aria-labelledby="tab-sales" aria-hidden="false" tabindex="0">
       <div class="eyebrow">Division 01</div>
       <h1>Sales</h1>
+
+      <div class="action-grid">
+        <button class="primary-action" type="button" id="open-commission-modal" aria-haspopup="dialog" aria-controls="commission-modal">
+          <span class="action-label">Submit Commission</span>
+          <span class="action-sub">Log a closed transaction to the Commission Tracker</span>
+          <span class="action-arrow" aria-hidden="true">→</span>
+        </button>
+      </div>
+
       <div class="placeholder">
         <div class="mark">— Placeholder —</div>
-        <h2>Content coming soon</h2>
-        <p>This is where the Sales Division dashboard will live.</p>
+        <h2>More tools coming</h2>
+        <p>YTD totals, agent leaderboard, and recent deals will live here next.</p>
       </div>
     </section>
 
@@ -298,6 +518,105 @@
       </div>
     </section>
   </main>
+
+  <!-- ========================= COMMISSION MODAL ========================= -->
+  <div class="modal-overlay" id="commission-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="commission-modal-title" id="commission-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Sales Division</span>
+          <h2 class="modal-title" id="commission-modal-title">Submit Commission</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-commission-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="commission-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Deal Details</legend>
+          <div class="form-grid">
+
+            <div>
+              <label for="cf-agent">Agent <span class="req">*</span></label>
+              <select id="cf-agent" name="agent" required>
+                <option value="" disabled selected>Select agent…</option>
+                <option value="Ryan Stonehouse">Ryan Stonehouse</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="cf-agent-email">Agent Email <span class="req">*</span></label>
+              <input id="cf-agent-email" name="agent_email" type="email" required placeholder="agent@stonehouserealtyco.com" />
+            </div>
+
+            <div>
+              <label for="cf-date">Date of Closing <span class="req">*</span></label>
+              <input id="cf-date" name="date_of_closing" type="date" required />
+            </div>
+
+            <div>
+              <label for="cf-side">Side Represented <span class="req">*</span></label>
+              <select id="cf-side" name="side" required>
+                <option value="" disabled selected>Select side…</option>
+                <option value="Buyer">Buyer</option>
+                <option value="Seller">Seller</option>
+                <option value="Both">Both</option>
+              </select>
+            </div>
+
+            <div class="full">
+              <label for="cf-address">Property Address <span class="req">*</span></label>
+              <input id="cf-address" name="property_address" type="text" required placeholder="123 Main St, Franklin, TN 37067" />
+            </div>
+
+            <div>
+              <label for="cf-attorney">Closing Attorney</label>
+              <input id="cf-attorney" name="closing_attorney" type="text" placeholder="Firm or attorney name" />
+            </div>
+
+            <div>
+              <label for="cf-tc">Transaction Coordinator</label>
+              <input id="cf-tc" name="transaction_coordinator" type="text" placeholder="Coordinator name" />
+            </div>
+
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Financials</legend>
+          <div class="form-grid">
+
+            <div>
+              <label for="cf-price">Sales Price <span class="req">*</span></label>
+              <div class="currency"><input id="cf-price" name="sales_price" type="number" inputmode="decimal" min="0" step="1" required placeholder="0" /></div>
+            </div>
+
+            <div>
+              <label for="cf-gross">Gross Commission <span class="req">*</span></label>
+              <div class="currency"><input id="cf-gross" name="gross_commission" type="number" inputmode="decimal" min="0" step="0.01" required placeholder="0" /></div>
+            </div>
+
+            <div>
+              <label for="cf-net-agent">Net Commission to Agent <span class="req">*</span></label>
+              <div class="currency"><input id="cf-net-agent" name="net_to_agent" type="number" inputmode="decimal" min="0" step="0.01" required placeholder="0" /></div>
+            </div>
+
+            <div>
+              <label for="cf-net-broker">Net Commission to Brokerage <span class="req">*</span></label>
+              <div class="currency"><input id="cf-net-broker" name="net_to_brokerage" type="number" inputmode="decimal" min="0" step="0.01" required placeholder="0" /></div>
+            </div>
+
+          </div>
+        </fieldset>
+      </form>
+
+      <div class="form-status" id="commission-form-status" role="status" aria-live="polite"></div>
+
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-commission">Cancel</button>
+        <button class="btn" type="submit" form="commission-form" id="submit-commission">Submit</button>
+      </footer>
+    </div>
+  </div>
 
   <!-- ========================= FOOTER ========================= -->
   <footer class="site-footer">
@@ -371,6 +690,147 @@
 
       // Year in footer
       document.getElementById('year').textContent = new Date().getFullYear();
+    })();
+
+    // ============================================================
+    // Commission modal controller
+    //  - Opens via the Sales tab "Submit Commission" button
+    //  - Closes on X, Cancel, ESC, or click on the dim overlay
+    //  - Focus is trapped inside the modal while open
+    //  - Submit: POSTs the form to APPS_SCRIPT_URL if configured;
+    //    otherwise shows a friendly "not connected" message.
+    //  - To wire up the backend: deploy /Sales Division/Apps Script - Code.gs
+    //    as a Web App (see docs/apps-script-deployment.md) and paste
+    //    the /exec URL into APPS_SCRIPT_URL below.
+    // ============================================================
+    (function () {
+      const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwqhC4OGkdksUkcUCjcjsB2DVnrCqvu5hbnMbeanXe15-z5qJYuywfrMkF3EfXy1br/exec";
+
+      const overlay   = document.getElementById('commission-modal-overlay');
+      const modal     = document.getElementById('commission-modal');
+      const form      = document.getElementById('commission-form');
+      const statusEl  = document.getElementById('commission-form-status');
+      const openBtn   = document.getElementById('open-commission-modal');
+      const closeBtn  = document.getElementById('close-commission-modal');
+      const cancelBtn = document.getElementById('cancel-commission');
+      const submitBtn = document.getElementById('submit-commission');
+
+      let lastFocus = null;
+
+      function focusables() {
+        return modal.querySelectorAll(
+          'a[href], area[href], input:not([disabled]), select:not([disabled]), ' +
+          'textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+      }
+
+      function openModal() {
+        lastFocus = document.activeElement;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        clearStatus();
+        // Focus the first input on the next frame so the open animation can start
+        requestAnimationFrame(() => {
+          const first = focusables()[0];
+          if (first) first.focus();
+        });
+      }
+
+      function closeModal() {
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+      }
+
+      function setStatus(kind, msg) {
+        statusEl.className = 'form-status show ' + kind;
+        statusEl.textContent = msg;
+      }
+      function clearStatus() {
+        statusEl.className = 'form-status';
+        statusEl.textContent = '';
+      }
+
+      // Open / close handlers
+      if (openBtn)   openBtn.addEventListener('click', openModal);
+      if (closeBtn)  closeBtn.addEventListener('click', closeModal);
+      if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+      // Click on the dim background closes the modal (but not clicks inside .modal)
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal();
+      });
+
+      // ESC closes; Tab traps focus inside the dialog
+      document.addEventListener('keydown', (e) => {
+        if (overlay.getAttribute('aria-hidden') !== 'false') return;
+        if (e.key === 'Escape') { e.preventDefault(); closeModal(); return; }
+        if (e.key === 'Tab') {
+          const f = Array.from(focusables());
+          if (f.length === 0) return;
+          const first = f[0];
+          const last  = f[f.length - 1];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      });
+
+      // Submit handler
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearStatus();
+
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+
+        if (!APPS_SCRIPT_URL) {
+          setStatus(
+            'warn',
+            'Form is not connected to the Apps Script yet. ' +
+            'Deploy /Sales Division/Apps Script - Code.gs as a Web App and ' +
+            'paste the /exec URL into APPS_SCRIPT_URL near the bottom of index.html.'
+          );
+          return;
+        }
+
+        submitBtn.disabled = true;
+        const originalLabel = submitBtn.textContent;
+        submitBtn.textContent = 'Submitting…';
+
+        try {
+          const fd = new FormData(form);
+          const body = new URLSearchParams();
+          for (const [k, v] of fd.entries()) body.append(k, v);
+
+          const res = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: body,
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+          });
+
+          const text = await res.text();
+          let payload = null;
+          try { payload = JSON.parse(text); } catch (_) {}
+
+          if (payload && payload.ok) {
+            setStatus('ok', 'Submitted. Deal logged to the Commission Tracker.');
+            form.reset();
+          } else if (payload && payload.error) {
+            setStatus('err', 'Server error: ' + payload.error);
+          } else {
+            // No JSON returned — assume success.
+            setStatus('ok', 'Submitted. Check the Deal Log tab to confirm.');
+            form.reset();
+          }
+        } catch (err) {
+          setStatus('err', 'Network error: ' + (err && err.message ? err.message : err));
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalLabel;
+        }
+      });
     })();
   </script>
 </body>
