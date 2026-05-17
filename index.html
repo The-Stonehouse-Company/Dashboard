@@ -988,9 +988,22 @@
     //  - Parses Team Totals row + Per Agent rows
     //  - Populates the .stat-tiles and the agent table
     //  - Runs on every page load (publish-to-web has ~5min cache)
+    //
+    // CORS workaround:
+    //  Google's published-CSV URL issues a 307 redirect from docs.google.com
+    //  to googleusercontent.com. The 307 response lacks Access-Control-
+    //  Allow-Origin headers, so browsers block the redirect even though the
+    //  final destination would have allowed cross-origin reads. We route the
+    //  fetch through the api.allorigins.win public CORS proxy, which fetches
+    //  the CSV server-side and re-serves it with permissive CORS headers.
+    //
+    //  If allorigins ever becomes unreliable, swap PROXY_PREFIX for another
+    //  CORS proxy (e.g. a Cloudflare Worker you own), or run our own.
     // ============================================================
     (function () {
-      const STATS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRfvMXPBK_C_WrdtReMRbdPBbTqAjrdBf3baofirXBCF9m7txvm-8Rrmb9o2gJwJ-TshnPWmJy53olY/pub?gid=225119981&single=true&output=csv";
+      const RAW_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRfvMXPBK_C_WrdtReMRbdPBbTqAjrdBf3baofirXBCF9m7txvm-8Rrmb9o2gJwJ-TshnPWmJy53olY/pub?gid=225119981&single=true&output=csv";
+      const PROXY_PREFIX  = "https://api.allorigins.win/raw?url=";
+      const STATS_CSV_URL = PROXY_PREFIX + encodeURIComponent(RAW_CSV_URL);
 
       const usd = new Intl.NumberFormat('en-US', {
         style: 'currency', currency: 'USD', maximumFractionDigits: 0,
