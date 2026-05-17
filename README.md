@@ -1,6 +1,6 @@
-# The Stonehouse Company — Dashboard
+# The Stonehouse Company — Internal Dashboard
 
-A single-file, brand-matched public hub for The Stonehouse Company. Built to mirror the visual identity of [thestonehouseco.com](https://thestonehouseco.com) — black background, Aboreto display type, wide-tracked all-caps — with a live "Tape" of Sales Division metrics pulled from the Sales Commission Tracker Google Sheet.
+The shared internal workspace for The Stonehouse Company. One page, four tabs — one per division. Built to be opened by anyone on the team and grown out tab-by-tab as we systematize each division.
 
 ## What's in here
 
@@ -9,32 +9,30 @@ Dashboard/
 ├── index.html                   ← the dashboard (open in any browser)
 ├── README.md                    ← this file
 ├── .gitignore
-├── assets/                      ← drop logos, photos, project images here
+├── assets/                      ← drop logos, photos, exports here
 └── docs/
-    ├── apps-script-doGet.md     ← code to add to the Sheet's Apps Script
-    └── github-setup.md          ← step-by-step to push this to GitHub
+    ├── apps-script-doGet.md     ← (legacy, kept for later) Sheet-feed code
+    └── github-setup.md          ← one-time GitHub push setup
 ```
 
-## Running it locally
+## Tabs
 
-1. **Open `index.html`** directly in any browser (double-click it on Mac).
-2. To wire up the live Sales metrics, follow `docs/apps-script-doGet.md` — paste the resulting `/exec` URL into the `SHEETS_API_URL` constant near the bottom of `index.html`.
-3. Until you do step 2, the four metric tiles will show `—` and "Live feed not configured" in the corner. Everything else renders fine.
+| # | Tab                                  | Status                            |
+|---|--------------------------------------|-----------------------------------|
+| 01 | Sales                               | Placeholder — content coming      |
+| 02 | Land Acquisition                    | Placeholder — content coming      |
+| 03 | Custom Home Owners Representation   | Placeholder — content coming      |
+| 04 | Development                         | Placeholder — content coming      |
 
-## Sections
+Each tab is its own deep-linkable view: append `#sales`, `#land`, `#customrep`, or `#development` to the URL to land directly on that tab.
 
-| Section            | Source                                          |
-|--------------------|--------------------------------------------------|
-| Hero               | Static — pulled from brand                       |
-| The Tape (metrics) | **Live** from Sales Commission Tracker via Apps Script |
-| Four Divisions     | Static — pulled from `Company Overview.docx`     |
-| Platinum Reserve   | Static — sub-brand callout                       |
-| Featured Projects  | Static placeholders (Davis, Arrington, Clifton)  |
-| Geography          | Static — Middle TN                               |
-| Mission & Values   | Static                                           |
-| Footer / Contact   | Static                                           |
+Keyboard: with focus on the tab strip, use **← / → / Home / End** to move between tabs.
 
-## Brand tokens used
+## Running it
+
+Open `index.html` directly in any browser (double-click on Mac). No build step, no server, no dependencies.
+
+## Brand tokens
 
 | Token            | Value      | Origin                                 |
 |------------------|------------|----------------------------------------|
@@ -46,13 +44,17 @@ Dashboard/
 | Body font        | Montserrat | Stand-in for Brandon Grotesque (paid)  |
 | Letter-spacing   | 0.25em+    | Site's signature caps tracking         |
 
-## Roadmap (later)
+## Roadmap
 
-- Replace the SVG map with a proper geo / interactive map of active listings.
-- Pull "Featured Projects" live from a `Projects` sheet tab once one exists.
-- Add a private internal-ops view (separate page) tied to the Land Acquisition pipeline and Development underwriting model.
-- Move from local-file usage to a hosted private URL when the company is ready to share access.
+Build out each tab one at a time. Likely order of buildout:
+
+1. **Sales** — first division to instrument; live YTD numbers via the Sales Commission Tracker (`docs/apps-script-doGet.md` has the Apps Script code from the previous design).
+2. **Development** — second priority; the new spec-home arm.
+3. **Land Acquisition** — pipeline view across active sourcing efforts.
+4. **Custom Home Owners Representation** — active client roster and project stage tracking.
+
+Once tabs have real content, decide whether to host this on a real URL (Cloudflare Pages / Netlify) so the team can access it without cloning the repo.
 
 ## Repository
 
-This lives in the `The-Stonehouse-Company` GitHub organization. See `docs/github-setup.md` for the one-time push instructions.
+This lives in `The-Stonehouse-Company/Dashboard` on GitHub (private). See `docs/github-setup.md` for the one-time setup; day-to-day, just Commit and Push in GitHub Desktop.
