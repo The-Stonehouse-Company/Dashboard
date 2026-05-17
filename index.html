@@ -422,6 +422,78 @@
 
     body.modal-open { overflow: hidden; }
 
+    /* =========================================================
+       Template cards (reusable grid for marketing assets, etc.)
+       ========================================================= */
+    .subpanel-intro {
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 0 36px;
+    }
+    .template-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+    .template-card {
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+      padding: 28px 26px 26px;
+      display: flex;
+      flex-direction: column;
+      min-height: 200px;
+      position: relative;
+      transition: background .2s, border-color .2s;
+      cursor: default;
+    }
+    .template-card.is-clickable {
+      cursor: pointer;
+    }
+    .template-card.is-clickable:hover {
+      background: #181818;
+      border-color: var(--text);
+    }
+    .template-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .template-kind {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-x-wide);
+    }
+    .template-status {
+      font-size: 9px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+      border: 1px solid var(--rule-strong);
+      padding: 3px 8px;
+      white-space: nowrap;
+    }
+    .template-status.is-soon {
+      color: var(--text-dim);
+    }
+    .template-card h3 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1.15;
+      margin: 0 0 12px;
+    }
+    .template-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.55;
+    }
+
     /* Empty-state card */
     .placeholder {
       border: 1px solid var(--rule);
@@ -535,10 +607,35 @@
       </div>
 
       <div class="subpanel" id="subpanel-sales-marketing" role="tabpanel" aria-hidden="true" tabindex="0">
-        <div class="placeholder">
-          <div class="mark">— Placeholder —</div>
-          <h2>Marketing Templates</h2>
-          <p>Listing brochures, email templates, property flyers, social posts, and other reusable marketing assets will live here.</p>
+        <p class="subpanel-intro">Reusable marketing materials for the Sales Division. Click a template to open or download once content is added.</p>
+
+        <div class="template-grid">
+          <article class="template-card" data-template-key="property-one-pager">
+            <div class="template-card-head">
+              <span class="template-kind">Template · One-Pager</span>
+              <span class="template-status is-soon">Coming soon</span>
+            </div>
+            <h3>Property One Pager</h3>
+            <p>Single-page listing summary for showings, open houses, and broker tours. Property photo, key stats, agent contact.</p>
+          </article>
+
+          <article class="template-card" data-template-key="cma">
+            <div class="template-card-head">
+              <span class="template-kind">Template · Analysis</span>
+              <span class="template-status is-soon">Coming soon</span>
+            </div>
+            <h3>CMA</h3>
+            <p>Comparative Market Analysis — pricing strategy and comp set for listing presentations and seller conversations.</p>
+          </article>
+
+          <article class="template-card" data-template-key="strategic-marketing-plan-newcon">
+            <div class="template-card-head">
+              <span class="template-kind">Template · Plan</span>
+              <span class="template-status is-soon">Coming soon</span>
+            </div>
+            <h3>Strategic Marketing Plan — New Construction</h3>
+            <p>Go-to-market strategy for spec builds and ground-up projects. Positioning, channels, timeline, and key milestones.</p>
+          </article>
         </div>
       </div>
     </section>
