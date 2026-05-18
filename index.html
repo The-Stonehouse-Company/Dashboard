@@ -711,6 +711,134 @@
       .deal-head { flex-direction: column; align-items: flex-start; }
     }
 
+    /* =========================================================
+       New Construction Listings — per-listing layout
+       matches the mockup Ryan provided: hero photo, title,
+       address line, stats line (pipe-separated), price +
+       completion, italic builder/area, plans/design-board CTAs
+       ========================================================= */
+    .listing-subtabbar {
+      margin-top: 0;
+      margin-bottom: 32px;
+    }
+    .listing-card {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .listing-hero {
+      background: var(--bg-elev);
+      border: 1px solid var(--rule);
+      margin-bottom: 28px;
+      overflow: hidden;
+      position: relative;
+    }
+    .listing-hero img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 540px;
+      object-fit: cover;
+    }
+    .listing-hero.empty {
+      aspect-ratio: 16 / 10;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-dim);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-x-wide);
+    }
+    .listing-hero.empty img { display: none; }
+    .listing-hero.empty::after {
+      content: "Hero photo not yet added";
+    }
+
+    .listing-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1.1;
+      margin: 0 0 6px;
+      color: var(--text);
+    }
+    .listing-address {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+      margin-bottom: 22px;
+    }
+    .listing-stats {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.6;
+      margin-bottom: 22px;
+    }
+    .listing-stats .sep {
+      color: var(--text-dim);
+      margin: 0 8px;
+    }
+    .listing-price {
+      font-family: var(--font-display);
+      font-size: 28px;
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+      color: var(--text);
+      margin-bottom: 22px;
+    }
+    .listing-meta {
+      margin-bottom: 26px;
+    }
+    .listing-meta .meta-row {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.7;
+    }
+    .listing-meta .meta-row em {
+      font-style: italic;
+      color: var(--text-muted);
+      font-weight: 300;
+    }
+    .listing-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .listing-btn {
+      font: inherit;
+      font-size: 11px;
+      padding: 12px 22px;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+      color: var(--text);
+      background: transparent;
+      border: 1px solid var(--rule-strong);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .listing-btn:hover {
+      border-color: var(--text);
+      background: var(--text);
+      color: var(--bg);
+    }
+    .listing-btn[aria-disabled="true"] {
+      opacity: .35;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .listings-empty {
+      padding: 26px;
+      border: 1px solid var(--rule);
+      background: var(--bg-elev);
+      color: var(--text-muted);
+      font-size: 12px;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      text-align: center;
+    }
+
     /* Mode toggle (two-pill segmented control used in the One Pager modal) */
     .mode-toggle {
       display: flex;
@@ -1324,6 +1452,7 @@
         <button class="subtab" role="tab" aria-controls="subpanel-sales-commissions" aria-selected="true"  data-subkey="commissions">Commissions</button>
         <button class="subtab" role="tab" aria-controls="subpanel-sales-marketing"   aria-selected="false" data-subkey="marketing">Marketing Templates</button>
         <button class="subtab" role="tab" aria-controls="subpanel-sales-openhouse"   aria-selected="false" data-subkey="openhouse">Open House</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-sales-listings"    aria-selected="false" data-subkey="listings">New Construction Listings</button>
       </nav>
 
       <div class="subpanel" id="subpanel-sales-commissions" role="tabpanel" aria-hidden="false" tabindex="0">
@@ -1542,6 +1671,14 @@
             <p>Go-to-market strategy for spec builds and ground-up projects. Positioning, channels, timeline, and key milestones.</p>
           </article>
         </div>
+      </div>
+
+      <div class="subpanel" id="subpanel-sales-listings" role="tabpanel" aria-hidden="true" tabindex="0">
+        <!-- Nested subtabbar: one tab per active listing.
+             Populated by the listings render script below. -->
+        <nav class="subtabbar listing-subtabbar" role="tablist" aria-label="Listings" id="listings-subtabbar"></nav>
+        <!-- One .subpanel per listing is rendered here at load time. -->
+        <div id="listings-subpanels"></div>
       </div>
     </section>
 
@@ -3546,6 +3683,197 @@
         session = null;
         showState('idle');
       }
+    })();
+
+    // ============================================================
+    // New Construction Listings renderer (Sales Division)
+    //  - Single source of truth: the LISTINGS array below.
+    //  - Renders one nested .subtab + .subpanel per listing into the
+    //    "New Construction Listings" sub-panel.
+    //  - Runs BEFORE the .subtabbar controller (next IIFE) so the
+    //    controller picks up the dynamically-injected subtabbar.
+    //
+    // HOW TO EDIT A LISTING:
+    //   Update the entry in the LISTINGS array. Empty fields are
+    //   automatically hidden so a partly-filled listing still looks
+    //   clean. The slug controls the asset folder name —
+    //   /Company/Dashboard/assets/listings/<slug>/{hero.jpg, plans.pdf,
+    //   design-board.pdf}. Drop files into that folder and commit.
+    //
+    // HOW TO ADD A LISTING:
+    //   Add a new object to LISTINGS. Slug should be url-safe and
+    //   unique. Everything else can start empty and be filled in
+    //   over time.
+    // ============================================================
+    (function () {
+      const LISTINGS = [
+        {
+          slug:        '1306-clifton-ln',
+          label:       '1306 Clifton',          // sub-tab label (short)
+          title:       '1306 Clifton Ln',       // big display title
+          addressLine: '1306 Clifton Ln, Nashville, TN',
+          bd: '', fb: '', hb: '', sqft: '', garage: '', features: [],
+          price: '', completion: '',
+          builder: '', area: '',
+          hasPlans: false, hasDesignBoard: false,
+        },
+        {
+          slug:        '1308-clifton-ln',
+          label:       '1308 Clifton',
+          title:       '1308 Clifton Ln',
+          addressLine: '1308 Clifton Ln, Nashville, TN',
+          bd: '', fb: '', hb: '', sqft: '', garage: '', features: [],
+          price: '', completion: '',
+          builder: '', area: '',
+          hasPlans: false, hasDesignBoard: false,
+        },
+        {
+          slug:        '715-davis-dr',
+          label:       '715 Davis',
+          title:       '715 Davis Dr',
+          addressLine: '715 Davis Dr, Nashville, TN',
+          bd: '', fb: '', hb: '', sqft: '', garage: '', features: [],
+          price: '', completion: '',
+          builder: '', area: '',
+          hasPlans: false, hasDesignBoard: false,
+        },
+        {
+          slug:        '2495-deer-meadow-ln',
+          label:       '2495 Deer Meadow',
+          title:       '2495 Deer Meadow Ln',
+          addressLine: '2495 Deer Meadow Ln, Nashville, TN',
+          bd: '', fb: '', hb: '', sqft: '', garage: '', features: [],
+          price: '', completion: '',
+          builder: '', area: '',
+          hasPlans: false, hasDesignBoard: false,
+        },
+        {
+          slug:        '1055-zophi-st',
+          label:       '1055 Zophi',
+          title:       '1055 Zophi St',
+          addressLine: '1055 Zophi St, Nashville, TN',
+          bd: '', fb: '', hb: '', sqft: '', garage: '', features: [],
+          price: '', completion: '',
+          builder: '', area: '',
+          hasPlans: false, hasDesignBoard: false,
+        },
+        {
+          slug:        '934-thomas-ave',
+          label:       '934 Thomas',
+          title:       '934 Thomas Ave',
+          addressLine: '934 Thomas Ave, Nashville, TN',
+          bd: '', fb: '', hb: '', sqft: '', garage: '', features: [],
+          price: '', completion: '',
+          builder: '', area: '',
+          hasPlans: false, hasDesignBoard: false,
+        },
+        {
+          slug:        '735-clematis-dr',
+          label:       '735 Clematis',
+          title:       '735 Clematis Dr',
+          addressLine: '735 Clematis Dr, Nashville, TN',
+          bd: '', fb: '', hb: '', sqft: '', garage: '', features: [],
+          price: '', completion: '',
+          builder: '', area: '',
+          hasPlans: false, hasDesignBoard: false,
+        },
+      ];
+
+      const bar      = document.getElementById('listings-subtabbar');
+      const container = document.getElementById('listings-subpanels');
+      if (!bar || !container) return;
+
+      function esc(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+
+      // Build the pipe-separated stats line. Empty fields are skipped so
+      // a half-filled listing still reads cleanly.
+      function buildStats(L) {
+        const parts = [];
+        if (L.bd)     parts.push(esc(L.bd) + ' BD');
+        if (L.fb || L.hb) {
+          let bath = '';
+          if (L.fb) bath += L.fb + ' FB';
+          if (L.fb && L.hb) bath += ' + ';
+          if (L.hb) bath += L.hb + ' HB';
+          parts.push(esc(bath));
+        }
+        if (L.sqft)   parts.push(esc(L.sqft) + ' SF');
+        if (L.garage) parts.push(esc(L.garage));
+        if (Array.isArray(L.features)) {
+          L.features.filter(Boolean).forEach((f) => parts.push(esc(f)));
+        }
+        if (!parts.length) return '';
+        return parts.join('<span class="sep">|</span>');
+      }
+
+      function buildPriceLine(L) {
+        if (!L.price && !L.completion) return '';
+        if (L.price && L.completion) return esc(L.price) + ' – ' + esc(L.completion);
+        return esc(L.price || L.completion);
+      }
+
+      // Render the panel HTML for a single listing.
+      function listingPanelHtml(L) {
+        const stats     = buildStats(L);
+        const priceLine = buildPriceLine(L);
+        const assetBase = 'assets/listings/' + esc(L.slug) + '/';
+        const titleUp   = esc(L.title || '').toUpperCase();
+        const addrUp    = esc(L.addressLine || '').toUpperCase();
+
+        const actions = [];
+        if (L.hasPlans) {
+          actions.push('<a class="listing-btn" href="' + assetBase + 'plans.pdf" target="_blank" rel="noopener">Building Plans</a>');
+        }
+        if (L.hasDesignBoard) {
+          actions.push('<a class="listing-btn" href="' + assetBase + 'design-board.pdf" target="_blank" rel="noopener">Design Board</a>');
+        }
+
+        return (
+          '<div class="subpanel" id="listing-panel-' + esc(L.slug) + '" role="tabpanel" aria-hidden="true" tabindex="0">' +
+            '<div class="listing-card">' +
+              '<div class="listing-hero" data-slug="' + esc(L.slug) + '">' +
+                '<img src="' + assetBase + 'hero.jpg" alt="' + esc(L.title) + '" onerror="this.closest(\'.listing-hero\').classList.add(\'empty\');" />' +
+              '</div>' +
+              (titleUp ? '<h3 class="listing-title">' + titleUp + '</h3>' : '') +
+              (addrUp  ? '<div class="listing-address">' + addrUp + '</div>' : '') +
+              (stats   ? '<div class="listing-stats">' + stats + '</div>' : '') +
+              (priceLine ? '<div class="listing-price">' + priceLine + '</div>' : '') +
+              ((L.builder || L.area)
+                ? '<div class="listing-meta">' +
+                    (L.builder ? '<div class="meta-row">Builder: <em>' + esc(L.builder) + '</em></div>' : '') +
+                    (L.area    ? '<div class="meta-row">Area: <em>'    + esc(L.area)    + '</em></div>' : '') +
+                  '</div>'
+                : '') +
+              (actions.length ? '<div class="listing-actions">' + actions.join('') + '</div>' : '') +
+            '</div>' +
+          '</div>'
+        );
+      }
+
+      if (!LISTINGS.length) {
+        bar.innerHTML = '';
+        container.innerHTML = '<div class="listings-empty">No listings yet.</div>';
+        return;
+      }
+
+      // Render the nested subtabbar (one .subtab per listing).
+      bar.innerHTML = LISTINGS.map((L, i) => (
+        '<button class="subtab" role="tab" ' +
+                'aria-controls="listing-panel-' + esc(L.slug) + '" ' +
+                'aria-selected="' + (i === 0 ? 'true' : 'false') + '" ' +
+                'data-subkey="listing-' + esc(L.slug) + '">' +
+          esc(L.label) +
+        '</button>'
+      )).join('');
+
+      // Render the matching subpanels. First one is visible by default.
+      container.innerHTML = LISTINGS.map(listingPanelHtml).join('');
+      const firstPanel = container.querySelector('.subpanel');
+      if (firstPanel) firstPanel.setAttribute('aria-hidden', 'false');
     })();
 
     // ============================================================
