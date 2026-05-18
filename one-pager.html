@@ -45,12 +45,30 @@
       position: fixed; top: 16px; right: 16px;
       display: flex; gap: 10px;
       z-index: 100;
-      align-items: center;
+      align-items: flex-start;
+      max-width: calc(100vw - 32px);
     }
     .toolbar .tb-status {
       font-size: 10px; color: var(--text-muted);
       text-transform: uppercase; letter-spacing: var(--tracking-wide);
       margin-right: 6px;
+      max-width: 560px;
+      white-space: normal;
+      line-height: 1.5;
+      text-align: right;
+      padding-top: 10px;
+    }
+    .toolbar .tb-status.warn {
+      color: #ffb46b;
+      font-weight: 500;
+      white-space: normal;
+      line-height: 1.4;
+    }
+    .toolbar .tb-status.err {
+      color: #ff6b6b;
+      font-weight: 500;
+      white-space: normal;
+      line-height: 1.4;
     }
     .toolbar .tb-btn {
       font: inherit; font-size: 11px; font-weight: 400;
@@ -643,7 +661,12 @@
     const printBtn = document.getElementById('print-btn');
     const statusEl = document.getElementById('tb-status');
 
-    function setStatus(text) { statusEl.textContent = text; }
+    function setStatus(text, level) {
+      statusEl.textContent = text;
+      statusEl.classList.remove('warn', 'err');
+      if (level === 'warn') statusEl.classList.add('warn');
+      else if (level === 'err') statusEl.classList.add('err');
+    }
 
     // ----------------------------------------------------------
     // PDF generation via html2canvas + jsPDF — bypasses window.print()
@@ -777,8 +800,27 @@
       renderOnePager(d);
       await whenReady();
 
-      // Enable the manual Save-as-PDF button.
-      setStatus('Ready');
+      // Surface how many pages are in the rendered output so the user can
+      // immediately tell whether plans + design board made it through.
+      const extraCount = document.querySelectorAll('.extra-page').length;
+      const summary = (1 + extraCount) + ' page' + (extraCount === 0 ? '' : 's') +
+        (extraCount > 0 ? ' (cover + ' + extraCount + ' extra)' : ' (cover only)');
+
+      // If the dashboard reported any file-processing failures, show them
+      // prominently — silent failures were the reason plans/design board
+      // were going missing without any clue why. Receipts confirm what
+      // files we actually received, so it's visible whether the issue is
+      // upload-side or render-side.
+      const parts = ['Ready · ' + summary];
+      if (d.fileReceipts && d.fileReceipts.length) {
+        parts.push(d.fileReceipts.join('  ·  '));
+      }
+      if (d.warnings && d.warnings.length) {
+        parts.push('⚠  ' + d.warnings.join('  |  '));
+        setStatus(parts.join('   '), 'warn');
+      } else {
+        setStatus(parts.join('   '));
+      }
       printBtn.disabled = false;
     })();
   </script>

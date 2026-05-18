@@ -2239,23 +2239,46 @@
           // Read uploads (only relevant fields per mode). Each file is wrapped
           // in its own try/catch so a bad/large PDF for one section doesn't
           // kill the whole submission — the section is dropped and we move on.
+          const warnings = []; // collected file-processing errors; passed to output tab
+          const fileReceipts = []; // diagnostic: what files we actually saw
+          function fmtSize(bytes) {
+            if (!bytes) return '0';
+            if (bytes < 1024) return bytes + 'B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + 'KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + 'MB';
+          }
           async function safeRead(elId, label) {
             const el = document.getElementById(elId);
             // No file selected — nothing to do.
-            if (!el || !el.files || !el.files[0]) return null;
+            if (!el || !el.files || !el.files[0]) {
+              fileReceipts.push(label + ': (none)');
+              return null;
+            }
+            const f = el.files[0];
+            const sizeStr = fmtSize(f.size);
+            const kind = (f.type === 'application/pdf' || /\.pdf$/i.test(f.name)) ? 'pdf' : 'img';
+            console.log('[one-pager] reading ' + label + ': ' + f.name + ' (' + sizeStr + ', ' + kind + ')');
             // 60s wall-clock timeout per file. Real PDFs render in 2–10s
             // even at scale; 60s is way past any reasonable threshold.
             try {
-              return await Promise.race([
+              const result = await Promise.race([
                 readFile(el),
                 new Promise((_, rej) => setTimeout(
                   () => rej(new Error('processing exceeded 60 seconds — file may be too large or corrupt')),
                   60000
                 )),
               ]);
+              // Record exactly what came back so we can see PDF page counts.
+              const pageInfo = result && Array.isArray(result.pages)
+                ? (', ' + result.pages.length + ' page' + (result.pages.length === 1 ? '' : 's'))
+                : '';
+              fileReceipts.push(label + ': ' + f.name + ' (' + sizeStr + pageInfo + ') ✓');
+              return result;
             } catch (err) {
               console.warn(label + ' upload failed:', err);
-              setStatus('warn', label + ' could not be processed (' + (err && err.message ? err.message : 'unknown error') + '). The one-pager will be generated without it.');
+              const msg = err && err.message ? err.message : 'unknown error';
+              warnings.push(label + ' [' + f.name + ', ' + sizeStr + ']: ' + msg);
+              fileReceipts.push(label + ': ' + f.name + ' (' + sizeStr + ') ✗ ' + msg);
               return null;
             }
           }
@@ -2292,6 +2315,8 @@
             daysOnMarket:   document.getElementById('op-dom').value.trim(),
             listingPhoto:   listingPhoto || null,
             generatedAt:    new Date().toISOString(),
+            warnings:       warnings,
+            fileReceipts:   fileReceipts,
           };
 
           try {
