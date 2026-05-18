@@ -45,11 +45,17 @@
       position: fixed; top: 16px; right: 16px;
       display: flex; gap: 10px;
       z-index: 100;
+      align-items: center;
+    }
+    .toolbar .tb-status {
+      font-size: 10px; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: var(--tracking-wide);
+      margin-right: 6px;
     }
     .toolbar .tb-btn {
-      font: inherit; font-size: 10px; font-weight: 300;
+      font: inherit; font-size: 11px; font-weight: 400;
       text-transform: uppercase; letter-spacing: var(--tracking-wide);
-      padding: 10px 16px;
+      padding: 12px 22px;
       color: var(--bg); background: var(--text);
       border: 1px solid var(--text);
       cursor: pointer;
@@ -58,8 +64,10 @@
     }
     .toolbar .tb-btn.ghost {
       background: transparent; color: var(--text);
+      padding: 10px 16px; font-weight: 300;
     }
     .toolbar .tb-btn:hover { opacity: .85; }
+    .toolbar .tb-btn:disabled { opacity: .4; cursor: wait; }
 
     /* ------------------------------------------------------------
        The one-pager itself — sized to fit an 8.5" x 11" page nicely.
@@ -417,8 +425,9 @@
 </head>
 <body>
   <div class="toolbar">
+    <span class="tb-status" id="tb-status">Loading…</span>
     <a class="tb-btn ghost" href="index.html#sales">← Back</a>
-    <button class="tb-btn" type="button" id="print-btn">Print / Save as PDF</button>
+    <button class="tb-btn" type="button" id="print-btn" disabled>Save as PDF</button>
   </div>
 
   <main id="output"></main>
@@ -474,14 +483,23 @@
       });
     }
 
+    // The dashboard passes a unique ?req=... when opening this page so we
+    // only render the matching payload (avoids stale data from a previous
+    // generation if IDB still has an old entry).
+    const REQUESTED_ID = new URLSearchParams(window.location.search).get('req');
+
     // The output tab is sometimes opened by the dashboard BEFORE the IDB
     // write completes (we open synchronously to avoid Safari's pop-up
-    // blocker). Poll IDB for up to 8 seconds.
+    // blocker). Poll IDB for up to 12 seconds, waiting for a payload that
+    // matches our requestId (if specified — for backwards compatibility,
+    // any payload is accepted when no ?req= is in the URL).
     async function loadPayload() {
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < 60; i++) {
         try {
           const v = await idbGet('current');
-          if (v && v.mode) return v;
+          if (v && v.mode) {
+            if (!REQUESTED_ID || v.requestId === REQUESTED_ID) return v;
+          }
         } catch (err) {
           console.error('IndexedDB read failed:', err);
           return null;
@@ -641,8 +659,12 @@
         extraPages;
     }
 
-    // Print button
-    document.getElementById('print-btn').addEventListener('click', () => window.print());
+    const printBtn = document.getElementById('print-btn');
+    const statusEl = document.getElementById('tb-status');
+
+    printBtn.addEventListener('click', () => window.print());
+
+    function setStatus(text) { statusEl.textContent = text; }
 
     // Wait until every image inside the rendered page has actually painted.
     // Then `document.fonts.ready` lets Aboreto + Montserrat settle before
@@ -656,20 +678,27 @@
       if (document.fonts && document.fonts.ready) {
         await document.fonts.ready;
       }
-      // tiny grace period for layout settle
-      await new Promise((r) => setTimeout(r, 250));
+      // small grace period so layout fully settles
+      await new Promise((r) => setTimeout(r, 300));
     }
 
     // Kick everything off
-    loadPayload().then(async (d) => {
-      if (!d || !d.mode) { renderEmpty(); return; }
+    (async () => {
+      setStatus('Loading…');
+      const d = await loadPayload();
+      if (!d || !d.mode) { renderEmpty(); setStatus('No data'); return; }
+
+      setStatus('Rendering…');
       renderOnePager(d);
       await whenReady();
-      // Auto-open the browser's print/Save-as-PDF dialog. User picks
-      // "Save as PDF" → clicks Save → done. If they cancel, the rendered
-      // page stays open and the toolbar's Print button re-triggers.
-      window.print();
-    });
+
+      // Enable the manual Save-as-PDF button. We deliberately do NOT
+      // auto-trigger window.print() — it was firing before layout
+      // completed in some browsers and producing blank PDFs. The user
+      // can verify the page looks right on-screen, then click Save.
+      setStatus('Ready');
+      printBtn.disabled = false;
+    })();
   </script>
 </body>
 </html>

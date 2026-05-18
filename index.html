@@ -2211,7 +2211,10 @@
         // Safari (and strict pop-up blockers) will block the open after
         // the user-gesture context ends. The output page polls IDB until
         // our write completes, so opening early is fine.
-        const outputWin = window.open('one-pager.html', '_blank');
+        // We pass a unique requestId so the new tab only renders THIS
+        // generation's payload (not stale data from a previous run).
+        const requestId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        const outputWin = window.open('one-pager.html?req=' + requestId, '_blank');
         if (!outputWin) {
           setStatus('warn', 'Pop-up blocked — allow pop-ups from this site so the one-pager can open. Then try Generate again.');
           return;
@@ -2233,6 +2236,7 @@
           ]);
 
           const payload = {
+            requestId: requestId,
             mode: mode,
             address:        document.getElementById('op-address').value.trim(),
             cityStateZip:   document.getElementById('op-citystate').value.trim(),
