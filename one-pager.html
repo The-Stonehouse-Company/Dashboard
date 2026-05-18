@@ -451,17 +451,26 @@
       }
 
       // Build the extra pages that flow after the cover (only for New Construction).
+      //  - Single image upload  → one extra page.
+      //  - PDF upload (now an array of page images) → one extra page per PDF page.
       function extraPageHtml(eyebrow, file) {
-        if (!file || !file.data) return '';
-        return (
-          '<section class="extra-page">' +
-            '<header class="extra-page-head">' +
-              '<div class="extra-page-eyebrow">' + escapeHTML(eyebrow) + '</div>' +
-              '<div class="extra-page-addr">' + escapeHTML(d.address || '') + '</div>' +
-            '</header>' +
-            '<img class="extra-page-image" src="' + file.data + '" alt="' + escapeHTML(eyebrow) + '" />' +
-          '</section>'
-        );
+        if (!file) return '';
+        const pages = Array.isArray(file.pages) && file.pages.length ? file.pages
+                     : (file.data ? [file.data] : []);
+        if (!pages.length) return '';
+        const multi = pages.length > 1;
+        return pages.map((src, idx) => {
+          const label = multi ? (eyebrow + ' · ' + (idx + 1) + ' / ' + pages.length) : eyebrow;
+          return (
+            '<section class="extra-page">' +
+              '<header class="extra-page-head">' +
+                '<div class="extra-page-eyebrow">' + escapeHTML(label) + '</div>' +
+                '<div class="extra-page-addr">' + escapeHTML(d.address || '') + '</div>' +
+              '</header>' +
+              '<img class="extra-page-image" src="' + src + '" alt="' + escapeHTML(label) + '" />' +
+            '</section>'
+          );
+        }).join('');
       }
       const extraPages = isNewCon
         ? (extraPageHtml('Building Plans', d.plans) + extraPageHtml('Design Board', d.designBoard))
