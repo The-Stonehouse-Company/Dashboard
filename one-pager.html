@@ -643,9 +643,98 @@
     const printBtn = document.getElementById('print-btn');
     const statusEl = document.getElementById('tb-status');
 
-    printBtn.addEventListener('click', () => window.print());
-
     function setStatus(text) { statusEl.textContent = text; }
+
+    // ----------------------------------------------------------
+    // PDF generation via html2canvas + jsPDF — bypasses window.print()
+    // because Safari was producing blank PDFs even with proper print CSS.
+    // We capture each .pager / .extra-page section from the already-
+    // rendered visible DOM (no iframe; styling is fully applied), then
+    // assemble into a multi-page PDF and trigger a browser download.
+    // ----------------------------------------------------------
+    let libsPromise = null;
+    function loadPdfLibs() {
+      if (libsPromise) return libsPromise;
+      function loadScript(src) {
+        return new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = src;
+          s.onload  = () => resolve();
+          s.onerror = () => reject(new Error('Failed to load ' + src));
+          document.head.appendChild(s);
+        });
+      }
+      libsPromise = Promise.all([
+        loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
+        loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'),
+      ]).then(() => ({
+        html2canvas: window.html2canvas,
+        jsPDF: (window.jspdf && window.jspdf.jsPDF) || window.jsPDF,
+      }));
+      return libsPromise;
+    }
+
+    function cleanFilename(s) {
+      return String(s || 'property').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').slice(0, 60) || 'property';
+    }
+
+    async function downloadAsPdf(payload) {
+      const originalLabel = printBtn.textContent;
+      printBtn.disabled = true;
+      printBtn.textContent = 'Building…';
+      setStatus('Loading PDF engine…');
+      try {
+        const { html2canvas, jsPDF } = await loadPdfLibs();
+        if (!html2canvas || !jsPDF) throw new Error('PDF libraries did not initialize');
+
+        const sections = Array.from(document.querySelectorAll('.pager, .extra-page'));
+        if (!sections.length) throw new Error('Nothing to render');
+
+        const PAGE_W = 8.5, PAGE_H = 11;
+        const pdf = new jsPDF({ unit: 'in', format: 'letter', orientation: 'portrait' });
+
+        for (let i = 0; i < sections.length; i++) {
+          setStatus('Rendering page ' + (i + 1) + ' of ' + sections.length + '…');
+          const canvas = await html2canvas(sections[i], {
+            scale: 2,
+            backgroundColor: '#000000',
+            useCORS: true,
+            logging: false,
+            allowTaint: true,
+          });
+          const imgData = canvas.toDataURL('image/jpeg', 0.92);
+          const ratio = canvas.width / canvas.height;
+          let imgW, imgH, imgX, imgY;
+          if (ratio >= PAGE_W / PAGE_H) {
+            imgW = PAGE_W; imgH = PAGE_W / ratio; imgX = 0; imgY = (PAGE_H - imgH) / 2;
+          } else {
+            imgH = PAGE_H; imgW = PAGE_H * ratio; imgY = 0; imgX = (PAGE_W - imgW) / 2;
+          }
+          if (i > 0) pdf.addPage('letter', 'portrait');
+          // Solid black background behind each page so any blank gutter
+          // matches the document's dark theme instead of showing white.
+          pdf.setFillColor(0, 0, 0);
+          pdf.rect(0, 0, PAGE_W, PAGE_H, 'F');
+          pdf.addImage(imgData, 'JPEG', imgX, imgY, imgW, imgH);
+        }
+
+        const filename = 'One-Pager-' + cleanFilename(payload && payload.address) + '.pdf';
+        pdf.save(filename);
+
+        setStatus('Saved: ' + filename);
+      } catch (err) {
+        console.error('PDF generation failed:', err);
+        setStatus('PDF failed: ' + (err && err.message ? err.message : 'unknown error'));
+      } finally {
+        printBtn.disabled = false;
+        printBtn.textContent = originalLabel;
+      }
+    }
+
+    // We need the payload available to name the file; renderOnePager
+    // is called with `d`, so we capture it for the click handler.
+    let __payload = null;
+    printBtn.addEventListener('click', () => downloadAsPdf(__payload));
 
     // Wait until every image inside the rendered page has actually painted.
     // Then `document.fonts.ready` lets Aboreto + Montserrat settle before
@@ -679,13 +768,11 @@
       }
 
       setStatus('Rendering…');
+      __payload = d;     // captured for the Save-as-PDF click handler
       renderOnePager(d);
       await whenReady();
 
-      // Enable the manual Save-as-PDF button. We deliberately do NOT
-      // auto-trigger window.print() — it was firing before layout
-      // completed in some browsers and producing blank PDFs. The user
-      // can verify the page looks right on-screen, then click Save.
+      // Enable the manual Save-as-PDF button.
       setStatus('Ready');
       printBtn.disabled = false;
     })();
