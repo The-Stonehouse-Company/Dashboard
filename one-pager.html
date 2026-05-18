@@ -131,10 +131,12 @@
       color: var(--text-muted);
     }
 
-    /* Hero image */
+    /* Hero image — preserves the rendering's natural aspect ratio so
+       widescreen architectural renderings aren't squashed into a square.
+       max-height caps very tall portrait images from dominating the page. */
     .hero {
       width: 100%;
-      aspect-ratio: 1 / 1;
+      max-height: 620px;
       background: var(--bg-elev);
       border: 1px solid var(--rule);
       margin: 0 auto 32px;
@@ -142,9 +144,11 @@
       display: flex; align-items: center; justify-content: center;
     }
     .hero img {
-      width: 100%; height: 100%;
-      object-fit: cover;
       display: block;
+      width: 100%;
+      height: auto;
+      max-height: 620px;
+      object-fit: contain;
     }
     .hero.empty {
       color: var(--text-dim);
@@ -908,7 +912,14 @@
         await addImagePage(out, rgb, coverBytes, 'image/jpeg');
 
         // ---------- 3. Append plans + design board ----------
-        // For each: if PDF, copy pages directly; if image, embed as new page.
+        // For each: if PDF, embed pages and scale to Letter (rotating
+        // to landscape if the source page is wider than tall). If image,
+        // embed as a new Letter page.
+        //
+        // Why normalize to Letter: source PDFs often come at huge
+        // architectural sheet sizes (24×36, 30×42), which made the cover
+        // look tiny in the output. Scaling every page to Letter gives a
+        // uniform document that prints/views consistently.
         async function appendAttachment(file, label) {
           if (!file || !file.blob) return;
           const isPdf = (file.type === 'application/pdf') || /\.pdf$/i.test(file.name || '');
@@ -917,9 +928,22 @@
             const bytes = await blobToArrayBuffer(file.blob);
             const src = await PDFDocument.load(bytes, { ignoreEncryption: true });
             const indices = src.getPageIndices();
-            const copied = await out.copyPages(src, indices);
-            copied.forEach((p) => out.addPage(p));
-            console.log('[one-pager] merged ' + label + ': ' + indices.length + ' page(s)');
+            // embedPdf returns PDFEmbeddedPage[] which we can draw onto
+            // newly-created Letter pages at any size. Unlike copyPages,
+            // this lets us SCALE the content rather than inheriting the
+            // source page's dimensions.
+            const embedded = await out.embedPdf(src, indices);
+            embedded.forEach((emb, i) => {
+              const isLandscape = emb.width > emb.height;
+              // Letter portrait = 612×792; Letter landscape = 792×612.
+              const pageW = isLandscape ? PAGE_H_PT : PAGE_W_PT;
+              const pageH = isLandscape ? PAGE_W_PT : PAGE_H_PT;
+              const page = out.addPage([pageW, pageH]);
+              page.drawRectangle({ x: 0, y: 0, width: pageW, height: pageH, color: rgb(0, 0, 0) });
+              const fit = fitInto(emb.width, emb.height, pageW, pageH);
+              page.drawPage(emb, { x: fit.x, y: fit.y, width: fit.w, height: fit.h });
+            });
+            console.log('[one-pager] merged ' + label + ': ' + indices.length + ' page(s), scaled to Letter');
           } else {
             setStatus('Embedding ' + label + '…');
             const { bytes, mime } = await fileToImageBytes(file);
