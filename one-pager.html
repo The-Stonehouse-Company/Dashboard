@@ -695,12 +695,15 @@
 
         for (let i = 0; i < sections.length; i++) {
           setStatus('Rendering page ' + (i + 1) + ' of ' + sections.length + '…');
+          // useCORS for any cross-origin images we might pull in (Google
+          // Fonts, etc.). Blob URLs in the extra pages are same-origin
+          // so don't need CORS — but they DO need allowTaint disabled
+          // so toDataURL doesn't blow up.
           const canvas = await html2canvas(sections[i], {
             scale: 2,
             backgroundColor: '#000000',
             useCORS: true,
             logging: false,
-            allowTaint: true,
           });
           const imgData = canvas.toDataURL('image/jpeg', 0.92);
           const ratio = canvas.width / canvas.height;
@@ -716,6 +719,8 @@
           pdf.setFillColor(0, 0, 0);
           pdf.rect(0, 0, PAGE_W, PAGE_H, 'F');
           pdf.addImage(imgData, 'JPEG', imgX, imgY, imgW, imgH);
+          // Brief pause between captures so the browser can free canvas memory.
+          await new Promise((r) => setTimeout(r, 80));
         }
 
         const filename = 'One-Pager-' + cleanFilename(payload && payload.address) + '.pdf';
