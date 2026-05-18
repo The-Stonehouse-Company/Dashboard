@@ -442,6 +442,68 @@
     /* Wider modal variant for the long Property Intake form */
     .modal-overlay.is-wide .modal { max-width: 880px; }
 
+    /* Mode toggle (two-pill segmented control used in the One Pager modal) */
+    .mode-toggle {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--rule-strong);
+      margin-bottom: 28px;
+    }
+    .mode-toggle label {
+      flex: 1;
+      position: relative;
+      cursor: pointer;
+      display: block;
+    }
+    .mode-toggle input[type=radio] {
+      position: absolute; opacity: 0; pointer-events: none;
+    }
+    .mode-toggle .mode-pill {
+      display: block;
+      text-align: center;
+      padding: 14px 14px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+      color: var(--text-muted);
+      background: var(--bg);
+      transition: background .15s, color .15s;
+    }
+    .mode-toggle label + label .mode-pill { border-left: 1px solid var(--rule-strong); }
+    .mode-toggle input[type=radio]:checked + .mode-pill {
+      color: var(--text);
+      background: var(--bg-elev-2);
+    }
+    .mode-toggle input[type=radio]:focus-visible + .mode-pill {
+      outline: 2px solid var(--text);
+      outline-offset: -4px;
+    }
+
+    /* Sections inside the One Pager modal that toggle visibility by mode */
+    fieldset[data-mode-only] { display: none; }
+    fieldset[data-mode-only].is-visible { display: block; }
+
+    /* File input restyling */
+    input[type=file] {
+      width: 100%;
+      font: inherit; font-size: 12px;
+      color: var(--text-muted);
+      background: var(--bg);
+      border: 1px solid var(--rule-strong);
+      padding: 10px 12px;
+    }
+    input[type=file]::-webkit-file-upload-button {
+      font: inherit; font-size: 10px; font-weight: 300;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      color: var(--text);
+      background: var(--bg-elev-2);
+      border: 1px solid var(--rule-strong);
+      padding: 6px 12px;
+      margin-right: 12px;
+      cursor: pointer;
+    }
+
     /* Radio pill group (used for Flood Zone, Needs Variance) */
     .radio-group {
       display: flex;
@@ -1184,13 +1246,13 @@
         <p class="subpanel-intro">Reusable marketing materials for the Sales Division. Click a template to open or download once content is added.</p>
 
         <div class="template-grid">
-          <article class="template-card" data-template-key="property-one-pager">
+          <article class="template-card is-clickable" data-template-key="property-one-pager" id="open-onepager-modal" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="onepager-modal">
             <div class="template-card-head">
               <span class="template-kind">Template · One-Pager</span>
-              <span class="template-status is-soon">Coming soon</span>
+              <span class="template-status">Ready</span>
             </div>
             <h3>Property One Pager</h3>
-            <p>Single-page listing summary for showings, open houses, and broker tours. Property photo, key stats, agent contact.</p>
+            <p>Single-page listing summary for showings, open houses, and broker tours. Generates a print-ready PDF.</p>
           </article>
 
           <article class="template-card" data-template-key="cma">
@@ -1540,6 +1602,162 @@
     </div>
   </div>
 
+  <!-- ========================= ONE PAGER BUILDER MODAL ========================= -->
+  <div class="modal-overlay is-wide" id="onepager-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="onepager-modal-title" id="onepager-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Sales · Marketing Templates</span>
+          <h2 class="modal-title" id="onepager-modal-title">Property One Pager</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-onepager-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="onepager-form" autocomplete="off" novalidate>
+
+        <!-- Mode toggle -->
+        <div class="mode-toggle" role="radiogroup" aria-label="One pager type">
+          <label>
+            <input type="radio" name="mode" value="new_construction" checked />
+            <span class="mode-pill">New Construction (Off-MLS)</span>
+          </label>
+          <label>
+            <input type="radio" name="mode" value="on_market" />
+            <span class="mode-pill">On-Market (MLS)</span>
+          </label>
+        </div>
+
+        <fieldset>
+          <legend>Property</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="op-address">Property Address <span class="req">*</span></label>
+              <input id="op-address" name="address" type="text" required placeholder="2145 Sharondale Dr" />
+            </div>
+            <div>
+              <label for="op-citystate">City, State, Zip <span class="req">*</span></label>
+              <input id="op-citystate" name="city_state_zip" type="text" required placeholder="Nashville, TN 37215" />
+            </div>
+            <div>
+              <label for="op-neighborhood">Neighborhood / Area <span class="req">*</span></label>
+              <input id="op-neighborhood" name="neighborhood" type="text" required placeholder="Green Hills" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Key Stats</legend>
+          <div class="form-grid-4">
+            <div>
+              <label for="op-beds">Bedrooms</label>
+              <input id="op-beds" name="bedrooms" type="text" placeholder="5" />
+            </div>
+            <div>
+              <label for="op-baths">Bathrooms</label>
+              <input id="op-baths" name="bathrooms" type="text" placeholder="5.2" />
+            </div>
+            <div>
+              <label for="op-sqft">Square Feet</label>
+              <input id="op-sqft" name="square_feet" type="text" placeholder="3,941" />
+            </div>
+            <div>
+              <label for="op-garage">Car Garage</label>
+              <input id="op-garage" name="garage" type="text" placeholder="3" />
+            </div>
+          </div>
+          <div class="form-grid" style="margin-top: 14px;">
+            <div>
+              <label>Pool</label>
+              <div class="radio-group">
+                <label><input type="radio" name="pool" value="No" checked /><span class="radio-pill">No</span></label>
+                <label><input type="radio" name="pool" value="Yes" /><span class="radio-pill">Yes</span></label>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- New Construction-only fields -->
+        <fieldset data-mode-only="new_construction" class="is-visible">
+          <legend>New Construction Details</legend>
+          <div class="form-grid">
+            <div>
+              <label for="op-price">Purchase Price <span class="req">*</span></label>
+              <div class="currency"><input id="op-price" name="price" type="number" inputmode="decimal" min="0" step="1" placeholder="2150000" /></div>
+            </div>
+            <div>
+              <label for="op-builder">Builder</label>
+              <input id="op-builder" name="builder" type="text" placeholder="Clear Creek" />
+            </div>
+            <div>
+              <label for="op-completion">Estimated Completion</label>
+              <input id="op-completion" name="completion" type="text" placeholder="Winter 2026" />
+            </div>
+            <div>
+              <label for="op-client">Prepared For (Client Name)</label>
+              <input id="op-client" name="client" type="text" placeholder="Liv Brien" />
+            </div>
+            <div class="full">
+              <label for="op-rendering">Front Rendering (image)</label>
+              <input id="op-rendering" name="rendering" type="file" accept="image/*" />
+            </div>
+            <div>
+              <label for="op-plans">Building Plans (image)</label>
+              <input id="op-plans" name="plans" type="file" accept="image/*" />
+            </div>
+            <div>
+              <label for="op-designboard">Design Board (image)</label>
+              <input id="op-designboard" name="design_board" type="file" accept="image/*" />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- On-Market-only fields -->
+        <fieldset data-mode-only="on_market">
+          <legend>On-Market Details</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="op-listing-url">RealTracs Listing Link</label>
+              <input id="op-listing-url" name="listing_url" type="url" placeholder="https://www.realtracs.com/property/…" />
+            </div>
+            <div>
+              <label for="op-list-price">Listing Price <span class="req">*</span></label>
+              <div class="currency"><input id="op-list-price" name="list_price" type="number" inputmode="decimal" min="0" step="1" placeholder="0" /></div>
+            </div>
+            <div>
+              <label for="op-dom">Days on Market</label>
+              <input id="op-dom" name="days_on_market" type="number" inputmode="numeric" min="0" placeholder="0" />
+            </div>
+            <div class="full">
+              <label for="op-listing-photo">Listing Photo</label>
+              <input id="op-listing-photo" name="listing_photo" type="file" accept="image/*" />
+            </div>
+            <div>
+              <label for="op-client-om">Prepared For (Client Name)</label>
+              <input id="op-client-om" name="client_om" type="text" placeholder="Liv Brien" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Property Highlights</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="op-highlights">One per line — these become the bulleted list on the one-pager.</label>
+              <textarea id="op-highlights" name="highlights" rows="6" placeholder="Primary Suite on Main Level&#10;Private Elevator&#10;5 Bedrooms / 5 Full + 2 Half Baths&#10;3,941 Square Feet of Living Space&#10;3-Car Garage&#10;Located in Coveted Green Hills"></textarea>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+
+      <div class="form-status" id="onepager-form-status" role="status" aria-live="polite"></div>
+
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-onepager">Cancel</button>
+        <button class="btn" type="submit" form="onepager-form" id="generate-onepager">Generate One Pager</button>
+      </footer>
+    </div>
+  </div>
+
   <!-- ========================= FOOTER ========================= -->
   <footer class="site-footer">
     <div class="wrap footer-row">
@@ -1786,6 +2004,184 @@
       }
 
       loadStats();
+    })();
+
+    // ============================================================
+    // Property One Pager builder (Marketing Templates)
+    //  - Modal collects all the data, reads any uploaded images as data URLs,
+    //    serializes everything to sessionStorage, and opens one-pager.html
+    //    in a new tab where the page renders the styled output.
+    //  - No backend involved. Agent prints to PDF from the output page.
+    // ============================================================
+    (function () {
+      const overlay  = document.getElementById('onepager-modal-overlay');
+      const modal    = document.getElementById('onepager-modal');
+      const form     = document.getElementById('onepager-form');
+      const statusEl = document.getElementById('onepager-form-status');
+      const openCard = document.getElementById('open-onepager-modal');
+      const closeBtn = document.getElementById('close-onepager-modal');
+      const cancelBtn = document.getElementById('cancel-onepager');
+      const generateBtn = document.getElementById('generate-onepager');
+      const modeRadios = form ? form.querySelectorAll('input[name="mode"]') : [];
+      const modeFieldsets = form ? form.querySelectorAll('fieldset[data-mode-only]') : [];
+
+      if (!overlay || !form) return;
+
+      let lastFocus = null;
+
+      function showModeFields(mode) {
+        modeFieldsets.forEach((fs) => {
+          if (fs.dataset.modeOnly === mode) fs.classList.add('is-visible');
+          else                              fs.classList.remove('is-visible');
+        });
+      }
+
+      function focusables() {
+        return modal.querySelectorAll(
+          'a[href], input:not([disabled]):not([type=hidden]), select:not([disabled]), ' +
+          'textarea:not([disabled]), button:not([disabled])'
+        );
+      }
+
+      function openModal() {
+        lastFocus = document.activeElement;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        clearStatus();
+        // Reflect the currently-selected mode (default = new_construction)
+        const selected = form.querySelector('input[name="mode"]:checked');
+        showModeFields(selected ? selected.value : 'new_construction');
+        requestAnimationFrame(() => {
+          const first = focusables()[0];
+          if (first) first.focus();
+        });
+      }
+      function closeModal() {
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+      }
+      function setStatus(kind, msg) {
+        statusEl.className = 'form-status show ' + kind;
+        statusEl.textContent = msg;
+      }
+      function clearStatus() {
+        statusEl.className = 'form-status';
+        statusEl.textContent = '';
+      }
+
+      // Open from the template card (acts as button with role + tabindex)
+      if (openCard) {
+        openCard.addEventListener('click', openModal);
+        openCard.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(); }
+        });
+      }
+      if (closeBtn)  closeBtn.addEventListener('click', closeModal);
+      if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (overlay.getAttribute('aria-hidden') !== 'false') return;
+        if (e.key === 'Escape') { e.preventDefault(); closeModal(); return; }
+        if (e.key === 'Tab') {
+          const f = Array.from(focusables());
+          if (f.length === 0) return;
+          const first = f[0];
+          const last  = f[f.length - 1];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      });
+
+      // Mode toggle swap
+      modeRadios.forEach((r) => {
+        r.addEventListener('change', () => showModeFields(r.value));
+      });
+
+      // Helper: read a file input as a data URL (or return '' if no file).
+      function readFile(input) {
+        if (!input || !input.files || !input.files[0]) return Promise.resolve('');
+        const file = input.files[0];
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload  = () => resolve({ name: file.name, type: file.type, data: reader.result });
+          reader.onerror = () => reject(reader.error);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      // Submit → package payload, store in sessionStorage, open output page.
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearStatus();
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+
+        generateBtn.disabled = true;
+        const originalLabel = generateBtn.textContent;
+        generateBtn.textContent = 'Preparing…';
+
+        try {
+          const mode = form.querySelector('input[name="mode"]:checked').value;
+
+          // Read uploads (only relevant fields per mode)
+          const [rendering, plans, designBoard, listingPhoto] = await Promise.all([
+            readFile(document.getElementById('op-rendering')),
+            readFile(document.getElementById('op-plans')),
+            readFile(document.getElementById('op-designboard')),
+            readFile(document.getElementById('op-listing-photo')),
+          ]);
+
+          const payload = {
+            mode: mode,
+            address:        document.getElementById('op-address').value.trim(),
+            cityStateZip:   document.getElementById('op-citystate').value.trim(),
+            neighborhood:   document.getElementById('op-neighborhood').value.trim(),
+            bedrooms:       document.getElementById('op-beds').value.trim(),
+            bathrooms:      document.getElementById('op-baths').value.trim(),
+            squareFeet:     document.getElementById('op-sqft').value.trim(),
+            garage:         document.getElementById('op-garage').value.trim(),
+            pool:           (form.querySelector('input[name="pool"]:checked') || {}).value || 'No',
+            highlights:     document.getElementById('op-highlights').value.trim(),
+            // mode-specific
+            price:          document.getElementById('op-price').value.trim(),
+            builder:        document.getElementById('op-builder').value.trim(),
+            completion:     document.getElementById('op-completion').value.trim(),
+            client:         document.getElementById('op-client').value.trim() ||
+                            document.getElementById('op-client-om').value.trim(),
+            rendering:      rendering || '',
+            plans:          plans || '',
+            designBoard:    designBoard || '',
+            listingUrl:     document.getElementById('op-listing-url').value.trim(),
+            listPrice:      document.getElementById('op-list-price').value.trim(),
+            daysOnMarket:   document.getElementById('op-dom').value.trim(),
+            listingPhoto:   listingPhoto || '',
+            generatedAt:    new Date().toISOString(),
+          };
+
+          try {
+            sessionStorage.setItem('stonehouse.onePager', JSON.stringify(payload));
+          } catch (err) {
+            // QuotaExceededError — most likely image too large
+            setStatus('err', 'Images too large to pass between pages. Try smaller images (< 4MB total).');
+            console.error('sessionStorage write failed:', err);
+            return;
+          }
+
+          // Open the output page in a new tab so the agent keeps the modal/data context
+          window.open('one-pager.html', '_blank', 'noopener');
+          closeModal();
+        } catch (err) {
+          console.error('One pager generation failed:', err);
+          setStatus('err', 'Error preparing one-pager: ' + (err && err.message ? err.message : err));
+        } finally {
+          generateBtn.disabled = false;
+          generateBtn.textContent = originalLabel;
+        }
+      });
     })();
 
     // ============================================================
