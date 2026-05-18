@@ -490,11 +490,16 @@
 
     // The output tab is sometimes opened by the dashboard BEFORE the IDB
     // write completes (we open synchronously to avoid Safari's pop-up
-    // blocker). Poll IDB for up to 12 seconds, waiting for a payload that
-    // matches our requestId (if specified — for backwards compatibility,
-    // any payload is accepted when no ?req= is in the URL).
-    async function loadPayload() {
-      for (let i = 0; i < 60; i++) {
+    // blocker). Poll IDB for up to 90 seconds (300 × 300ms) — generous
+    // window for big PDF renders. Update status periodically so the user
+    // knows it hasn't frozen.
+    //
+    // For backwards compatibility, any payload is accepted when no ?req=
+    // is in the URL; otherwise we wait for the matching requestId.
+    async function loadPayload(onProgress) {
+      const MAX_TRIES = 300;
+      const STEP_MS = 300;
+      for (let i = 0; i < MAX_TRIES; i++) {
         try {
           const v = await idbGet('current');
           if (v && v.mode) {
@@ -504,7 +509,8 @@
           console.error('IndexedDB read failed:', err);
           return null;
         }
-        await new Promise((r) => setTimeout(r, 200));
+        if (onProgress) onProgress(i, MAX_TRIES);
+        await new Promise((r) => setTimeout(r, STEP_MS));
       }
       return null;
     }
@@ -684,9 +690,18 @@
 
     // Kick everything off
     (async () => {
-      setStatus('Loading…');
-      const d = await loadPayload();
-      if (!d || !d.mode) { renderEmpty(); setStatus('No data'); return; }
+      setStatus('Waiting for data…');
+      const d = await loadPayload((i, max) => {
+        const elapsedSec = Math.round((i + 1) * 300 / 1000);
+        if (i >= 30 && i < 60) setStatus('Still working… ' + elapsedSec + 's');
+        else if (i >= 60 && i < 120) setStatus('Processing large files… ' + elapsedSec + 's');
+        else if (i >= 120) setStatus('Waiting on dashboard… ' + elapsedSec + 's');
+      });
+      if (!d || !d.mode) {
+        renderEmpty();
+        setStatus('No data');
+        return;
+      }
 
       setStatus('Rendering…');
       renderOnePager(d);

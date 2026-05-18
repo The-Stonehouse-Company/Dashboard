@@ -2240,8 +2240,19 @@
           // in its own try/catch so a bad/large PDF for one section doesn't
           // kill the whole submission — the section is dropped and we move on.
           async function safeRead(elId, label) {
+            const el = document.getElementById(elId);
+            // No file selected — nothing to do.
+            if (!el || !el.files || !el.files[0]) return null;
+            // 60s wall-clock timeout per file. Real PDFs render in 2–10s
+            // even at scale; 60s is way past any reasonable threshold.
             try {
-              return await readFile(document.getElementById(elId));
+              return await Promise.race([
+                readFile(el),
+                new Promise((_, rej) => setTimeout(
+                  () => rej(new Error('processing exceeded 60 seconds — file may be too large or corrupt')),
+                  60000
+                )),
+              ]);
             } catch (err) {
               console.warn(label + ' upload failed:', err);
               setStatus('warn', label + ' could not be processed (' + (err && err.message ? err.message : 'unknown error') + '). The one-pager will be generated without it.');
