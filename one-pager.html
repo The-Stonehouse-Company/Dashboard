@@ -347,79 +347,54 @@
       font-size: 13px;
     }
 
-    /* Print styling */
+    /* Print styling — kept minimal to avoid Safari's "blank print" bug.
+       Aggressive print-specific size overrides + page-break-inside:avoid
+       on oversized content can cause Safari to silently drop the entire
+       cover from the output. We rely on the screen layout instead and
+       only override the essentials here. */
     @page {
-      size: 8.5in 11in;
+      size: letter portrait;
       margin: 0;
     }
     @media print {
-      /* Force the dark background + white text to actually print.
-         Without these properties, Chrome/Safari strip background colors. */
-      html, body, .pager, .extra-page, .glance, .hero, .stat-tile {
+      /* Force every element to retain its CSS colors in the print.
+         Without this, Chrome/Safari strip backgrounds. */
+      *, *::before, *::after {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
         color-adjust: exact !important;
       }
-      html, body { background: var(--bg) !important; }
+      html, body {
+        background: #000000 !important;
+        color: #ffffff !important;
+      }
 
       .toolbar { display: none !important; }
 
-      /* Cover — tighten spacing so the whole cover fits on one page. */
+      /* Cover fills the page; let it flow naturally rather than fighting
+         the browser's pagination with page-break-inside: avoid. */
       .pager {
-        max-width: none;
-        margin: 0;
-        padding: 0.4in 0.5in 0.35in;
-        page-break-inside: avoid;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0.4in 0.5in !important;
         page-break-after: always;
       }
-      .pager-head { padding-bottom: 12px; margin-bottom: 18px; }
-      .brand-mark { width: 44px; height: 44px; }
-      .head-eyebrow { font-size: 14px; }
-      .head-sub { font-size: 8.5px; margin-top: 4px; }
+      .pager-foot { page-break-after: always; }
 
-      /* Hero — fixed cap so it never blows past half the page. */
-      .hero {
-        aspect-ratio: auto;
-        height: 3.6in;
-        margin-bottom: 18px;
-        border: 0;
-      }
-
-      .address h1 { font-size: 30px; }
-      .address .sub { font-size: 12px; margin-top: 4px; }
-
-      .stats { padding: 16px 0; margin: 18px 0; }
-      .stat .num { font-size: 30px; }
-      .stat .label { font-size: 9px; margin-top: 6px; }
-
-      .two-col { gap: 18px; margin-bottom: 18px; }
-      .col-head { margin-bottom: 10px; }
-      .highlights ul { font-size: 12px; line-height: 1.55; }
-      .glance { padding: 16px 18px; }
-      .glance-rows { gap: 12px 14px; }
-      .glance-row .v { font-size: 18px; }
-
-      .prepared { padding-top: 14px; }
-      .prepared .label { margin-bottom: 6px; }
-      .prepared .name { font-size: 22px; }
-
-      .pager-foot { margin-top: 14px; }
-
-      a { color: inherit; text-decoration: none; }
-
-      /* Each extra page starts on a fresh sheet */
+      /* Each extra page starts on a fresh sheet. */
       .extra-page {
-        max-width: none;
-        margin: 0;
-        padding: 0.5in 0.6in 0.5in;
-        border-top: 0;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0.4in 0.5in !important;
+        border-top: 0 !important;
         page-break-before: always;
-        page-break-inside: avoid;
       }
       .extra-page-image {
         max-height: 9.2in;
-        border: 0;
+        border: 0 !important;
       }
+
+      a { color: inherit; text-decoration: none; }
     }
   </style>
 </head>
