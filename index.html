@@ -571,6 +571,146 @@
     .calc-reference td:first-child { color: var(--text); }
     .calc-reference tr.active td { color: var(--text); background: var(--bg-elev); }
 
+    /* =========================================================
+       Land Acquisition · Active Pipeline (under-contract deals)
+       Per-deal card with two milestone progress bars
+       (Due Diligence + Closing).
+       ========================================================= */
+    .pipeline-section {
+      margin-top: 8px;
+      margin-bottom: 48px;
+    }
+    .pipeline-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+    .pipeline-head .pipeline-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1;
+      margin: 0;
+    }
+    .pipeline-head .pipeline-meta {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-x-wide);
+    }
+    .deal-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .deal-card {
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+      padding: 22px 24px 20px;
+    }
+    .deal-head {
+      display: flex; justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 14px;
+    }
+    .deal-address {
+      font-family: var(--font-display);
+      font-size: 18px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      line-height: 1.15;
+      margin: 0 0 6px;
+      color: var(--text);
+    }
+    .deal-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+    }
+    .deal-price {
+      font-family: var(--font-display);
+      font-size: 14px;
+      letter-spacing: 0.05em;
+      color: var(--text);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .deal-bar {
+      margin-top: 12px;
+    }
+    .deal-bar:first-of-type { margin-top: 0; }
+    .deal-bar .bar-row {
+      display: grid;
+      grid-template-columns: 120px 1fr auto;
+      align-items: center;
+      gap: 14px;
+    }
+    .deal-bar .bar-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-x-wide);
+    }
+    .deal-bar .bar-track {
+      position: relative;
+      height: 6px;
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      overflow: hidden;
+    }
+    .deal-bar .bar-fill {
+      position: absolute; left: 0; top: 0; bottom: 0;
+      background: var(--text);
+      transition: width .3s ease;
+    }
+    .deal-bar.approaching .bar-fill { background: #e8c068; }
+    .deal-bar.past .bar-fill { background: #d97a7a; }
+    .deal-bar.done .bar-fill { background: var(--text-dim); }
+    .deal-bar .bar-status {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .deal-bar.approaching .bar-status { color: #e8c068; }
+    .deal-bar.past .bar-status { color: #d97a7a; }
+    .deal-bar.done .bar-status { color: var(--text-dim); }
+    .deal-bar .bar-dates {
+      grid-column: 2 / -1;
+      margin-top: 6px;
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+    .deal-empty, .deal-error {
+      padding: 26px;
+      border: 1px solid var(--rule);
+      background: var(--bg-elev);
+      color: var(--text-muted);
+      font-size: 12px;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      text-align: center;
+    }
+    .deal-error { color: #f4b9b9; border-color: #4a1f1f; text-transform: none; }
+    @media (max-width: 640px) {
+      .deal-bar .bar-row { grid-template-columns: 1fr; gap: 6px; }
+      .deal-bar .bar-dates { grid-column: 1; }
+      .deal-head { flex-direction: column; align-items: flex-start; }
+    }
+
     /* Mode toggle (two-pill segmented control used in the One Pager modal) */
     .mode-toggle {
       display: flex;
@@ -1422,10 +1562,23 @@
         </button>
       </div>
 
+      <section class="pipeline-section" aria-labelledby="land-pipeline-title">
+        <header class="pipeline-head">
+          <div>
+            <div class="eyebrow" style="margin-bottom:8px;">Active Pipeline</div>
+            <h2 class="pipeline-title" id="land-pipeline-title">Under Contract</h2>
+          </div>
+          <div class="pipeline-meta" id="land-pipeline-meta">Loading…</div>
+        </header>
+        <div class="deal-list" id="land-pipeline-list">
+          <div class="deal-empty">Loading deals…</div>
+        </div>
+      </section>
+
       <div class="placeholder">
         <div class="mark">— Placeholder —</div>
         <h2>More tools coming</h2>
-        <p>Pipeline view, MRC class summary, and active-deal tracking will live here next.</p>
+        <p>MRC class summary, deal aggregates, and historical analytics will live here next.</p>
       </div>
     </section>
 
@@ -2658,6 +2811,286 @@
       // Live recalc on input
       contractInput.addEventListener('input', recalc);
       mrcInput.addEventListener('input', recalc);
+    })();
+
+    // ============================================================
+    // Land Acquisition · Active Pipeline
+    //  - Fetches the Land Acquisition Intake responses sheet via the
+    //    gviz JSON endpoint (same pattern as Sales YTD stats).
+    //  - Looks up columns by header LABEL (not position) so the form
+    //    can have columns added without breaking this view.
+    //  - Filters to deals that are currently under contract:
+    //      • has a Date Under Contract
+    //      • Closing Date is in the future OR not yet filled in
+    //  - Renders one card per deal with two progress bars
+    //    (Due Diligence + Closing) showing how close we are to each
+    //    milestone, color-coded by urgency.
+    //
+    // SETUP REQUIRED:
+    //   1. Paste the Land Acquisition Intake sheet ID into LAND_SHEET_ID.
+    //   2. Make sure the sheet is shared as "Anyone with the link can view."
+    //   3. If the responses tab isn't named "Form Responses 1", update
+    //      LAND_SHEET_TAB to match.
+    // ============================================================
+    (function () {
+      const LAND_SHEET_ID  = "PASTE_LAND_ACQ_SHEET_ID_HERE";
+      const LAND_SHEET_TAB = "Form Responses 1";
+
+      const listEl = document.getElementById('land-pipeline-list');
+      const metaEl = document.getElementById('land-pipeline-meta');
+      if (!listEl) return;
+
+      // --- Friendly empty/error states ---
+      function setEmpty(message) {
+        listEl.innerHTML = '<div class="deal-empty">' + esc(message) + '</div>';
+      }
+      function setError(message) {
+        listEl.innerHTML = '<div class="deal-error">' + esc(message) + '</div>';
+      }
+      function setMeta(text) {
+        if (metaEl) metaEl.textContent = text;
+      }
+
+      // If the sheet ID hasn't been wired up yet, render a setup prompt
+      // and bail. This keeps the section in place visually without
+      // throwing errors.
+      if (!LAND_SHEET_ID || /PASTE_/.test(LAND_SHEET_ID)) {
+        setMeta('Setup pending');
+        setEmpty('Land Acquisition sheet not yet connected. Paste the sheet ID into LAND_SHEET_ID in the dashboard source to wire this up.');
+        return;
+      }
+
+      const STATS_URL =
+        "https://docs.google.com/spreadsheets/d/" + LAND_SHEET_ID +
+        "/gviz/tq?tqx=out:json&sheet=" + encodeURIComponent(LAND_SHEET_TAB);
+
+      // ---------- Helpers ----------
+      function esc(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+      const usdFull = new Intl.NumberFormat('en-US', {
+        style: 'currency', currency: 'USD', maximumFractionDigits: 0,
+      });
+      function fmtUSD(n) {
+        if (!isFinite(n) || !n) return '';
+        return usdFull.format(n);
+      }
+      function fmtDate(d) {
+        if (!(d instanceof Date) || isNaN(d)) return '—';
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+      function startOfDay(d) {
+        const x = new Date(d);
+        x.setHours(0, 0, 0, 0);
+        return x;
+      }
+      function daysBetween(a, b) {
+        const ms = startOfDay(b).getTime() - startOfDay(a).getTime();
+        return Math.round(ms / (1000 * 60 * 60 * 24));
+      }
+      function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+
+      function parseGvizDate(cell) {
+        if (!cell || cell.v == null) return null;
+        // gviz date format: "Date(YYYY,M,D)" with month 0-indexed.
+        if (typeof cell.v === 'string') {
+          const m = cell.v.match(/^Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?\)$/);
+          if (m) return new Date(+m[1], +m[2], +m[3], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0));
+        }
+        if (cell.f) {
+          const p = new Date(cell.f);
+          if (!isNaN(p)) return p;
+        }
+        return null;
+      }
+      function parseGvizNumber(cell) {
+        if (!cell || cell.v == null) return 0;
+        if (typeof cell.v === 'number') return cell.v;
+        const n = parseFloat(String(cell.v).replace(/[$,\s]/g, ''));
+        return isNaN(n) ? 0 : n;
+      }
+      function parseGvizString(cell) {
+        if (!cell) return '';
+        if (cell.f != null) return String(cell.f);
+        if (cell.v != null) return String(cell.v);
+        return '';
+      }
+
+      // Parse the JSONP wrapper around gviz responses.
+      function parseGvizEnvelope(text) {
+        const match = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
+        if (!match) throw new Error('gviz response in unexpected format');
+        const data = JSON.parse(match[1]);
+        if (data.status !== 'ok') {
+          const msg = (data.errors && data.errors[0] && data.errors[0].detailed_message) || data.status;
+          throw new Error('gviz: ' + msg);
+        }
+        return data.table || { cols: [], rows: [] };
+      }
+
+      // Find a column by header label. Tries exact match (case-insensitive)
+      // first, then falls back to "contains."
+      function findCol(cols, ...candidates) {
+        const norm = (s) => String(s || '').toLowerCase().trim();
+        for (const cand of candidates) {
+          const idx = cols.findIndex((c) => norm(c.label) === norm(cand));
+          if (idx >= 0) return idx;
+        }
+        for (const cand of candidates) {
+          const idx = cols.findIndex((c) => norm(c.label).indexOf(norm(cand)) >= 0);
+          if (idx >= 0) return idx;
+        }
+        return -1;
+      }
+
+      // ---------- Bar rendering ----------
+      // Renders a single milestone bar (Due Diligence or Closing).
+      //   label = display name
+      //   start = Date the bar begins (Date Under Contract for both)
+      //   end   = milestone date (DD End or Closing)
+      function renderBar(label, start, end, today) {
+        if (!start || !end) {
+          return (
+            '<div class="deal-bar"><div class="bar-row">' +
+              '<div class="bar-label">' + esc(label) + '</div>' +
+              '<div class="bar-track"></div>' +
+              '<div class="bar-status">Date missing</div>' +
+            '</div></div>'
+          );
+        }
+        const total      = Math.max(1, daysBetween(start, end));
+        const elapsed    = clamp(daysBetween(start, today), 0, total);
+        const remaining  = daysBetween(today, end);
+        const pct        = (elapsed / total) * 100;
+
+        let state = '';
+        if (remaining < 0)       state = 'past';
+        else if (remaining === 0) state = 'approaching';
+        else if (remaining <= 7) state = 'approaching';
+        else if (elapsed >= total) state = 'done';
+
+        const statusLabel =
+          remaining < 0  ? Math.abs(remaining) + ' day' + (Math.abs(remaining) === 1 ? '' : 's') + ' past' :
+          remaining === 0 ? 'Today' :
+                            remaining + ' day' + (remaining === 1 ? '' : 's') + ' left';
+
+        return (
+          '<div class="deal-bar ' + state + '">' +
+            '<div class="bar-row">' +
+              '<div class="bar-label">' + esc(label) + '</div>' +
+              '<div class="bar-track"><div class="bar-fill" style="width:' + pct.toFixed(1) + '%"></div></div>' +
+              '<div class="bar-status">' + esc(statusLabel) + '</div>' +
+            '</div>' +
+            '<div class="bar-dates">' + esc(fmtDate(start)) + ' → ' + esc(fmtDate(end)) + '</div>' +
+          '</div>'
+        );
+      }
+
+      function renderDealCard(d, today) {
+        return (
+          '<article class="deal-card">' +
+            '<header class="deal-head">' +
+              '<div>' +
+                '<h3 class="deal-address">' + esc(d.address || 'Untitled property') + '</h3>' +
+                '<div class="deal-meta">' +
+                  esc(d.neighborhood || '') +
+                '</div>' +
+              '</div>' +
+              (d.contract
+                ? '<div class="deal-price">' + esc(fmtUSD(d.contract)) + '</div>'
+                : ''
+              ) +
+            '</header>' +
+            renderBar('Due Diligence', d.underContract, d.ddEnd,   today) +
+            renderBar('Closing',       d.underContract, d.closing, today) +
+          '</article>'
+        );
+      }
+
+      // ---------- Main load ----------
+      async function loadPipeline() {
+        try {
+          setMeta('Loading…');
+          setEmpty('Loading deals…');
+
+          const url = STATS_URL + '&t=' + Date.now();
+          const res = await fetch(url, { cache: 'no-store' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const text = await res.text();
+          const table = parseGvizEnvelope(text);
+          const cols  = table.cols || [];
+          const rawRows = table.rows || [];
+
+          // Resolve column indices by header label.
+          const ix = {
+            address:        findCol(cols, 'Property Address'),
+            neighborhood:   findCol(cols, 'Neighborhood / Area', 'Neighborhood'),
+            contract:       findCol(cols, 'Contract Price'),
+            underContract:  findCol(cols, 'Date Under Contract', 'Under Contract'),
+            ddEnd:          findCol(cols, 'Due Diligence End', 'DD End'),
+            closing:        findCol(cols, 'Closing Date', 'Closing'),
+          };
+
+          const missing = Object.entries(ix).filter(([_, v]) => v < 0).map(([k]) => k);
+          if (missing.length) {
+            throw new Error('Required column(s) not found in sheet: ' + missing.join(', ') +
+              '. Headers must include "Property Address", "Date Under Contract", "Due Diligence End", "Closing Date".');
+          }
+
+          const today = startOfDay(new Date());
+
+          const deals = rawRows
+            .map((r) => {
+              const c = r.c || [];
+              return {
+                address:       parseGvizString(c[ix.address]),
+                neighborhood:  parseGvizString(c[ix.neighborhood]),
+                contract:      parseGvizNumber(c[ix.contract]),
+                underContract: parseGvizDate(c[ix.underContract]),
+                ddEnd:         parseGvizDate(c[ix.ddEnd]),
+                closing:       parseGvizDate(c[ix.closing]),
+              };
+            })
+            // Only deals that have an Under Contract date
+            .filter((d) => d.underContract instanceof Date)
+            // Drop deals that have already closed (closing in the past).
+            // Empty closing date = still active, keep it.
+            .filter((d) => !d.closing || d.closing >= today);
+
+          // Sort by closing date ascending (next-up first). Deals without
+          // a closing date sink to the bottom.
+          deals.sort((a, b) => {
+            const ac = a.closing ? a.closing.getTime() : Infinity;
+            const bc = b.closing ? b.closing.getTime() : Infinity;
+            return ac - bc;
+          });
+
+          if (deals.length === 0) {
+            setMeta('0 active deals');
+            setEmpty('No deals currently under contract.');
+            return;
+          }
+
+          setMeta(deals.length + ' active deal' + (deals.length === 1 ? '' : 's'));
+          listEl.innerHTML = deals.map((d) => renderDealCard(d, today)).join('');
+        } catch (err) {
+          console.error('Land pipeline load failed:', err);
+          setMeta('Could not load');
+          setError('Could not load pipeline: ' + (err && err.message ? err.message : err));
+        }
+      }
+
+      // Initial load + refresh whenever the Land Acquisition tab becomes
+      // visible (cheap; gviz responses are tiny). Also expose a manual
+      // refresher in case we add a button later.
+      loadPipeline();
+      const landTabBtn = document.getElementById('tab-land');
+      if (landTabBtn) {
+        landTabBtn.addEventListener('click', () => loadPipeline());
+      }
+      window.__loadLandPipeline = loadPipeline;
     })();
 
     // ============================================================
