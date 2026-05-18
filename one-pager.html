@@ -829,8 +829,11 @@
     }
 
     // Add an image-like (image File OR rendered canvas blob) onto a new
-    // page of the output PDF, centered on a black background.
-    async function addImagePage(out, rgb, imgBytes, mimeHint) {
+    // page of the output PDF.
+    //   bgColor: 'black' for the cover (matches the cover's dark design);
+    //            'white' for everything else so uploaded plans/design
+    //            boards don't get a black bar around them.
+    async function addImagePage(out, rgb, imgBytes, mimeHint, bgColor) {
       let img;
       const isPng = /png/i.test(mimeHint || '');
       if (isPng) {
@@ -846,7 +849,11 @@
         }
       }
       const page = out.addPage([PAGE_W_PT, PAGE_H_PT]);
-      page.drawRectangle({ x: 0, y: 0, width: PAGE_W_PT, height: PAGE_H_PT, color: rgb(0, 0, 0) });
+      const isBlack = bgColor === 'black';
+      page.drawRectangle({
+        x: 0, y: 0, width: PAGE_W_PT, height: PAGE_H_PT,
+        color: isBlack ? rgb(0, 0, 0) : rgb(1, 1, 1),
+      });
       const fit = fitInto(img.width, img.height, PAGE_W_PT, PAGE_H_PT);
       page.drawImage(img, { x: fit.x, y: fit.y, width: fit.w, height: fit.h });
     }
@@ -909,7 +916,7 @@
         // ---------- 2. Build the output PDF with pdf-lib ----------
         setStatus('Assembling PDF…');
         const out = await PDFDocument.create();
-        await addImagePage(out, rgb, coverBytes, 'image/jpeg');
+        await addImagePage(out, rgb, coverBytes, 'image/jpeg', 'black');
 
         // ---------- 3. Append plans + design board ----------
         // For each: if PDF, embed pages and scale to Letter (rotating
@@ -939,7 +946,11 @@
               const pageW = isLandscape ? PAGE_H_PT : PAGE_W_PT;
               const pageH = isLandscape ? PAGE_W_PT : PAGE_H_PT;
               const page = out.addPage([pageW, pageH]);
-              page.drawRectangle({ x: 0, y: 0, width: pageW, height: pageH, color: rgb(0, 0, 0) });
+              // White background for appended pages — the source PDF
+              // (plans, design board) has its own native background
+              // (usually white) and we don't want a black bar showing
+              // through any letterboxing.
+              page.drawRectangle({ x: 0, y: 0, width: pageW, height: pageH, color: rgb(1, 1, 1) });
               const fit = fitInto(emb.width, emb.height, pageW, pageH);
               page.drawPage(emb, { x: fit.x, y: fit.y, width: fit.w, height: fit.h });
             });
@@ -947,7 +958,7 @@
           } else {
             setStatus('Embedding ' + label + '…');
             const { bytes, mime } = await fileToImageBytes(file);
-            await addImagePage(out, rgb, bytes, mime);
+            await addImagePage(out, rgb, bytes, mime, 'white');
             console.log('[one-pager] embedded ' + label + ' as image');
           }
         }
