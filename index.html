@@ -2103,112 +2103,21 @@
       });
 
       // ----------------------------------------------------------
-      // PDF.js — loaded lazily the first time a PDF is uploaded.
+      // File reader — keeps the raw Blob for every upload (image OR PDF).
       //
-      // CDN choice: jsDelivr serving the LEGACY build of pdfjs-dist.
-      //   - The legacy build is the classic-script (UMD) variant designed
-      //     for older browsers; it Just Works with a normal <script> tag
-      //     and exposes window.pdfjsLib.
-      //   - The modern build at /build/pdf.min.js requires ES module
-      //     loading on v3.x and can hang silently if the worker URL
-      //     doesn't resolve, which is what was happening here (60s
-      //     timeouts on a 1MB PDF == worker never started).
+      // We used to render uploaded PDFs to JPEG via PDF.js so they could
+      // be displayed as <img> tags in the output tab. That was unreliable
+      // (worker hangs) and lossy (image-of-vector-pdf instead of pdf).
       //
-      // Worker note: we fetch the worker JS as text and turn it into a
-      // Blob URL on the same origin so cross-origin worker restrictions
-      // can't block it. This is a well-known PDF.js fix for the exact
-      // "getDocument hangs forever" symptom we saw.
+      // New architecture: just hand the original PDF Blob through. The
+      // one-pager output page uses pdf-lib at download time to merge the
+      // raw PDF pages straight into the final document. No rendering, no
+      // worker, no resampling — perfect-fidelity copies of the uploaded
+      // plans and design board.
       // ----------------------------------------------------------
-      const PDFJS_VERSION = '3.11.174';
-      const PDFJS_LIB_URL    = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@' + PDFJS_VERSION + '/legacy/build/pdf.min.js';
-      const PDFJS_WORKER_URL = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@' + PDFJS_VERSION + '/legacy/build/pdf.worker.min.js';
-      let pdfjsPromise = null;
-      function loadPdfJs() {
-        if (pdfjsPromise) return pdfjsPromise;
-        pdfjsPromise = (async () => {
-          // 1. Load the main library via classic <script>.
-          await new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src = PDFJS_LIB_URL;
-            s.onload  = () => resolve();
-            s.onerror = () => reject(new Error('Could not load PDF.js library from ' + PDFJS_LIB_URL));
-            document.head.appendChild(s);
-          });
-          if (!window.pdfjsLib) {
-            throw new Error('pdfjsLib not exposed after script load — wrong CDN path?');
-          }
-          // 2. Pull the worker source as text, wrap in a Blob, hand the
-          // resulting same-origin blob URL to PDF.js. Bypasses cross-origin
-          // worker blockers entirely.
-          try {
-            const res = await fetch(PDFJS_WORKER_URL);
-            if (!res.ok) throw new Error('worker fetch returned HTTP ' + res.status);
-            const code = await res.text();
-            const blobUrl = URL.createObjectURL(new Blob([code], { type: 'application/javascript' }));
-            window.pdfjsLib.GlobalWorkerOptions.workerSrc = blobUrl;
-            console.log('[one-pager] PDF.js worker installed via blob URL');
-          } catch (err) {
-            // Fall back to direct CDN URL — better than nothing.
-            console.warn('[one-pager] Blob-worker setup failed, falling back to direct URL:', err);
-            window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_URL;
-          }
-          return window.pdfjsLib;
-        })();
-        return pdfjsPromise;
-      }
-
-      // Render every page of a PDF to a JPEG Blob.
-      // We aim for ~144 DPI but cap the longer side at MAX_DIM so huge
-      // architectural sheets (24×36, 30×42) don't blow past the browser's
-      // canvas memory limit and silently fail.
-      async function renderPdfToPages(arrayBuffer, label) {
-        console.log('[one-pager] ' + label + ': loading PDF.js…');
-        const pdfjsLib = await loadPdfJs();
-        console.log('[one-pager] ' + label + ': PDF.js ready, parsing document (' + arrayBuffer.byteLength + ' bytes)…');
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        console.log('[one-pager] ' + label + ': parsed, ' + pdf.numPages + ' page(s)');
-        const out = [];
-        const MAX_DIM = 2400; // px — Safari/Chrome can comfortably encode this
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const base = page.getViewport({ scale: 1 });
-          const scaleByCap = MAX_DIM / Math.max(base.width, base.height);
-          const scale = Math.min(2, scaleByCap);
-          const viewport = page.getViewport({ scale: scale });
-          const canvas = document.createElement('canvas');
-          canvas.width = Math.floor(viewport.width);
-          canvas.height = Math.floor(viewport.height);
-          await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-          const blob = await new Promise((resolve, reject) => {
-            canvas.toBlob(
-              (b) => b ? resolve(b) : reject(new Error('canvas.toBlob returned null at page ' + i)),
-              'image/jpeg', 0.9
-            );
-          });
-          console.log('[one-pager] ' + label + ': rendered page ' + i + '/' + pdf.numPages);
-          out.push(blob);
-          canvas.width = canvas.height = 0;
-        }
-        return out;
-      }
-
-      // Helper: read a file input.
-      //  - Images: { name, type, blob: File }
-      //  - PDFs:   { name, type, pages: [Blob, ...] }
-      //  - Empty:  null
-      function readFile(input, label) {
+      function readFile(input) {
         if (!input || !input.files || !input.files[0]) return Promise.resolve(null);
         const file = input.files[0];
-        const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
-
-        if (isPdf) {
-          return file.arrayBuffer().then(async (buf) => {
-            const pages = await renderPdfToPages(buf, label || file.name);
-            return { name: file.name, type: file.type || 'application/pdf', pages: pages };
-          });
-        }
-
-        // Image — the File object IS a Blob, so we can just hand it through.
         return Promise.resolve({ name: file.name, type: file.type, blob: file });
       }
 
@@ -2291,23 +2200,13 @@
             }
             const f = el.files[0];
             const sizeStr = fmtSize(f.size);
-            const kind = (f.type === 'application/pdf' || /\.pdf$/i.test(f.name)) ? 'pdf' : 'img';
-            console.log('[one-pager] reading ' + label + ': ' + f.name + ' (' + sizeStr + ', ' + kind + ')');
-            // 60s wall-clock timeout per file. Real PDFs render in 2–10s
-            // even at scale; 60s is way past any reasonable threshold.
+            const isPdf = (f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+            const kind = isPdf ? 'pdf' : 'img';
+            const fate = isPdf ? ' (appended to PDF)' : '';
+            console.log('[one-pager] received ' + label + ': ' + f.name + ' (' + sizeStr + ', ' + kind + ')');
             try {
-              const result = await Promise.race([
-                readFile(el, label),
-                new Promise((_, rej) => setTimeout(
-                  () => rej(new Error('processing exceeded 60 seconds — file may be too large or corrupt')),
-                  60000
-                )),
-              ]);
-              // Record exactly what came back so we can see PDF page counts.
-              const pageInfo = result && Array.isArray(result.pages)
-                ? (', ' + result.pages.length + ' page' + (result.pages.length === 1 ? '' : 's'))
-                : '';
-              fileReceipts.push(label + ': ' + f.name + ' (' + sizeStr + pageInfo + ') ✓');
+              const result = await readFile(el);
+              fileReceipts.push(label + ': ' + f.name + ' (' + sizeStr + ', ' + kind + ')' + fate + ' ✓');
               return result;
             } catch (err) {
               console.warn(label + ' upload failed:', err);

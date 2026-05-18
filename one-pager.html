@@ -315,6 +315,51 @@
       display: block;
     }
 
+    /* "Appended to PDF" notice card — shown when PDF plans/design board
+       are attached but not previewed on screen. */
+    .attached-notice {
+      max-width: 850px;
+      margin: 32px auto 0;
+      padding: 24px var(--pad-x);
+      background: var(--bg-elev);
+      border: 1px solid var(--rule);
+    }
+    .attached-notice .an-head {
+      font-family: var(--font-display);
+      font-size: 14px;
+      letter-spacing: var(--tracking-x-wide);
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    .attached-notice ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 14px;
+      font-size: 13px;
+      color: var(--text);
+    }
+    .attached-notice ul li {
+      padding: 6px 0;
+      border-bottom: 1px solid var(--rule);
+      letter-spacing: .02em;
+    }
+    .attached-notice ul li:last-child { border-bottom: 0; }
+    .attached-notice ul li strong {
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-right: 8px;
+    }
+    .attached-notice .an-foot {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .attached-notice .an-foot em { font-style: italic; }
+
     /* Prepared-for block */
     .prepared {
       text-align: center;
@@ -562,31 +607,56 @@
       }
 
       // Build the extra pages that flow after the cover (only for New Construction).
-      //  - Single image upload → one extra page from file.blob.
-      //  - PDF upload          → one extra page per Blob in file.pages.
+      //  - IMAGE upload → one extra page rendered as <img> on screen.
+      //  - PDF upload   → NO on-screen preview; the original PDF is merged
+      //                   straight into the downloaded PDF at save time
+      //                   via pdf-lib. This is the change that fixed the
+      //                   "plans/design board never appear" bug: we no
+      //                   longer try to rasterize PDFs at upload time,
+      //                   so there's no PDF.js worker to fail.
       function extraPageHtml(eyebrow, file) {
-        if (!file) return '';
-        const blobs = Array.isArray(file.pages) && file.pages.length ? file.pages
-                    : (file.blob ? [file.blob] : []);
-        if (!blobs.length) return '';
-        const multi = blobs.length > 1;
-        return blobs.map((b, idx) => {
-          const src = blobToUrl(b);
-          if (!src) return '';
-          const label = multi ? (eyebrow + ' · ' + (idx + 1) + ' / ' + blobs.length) : eyebrow;
-          return (
-            '<section class="extra-page">' +
-              '<header class="extra-page-head">' +
-                '<div class="extra-page-eyebrow">' + escapeHTML(label) + '</div>' +
-                '<div class="extra-page-addr">' + escapeHTML(d.address || '') + '</div>' +
-              '</header>' +
-              '<img class="extra-page-image" src="' + src + '" alt="' + escapeHTML(label) + '" />' +
-            '</section>'
-          );
-        }).join('');
+        if (!file || !file.blob) return '';
+        const isPdf = (file.type === 'application/pdf') || /\.pdf$/i.test(file.name || '');
+        if (isPdf) return ''; // PDFs are appended at download time, not previewed inline.
+        const src = blobToUrl(file.blob);
+        if (!src) return '';
+        return (
+          '<section class="extra-page">' +
+            '<header class="extra-page-head">' +
+              '<div class="extra-page-eyebrow">' + escapeHTML(eyebrow) + '</div>' +
+              '<div class="extra-page-addr">' + escapeHTML(d.address || '') + '</div>' +
+            '</header>' +
+            '<img class="extra-page-image" src="' + src + '" alt="' + escapeHTML(eyebrow) + '" />' +
+          '</section>'
+        );
+      }
+      // Notice card listing what'll be merged into the downloaded PDF but
+      // isn't previewed on screen (i.e., uploaded PDFs).
+      function attachedNoticeHtml() {
+        if (!isNewCon) return '';
+        const items = [];
+        const fmt = (label, f) => {
+          if (!f || !f.blob) return null;
+          const isPdf = (f.type === 'application/pdf') || /\.pdf$/i.test(f.name || '');
+          if (!isPdf) return null;
+          const mb = (f.blob.size / (1024 * 1024)).toFixed(1);
+          return '<li><strong>' + escapeHTML(label) + ':</strong> ' + escapeHTML(f.name || '') + ' (' + mb + 'MB)</li>';
+        };
+        const a = fmt('Building Plans', d.plans);
+        const b = fmt('Design Board', d.designBoard);
+        if (a) items.push(a);
+        if (b) items.push(b);
+        if (!items.length) return '';
+        return (
+          '<aside class="attached-notice">' +
+            '<div class="an-head">Appended to PDF Download</div>' +
+            '<ul>' + items.join('') + '</ul>' +
+            '<div class="an-foot">These PDFs aren\'t previewed on screen — they\'re merged into the final document when you click <em>Save as PDF</em>.</div>' +
+          '</aside>'
+        );
       }
       const extraPages = isNewCon
-        ? (extraPageHtml('Building Plans', d.plans) + extraPageHtml('Design Board', d.designBoard))
+        ? (extraPageHtml('Building Plans', d.plans) + extraPageHtml('Design Board', d.designBoard) + attachedNoticeHtml())
         : '';
 
       const heroHtml = heroSrc
@@ -669,11 +739,15 @@
     }
 
     // ----------------------------------------------------------
-    // PDF generation via html2canvas + jsPDF — bypasses window.print()
-    // because Safari was producing blank PDFs even with proper print CSS.
-    // We capture each .pager / .extra-page section from the already-
-    // rendered visible DOM (no iframe; styling is fully applied), then
-    // assemble into a multi-page PDF and trigger a browser download.
+    // PDF generation: html2canvas captures the cover; pdf-lib assembles
+    // the final document.
+    //
+    // The crucial difference from the prior html2canvas + jsPDF approach:
+    // uploaded PDFs (plans, design board) are NOT rasterized at any
+    // point. pdf-lib loads them as PDFDocuments and copies their pages
+    // directly into the output PDF — vector-perfect, no rendering, no
+    // PDF.js worker, no possibility of the "timeout after 60 seconds"
+    // hang we kept hitting.
     // ----------------------------------------------------------
     let libsPromise = null;
     function loadPdfLibs() {
@@ -689,16 +763,120 @@
       }
       libsPromise = Promise.all([
         loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
-        loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'),
-      ]).then(() => ({
-        html2canvas: window.html2canvas,
-        jsPDF: (window.jspdf && window.jspdf.jsPDF) || window.jsPDF,
-      }));
+        loadScript('https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js'),
+      ]).then(() => {
+        if (!window.html2canvas) throw new Error('html2canvas not available');
+        if (!window.PDFLib || !window.PDFLib.PDFDocument) throw new Error('pdf-lib not available');
+        return {
+          html2canvas: window.html2canvas,
+          PDFDocument: window.PDFLib.PDFDocument,
+          rgb: window.PDFLib.rgb,
+        };
+      });
       return libsPromise;
     }
 
     function cleanFilename(s) {
       return String(s || 'property').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').slice(0, 60) || 'property';
+    }
+
+    // Letter page in PDF points: 612 × 792 (72 dpi).
+    const PAGE_W_PT = 612;
+    const PAGE_H_PT = 792;
+
+    // Center-fit an image into a page, preserving aspect ratio.
+    function fitInto(imgW, imgH, pageW, pageH) {
+      const imgRatio = imgW / imgH;
+      const pageRatio = pageW / pageH;
+      if (imgRatio >= pageRatio) {
+        const w = pageW;
+        const h = pageW / imgRatio;
+        return { x: 0, y: (pageH - h) / 2, w, h };
+      } else {
+        const h = pageH;
+        const w = pageH * imgRatio;
+        return { x: (pageW - w) / 2, y: 0, w, h };
+      }
+    }
+
+    // Read a Blob as an ArrayBuffer (with Safari-compatible fallback).
+    function blobToArrayBuffer(blob) {
+      if (blob.arrayBuffer) return blob.arrayBuffer();
+      return new Promise((resolve, reject) => {
+        const fr = new FileReader();
+        fr.onload  = () => resolve(fr.result);
+        fr.onerror = () => reject(fr.error || new Error('FileReader failed'));
+        fr.readAsArrayBuffer(blob);
+      });
+    }
+
+    // Trigger a browser download of a Blob.
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        try { document.body.removeChild(a); } catch (_) {}
+        URL.revokeObjectURL(url);
+      }, 1000);
+    }
+
+    // Add an image-like (image File OR rendered canvas blob) onto a new
+    // page of the output PDF, centered on a black background.
+    async function addImagePage(out, rgb, imgBytes, mimeHint) {
+      let img;
+      const isPng = /png/i.test(mimeHint || '');
+      if (isPng) {
+        img = await out.embedPng(imgBytes);
+      } else {
+        // Default to JPEG; embedJpg fails on non-JPEG data but we control
+        // the cover capture, and any uploaded image we route here was
+        // canvas-converted to JPEG just above.
+        try {
+          img = await out.embedJpg(imgBytes);
+        } catch (_) {
+          img = await out.embedPng(imgBytes);
+        }
+      }
+      const page = out.addPage([PAGE_W_PT, PAGE_H_PT]);
+      page.drawRectangle({ x: 0, y: 0, width: PAGE_W_PT, height: PAGE_H_PT, color: rgb(0, 0, 0) });
+      const fit = fitInto(img.width, img.height, PAGE_W_PT, PAGE_H_PT);
+      page.drawImage(img, { x: fit.x, y: fit.y, width: fit.w, height: fit.h });
+    }
+
+    // Convert an uploaded File/Blob into bytes for embedding.
+    async function fileToImageBytes(file) {
+      // If it's a JPEG, use as-is.
+      const isJpeg = /jpeg|jpg/i.test(file.type) || /\.(jpe?g)$/i.test(file.name || '');
+      const isPng  = /png/i.test(file.type)        || /\.png$/i.test(file.name || '');
+      if (isJpeg || isPng) {
+        const buf = await blobToArrayBuffer(file.blob);
+        return { bytes: buf, mime: isPng ? 'image/png' : 'image/jpeg' };
+      }
+      // For other image formats (avif, webp, heic), draw onto a canvas
+      // and re-encode as JPEG so pdf-lib can embed it.
+      const url = URL.createObjectURL(file.blob);
+      try {
+        const img = await new Promise((res, rej) => {
+          const i = new Image();
+          i.onload = () => res(i);
+          i.onerror = () => rej(new Error('image decode failed: ' + (file.name || '')));
+          i.src = url;
+        });
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        const blob = await new Promise((res, rej) =>
+          canvas.toBlob((b) => b ? res(b) : rej(new Error('canvas.toBlob null')), 'image/jpeg', 0.92)
+        );
+        return { bytes: await blobToArrayBuffer(blob), mime: 'image/jpeg' };
+      } finally {
+        URL.revokeObjectURL(url);
+      }
     }
 
     async function downloadAsPdf(payload) {
@@ -707,52 +885,61 @@
       printBtn.textContent = 'Building…';
       setStatus('Loading PDF engine…');
       try {
-        const { html2canvas, jsPDF } = await loadPdfLibs();
-        if (!html2canvas || !jsPDF) throw new Error('PDF libraries did not initialize');
+        const { html2canvas, PDFDocument, rgb } = await loadPdfLibs();
 
-        const sections = Array.from(document.querySelectorAll('.pager, .extra-page'));
-        if (!sections.length) throw new Error('Nothing to render');
+        // ---------- 1. Capture the cover via html2canvas ----------
+        const coverEl = document.querySelector('.pager');
+        if (!coverEl) throw new Error('Cover element missing');
+        setStatus('Rendering cover…');
+        const canvas = await html2canvas(coverEl, {
+          scale: 2,
+          backgroundColor: '#000000',
+          useCORS: true,
+          logging: false,
+        });
+        const coverJpegBlob = await new Promise((res, rej) =>
+          canvas.toBlob((b) => b ? res(b) : rej(new Error('cover canvas.toBlob returned null')), 'image/jpeg', 0.92)
+        );
+        const coverBytes = await blobToArrayBuffer(coverJpegBlob);
 
-        const PAGE_W = 8.5, PAGE_H = 11;
-        const pdf = new jsPDF({ unit: 'in', format: 'letter', orientation: 'portrait' });
+        // ---------- 2. Build the output PDF with pdf-lib ----------
+        setStatus('Assembling PDF…');
+        const out = await PDFDocument.create();
+        await addImagePage(out, rgb, coverBytes, 'image/jpeg');
 
-        for (let i = 0; i < sections.length; i++) {
-          setStatus('Rendering page ' + (i + 1) + ' of ' + sections.length + '…');
-          // useCORS for any cross-origin images we might pull in (Google
-          // Fonts, etc.). Blob URLs in the extra pages are same-origin
-          // so don't need CORS — but they DO need allowTaint disabled
-          // so toDataURL doesn't blow up.
-          const canvas = await html2canvas(sections[i], {
-            scale: 2,
-            backgroundColor: '#000000',
-            useCORS: true,
-            logging: false,
-          });
-          const imgData = canvas.toDataURL('image/jpeg', 0.92);
-          const ratio = canvas.width / canvas.height;
-          let imgW, imgH, imgX, imgY;
-          if (ratio >= PAGE_W / PAGE_H) {
-            imgW = PAGE_W; imgH = PAGE_W / ratio; imgX = 0; imgY = (PAGE_H - imgH) / 2;
+        // ---------- 3. Append plans + design board ----------
+        // For each: if PDF, copy pages directly; if image, embed as new page.
+        async function appendAttachment(file, label) {
+          if (!file || !file.blob) return;
+          const isPdf = (file.type === 'application/pdf') || /\.pdf$/i.test(file.name || '');
+          if (isPdf) {
+            setStatus('Merging ' + label + '…');
+            const bytes = await blobToArrayBuffer(file.blob);
+            const src = await PDFDocument.load(bytes, { ignoreEncryption: true });
+            const indices = src.getPageIndices();
+            const copied = await out.copyPages(src, indices);
+            copied.forEach((p) => out.addPage(p));
+            console.log('[one-pager] merged ' + label + ': ' + indices.length + ' page(s)');
           } else {
-            imgH = PAGE_H; imgW = PAGE_H * ratio; imgY = 0; imgX = (PAGE_W - imgW) / 2;
+            setStatus('Embedding ' + label + '…');
+            const { bytes, mime } = await fileToImageBytes(file);
+            await addImagePage(out, rgb, bytes, mime);
+            console.log('[one-pager] embedded ' + label + ' as image');
           }
-          if (i > 0) pdf.addPage('letter', 'portrait');
-          // Solid black background behind each page so any blank gutter
-          // matches the document's dark theme instead of showing white.
-          pdf.setFillColor(0, 0, 0);
-          pdf.rect(0, 0, PAGE_W, PAGE_H, 'F');
-          pdf.addImage(imgData, 'JPEG', imgX, imgY, imgW, imgH);
-          // Brief pause between captures so the browser can free canvas memory.
-          await new Promise((r) => setTimeout(r, 80));
         }
+        await appendAttachment(payload.plans,       'Building Plans');
+        await appendAttachment(payload.designBoard, 'Design Board');
 
+        // ---------- 4. Save + download ----------
+        setStatus('Saving…');
+        const pdfBytes = await out.save();
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         const filename = 'One-Pager-' + cleanFilename(payload && payload.address) + '.pdf';
-        pdf.save(filename);
-
-        setStatus('Saved: ' + filename);
+        downloadBlob(blob, filename);
+        setStatus('Saved: ' + filename + ' (' + out.getPageCount() + ' pages)');
       } catch (err) {
         console.error('PDF generation failed:', err);
-        setStatus('PDF failed: ' + (err && err.message ? err.message : 'unknown error'));
+        setStatus('PDF failed: ' + (err && err.message ? err.message : 'unknown error'), 'err');
       } finally {
         printBtn.disabled = false;
         printBtn.textContent = originalLabel;
