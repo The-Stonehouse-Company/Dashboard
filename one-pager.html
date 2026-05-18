@@ -222,13 +222,17 @@
       line-height: 1.1;
     }
 
-    /* CTA buttons (used by On-Market mode only) */
+    /* CTA buttons on the cover */
     .ctas {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 16px;
-      margin: 24px auto 32px;
+      margin: 24px 0 32px;
+    }
+    .ctas.single {
+      grid-template-columns: 1fr;
       max-width: 320px;
+      margin: 24px auto 32px;
     }
     .cta-btn {
       display: block;
@@ -427,13 +431,21 @@
       });
     }
 
+    // The output tab is sometimes opened by the dashboard BEFORE the IDB
+    // write completes (we open synchronously to avoid Safari's pop-up
+    // blocker). Poll IDB for up to 8 seconds.
     async function loadPayload() {
-      try {
-        return await idbGet('current');
-      } catch (err) {
-        console.error('IndexedDB read failed:', err);
-        return null;
+      for (let i = 0; i < 40; i++) {
+        try {
+          const v = await idbGet('current');
+          if (v && v.mode) return v;
+        } catch (err) {
+          console.error('IndexedDB read failed:', err);
+          return null;
+        }
+        await new Promise((r) => setTimeout(r, 200));
       }
+      return null;
     }
 
     function renderEmpty() {
@@ -477,13 +489,22 @@
           '<div class="glance-row"><div class="k">Area</div><div class="v">' + escapeHTML(dash(d.neighborhood)) + '</div></div>';
       }
 
-      // Cover CTAs — only used for On-Market mode (View Listing link).
-      // For New Construction the plans + design board now flow as separate
-      // pages after the cover (see "extraPages" below) instead of as buttons.
+      // Cover CTAs.
+      // New Construction: two decorative buttons (Building Plans, Design Board)
+      // matching the brand template. The actual content flows as separate pages
+      // after the cover; the buttons are visual indicators that those sections
+      // exist further down.
+      // On-Market: single "View Listing" link to the source listing.
       let ctas = '';
-      if (!isNewCon && d.listingUrl) {
+      if (isNewCon) {
         ctas =
           '<div class="ctas">' +
+            '<span class="cta-btn">View Building Plans</span>' +
+            '<span class="cta-btn">View Design Board</span>' +
+          '</div>';
+      } else if (d.listingUrl) {
+        ctas =
+          '<div class="ctas single">' +
             '<a class="cta-btn" href="' + escapeHTML(d.listingUrl) + '" target="_blank" rel="noopener">View Listing</a>' +
           '</div>';
       }
@@ -588,10 +609,31 @@
     // Print button
     document.getElementById('print-btn').addEventListener('click', () => window.print());
 
+    // Wait until every image inside the rendered page has actually painted.
+    // Then `document.fonts.ready` lets Aboreto + Montserrat settle before
+    // the print engine snapshots the document.
+    async function whenReady() {
+      const imgs = Array.from(document.querySelectorAll('img'));
+      await Promise.all(imgs.map((img) =>
+        img.complete && img.naturalWidth ? Promise.resolve()
+        : new Promise((res) => { img.onload = img.onerror = res; })
+      ));
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+      // tiny grace period for layout settle
+      await new Promise((r) => setTimeout(r, 250));
+    }
+
     // Kick everything off
-    loadPayload().then((d) => {
-      if (!d || !d.mode) renderEmpty();
-      else                renderOnePager(d);
+    loadPayload().then(async (d) => {
+      if (!d || !d.mode) { renderEmpty(); return; }
+      renderOnePager(d);
+      await whenReady();
+      // Auto-open the browser's print/Save-as-PDF dialog. User picks
+      // "Save as PDF" → clicks Save → done. If they cancel, the rendered
+      // page stays open and the toolbar's Print button re-triggers.
+      window.print();
     });
   </script>
 </body>

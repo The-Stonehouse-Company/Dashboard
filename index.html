@@ -2198,91 +2198,24 @@
         });
       }
 
-      // ---- html2pdf.js — loaded lazily the first time the user generates ----
-      let html2pdfPromise = null;
-      function loadHtml2Pdf() {
-        if (html2pdfPromise) return html2pdfPromise;
-        html2pdfPromise = new Promise((resolve, reject) => {
-          const s = document.createElement('script');
-          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js';
-          s.onload  = () => window.html2pdf ? resolve(window.html2pdf) : reject(new Error('html2pdf did not initialize'));
-          s.onerror = () => reject(new Error('Could not load html2pdf from CDN'));
-          document.head.appendChild(s);
-        });
-        return html2pdfPromise;
-      }
-
-      // Build a hidden iframe pointing at one-pager.html, wait for it
-      // to render (images loaded, fonts ready), then ask html2pdf to
-      // convert its <main> output to a downloadable PDF.
-      async function generateAndDownloadPdf(payload) {
-        const html2pdf = await loadHtml2Pdf();
-
-        const iframe = document.createElement('iframe');
-        iframe.setAttribute('aria-hidden', 'true');
-        iframe.style.cssText = 'position:fixed;left:-99999px;top:0;width:850px;height:4000px;border:0;visibility:hidden;';
-        iframe.src = 'one-pager.html';
-        document.body.appendChild(iframe);
-
-        try {
-          // 1. Wait for the iframe document to load.
-          await new Promise((resolve, reject) => {
-            iframe.onload  = () => resolve();
-            iframe.onerror = () => reject(new Error('Could not load one-pager.html in iframe'));
-            setTimeout(() => reject(new Error('iframe load timed out')), 30000);
-          });
-
-          const innerDoc = iframe.contentDocument;
-
-          // 2. Wait for the one-pager to actually render (it reads from IDB).
-          //    Poll for the .pager element with a 5s ceiling.
-          for (let i = 0; i < 50; i++) {
-            if (innerDoc.querySelector('.pager')) break;
-            await new Promise((r) => setTimeout(r, 100));
-          }
-
-          // 3. Wait for every image inside to finish loading.
-          const imgs = Array.from(innerDoc.querySelectorAll('img'));
-          await Promise.all(imgs.map((img) =>
-            img.complete && img.naturalWidth ? Promise.resolve()
-            : new Promise((res) => { img.onload = img.onerror = res; })
-          ));
-
-          // 4. Wait for fonts to settle.
-          if (innerDoc.fonts && innerDoc.fonts.ready) {
-            await innerDoc.fonts.ready;
-          }
-          // Small extra delay so layout has fully painted.
-          await new Promise((r) => setTimeout(r, 250));
-
-          // 5. Run html2pdf on the rendered output.
-          const target = innerDoc.querySelector('main#output');
-          if (!target) throw new Error('one-pager.html did not produce output (no #output element)');
-
-          const cleanAddr = (payload.address || 'property').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').slice(0, 60) || 'property';
-          const filename = 'One-Pager-' + cleanAddr + '.pdf';
-
-          await html2pdf().set({
-            margin: 0,
-            filename: filename,
-            image:    { type: 'jpeg', quality: 0.95 },
-            html2canvas: { scale: 2, backgroundColor: '#000', useCORS: true },
-            jsPDF:    { unit: 'in', format: 'letter', orientation: 'portrait' },
-            pagebreak: { mode: ['css', 'legacy'], before: '.extra-page' },
-          }).from(target).save();
-
-          return filename;
-        } finally {
-          document.body.removeChild(iframe);
-        }
-      }
-
-      // Submit → package payload, write to IDB (so the hidden iframe can read it),
-      // then generate the PDF and trigger a browser download.
+      // Submit → write payload to IDB, then open one-pager.html in a new
+      // tab where the rendered page auto-triggers the browser's Save-as-PDF
+      // dialog. Browser print = perfect CSS fidelity (vs. html2canvas/html2pdf
+      // which strips styling and produces broken output).
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         clearStatus();
         if (!form.checkValidity()) { form.reportValidity(); return; }
+
+        // CRITICAL — open the new tab BEFORE any async work, otherwise
+        // Safari (and strict pop-up blockers) will block the open after
+        // the user-gesture context ends. The output page polls IDB until
+        // our write completes, so opening early is fine.
+        const outputWin = window.open('one-pager.html', '_blank');
+        if (!outputWin) {
+          setStatus('warn', 'Pop-up blocked — allow pop-ups from this site so the one-pager can open. Then try Generate again.');
+          return;
+        }
 
         generateBtn.disabled = true;
         const originalLabel = generateBtn.textContent;
@@ -2331,19 +2264,14 @@
           } catch (err) {
             setStatus('err', 'Could not save one-pager data: ' + (err && err.message ? err.message : err));
             console.error('IndexedDB write failed:', err);
+            try { outputWin.close(); } catch (_) {}
             return;
           }
 
-          // Generate the PDF directly to the user's Downloads folder.
-          generateBtn.textContent = 'Generating PDF…';
-          try {
-            const filename = await generateAndDownloadPdf(payload);
-            setStatus('ok', 'Downloaded: ' + filename);
-            setTimeout(() => { closeModal(); }, 1200);
-          } catch (err) {
-            console.error('PDF generation failed:', err);
-            setStatus('err', 'Could not generate PDF: ' + (err && err.message ? err.message : err));
-          }
+          // Output tab opened synchronously above is currently polling IDB.
+          // Once it reads our payload, it will render and auto-open the print
+          // dialog for Save-as-PDF.
+          closeModal();
         } catch (err) {
           console.error('One pager generation failed:', err);
           setStatus('err', 'Error preparing one-pager: ' + (err && err.message ? err.message : err));
