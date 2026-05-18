@@ -2126,9 +2126,10 @@
         return pdfjsPromise;
       }
 
-      // Render every page of a PDF to a JPEG data URL.
-      // Scale 2x ≈ 144 DPI (plenty for print). JPEG quality 0.9 to keep
-      // file size manageable inside the 5MB sessionStorage budget.
+      // Render every page of a PDF to a JPEG Blob.
+      // Scale 2x ≈ 144 DPI (print-quality). JPEG quality 0.9.
+      // Returning Blobs (not base64 data URLs) saves ~33% in storage and
+      // is what IndexedDB stores natively without re-encoding.
       async function renderPdfToPages(arrayBuffer) {
         const pdfjsLib = await loadPdfJs();
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -2140,19 +2141,19 @@
           canvas.width = viewport.width;
           canvas.height = viewport.height;
           await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-          out.push(canvas.toDataURL('image/jpeg', 0.9));
-          // Free the canvas
+          const blob = await new Promise((res) => canvas.toBlob(res, 'image/jpeg', 0.9));
+          out.push(blob);
           canvas.width = canvas.height = 0;
         }
         return out;
       }
 
       // Helper: read a file input.
-      //  - Images: { name, type, data: <data-url> }
-      //  - PDFs:   { name, type, pages: [<data-url>, ...] }
-      //  - Empty:  '' (no file)
+      //  - Images: { name, type, blob: File }
+      //  - PDFs:   { name, type, pages: [Blob, ...] }
+      //  - Empty:  null
       function readFile(input) {
-        if (!input || !input.files || !input.files[0]) return Promise.resolve('');
+        if (!input || !input.files || !input.files[0]) return Promise.resolve(null);
         const file = input.files[0];
         const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
 
@@ -2163,12 +2164,37 @@
           });
         }
 
-        // Image / fallback
+        // Image — the File object IS a Blob, so we can just hand it through.
+        return Promise.resolve({ name: file.name, type: file.type, blob: file });
+      }
+
+      // ----------------------------------------------------------
+      // IndexedDB transport for the one-pager payload.
+      // Why not sessionStorage: it's capped around 5MB and the keys must
+      // be strings (forces base64 encoding of binary, ~33% bloat). IndexedDB
+      // stores Blob objects natively, has effectively no size limit for
+      // our use case, and is just as easy to read from the output page.
+      // ----------------------------------------------------------
+      function idbOpen() {
         return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload  = () => resolve({ name: file.name, type: file.type, data: reader.result });
-          reader.onerror = () => reject(reader.error);
-          reader.readAsDataURL(file);
+          const req = indexedDB.open('stonehouse-dashboard', 1);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('onepager')) {
+              db.createObjectStore('onepager');
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      }
+      async function idbPut(key, value) {
+        const db = await idbOpen();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction('onepager', 'readwrite');
+          tx.objectStore('onepager').put(value, key);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
         });
       }
 
@@ -2210,22 +2236,21 @@
             completion:     document.getElementById('op-completion').value.trim(),
             client:         document.getElementById('op-client').value.trim() ||
                             document.getElementById('op-client-om').value.trim(),
-            rendering:      rendering || '',
-            plans:          plans || '',
-            designBoard:    designBoard || '',
+            rendering:      rendering || null,
+            plans:          plans || null,
+            designBoard:    designBoard || null,
             listingUrl:     document.getElementById('op-listing-url').value.trim(),
             listPrice:      document.getElementById('op-list-price').value.trim(),
             daysOnMarket:   document.getElementById('op-dom').value.trim(),
-            listingPhoto:   listingPhoto || '',
+            listingPhoto:   listingPhoto || null,
             generatedAt:    new Date().toISOString(),
           };
 
           try {
-            sessionStorage.setItem('stonehouse.onePager', JSON.stringify(payload));
+            await idbPut('current', payload);
           } catch (err) {
-            // QuotaExceededError — most likely image too large
-            setStatus('err', 'Images too large to pass between pages. Try smaller images (< 4MB total).');
-            console.error('sessionStorage write failed:', err);
+            setStatus('err', 'Could not save one-pager data: ' + (err && err.message ? err.message : err));
+            console.error('IndexedDB write failed:', err);
             return;
           }
 

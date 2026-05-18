@@ -379,11 +379,11 @@
   <script>
     // ============================================================
     // One-pager renderer
-    //  Reads the payload that the dashboard wrote to sessionStorage,
-    //  then composes the styled output page from it.
+    //  Reads the payload from IndexedDB (dashboard wrote it just before
+    //  opening this tab), composes the styled output page, and converts
+    //  any Blob attachments to object URLs for use as <img src="…">.
     // ============================================================
 
-    const RAW = sessionStorage.getItem('stonehouse.onePager');
     const output = document.getElementById('output');
 
     function escapeHTML(s) {
@@ -399,20 +399,58 @@
     }
     function dash(v) { return v == null || v === '' ? '—' : v; }
 
-    if (!RAW) {
+    function blobToUrl(b) {
+      return (b instanceof Blob) ? URL.createObjectURL(b) : '';
+    }
+
+    // ----- IndexedDB helpers (mirror the dashboard) -----
+    function idbOpen() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('stonehouse-dashboard', 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('onepager')) {
+            db.createObjectStore('onepager');
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+    async function idbGet(key) {
+      const db = await idbOpen();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('onepager', 'readonly');
+        const req = tx.objectStore('onepager').get(key);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function loadPayload() {
+      try {
+        return await idbGet('current');
+      } catch (err) {
+        console.error('IndexedDB read failed:', err);
+        return null;
+      }
+    }
+
+    function renderEmpty() {
       output.innerHTML =
         '<div class="empty-state">' +
           '<h2>No one-pager data</h2>' +
           '<p>Return to the dashboard, open Sales → Marketing Templates → Property One Pager, fill in the form, and generate again.</p>' +
         '</div>';
-    } else {
-      const d = JSON.parse(RAW);
+    }
+
+    function renderOnePager(d) {
 
       const isNewCon = d.mode === 'new_construction';
 
       const heroSrc = isNewCon
-        ? (d.rendering && d.rendering.data) || ''
-        : (d.listingPhoto && d.listingPhoto.data) || '';
+        ? blobToUrl(d.rendering && d.rendering.blob)
+        : blobToUrl(d.listingPhoto && d.listingPhoto.blob);
 
       const headEyebrow = 'The Stonehouse Company';
       const headSub = isNewCon ? 'Exclusive Off-Market Property' : 'On-Market Listing';
@@ -451,16 +489,18 @@
       }
 
       // Build the extra pages that flow after the cover (only for New Construction).
-      //  - Single image upload  → one extra page.
-      //  - PDF upload (now an array of page images) → one extra page per PDF page.
+      //  - Single image upload → one extra page from file.blob.
+      //  - PDF upload          → one extra page per Blob in file.pages.
       function extraPageHtml(eyebrow, file) {
         if (!file) return '';
-        const pages = Array.isArray(file.pages) && file.pages.length ? file.pages
-                     : (file.data ? [file.data] : []);
-        if (!pages.length) return '';
-        const multi = pages.length > 1;
-        return pages.map((src, idx) => {
-          const label = multi ? (eyebrow + ' · ' + (idx + 1) + ' / ' + pages.length) : eyebrow;
+        const blobs = Array.isArray(file.pages) && file.pages.length ? file.pages
+                    : (file.blob ? [file.blob] : []);
+        if (!blobs.length) return '';
+        const multi = blobs.length > 1;
+        return blobs.map((b, idx) => {
+          const src = blobToUrl(b);
+          if (!src) return '';
+          const label = multi ? (eyebrow + ' · ' + (idx + 1) + ' / ' + blobs.length) : eyebrow;
           return (
             '<section class="extra-page">' +
               '<header class="extra-page-head">' +
@@ -547,6 +587,12 @@
 
     // Print button
     document.getElementById('print-btn').addEventListener('click', () => window.print());
+
+    // Kick everything off
+    loadPayload().then((d) => {
+      if (!d || !d.mode) renderEmpty();
+      else                renderOnePager(d);
+    });
   </script>
 </body>
 </html>
