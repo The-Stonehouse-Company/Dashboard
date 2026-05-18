@@ -345,15 +345,58 @@
       margin: 0;
     }
     @media print {
-      body { background: var(--bg); }
+      /* Force the dark background + white text to actually print.
+         Without these properties, Chrome/Safari strip background colors. */
+      html, body, .pager, .extra-page, .glance, .hero, .stat-tile {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      html, body { background: var(--bg) !important; }
+
       .toolbar { display: none !important; }
+
+      /* Cover — tighten spacing so the whole cover fits on one page. */
       .pager {
         max-width: none;
         margin: 0;
-        padding: 0.5in 0.6in 0.5in;
+        padding: 0.4in 0.5in 0.35in;
         page-break-inside: avoid;
+        page-break-after: always;
       }
-      .hero { aspect-ratio: 4 / 3; }
+      .pager-head { padding-bottom: 12px; margin-bottom: 18px; }
+      .brand-mark { width: 44px; height: 44px; }
+      .head-eyebrow { font-size: 14px; }
+      .head-sub { font-size: 8.5px; margin-top: 4px; }
+
+      /* Hero — fixed cap so it never blows past half the page. */
+      .hero {
+        aspect-ratio: auto;
+        height: 3.6in;
+        margin-bottom: 18px;
+        border: 0;
+      }
+
+      .address h1 { font-size: 30px; }
+      .address .sub { font-size: 12px; margin-top: 4px; }
+
+      .stats { padding: 16px 0; margin: 18px 0; }
+      .stat .num { font-size: 30px; }
+      .stat .label { font-size: 9px; margin-top: 6px; }
+
+      .two-col { gap: 18px; margin-bottom: 18px; }
+      .col-head { margin-bottom: 10px; }
+      .highlights ul { font-size: 12px; line-height: 1.55; }
+      .glance { padding: 16px 18px; }
+      .glance-rows { gap: 12px 14px; }
+      .glance-row .v { font-size: 18px; }
+
+      .prepared { padding-top: 14px; }
+      .prepared .label { margin-bottom: 6px; }
+      .prepared .name { font-size: 22px; }
+
+      .pager-foot { margin-top: 14px; }
+
       a { color: inherit; text-decoration: none; }
 
       /* Each extra page starts on a fresh sheet */
@@ -361,7 +404,7 @@
         max-width: none;
         margin: 0;
         padding: 0.5in 0.6in 0.5in;
-        border-top: 0;             /* hide the on-screen separator */
+        border-top: 0;
         page-break-before: always;
         page-break-inside: avoid;
       }
@@ -490,19 +533,11 @@
       }
 
       // Cover CTAs.
-      // New Construction: two decorative buttons (Building Plans, Design Board)
-      // matching the brand template. The actual content flows as separate pages
-      // after the cover; the buttons are visual indicators that those sections
-      // exist further down.
+      // New Construction: no buttons — the building plans + design board
+      // flow as their own pages after the cover, no button needed.
       // On-Market: single "View Listing" link to the source listing.
       let ctas = '';
-      if (isNewCon) {
-        ctas =
-          '<div class="ctas">' +
-            '<span class="cta-btn">View Building Plans</span>' +
-            '<span class="cta-btn">View Design Board</span>' +
-          '</div>';
-      } else if (d.listingUrl) {
+      if (!isNewCon && d.listingUrl) {
         ctas =
           '<div class="ctas single">' +
             '<a class="cta-btn" href="' + escapeHTML(d.listingUrl) + '" target="_blank" rel="noopener">View Listing</a>' +
