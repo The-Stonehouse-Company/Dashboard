@@ -2127,21 +2127,30 @@
       }
 
       // Render every page of a PDF to a JPEG Blob.
-      // Scale 2x ≈ 144 DPI (print-quality). JPEG quality 0.9.
-      // Returning Blobs (not base64 data URLs) saves ~33% in storage and
-      // is what IndexedDB stores natively without re-encoding.
+      // We aim for ~144 DPI but cap the longer side at MAX_DIM so huge
+      // architectural sheets (24×36, 30×42) don't blow past the browser's
+      // canvas memory limit and silently fail.
       async function renderPdfToPages(arrayBuffer) {
         const pdfjsLib = await loadPdfJs();
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         const out = [];
+        const MAX_DIM = 2400; // px — Safari/Chrome can comfortably encode this
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
-          const viewport = page.getViewport({ scale: 2 });
+          const base = page.getViewport({ scale: 1 });
+          const scaleByCap = MAX_DIM / Math.max(base.width, base.height);
+          const scale = Math.min(2, scaleByCap);
+          const viewport = page.getViewport({ scale: scale });
           const canvas = document.createElement('canvas');
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
+          canvas.width = Math.floor(viewport.width);
+          canvas.height = Math.floor(viewport.height);
           await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-          const blob = await new Promise((res) => canvas.toBlob(res, 'image/jpeg', 0.9));
+          const blob = await new Promise((resolve, reject) => {
+            canvas.toBlob(
+              (b) => b ? resolve(b) : reject(new Error('canvas.toBlob returned null at page ' + i)),
+              'image/jpeg', 0.9
+            );
+          });
           out.push(blob);
           canvas.width = canvas.height = 0;
         }
@@ -2227,12 +2236,23 @@
         try {
           const mode = form.querySelector('input[name="mode"]:checked').value;
 
-          // Read uploads (only relevant fields per mode)
+          // Read uploads (only relevant fields per mode). Each file is wrapped
+          // in its own try/catch so a bad/large PDF for one section doesn't
+          // kill the whole submission — the section is dropped and we move on.
+          async function safeRead(elId, label) {
+            try {
+              return await readFile(document.getElementById(elId));
+            } catch (err) {
+              console.warn(label + ' upload failed:', err);
+              setStatus('warn', label + ' could not be processed (' + (err && err.message ? err.message : 'unknown error') + '). The one-pager will be generated without it.');
+              return null;
+            }
+          }
           const [rendering, plans, designBoard, listingPhoto] = await Promise.all([
-            readFile(document.getElementById('op-rendering')),
-            readFile(document.getElementById('op-plans')),
-            readFile(document.getElementById('op-designboard')),
-            readFile(document.getElementById('op-listing-photo')),
+            safeRead('op-rendering',    'Front rendering'),
+            safeRead('op-plans',        'Building plans'),
+            safeRead('op-designboard',  'Design board'),
+            safeRead('op-listing-photo','Listing photo'),
           ]);
 
           const payload = {
@@ -2279,6 +2299,9 @@
         } catch (err) {
           console.error('One pager generation failed:', err);
           setStatus('err', 'Error preparing one-pager: ' + (err && err.message ? err.message : err));
+          // Close the orphaned output tab so the user isn't left looking
+          // at a hanging "No data" page after we've failed on this end.
+          try { outputWin.close(); } catch (_) {}
         } finally {
           generateBtn.disabled = false;
           generateBtn.textContent = originalLabel;
