@@ -2103,26 +2103,57 @@
       });
 
       // ----------------------------------------------------------
-      // PDF.js — loaded lazily the first time a PDF is uploaded so
-      // we don't pay the ~300KB cost on every page view.
-      // Returns the global pdfjsLib once ready.
+      // PDF.js — loaded lazily the first time a PDF is uploaded.
+      //
+      // CDN choice: jsDelivr serving the LEGACY build of pdfjs-dist.
+      //   - The legacy build is the classic-script (UMD) variant designed
+      //     for older browsers; it Just Works with a normal <script> tag
+      //     and exposes window.pdfjsLib.
+      //   - The modern build at /build/pdf.min.js requires ES module
+      //     loading on v3.x and can hang silently if the worker URL
+      //     doesn't resolve, which is what was happening here (60s
+      //     timeouts on a 1MB PDF == worker never started).
+      //
+      // Worker note: we fetch the worker JS as text and turn it into a
+      // Blob URL on the same origin so cross-origin worker restrictions
+      // can't block it. This is a well-known PDF.js fix for the exact
+      // "getDocument hangs forever" symptom we saw.
       // ----------------------------------------------------------
       const PDFJS_VERSION = '3.11.174';
-      const PDFJS_CDN_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/' + PDFJS_VERSION;
+      const PDFJS_LIB_URL    = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@' + PDFJS_VERSION + '/legacy/build/pdf.min.js';
+      const PDFJS_WORKER_URL = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@' + PDFJS_VERSION + '/legacy/build/pdf.worker.min.js';
       let pdfjsPromise = null;
       function loadPdfJs() {
         if (pdfjsPromise) return pdfjsPromise;
-        pdfjsPromise = new Promise((resolve, reject) => {
-          const s = document.createElement('script');
-          s.src = PDFJS_CDN_BASE + '/pdf.min.js';
-          s.onload = () => {
-            if (!window.pdfjsLib) return reject(new Error('pdfjsLib not exposed by script'));
-            window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_CDN_BASE + '/pdf.worker.min.js';
-            resolve(window.pdfjsLib);
-          };
-          s.onerror = () => reject(new Error('Could not load PDF.js from CDN'));
-          document.head.appendChild(s);
-        });
+        pdfjsPromise = (async () => {
+          // 1. Load the main library via classic <script>.
+          await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = PDFJS_LIB_URL;
+            s.onload  = () => resolve();
+            s.onerror = () => reject(new Error('Could not load PDF.js library from ' + PDFJS_LIB_URL));
+            document.head.appendChild(s);
+          });
+          if (!window.pdfjsLib) {
+            throw new Error('pdfjsLib not exposed after script load — wrong CDN path?');
+          }
+          // 2. Pull the worker source as text, wrap in a Blob, hand the
+          // resulting same-origin blob URL to PDF.js. Bypasses cross-origin
+          // worker blockers entirely.
+          try {
+            const res = await fetch(PDFJS_WORKER_URL);
+            if (!res.ok) throw new Error('worker fetch returned HTTP ' + res.status);
+            const code = await res.text();
+            const blobUrl = URL.createObjectURL(new Blob([code], { type: 'application/javascript' }));
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = blobUrl;
+            console.log('[one-pager] PDF.js worker installed via blob URL');
+          } catch (err) {
+            // Fall back to direct CDN URL — better than nothing.
+            console.warn('[one-pager] Blob-worker setup failed, falling back to direct URL:', err);
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_URL;
+          }
+          return window.pdfjsLib;
+        })();
         return pdfjsPromise;
       }
 
@@ -2130,9 +2161,12 @@
       // We aim for ~144 DPI but cap the longer side at MAX_DIM so huge
       // architectural sheets (24×36, 30×42) don't blow past the browser's
       // canvas memory limit and silently fail.
-      async function renderPdfToPages(arrayBuffer) {
+      async function renderPdfToPages(arrayBuffer, label) {
+        console.log('[one-pager] ' + label + ': loading PDF.js…');
         const pdfjsLib = await loadPdfJs();
+        console.log('[one-pager] ' + label + ': PDF.js ready, parsing document (' + arrayBuffer.byteLength + ' bytes)…');
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        console.log('[one-pager] ' + label + ': parsed, ' + pdf.numPages + ' page(s)');
         const out = [];
         const MAX_DIM = 2400; // px — Safari/Chrome can comfortably encode this
         for (let i = 1; i <= pdf.numPages; i++) {
@@ -2151,6 +2185,7 @@
               'image/jpeg', 0.9
             );
           });
+          console.log('[one-pager] ' + label + ': rendered page ' + i + '/' + pdf.numPages);
           out.push(blob);
           canvas.width = canvas.height = 0;
         }
@@ -2161,14 +2196,14 @@
       //  - Images: { name, type, blob: File }
       //  - PDFs:   { name, type, pages: [Blob, ...] }
       //  - Empty:  null
-      function readFile(input) {
+      function readFile(input, label) {
         if (!input || !input.files || !input.files[0]) return Promise.resolve(null);
         const file = input.files[0];
         const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
 
         if (isPdf) {
           return file.arrayBuffer().then(async (buf) => {
-            const pages = await renderPdfToPages(buf);
+            const pages = await renderPdfToPages(buf, label || file.name);
             return { name: file.name, type: file.type || 'application/pdf', pages: pages };
           });
         }
@@ -2262,7 +2297,7 @@
             // even at scale; 60s is way past any reasonable threshold.
             try {
               const result = await Promise.race([
-                readFile(el),
+                readFile(el, label),
                 new Promise((_, rej) => setTimeout(
                   () => rej(new Error('processing exceeded 60 seconds — file may be too large or corrupt')),
                   60000
