@@ -3207,13 +3207,19 @@
 
         <fieldset>
           <legend>Underwriting Numbers (Pages 11–12)</legend>
-          <div id="om-uw-status" class="form-status show" style="margin: 0 0 12px;">
-            Checking for saved Underwriting Model state…
-          </div>
-          <p style="font-size:11px; color:var(--text-muted); margin:0; letter-spacing:.02em; line-height:1.5;">
-            Pages 11 and 12 auto-populate from your most recent run of the Underwriting Model.
-            Open the Underwriting Model modal first if these numbers are stale.
+          <p style="font-size:11px; color:var(--text-muted); margin:0 0 12px; letter-spacing:.02em; line-height:1.5;">
+            Pick a logged deal — pages 11 and 12 will populate directly from the Underwriting Deal Log sheet.
+            Don't see your deal here? Run the Underwriting Model and click <em>Log This Deal</em> first.
           </p>
+          <div class="form-grid">
+            <div class="full">
+              <label for="om-uw-deal">Logged Deal <span class="req">*</span></label>
+              <select id="om-uw-deal" name="uw_deal" required>
+                <option value="" disabled selected>Loading deals…</option>
+              </select>
+            </div>
+          </div>
+          <div id="om-uw-status" class="form-status" style="margin: 12px 0 0;"></div>
         </fieldset>
 
         <fieldset>
@@ -3470,8 +3476,11 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         </p>
       </div>
 
+      <div class="form-status" id="uw-log-status"></div>
+
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="uw-reset">Reset to Defaults</button>
+        <button class="btn ghost" type="button" id="uw-log-deal">Log This Deal</button>
         <button class="btn" type="button" id="close-uw-done">Done</button>
       </footer>
     </div>
@@ -5747,29 +5756,194 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       renderCompStack('om-ss-comps',   'ss');
       renderProjectStack('om-other-projects', 'proj');
 
-      // ---- Read latest Underwriting Model state from localStorage ----
-      function loadUWState() {
-        try {
-          const raw = localStorage.getItem('uw-model:v1');
-          if (!raw) return null;
-          return JSON.parse(raw);
-        } catch (_) { return null; }
+      // ---- Fetch logged deals from the Underwriting Deal Log sheet ----
+      // Same gviz JSON pattern as the rest of the dashboard. Each row in
+      // the sheet = one click of "Log This Deal" in the Underwriting modal.
+      const UW_LOG_SHEET_ID  = "1xsqbZU9R9TNFPhVzwyvYdn2HKYnKiJVFVmLrMLFVtTE";
+      const UW_LOG_SHEET_TAB = "Form Responses 1";
+      const UW_LOG_URL =
+        "https://docs.google.com/spreadsheets/d/" + UW_LOG_SHEET_ID +
+        "/gviz/tq?tqx=out:json&headers=1&sheet=" + encodeURIComponent(UW_LOG_SHEET_TAB);
+
+      const dealSelect = document.getElementById('om-uw-deal');
+      let dealRows = []; // cached [{label, rowObj}] populated on modal open
+
+      function parseGvizCell(cell) {
+        if (!cell) return '';
+        if (cell.f != null) return String(cell.f);
+        if (cell.v != null) return String(cell.v);
+        return '';
       }
-      function refreshUWStatus() {
-        const uw = loadUWState();
-        if (!uw) {
-          uwStatus.classList.remove('ok');
-          uwStatus.classList.add('warn');
-          uwStatus.textContent = '⚠  No saved Underwriting Model state. Open the Underwriting Model modal, fill in numbers, then come back here.';
-          return;
+      function parseGvizEnvelope(text) {
+        const match = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
+        if (!match) throw new Error('gviz response in unexpected format');
+        const data = JSON.parse(match[1]);
+        if (data.status !== 'ok') {
+          const msg = (data.errors && data.errors[0] && data.errors[0].detailed_message) || data.status;
+          throw new Error('gviz: ' + msg);
         }
-        const lot = uw.lotCost ? '$' + uw.lotCost.toLocaleString() : '—';
-        const tps = uw.salePsf && uw.sqft && uw.numHomes
-          ? '$' + (uw.salePsf * uw.sqft * uw.numHomes).toLocaleString()
-          : '—';
-        uwStatus.classList.remove('warn');
-        uwStatus.classList.add('ok');
-        uwStatus.textContent = '✓  Using your latest Underwriting Model run · Lot ' + lot + ' · Projected Sale ' + tps;
+        return data.table || { cols: [], rows: [] };
+      }
+      function omFindCol(cols, ...candidates) {
+        const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+        const labels = cols.map((c) => norm(c.label));
+        for (const cand of candidates) {
+          const t = norm(cand);
+          const idx = labels.findIndex((l) => l === t);
+          if (idx >= 0) return idx;
+        }
+        for (const cand of candidates) {
+          const t = norm(cand);
+          const idx = labels.findIndex((l) => l.indexOf(t) >= 0 || t.indexOf(l) >= 0);
+          if (idx >= 0) return idx;
+        }
+        return -1;
+      }
+
+      // Build a normalized row object with all the fields pages 11-12 need.
+      function rowToDeal(cols, r) {
+        const c = r.c || [];
+        const ix = {
+          ts:         omFindCol(cols, 'Timestamp'),
+          scenario:   omFindCol(cols, 'Scenerio Name', 'Scenario Name', 'Scenario'),
+          address:    omFindCol(cols, 'Property Address'),
+          neighborhood:omFindCol(cols, 'Neighborhood'),
+          notes:      omFindCol(cols, 'Notes'),
+          numHomes:   omFindCol(cols, 'Number of Homes'),
+          sqft:       omFindCol(cols, 'Sq Footage / Home', 'Sq Footage Per Home'),
+          buildPsf:   omFindCol(cols, 'Build $ Sq Ft', 'Build Price Per Sq Ft', 'Build $/SF'),
+          salePsf:    omFindCol(cols, 'Target Sale $', 'Target Sale $/SF', 'Target Sales Price'),
+          constrMo:   omFindCol(cols, 'Construction Months'),
+          saleMo:     omFindCol(cols, 'Sale Period Months'),
+          numInvestors:omFindCol(cols, 'Number of Investors'),
+          overrunPct: omFindCol(cols, 'Construction Overrun %'),
+          realtorPct: omFindCol(cols, 'Realtor Commission %'),
+          bankFeePct: omFindCol(cols, 'Bank Fee %'),
+          ratePct:    omFindCol(cols, 'Interest Rate %'),
+          devFeePct:  omFindCol(cols, 'Developer Fee %'),
+          prefRetPct: omFindCol(cols, 'Investor Preferred Return %'),
+          capMode:    omFindCol(cols, 'Capital Mode'),
+          ltcRatio:   omFindCol(cols, 'LTC Ratio'),
+          ltvTargetPct:omFindCol(cols, 'Target LTV %'),
+          lotCost:    omFindCol(cols, 'Lot Cost'),
+          ownerEquity:omFindCol(cols, 'Owner Equity Into Land'),
+          taxes:      omFindCol(cols, 'Annual Taxes'),
+          title:      omFindCol(cols, 'Title / Closing'),
+          pool:       omFindCol(cols, 'Pool Cost'),
+          designer:   omFindCol(cols, 'Designer Fee'),
+          architect:  omFindCol(cols, 'Architect Fee'),
+          tpc:        omFindCol(cols, 'Total Project Cost'),
+          equity:     omFindCol(cols, 'Equity Invested'),
+          equityPer:  omFindCol(cols, 'Equity Per Investor'),
+          loan:       omFindCol(cols, 'Loan Amount'),
+          landLoan:   omFindCol(cols, 'Land Loan'),
+          computedLtc:omFindCol(cols, 'Computed LTC %'),
+          computedLtv:omFindCol(cols, 'Computed LTV %'),
+          grossProfit:omFindCol(cols, 'Gross Profit'),
+          margin:     omFindCol(cols, 'Profit Margin %'),
+          roe:        omFindCol(cols, 'ROE %'),
+          roc:        omFindCol(cols, 'ROC %'),
+          roeAnn:     omFindCol(cols, 'Annualized ROE %'),
+          profitPerHome:omFindCol(cols, 'Profit Per Home'),
+          devNet:     omFindCol(cols, 'Developer Net Profit'),
+          breakEven:  omFindCol(cols, 'Break-Even $ / SF', 'Break Even $/SF'),
+          netRevenue: omFindCol(cols, 'Net Revenue'),
+          interest:   omFindCol(cols, 'Construction Interest'),
+          bankFees:   omFindCol(cols, 'Bank Fees'),
+        };
+        function s(k) { return ix[k] >= 0 ? parseGvizCell(c[ix[k]]) : ''; }
+        function n(k) {
+          if (ix[k] < 0) return 0;
+          const cell = c[ix[k]];
+          if (!cell) return 0;
+          if (typeof cell.v === 'number') return cell.v;
+          const v = parseFloat(String(cell.v || cell.f || '').replace(/[$,%\s]/g, ''));
+          return isNaN(v) ? 0 : v;
+        }
+        return {
+          timestamp:        s('ts'),
+          scenario:         s('scenario') || 'Base',
+          address:          s('address'),
+          neighborhood:     s('neighborhood'),
+          notes:            s('notes'),
+          numHomes:         n('numHomes'),
+          sqft:             n('sqft'),
+          buildPsf:         n('buildPsf'),
+          salePsf:          n('salePsf'),
+          constrMo:         n('constrMo'),
+          saleMo:           n('saleMo'),
+          numInvestors:     n('numInvestors'),
+          overrunPct:       n('overrunPct'),
+          realtorPct:       n('realtorPct'),
+          bankFeePct:       n('bankFeePct'),
+          ratePct:          n('ratePct'),
+          devFeePct:        n('devFeePct'),
+          prefRetPct:       n('prefRetPct'),
+          capMode:          s('capMode'),
+          ltcRatio:         s('ltcRatio'),
+          ltvTargetPct:     n('ltvTargetPct'),
+          lotCost:          n('lotCost'),
+          ownerEquity:      n('ownerEquity'),
+          taxes:            n('taxes'),
+          title:            n('title'),
+          pool:             n('pool'),
+          designer:         n('designer'),
+          architect:        n('architect'),
+          tpc:              n('tpc'),
+          equity:           n('equity'),
+          equityPer:        n('equityPer'),
+          loan:             n('loan'),
+          landLoan:         n('landLoan'),
+          computedLtc:      n('computedLtc'),
+          computedLtv:      n('computedLtv'),
+          grossProfit:      n('grossProfit'),
+          margin:           n('margin'),
+          roe:              n('roe'),
+          roc:              n('roc'),
+          roeAnn:           n('roeAnn'),
+          profitPerHome:    n('profitPerHome'),
+          devNet:           n('devNet'),
+          breakEven:        n('breakEven'),
+          netRevenue:       n('netRevenue'),
+          interest:         n('interest'),
+          bankFees:         n('bankFees'),
+        };
+      }
+
+      async function loadDeals() {
+        dealSelect.innerHTML = '<option value="" disabled selected>Loading deals…</option>';
+        uwStatus.classList.remove('show', 'ok', 'err', 'warn');
+        uwStatus.textContent = '';
+        try {
+          const res = await fetch(UW_LOG_URL + '&t=' + Date.now(), { cache: 'no-store' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const table = parseGvizEnvelope(await res.text());
+          const cols = table.cols || [];
+          const rows = table.rows || [];
+          dealRows = rows
+            .map((r) => rowToDeal(cols, r))
+            .filter((d) => d.address);
+          if (dealRows.length === 0) {
+            dealSelect.innerHTML = '<option value="" disabled selected>No deals logged yet</option>';
+            uwStatus.classList.add('show', 'warn');
+            uwStatus.textContent = '⚠  No deals in the log. Open the Underwriting Model, fill in numbers, click "Log This Deal", then come back here.';
+            return;
+          }
+          // Newest first so the most recently logged deal sits on top.
+          dealRows.reverse();
+          const opts = ['<option value="" disabled selected>Select a logged deal…</option>'];
+          dealRows.forEach((d, i) => {
+            const ts = d.timestamp ? ' · ' + d.timestamp.split(' ')[0] : '';
+            const label = d.address + '  ·  ' + d.scenario + ts;
+            opts.push('<option value="' + i + '">' + label.replace(/</g,'&lt;') + '</option>');
+          });
+          dealSelect.innerHTML = opts.join('');
+        } catch (err) {
+          console.error('OM deals load failed:', err);
+          dealSelect.innerHTML = '<option value="" disabled selected>Could not load</option>';
+          uwStatus.classList.add('show', 'err');
+          uwStatus.textContent = 'Could not load deal log: ' + (err && err.message ? err.message : err);
+        }
       }
 
       // ---- IndexedDB transport (same DB as one-pager, different store) ----
@@ -5828,7 +6002,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         overlay.setAttribute('aria-hidden', 'false');
         document.body.classList.add('modal-open');
         clearStatus();
-        refreshUWStatus();
+        // Refresh the dropdown from the sheet every time the modal opens
+        // so newly-logged deals appear without a page reload.
+        loadDeals();
         requestAnimationFrame(() => {
           const first = focusables()[0];
           if (first) first.focus();
@@ -5944,9 +6120,19 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             // Summary
             summaryText:   val('om-summary-text'),
 
-            // Pull underwriting state for pages 11–12
-            uw:            loadUWState(),
+            // Pages 11–12 use a logged deal from the Underwriting Deal Log sheet
+            uwLog:         (function () {
+              const idx = parseInt(dealSelect.value, 10);
+              if (isNaN(idx) || !dealRows[idx]) return null;
+              return dealRows[idx];
+            })(),
           };
+
+          if (!payload.uwLog) {
+            setStatus('warn', 'Pick a logged deal for pages 11–12 before generating.');
+            try { outputWin.close(); } catch (_) {}
+            return;
+          }
 
           await idbPut('current', payload);
           closeModal();
@@ -6529,6 +6715,190 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       openBtn  && openBtn.addEventListener('click', openModal);
       closeBtn && closeBtn.addEventListener('click', closeModal);
       doneBtn  && doneBtn.addEventListener('click', closeModal);
+
+      // ---- Log This Deal → posts current snapshot to Google Form ----
+      // Each click captures: every input + every computed output + an
+      // ISO timestamp + a free-text "scenario name" so the same property
+      // can be logged multiple times (e.g. "Base", "Stretch", "Conservative").
+      //
+      // SETUP REQUIRED (see message to Ryan):
+      //  1. Create a Google Form titled "Stonehouse — Underwriting Deal Log"
+      //     with the fields listed in the message below.
+      //  2. Link it to a new sheet, share "Anyone with link can view".
+      //  3. Get a pre-filled link with all fields populated with distinct
+      //     test values, paste back. I'll fill UW_LOG_FORM_URL +
+      //     UW_LOG_FIELD_MAP below.
+      const UW_LOG_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScumrvos8xCOt1yZKj9wHhBlxVkyMlh6LOZT_CpQoBkxANHnw/formResponse";
+      const UW_LOG_FIELD_MAP = {
+        scenario_name:          "entry.1625514809",
+        property_address:       "entry.1419711313",
+        neighborhood:           "entry.1844261007",
+        notes:                  "entry.204451091",
+        num_homes:              "entry.373107140",
+        sqft:                   "entry.1070548076",
+        build_psf:              "entry.637582628",
+        sale_psf:               "entry.1101241958",
+        construction_months:    "entry.1117431495",
+        sale_months:            "entry.533084319",
+        num_investors:          "entry.1877577166",
+        overrun_pct:            "entry.946526961",
+        realtor_pct:            "entry.1837656836",
+        bank_fee_pct:           "entry.410542814",
+        interest_rate:          "entry.723591261",
+        developer_fee_pct:      "entry.306884679",
+        preferred_return_pct:   "entry.520613219",
+        capital_mode:           "entry.839618654",
+        ltc_ratio:              "entry.1814457941",
+        ltv_target_pct:         "entry.1375826071",
+        lot_cost:               "entry.2117635858",
+        owner_equity_into_land: "entry.777918728",
+        annual_taxes:           "entry.347744152",
+        title_closing:          "entry.1080706681",
+        pool_cost:              "entry.1109136",
+        designer_fee:           "entry.641099620",
+        architect_fee:          "entry.1150242143",
+        total_project_cost:     "entry.867121106",
+        equity_invested:        "entry.2052691783",
+        equity_per_investor:    "entry.730629948",
+        loan_amount:            "entry.1349418419",
+        land_loan:              "entry.1878678244",
+        computed_ltc:           "entry.684631895",
+        computed_ltv:           "entry.1529950121",
+        gross_profit:           "entry.1024566360",
+        profit_margin:          "entry.1663520367",
+        roe:                    "entry.35404603",
+        roc:                    "entry.1761346202",
+        annualized_roe:         "entry.1036817140",
+        profit_per_home:        "entry.1722713110",
+        developer_net:          "entry.907270732",
+        break_even_psf:         "entry.139258",
+        net_revenue:            "entry.206645773",
+        construction_interest:  "entry.479785309",
+        bank_fees:              "entry.784547750",
+      };
+
+      const logStatusEl = document.getElementById('uw-log-status');
+      const logBtn      = document.getElementById('uw-log-deal');
+
+      function logStatus(level, msg) {
+        if (!logStatusEl) return;
+        logStatusEl.classList.add('show');
+        logStatusEl.classList.remove('ok', 'err', 'warn');
+        if (level && level !== 'info') logStatusEl.classList.add(level);
+        logStatusEl.textContent = msg;
+      }
+      function clearLogStatus() {
+        if (!logStatusEl) return;
+        logStatusEl.classList.remove('show', 'ok', 'err', 'warn');
+        logStatusEl.textContent = '';
+      }
+
+      logBtn && logBtn.addEventListener('click', async () => {
+        clearLogStatus();
+        const state = readState();
+        const r = compute(state);
+
+        // Require an address so the log entry is identifiable.
+        if (!state.address || !state.address.trim()) {
+          logStatus('warn', 'Add a Property Address before logging — every entry in the log is keyed by address.');
+          return;
+        }
+
+        // Optional scenario name to differentiate multiple runs of the same property.
+        const scenarioName = prompt(
+          'Name this scenario (optional — e.g. "Base", "Stretch", "Conservative"). Leave blank for "Base".',
+          ''
+        );
+        // User clicked Cancel — abort.
+        if (scenarioName === null) return;
+        const scenario = (scenarioName || '').trim() || 'Base';
+
+        // Optional notes — also via prompt, since we don't want yet
+        // another nested modal. Skippable.
+        const notes = prompt('Notes for this scenario (optional):', '') || '';
+
+        // Gate the actual POST behind whether the form is wired up.
+        const formReady = !/PASTE_/.test(UW_LOG_FORM_URL) &&
+                          !Object.values(UW_LOG_FIELD_MAP).some((v) => /PASTE_/.test(v));
+        if (!formReady) {
+          logStatus('warn',
+            'Form not wired up yet — create the Google Form first, then send the pre-filled link to the dashboard developer.');
+          return;
+        }
+
+        // Build the POST body. Convert decimal fractions to whole-number
+        // percent strings (so sheet rows are readable: "8" instead of "0.08").
+        const body = new FormData();
+        const payload = {
+          scenario_name:        scenario,
+          property_address:     state.address,
+          neighborhood:         state.neighborhood,
+          notes:                notes,
+          num_homes:            state.numHomes,
+          sqft:                 state.sqft,
+          build_psf:            state.buildPsf,
+          sale_psf:             state.salePsf,
+          construction_months:  state.constrMo,
+          sale_months:          state.saleMo,
+          num_investors:        state.numInvestors,
+          overrun_pct:          (state.overrunPct * 100).toFixed(2),
+          realtor_pct:          (state.realtorPct * 100).toFixed(2),
+          bank_fee_pct:         (state.bankFeePct * 100).toFixed(2),
+          interest_rate:        (state.rate * 100).toFixed(2),
+          developer_fee_pct:    (state.devFeePct * 100).toFixed(2),
+          preferred_return_pct: (state.prefReturnPct * 100).toFixed(2),
+          capital_mode:         state.capMode,
+          ltc_ratio:            state.ltc,
+          ltv_target_pct:       state.ltvTarget,
+          lot_cost:             state.lotCost,
+          owner_equity_into_land: state.ownerEquity,
+          annual_taxes:         state.taxes,
+          title_closing:        state.title,
+          pool_cost:            state.pool,
+          designer_fee:         state.designer,
+          architect_fee:        state.architect,
+          total_project_cost:   Math.round(r.tpc),
+          equity_invested:      Math.round(r.equity),
+          equity_per_investor:  Math.round(r.equityPerInvestor),
+          loan_amount:          Math.round(r.loan),
+          land_loan:            Math.round(r.landLoan),
+          computed_ltc:         (r.ltc * 100).toFixed(2),
+          computed_ltv:         (r.ltv * 100).toFixed(2),
+          gross_profit:         Math.round(r.grossProfit),
+          profit_margin:        (r.profitMargin * 100).toFixed(2),
+          roe:                  (r.roe * 100).toFixed(2),
+          roc:                  (r.roc * 100).toFixed(2),
+          annualized_roe:       (r.roeAnn * 100).toFixed(2),
+          profit_per_home:      Math.round(r.profitPerHome),
+          developer_net:        Math.round(r.devNet),
+          break_even_psf:       (r.breakEven).toFixed(2),
+          net_revenue:          Math.round(r.netRevenue),
+          construction_interest:Math.round(r.interest),
+          bank_fees:            Math.round(r.bankFees),
+        };
+        for (const [key, entryId] of Object.entries(UW_LOG_FIELD_MAP)) {
+          if (/PASTE_/.test(entryId)) continue;
+          if (payload[key] == null) continue;
+          body.append(entryId, String(payload[key]));
+        }
+
+        const originalLabel = logBtn.textContent;
+        logBtn.disabled = true;
+        logBtn.textContent = 'Logging…';
+
+        try {
+          await fetch(UW_LOG_FORM_URL, { method: 'POST', mode: 'no-cors', body: body });
+          logStatus('ok', '✓ Logged "' + scenario + '" for ' + state.address + ' to the Deal Log sheet.');
+          logBtn.textContent = 'Logged ✓';
+          setTimeout(() => { logBtn.textContent = originalLabel; }, 2400);
+        } catch (err) {
+          console.error('UW log failed:', err);
+          logStatus('err', 'Network error: ' + (err && err.message ? err.message : err));
+          logBtn.textContent = originalLabel;
+        } finally {
+          logBtn.disabled = false;
+        }
+      });
 
       // ---- Reset to defaults ----
       resetBtn.addEventListener('click', () => {

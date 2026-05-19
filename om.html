@@ -508,8 +508,11 @@
       return 'background-image:url(' + JSON.stringify(blobToUrl(file.blob)) + ');';
     }
 
-    // --- Underwriting math (mirrors index.html's compute() output) ---
-    function computeUW(uw) {
+    // --- Translate a logged-deal row from the Underwriting Deal Log sheet
+    //     into the shape pages 11 & 12 want. All values are already
+    //     pre-computed in the sheet — we just need to derive a few
+    //     summary numbers (total build, dev fee, etc.) from the inputs. ---
+    function uwFromLog(uw) {
       if (!uw) return null;
       const numHomes = uw.numHomes || 0;
       const sqft     = uw.sqft || 0;
@@ -518,78 +521,48 @@
       const constrMo = uw.constrMo || 0;
       const saleMo   = uw.saleMo || 0;
       const totalHold = constrMo + saleMo;
-      const monthlyRate = (uw.rate || 0) / 12;
 
-      const totalBuild  = sqft * buildPsf * numHomes;
-      const overrun     = totalBuild * (uw.overrunPct || 0);
-      const devFeeBase  = (uw.lotCost || 0) + totalBuild + overrun;
-      const devFee      = devFeeBase * (uw.devFeePct || 0);
-      const c26 = (uw.lotCost || 0) + totalBuild + overrun + (uw.taxes || 0) + (uw.title || 0) +
-                  (uw.pool || 0) + (uw.designer || 0) + (uw.architect || 0) + devFee;
-      const landLoan = Math.max(0, (uw.lotCost || 0) - (uw.ownerEquity || 0));
-
-      let kc = 0;
-      for (let m = 1; m <= totalHold; m++) {
-        const dPct = (constrMo > 0 && m <= constrMo) ? (1 / constrMo) : 0;
-        const cf  = Math.max(0, Math.pow(1 + monthlyRate, Math.max(totalHold - m, 0)) - 1);
-        kc += dPct * cf;
-      }
-      const kL = Math.pow(1 + monthlyRate, Math.max(totalHold - 1, 0)) - 1;
-
-      const equityFixed = (uw.ownerEquity || 0) + (uw.taxes || 0) + (uw.title || 0);
-      let equityFrac = 0.20;
-      if (uw.ltc === 'Custom') equityFrac = (uw.ltcCustom || 20) / 100;
-      else { const f = parseFloat(uw.ltc); if (!isNaN(f)) equityFrac = f; }
-      const salePerHomePreview = salePsf * sqft;
-      const grossSalesPreview  = salePerHomePreview * numHomes;
-      const ltvFrac = (uw.ltvTarget || 0) / 100;
-      const ltvLoan = uw.capMode === 'LTV' ? ltvFrac * grossSalesPreview : 0;
-
-      let tpc;
-      const ICF = (uw.bankFeePct || 0) + kc;
-      const adj = landLoan * (kL - kc);
-      if (uw.capMode === 'LandSoft') {
-        tpc = (c26 - equityFixed * ICF + adj) / Math.max(1e-9, (1 - ICF));
-      } else if (uw.capMode === 'LTV') {
-        tpc = c26 + ltvLoan * ICF + adj;
-      } else {
-        tpc = (c26 + adj) / Math.max(1e-9, (1 - (1 - equityFrac) * ICF));
-      }
-
-      let equity, loan;
-      if (uw.capMode === 'LandSoft') { equity = equityFixed; loan = tpc - equity; }
-      else if (uw.capMode === 'LTV') { loan = ltvLoan; equity = tpc - loan; }
-      else { equity = tpc * equityFrac; loan = tpc - equity; }
-
-      const bankFees = loan * (uw.bankFeePct || 0);
-      const interest = loan === 0 ? 0 : (loan - landLoan) * kc + landLoan * kL;
-
-      const salePerHome = salePsf * sqft;
-      const grossSales  = salePerHome * numHomes;
-      const realtor     = grossSales * (uw.realtorPct || 0);
-      const netRevenue  = grossSales - realtor;
-      const grossProfit = netRevenue - (c26 + bankFees + interest);
-      const profitMargin = grossSales === 0 ? 0 : grossProfit / grossSales;
-      const roe = equity === 0 ? 0 : grossProfit / equity;
+      const totalBuild = sqft * buildPsf * numHomes;
+      const overrunPct = (uw.overrunPct || 0) / 100;
+      const realtorPct = (uw.realtorPct || 0) / 100;
+      const bankFeePct = (uw.bankFeePct || 0) / 100;
+      const devFeePct  = (uw.devFeePct  || 0) / 100;
+      const overrun    = totalBuild * overrunPct;
+      const devFee     = ((uw.lotCost || 0) + totalBuild + overrun) * devFeePct;
+      const grossSales = salePsf * sqft * numHomes;
+      const realtor    = grossSales * realtorPct;
+      const netRevenue = uw.netRevenue || (grossSales - realtor);
 
       return {
-        numHomes, sqft, buildPsf, salePsf, constrMo, saleMo, totalHold,
-        lotCost: uw.lotCost || 0,
+        numHomes, sqft, buildPsf, salePsf,
+        constrMo, saleMo, totalHold,
+        lotCost:    uw.lotCost     || 0,
         totalBuild, overrun, devFee,
-        taxes: uw.taxes || 0,
-        title: uw.title || 0,
-        pool:  uw.pool  || 0,
-        designer:  uw.designer  || 0,
-        architect: uw.architect || 0,
-        bankFees, interest,
-        tpc, equity, loan, landLoan,
-        salePerHome, grossSales, realtor, netRevenue,
-        grossProfit, profitMargin, roe,
-        overrunPct: uw.overrunPct || 0,
-        realtorPct: uw.realtorPct || 0,
-        bankFeePct: uw.bankFeePct || 0,
-        devFeePct:  uw.devFeePct  || 0,
-        downPayment: equity,
+        taxes:      uw.taxes       || 0,
+        title:      uw.title       || 0,
+        pool:       uw.pool        || 0,
+        designer:   uw.designer    || 0,
+        architect:  uw.architect   || 0,
+        bankFees:   uw.bankFees    || 0,
+        interest:   uw.interest    || 0,
+        tpc:        uw.tpc         || 0,
+        equity:     uw.equity      || 0,
+        equityPer:  uw.equityPer   || 0,
+        loan:       uw.loan        || 0,
+        landLoan:   uw.landLoan    || 0,
+        salePerHome: salePsf * sqft,
+        grossSales, realtor, netRevenue,
+        grossProfit: uw.grossProfit || 0,
+        profitMargin:(uw.margin     || 0) / 100,
+        roe:         (uw.roe        || 0) / 100,
+        roc:         (uw.roc        || 0) / 100,
+        roeAnn:      (uw.roeAnn     || 0) / 100,
+        profitPerHome: uw.profitPerHome || 0,
+        devNet:        uw.devNet || 0,
+        breakEven:     uw.breakEven || 0,
+        overrunPct, realtorPct, bankFeePct, devFeePct,
+        // Scenario context
+        scenario:     uw.scenario || '',
       };
     }
 
@@ -925,7 +898,7 @@
 
     function render(d) {
       const out = document.getElementById('output');
-      const r = computeUW(d.uw);
+      const r = uwFromLog(d.uwLog);
       const html =
         pageCover(d) +
         pageOverview(d) +
