@@ -6856,13 +6856,6 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         // Build the POST body. Convert decimal fractions to whole-number
         // percent strings (so sheet rows are readable: "8" instead of "0.08").
         const body = new FormData();
-        // If the Google Form is split into multiple sections, the server
-        // only processes the section it thinks the user is "on" unless
-        // we explicitly tell it the user clicked Next through every
-        // section. pageHistory does that. Padded to 10 sections — Google
-        // ignores extras and silently uses the count it actually has.
-        body.append('pageHistory', '0,1,2,3,4,5,6,7,8,9');
-        body.append('fvv', '1');
         const payload = {
           scenario_name:        scenario,
           property_address:     state.address,
