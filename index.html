@@ -1714,6 +1714,11 @@
           <span class="action-sub">Log a property under evaluation for acquisition</span>
           <span class="action-arrow" aria-hidden="true">→</span>
         </button>
+        <button class="primary-action" type="button" id="open-land-onepager-modal" aria-haspopup="dialog" aria-controls="land-onepager-modal">
+          <span class="action-label">Generate One-Pager</span>
+          <span class="action-sub">Auto-populate from the Intake sheet by property address</span>
+          <span class="action-arrow" aria-hidden="true">→</span>
+        </button>
       </div>
 
       <section class="pipeline-section" aria-labelledby="land-pipeline-title">
@@ -2122,6 +2127,47 @@
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="cancel-intake">Cancel</button>
         <button class="btn" type="submit" form="intake-form" id="submit-intake">Submit Property Intake</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========================= LAND ACQ ONE-PAGER MODAL ========================= -->
+  <div class="modal-overlay" id="land-onepager-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="land-onepager-title" id="land-onepager-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Land Acquisition</span>
+          <h2 class="modal-title" id="land-onepager-title">Generate One-Pager</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-land-onepager-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="land-onepager-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Property Lookup</legend>
+          <p style="font-size:11px; color:var(--text-muted); margin:0 0 16px; letter-spacing:.02em; line-height:1.5;">
+            Pick a property below. The one-pager auto-populates from the Land Acquisition Intake sheet.
+          </p>
+          <div class="form-grid">
+            <div class="full">
+              <label for="lop-address">Property Address <span class="req">*</span></label>
+              <select id="lop-address" name="address" required>
+                <option value="" disabled selected>Loading properties…</option>
+              </select>
+            </div>
+            <div class="full">
+              <label for="lop-photo">Lot Photo (optional)</label>
+              <input id="lop-photo" name="photo" type="file" accept="image/*" />
+            </div>
+          </div>
+        </fieldset>
+      </form>
+
+      <div class="form-status" id="land-onepager-status"></div>
+
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-land-onepager">Cancel</button>
+        <button class="btn" type="button" id="generate-land-onepager">Generate One-Pager</button>
       </footer>
     </div>
   </div>
@@ -3432,6 +3478,378 @@
           submitBtn.disabled = false;
           submitBtn.textContent = originalLabel;
         }
+      });
+    })();
+
+    // ============================================================
+    // Land Acquisition · One-Pager Generator
+    //  - Opens via the Land Acquisition tab "Generate One-Pager" card.
+    //  - On open, fetches every row from the Land Acquisition Intake
+    //    sheet via gviz and populates the address <datalist>, so the
+    //    user gets autocomplete suggestions instead of having to type
+    //    addresses perfectly.
+    //  - On submit, finds the matching row (case/whitespace-tolerant),
+    //    builds a payload with mode='land' + the looked-up fields,
+    //    optionally attaches an uploaded lot photo, writes the payload
+    //    to IndexedDB (same transport the Sales one-pager uses), and
+    //    opens one-pager.html in a new tab. one-pager.html renders the
+    //    'land' mode with the same dark/Aboreto styling.
+    //
+    // Re-uses the existing LAND_SHEET_ID + Form Responses 1 tab.
+    // ============================================================
+    (function () {
+      const LAND_SHEET_ID  = "1pA82pl93-fhGpSoBmU4coJbkLf8KtJlMesc2p5XcKTA";
+      const LAND_SHEET_TAB = "Form Responses 1";
+      const STATS_URL =
+        "https://docs.google.com/spreadsheets/d/" + LAND_SHEET_ID +
+        "/gviz/tq?tqx=out:json&sheet=" + encodeURIComponent(LAND_SHEET_TAB);
+
+      const overlay   = document.getElementById('land-onepager-modal-overlay');
+      const modal     = document.getElementById('land-onepager-modal');
+      const form      = document.getElementById('land-onepager-form');
+      const statusEl  = document.getElementById('land-onepager-status');
+      const openBtn   = document.getElementById('open-land-onepager-modal');
+      const closeBtn  = document.getElementById('close-land-onepager-modal');
+      const cancelBtn = document.getElementById('cancel-land-onepager');
+      const generateBtn = document.getElementById('generate-land-onepager');
+      const addressInput = document.getElementById('lop-address');
+      const photoInput   = document.getElementById('lop-photo');
+
+      if (!overlay || !form) return;
+
+      let lastFocus = null;
+      let sheetRows = null; // cached parsed sheet { cols, rows } after first load
+
+      // Same-shape IndexedDB transport as the Sales one-pager controller,
+      // duplicated here because that helper is scoped inside that IIFE.
+      // Same DB + store names so both writers and the one-pager.html
+      // reader stay in sync.
+      function idbOpen() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open('stonehouse-dashboard', 1);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('onepager')) {
+              db.createObjectStore('onepager');
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      }
+      async function idbPut(key, value) {
+        const db = await idbOpen();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction('onepager', 'readwrite');
+          tx.objectStore('onepager').put(value, key);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        });
+      }
+
+      function focusables() {
+        return modal.querySelectorAll(
+          'a[href], input:not([disabled]):not([type=hidden]), select:not([disabled]), ' +
+          'textarea:not([disabled]), button:not([disabled])'
+        );
+      }
+
+      function clearStatus() {
+        statusEl.classList.remove('show', 'ok', 'err', 'warn');
+        statusEl.textContent = '';
+      }
+      function setStatus(level, msg) {
+        statusEl.classList.add('show');
+        statusEl.classList.remove('ok', 'err', 'warn');
+        if (level && level !== 'info') statusEl.classList.add(level);
+        statusEl.textContent = msg;
+      }
+
+      function openModal() {
+        lastFocus = document.activeElement;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        clearStatus();
+        // Always re-fetch on open — sheet contents change as intakes are submitted.
+        loadProperties();
+        requestAnimationFrame(() => addressInput && addressInput.focus());
+      }
+      function closeModal() {
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+
+      // ----- gviz parsing helpers (specific to this view) -----
+      function parseGvizDate(cell) {
+        if (!cell || cell.v == null) return null;
+        if (typeof cell.v === 'string') {
+          const m = cell.v.match(/^Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?\)$/);
+          if (m) return new Date(+m[1], +m[2], +m[3]);
+        }
+        if (cell.f) { const p = new Date(cell.f); if (!isNaN(p)) return p; }
+        return null;
+      }
+      function parseGvizString(cell) {
+        if (!cell) return '';
+        if (cell.f != null) return String(cell.f);
+        if (cell.v != null) return String(cell.v);
+        return '';
+      }
+      function parseGvizNumber(cell) {
+        if (!cell || cell.v == null) return '';
+        if (typeof cell.v === 'number') return cell.v;
+        const n = parseFloat(String(cell.v).replace(/[$,\s]/g, ''));
+        return isNaN(n) ? '' : n;
+      }
+      function parseGvizEnvelope(text) {
+        const match = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
+        if (!match) throw new Error('gviz response in unexpected format');
+        const data = JSON.parse(match[1]);
+        if (data.status !== 'ok') {
+          const msg = (data.errors && data.errors[0] && data.errors[0].detailed_message) || data.status;
+          throw new Error('gviz: ' + msg);
+        }
+        return data.table || { cols: [], rows: [] };
+      }
+      function findCol(cols, ...candidates) {
+        const norm = (s) => String(s || '').toLowerCase().trim();
+        for (const cand of candidates) {
+          const idx = cols.findIndex((c) => norm(c.label) === norm(cand));
+          if (idx >= 0) return idx;
+        }
+        for (const cand of candidates) {
+          const idx = cols.findIndex((c) => norm(c.label).indexOf(norm(cand)) >= 0);
+          if (idx >= 0) return idx;
+        }
+        return -1;
+      }
+
+      // Pull the sheet and populate the <select> with all property addresses.
+      async function loadProperties() {
+        setStatus('info', 'Loading properties from sheet…');
+        // Reset the dropdown to its loading state while we fetch.
+        addressInput.innerHTML = '<option value="" disabled selected>Loading properties…</option>';
+        try {
+          const url = STATS_URL + '&t=' + Date.now();
+          const res = await fetch(url, { cache: 'no-store' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const text = await res.text();
+          sheetRows = parseGvizEnvelope(text);
+
+          const ix = addrIx();
+          if (ix < 0) {
+            setStatus('err', 'Could not find "Property Address" column in the sheet.');
+            return;
+          }
+          const addresses = (sheetRows.rows || [])
+            .map((r) => parseGvizString((r.c || [])[ix]).trim())
+            .filter(Boolean);
+          // De-dupe (latest entry wins; we'll match against the LATEST row at submit time).
+          const seen = new Set();
+          const unique = [];
+          for (const a of addresses) {
+            const key = a.toLowerCase();
+            if (!seen.has(key)) { seen.add(key); unique.push(a); }
+          }
+          // Sort alphabetically so the dropdown is easy to scan.
+          unique.sort((a, b) => a.localeCompare(b));
+
+          if (unique.length === 0) {
+            addressInput.innerHTML = '<option value="" disabled selected>No properties yet</option>';
+            setStatus('warn', 'No properties found in the Intake sheet yet.');
+            return;
+          }
+
+          // Rebuild dropdown options. The placeholder option stays as the
+          // default; agent must explicitly pick a property before generating.
+          const opts = ['<option value="" disabled selected>Select a property…</option>']
+            .concat(unique.map((a) =>
+              '<option value="' + a.replace(/"/g, '&quot;') + '">' +
+                a.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+              '</option>'
+            ));
+          addressInput.innerHTML = opts.join('');
+          clearStatus();
+        } catch (err) {
+          console.error('Land one-pager load failed:', err);
+          addressInput.innerHTML = '<option value="" disabled selected>Could not load</option>';
+          setStatus('err', 'Could not load properties: ' + (err && err.message ? err.message : err));
+        }
+      }
+      function addrIx() {
+        if (!sheetRows) return -1;
+        return findCol(sheetRows.cols || [], 'Property Address', 'Address');
+      }
+
+      // Find the most recent row matching the given address.
+      function findRowByAddress(needle) {
+        if (!sheetRows) return null;
+        const ix = addrIx();
+        if (ix < 0) return null;
+        const norm = (s) => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+        const target = norm(needle);
+        if (!target) return null;
+        // Walk in reverse so latest submission wins if duplicates exist.
+        const rows = sheetRows.rows || [];
+        for (let i = rows.length - 1; i >= 0; i--) {
+          const cellAddr = norm(parseGvizString(((rows[i].c) || [])[ix]));
+          if (cellAddr === target) return rows[i];
+        }
+        // Fuzzy fallback — "starts with" then "contains" so a user typing a short
+        // version of the address still gets a match.
+        for (let i = rows.length - 1; i >= 0; i--) {
+          const cellAddr = norm(parseGvizString(((rows[i].c) || [])[ix]));
+          if (cellAddr.startsWith(target) || target.startsWith(cellAddr)) return rows[i];
+        }
+        for (let i = rows.length - 1; i >= 0; i--) {
+          const cellAddr = norm(parseGvizString(((rows[i].c) || [])[ix]));
+          if (cellAddr.indexOf(target) >= 0) return rows[i];
+        }
+        return null;
+      }
+
+      // Build the payload for one-pager.html from a sheet row.
+      function buildPayload(row, photoFile) {
+        const cols = sheetRows.cols || [];
+        const c = row.c || [];
+        const ix = {
+          agent:          findCol(cols, 'Agent Name', 'Agent'),
+          address:        findCol(cols, 'Property Address'),
+          neighborhood:   findCol(cols, 'Neighborhood / Area', 'Neighborhood'),
+          askingPrice:    findCol(cols, 'Asking Price'),
+          contractPrice:  findCol(cols, 'Contract Price'),
+          firstContact:   findCol(cols, 'First Contact Date'),
+          underContract:  findCol(cols, 'Date Under Contract'),
+          ddEnd:          findCol(cols, 'Due Diligence End'),
+          closing:        findCol(cols, 'Closing Date'),
+          lotSize:        findCol(cols, 'Lot Size'),
+          topography:     findCol(cols, 'Topography'),
+          zoning:         findCol(cols, 'Zoning'),
+          floodZone:      findCol(cols, 'Flood Zone'),
+          variance:       findCol(cols, 'Needs Variance', 'Variance'),
+          setbackFront:   findCol(cols, 'Setback — Front (ft)', 'Setback Front', 'Front Setback'),
+          setbackRear:    findCol(cols, 'Setback — Rear (ft)', 'Setback Rear', 'Rear Setback'),
+          setbackInterior:findCol(cols, 'Setback — Interior (ft)', 'Setback Interior', 'Interior Setback'),
+          setbackRoad:    findCol(cols, 'Setback — Road Side (ft)', 'Setback Road Side', 'Road Side Setback'),
+          dimFront:       findCol(cols, 'Lot Dimension — Front (ft)', 'Dimension Front', 'Front Dimension'),
+          dimSideLeft:    findCol(cols, 'Lot Dimension — Side Left (ft)', 'Dimension Side Left', 'Side Left'),
+          dimRear:        findCol(cols, 'Lot Dimension — Rear (ft)', 'Dimension Rear', 'Rear Dimension'),
+          dimSideRight:   findCol(cols, 'Lot Dimension — Side Right (ft)', 'Dimension Side Right', 'Side Right'),
+          bestComp:       findCol(cols, 'Best Comp'),
+          cma:            findCol(cols, 'CMA'),
+          landComps:      findCol(cols, 'Land Comps'),
+          notes:          findCol(cols, 'Additional Notes', 'Notes'),
+        };
+        function s(idx) { return idx >= 0 ? parseGvizString(c[idx]) : ''; }
+        function n(idx) { return idx >= 0 ? parseGvizNumber(c[idx]) : ''; }
+        function d(idx) { return idx >= 0 ? parseGvizDate(c[idx]) : null; }
+        function dStr(dd) {
+          if (!(dd instanceof Date) || isNaN(dd)) return '';
+          return dd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        return {
+          requestId:      Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+          mode:           'land',
+          agent:          s(ix.agent),
+          address:        s(ix.address),
+          neighborhood:   s(ix.neighborhood),
+          askingPrice:    n(ix.askingPrice),
+          contractPrice:  n(ix.contractPrice),
+          firstContact:   dStr(d(ix.firstContact)),
+          underContract:  dStr(d(ix.underContract)),
+          ddEnd:          dStr(d(ix.ddEnd)),
+          closing:        dStr(d(ix.closing)),
+          lotSize:        s(ix.lotSize),
+          topography:     s(ix.topography),
+          zoning:         s(ix.zoning),
+          floodZone:      s(ix.floodZone),
+          variance:       s(ix.variance),
+          setbacks: {
+            front:    s(ix.setbackFront),
+            rear:     s(ix.setbackRear),
+            interior: s(ix.setbackInterior),
+            road:     s(ix.setbackRoad),
+          },
+          dimensions: {
+            front:     s(ix.dimFront),
+            sideLeft:  s(ix.dimSideLeft),
+            rear:      s(ix.dimRear),
+            sideRight: s(ix.dimSideRight),
+          },
+          bestComp:       s(ix.bestComp),
+          cma:            s(ix.cma),
+          landComps:      s(ix.landComps),
+          notes:          s(ix.notes),
+          photo:          photoFile ? { name: photoFile.name, type: photoFile.type, blob: photoFile } : null,
+          generatedAt:    new Date().toISOString(),
+          warnings:       [],
+          fileReceipts:   [],
+        };
+      }
+
+      // ----- Generate handler -----
+      generateBtn.addEventListener('click', async () => {
+        clearStatus();
+        const addr = (addressInput.value || '').trim();
+        if (!addr) {
+          setStatus('warn', 'Enter or select a property address first.');
+          addressInput.focus();
+          return;
+        }
+        if (!sheetRows) {
+          setStatus('err', 'Properties not loaded yet. Try again in a moment.');
+          return;
+        }
+        const row = findRowByAddress(addr);
+        if (!row) {
+          setStatus('err', 'No match in the Intake sheet for that address.');
+          return;
+        }
+
+        // Open the new tab synchronously to keep Safari's pop-up blocker happy.
+        const requestId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        const outputWin = window.open('one-pager.html?req=' + requestId, '_blank');
+        if (!outputWin) {
+          setStatus('warn', 'Pop-up blocked — allow pop-ups from this site, then click Generate again.');
+          return;
+        }
+
+        const originalLabel = generateBtn.textContent;
+        generateBtn.disabled = true;
+        generateBtn.textContent = 'Preparing…';
+
+        try {
+          const payload = buildPayload(row, photoInput.files && photoInput.files[0]);
+          payload.requestId = requestId;
+
+          // Write to IDB. one-pager.html polls and renders.
+          await idbPut('current', payload);
+          closeModal();
+        } catch (err) {
+          console.error('Land one-pager generate failed:', err);
+          setStatus('err', 'Error preparing one-pager: ' + (err && err.message ? err.message : err));
+          try { outputWin.close(); } catch (_) {}
+        } finally {
+          generateBtn.disabled = false;
+          generateBtn.textContent = originalLabel;
+        }
+      });
+
+      // ----- Wire close/cancel/escape/backdrop -----
+      openBtn   && openBtn.addEventListener('click', openModal);
+      closeBtn  && closeBtn.addEventListener('click', closeModal);
+      cancelBtn && cancelBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') closeModal();
+      });
+      modal.addEventListener('keydown', (e) => {
+        if (e.key !== 'Tab') return;
+        const items = focusables(); if (!items.length) return;
+        const first = items[0], last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
       });
     })();
 

@@ -385,6 +385,33 @@
       letter-spacing: 0.04em;
     }
 
+    /* Land mode: comps section (Best Comp / CMA / Land Comps) */
+    .comps-section {
+      margin-top: 28px;
+      padding-top: 22px;
+      border-top: 1px solid var(--rule);
+    }
+    .comps-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 24px;
+      margin-top: 12px;
+    }
+    .comp-row.full { grid-column: 1 / -1; }
+    .comp-row .k {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-x-wide);
+      margin-bottom: 4px;
+    }
+    .comp-row .v {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
     /* Foot disclaimer */
     .pager-foot {
       margin-top: 24px;
@@ -732,6 +759,128 @@
         extraPages;
     }
 
+    // ============================================================
+    // Land Acquisition variant
+    //   Same brand styling (dark theme, Aboreto, header layout) as
+    //   the Sales one-pager, but renders LAND data: lot size, zoning,
+    //   topography, flood zone, setbacks/dimensions, asking + contract
+    //   price, due diligence + closing dates, comps.
+    //   Input: payload built by the Land One-Pager modal in index.html,
+    //   with d.mode === 'land'.
+    // ============================================================
+    function renderLandPager(d) {
+      const heroSrc = blobToUrl(d.photo && d.photo.blob);
+      const headEyebrow = 'The Stonehouse Company';
+      const headSub     = 'Land Acquisition Opportunity';
+
+      // Build the "lot details" bullet list from setbacks + dimensions.
+      // Any field that's empty is dropped so the list stays clean for
+      // intake rows that don't have every measurement filled in.
+      function lotBullet(label, val) {
+        if (!val) return '';
+        return '<li>' + escapeHTML(label) + ' — ' + escapeHTML(val) + '</li>';
+      }
+      const sb = d.setbacks   || {};
+      const dm = d.dimensions || {};
+      const lotItems = [
+        lotBullet('Front setback',     sb.front    ? sb.front + ' ft'    : ''),
+        lotBullet('Rear setback',      sb.rear     ? sb.rear + ' ft'     : ''),
+        lotBullet('Interior setback',  sb.interior ? sb.interior + ' ft' : ''),
+        lotBullet('Road-side setback', sb.road     ? sb.road + ' ft'     : ''),
+        lotBullet('Frontage',          dm.front     ? dm.front + ' ft'     : ''),
+        lotBullet('Side (left)',       dm.sideLeft  ? dm.sideLeft + ' ft'  : ''),
+        lotBullet('Rear width',        dm.rear      ? dm.rear + ' ft'      : ''),
+        lotBullet('Side (right)',      dm.sideRight ? dm.sideRight + ' ft' : ''),
+        d.variance ? lotBullet('Variance needed', d.variance) : '',
+      ].filter(Boolean).join('');
+
+      // "At a Glance" rows — prices + dates.
+      const glanceRows =
+        '<div class="glance-row full"><div class="k">Asking Price</div><div class="v">'   + escapeHTML(formatUSD(d.askingPrice)   || '—') + '</div></div>' +
+        '<div class="glance-row full"><div class="k">Contract Price</div><div class="v">' + escapeHTML(formatUSD(d.contractPrice) || '—') + '</div></div>' +
+        (d.underContract ? '<div class="glance-row"><div class="k">Under Contract</div><div class="v">' + escapeHTML(d.underContract) + '</div></div>' : '') +
+        (d.ddEnd         ? '<div class="glance-row"><div class="k">DD End</div><div class="v">'         + escapeHTML(d.ddEnd)         + '</div></div>' : '') +
+        (d.closing       ? '<div class="glance-row"><div class="k">Closing</div><div class="v">'        + escapeHTML(d.closing)       + '</div></div>' : '');
+
+      // Optional comps section below the two-col block.
+      const compsHtml = (d.bestComp || d.cma || d.landComps)
+        ? '<section class="comps-section">' +
+            '<h3 class="col-head">Comparables</h3>' +
+            '<div class="comps-grid">' +
+              (d.bestComp   ? '<div class="comp-row"><div class="k">Best Comp</div><div class="v">'  + escapeHTML(d.bestComp)   + '</div></div>' : '') +
+              (d.cma        ? '<div class="comp-row"><div class="k">CMA</div><div class="v">'        + escapeHTML(d.cma)        + '</div></div>' : '') +
+              (d.landComps  ? '<div class="comp-row full"><div class="k">Land Comps</div><div class="v">' + escapeHTML(d.landComps) + '</div></div>' : '') +
+            '</div>' +
+          '</section>'
+        : '';
+
+      const heroHtml = heroSrc
+        ? '<div class="hero"><img src="' + heroSrc + '" alt="' + escapeHTML(d.address) + '" /></div>'
+        : '<div class="hero empty">No lot photo provided</div>';
+
+      output.innerHTML =
+        '<article class="pager">' +
+          '<header class="pager-head">' +
+            '<div class="brand-mark"><img src="assets/icon-512.png" alt="The Stonehouse Company" /></div>' +
+            '<div class="head-right">' +
+              '<div class="head-eyebrow">' + escapeHTML(headEyebrow) + '</div>' +
+              '<div class="head-sub">' + escapeHTML(headSub) + '</div>' +
+            '</div>' +
+          '</header>' +
+
+          heroHtml +
+
+          '<section class="address">' +
+            '<h1>' + escapeHTML(d.address || 'Property') + '</h1>' +
+            '<div class="sub">' + escapeHTML(d.neighborhood || '') + '</div>' +
+          '</section>' +
+
+          '<section class="stats">' +
+            '<div class="stat"><div class="num">' + escapeHTML(dash(d.lotSize))    + '</div><div class="label">Lot Size</div></div>' +
+            '<div class="stat"><div class="num">' + escapeHTML(dash(d.zoning))     + '</div><div class="label">Zoning</div></div>' +
+            '<div class="stat"><div class="num">' + escapeHTML(dash(d.topography)) + '</div><div class="label">Topography</div></div>' +
+            '<div class="stat"><div class="num">' + escapeHTML(dash(d.floodZone))  + '</div><div class="label">Flood Zone</div></div>' +
+          '</section>' +
+
+          (lotItems
+            ? '<section class="two-col">' +
+                '<div class="highlights">' +
+                  '<h3 class="col-head">Lot Details</h3>' +
+                  '<ul>' + lotItems + '</ul>' +
+                '</div>' +
+                '<div class="glance">' +
+                  '<h3 class="col-head">At a Glance</h3>' +
+                  '<div class="glance-rows">' + glanceRows + '</div>' +
+                '</div>' +
+              '</section>'
+            : '<section><div class="glance" style="max-width:380px;margin:0 auto;">' +
+                '<h3 class="col-head">At a Glance</h3>' +
+                '<div class="glance-rows">' + glanceRows + '</div>' +
+              '</div></section>'
+          ) +
+
+          compsHtml +
+
+          (d.notes
+            ? '<section class="prepared">' +
+                '<div class="label">Additional Notes</div>' +
+                '<div class="name" style="font-family:var(--font-body);font-size:13px;font-weight:300;letter-spacing:.02em;line-height:1.6;text-transform:none;">' +
+                  escapeHTML(d.notes) +
+                '</div>' +
+              '</section>'
+            : '') +
+
+          (d.agent
+            ? '<section class="prepared">' +
+                '<div class="label">Prepared By</div>' +
+                '<div class="name">' + escapeHTML(d.agent) + '</div>' +
+              '</section>'
+            : '') +
+
+          '<div class="pager-foot">Confidential · Land Acquisition · Not For Public Distribution</div>' +
+        '</article>';
+    }
+
     const printBtn = document.getElementById('print-btn');
     const statusEl = document.getElementById('tb-status');
 
@@ -1049,7 +1198,11 @@
 
       setStatus('Rendering…');
       __payload = d;     // captured for the Save-as-PDF click handler
-      renderOnePager(d);
+      if (d.mode === 'land') {
+        renderLandPager(d);
+      } else {
+        renderOnePager(d);
+      }
       await whenReady();
 
       // Surface how many pages are in the rendered output so the user can
