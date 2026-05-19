@@ -270,6 +270,43 @@
       color: var(--text);
       transform: translateX(3px);
     }
+    /* "Coming Soon" placeholder variant — visually muted */
+    .primary-action.soon {
+      opacity: 0.65;
+    }
+    .primary-action.soon:hover { opacity: 0.85; }
+    .primary-action .action-soon-pill {
+      display: inline-block;
+      padding: 3px 8px;
+      font-size: 8px;
+      letter-spacing: var(--tracking-x-wide);
+      text-transform: uppercase;
+      color: var(--text-dim);
+      border: 1px solid var(--rule-strong);
+      margin-bottom: 6px;
+      align-self: flex-start;
+    }
+    /* Toast overlay for "Coming Soon" clicks — fades in/out at bottom */
+    .placeholder-toast {
+      position: fixed;
+      bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+      padding: 14px 24px;
+      color: var(--text);
+      font-size: 11px;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      z-index: 200;
+      white-space: nowrap;
+    }
+    .placeholder-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
 
     /* =========================================================
        Modal (commission form)
@@ -2363,6 +2400,18 @@
         <button class="primary-action" type="button" id="open-uw-modal" aria-haspopup="dialog" aria-controls="uw-modal">
           <span class="action-label">Underwriting Model</span>
           <span class="action-sub">Project costs, returns, draw schedule, sensitivity — interactive</span>
+          <span class="action-arrow" aria-hidden="true">→</span>
+        </button>
+        <button class="primary-action soon" type="button" data-placeholder="Offer Memorandum Generator">
+          <span class="action-soon-pill">Coming Soon</span>
+          <span class="action-label">Offer Memorandum Generator</span>
+          <span class="action-sub">Produce a branded OM PDF for a development opportunity — auto-populated from the underwriting model</span>
+          <span class="action-arrow" aria-hidden="true">→</span>
+        </button>
+        <button class="primary-action soon" type="button" data-placeholder="Comparables Generator">
+          <span class="action-soon-pill">Coming Soon</span>
+          <span class="action-label">Comparables Generator</span>
+          <span class="action-sub">Pull recent comparable sales for pricing & valuation analysis on a development site</span>
           <span class="action-arrow" aria-hidden="true">→</span>
         </button>
       </div>
@@ -4731,6 +4780,36 @@
       const tabBtn = document.getElementById('tab-customrep');
       if (tabBtn) tabBtn.addEventListener('click', () => loadPipeline());
       window.__loadCustomRepPipeline = loadPipeline;
+    })();
+
+    // ============================================================
+    // "Coming Soon" placeholder handler (reusable)
+    //  - Any <button class="primary-action soon" data-placeholder="NAME">
+    //    shows a transient toast at the bottom of the screen when clicked.
+    //  - No alert dialog — keeps it light and non-blocking.
+    // ============================================================
+    (function () {
+      let toastEl = null;
+      let hideTimer = null;
+      function showToast(msg) {
+        if (!toastEl) {
+          toastEl = document.createElement('div');
+          toastEl.className = 'placeholder-toast';
+          document.body.appendChild(toastEl);
+        }
+        toastEl.textContent = msg;
+        requestAnimationFrame(() => toastEl.classList.add('show'));
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => {
+          toastEl.classList.remove('show');
+        }, 2400);
+      }
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.primary-action.soon[data-placeholder]');
+        if (!btn) return;
+        e.preventDefault();
+        showToast(btn.dataset.placeholder + ' · Coming Soon');
+      });
     })();
 
     // ============================================================
