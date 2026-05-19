@@ -1949,6 +1949,14 @@
       </nav>
 
       <div class="subpanel" id="subpanel-customrep-pipeline" role="tabpanel" aria-hidden="false" tabindex="0">
+        <div class="action-grid">
+          <button class="primary-action" type="button" id="open-customrep-intake-modal" aria-haspopup="dialog" aria-controls="customrep-intake-modal">
+            <span class="action-label">Log a New Project</span>
+            <span class="action-sub">Add a custom-rep client to the active pipeline</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+
         <section class="pipeline-section" aria-labelledby="customrep-pipeline-title">
           <header class="pipeline-head">
             <div>
@@ -2371,6 +2379,105 @@
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="cancel-intake">Cancel</button>
         <button class="btn" type="submit" form="intake-form" id="submit-intake">Submit Property Intake</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========================= CUSTOM REP INTAKE MODAL ========================= -->
+  <div class="modal-overlay is-wide" id="customrep-intake-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="customrep-intake-title" id="customrep-intake-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Custom Home Rep</span>
+          <h2 class="modal-title" id="customrep-intake-title">Log a New Project</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-customrep-intake-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="customrep-intake-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Client</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="crf-client">Client Name <span class="req">*</span></label>
+              <input id="crf-client" name="client_name" type="text" required placeholder="John & Jane Smith" />
+            </div>
+            <div class="full">
+              <label for="crf-address">Property Address <span class="req">*</span></label>
+              <input id="crf-address" name="address" type="text" required placeholder="123 Main St, Nashville, TN 37205" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Team</legend>
+          <div class="form-grid">
+            <div>
+              <label for="crf-architect">Architect</label>
+              <input id="crf-architect" name="architect" type="text" placeholder="Studio name" />
+            </div>
+            <div>
+              <label for="crf-designer">Designer</label>
+              <input id="crf-designer" name="designer" type="text" placeholder="Designer / firm" />
+            </div>
+            <div class="full">
+              <label for="crf-builder">Builder</label>
+              <input id="crf-builder" name="builder" type="text" placeholder="General contractor" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Timeline</legend>
+          <div class="form-grid">
+            <div>
+              <label for="crf-engagement-start">Engagement Start Date <span class="req">*</span></label>
+              <input id="crf-engagement-start" name="engagement_start_date" type="date" required />
+            </div>
+            <div>
+              <label for="crf-projected-start">Projected Start Date</label>
+              <input id="crf-projected-start" name="projected_start_date" type="date" />
+            </div>
+            <div class="full">
+              <label for="crf-projected-co">Projected CO Date <span class="req">*</span></label>
+              <input id="crf-projected-co" name="projected_co_date" type="date" required />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Status & Budget</legend>
+          <div class="form-grid">
+            <div>
+              <label for="crf-stage">Current Stage <span class="req">*</span></label>
+              <select id="crf-stage" name="current_stage" required>
+                <option value="" disabled selected>Select stage…</option>
+                <option value="Pre-Con">Pre-Con</option>
+                <option value="Demolition">Demolition</option>
+                <option value="Framing">Framing</option>
+                <option value="Mechanicals">Mechanicals</option>
+                <option value="Drywall">Drywall</option>
+                <option value="Finishes">Finishes</option>
+                <option value="C.O.">C.O.</option>
+              </select>
+            </div>
+            <div>
+              <label for="crf-hard-cost">Hard Cost Estimate</label>
+              <div class="currency"><input id="crf-hard-cost" name="hard_cost_estimate" type="number" inputmode="decimal" min="0" step="1" placeholder="0" /></div>
+            </div>
+            <div class="full">
+              <label for="crf-notes">Notes</label>
+              <textarea id="crf-notes" name="notes" rows="4" placeholder="Anything worth flagging about scope, schedule, or stakeholders"></textarea>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+
+      <div class="form-status" id="customrep-intake-status"></div>
+
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-customrep-intake">Cancel</button>
+        <button class="btn" type="submit" form="customrep-intake-form" id="submit-customrep-intake">Log Project</button>
       </footer>
     </div>
   </div>
@@ -3861,6 +3968,173 @@
       const tabBtn = document.getElementById('tab-customrep');
       if (tabBtn) tabBtn.addEventListener('click', () => loadPipeline());
       window.__loadCustomRepPipeline = loadPipeline;
+    })();
+
+    // ============================================================
+    // Custom Home Rep · "Log a New Project" modal controller
+    //  - Opens via the Pipeline sub-tab action card.
+    //  - Same fire-and-forget POST pattern as Sales Commission +
+    //    Land Acquisition Intake: send a multipart/form POST to the
+    //    Google Form's /formResponse endpoint with the entry.NNN
+    //    field IDs mapped below. We use { mode: "no-cors" } and
+    //    don't read the response — Google's response is opaque and
+    //    sees a "ok" only via the 200 redirect that no-cors hides.
+    //  - On submit success, refreshes the pipeline so the new
+    //    project shows up immediately (next gviz fetch).
+    //
+    // SETUP REQUIRED:
+    //   1. Open the Custom Home Rep Intake Google Form.
+    //   2. Click the three-dot menu (top right) → "Get pre-filled link".
+    //   3. Fill in EVERY field with a unique sentinel value (e.g.
+    //      put your name in client name, "addr-test" in address, etc.)
+    //      and click "Get link" → "Copy link".
+    //   4. Paste the link back to me. Each "entry.NNNNNN=..." param
+    //      in the URL is one entry ID — I'll map them into FIELD_MAP.
+    //   5. Also paste the form's response URL (the /viewform URL).
+    // ============================================================
+    (function () {
+      // Form's /formResponse endpoint (derived from the /viewform URL
+      // in Ryan's pre-filled link).
+      const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSejJAHy6LDCUShiy7u6lwvl7dWYxmryozfZ0Bid2wfBjFaXVQ/formResponse";
+
+      // Mapped from the pre-filled link's entry.NNNNNN= params, in
+      // form-question order (Google emits entries in question order so
+      // the URL ordering tells us which entry ID belongs to which field).
+      const FIELD_MAP = {
+        client_name:           "entry.85794970",
+        address:               "entry.1484590953",
+        architect:             "entry.1328380332",
+        designer:              "entry.1874445141",
+        builder:               "entry.1124556673",
+        engagement_start_date: "entry.648172310",   // 1st date Q
+        projected_start_date:  "entry.630909392",   // 2nd date Q
+        projected_co_date:     "entry.1945807552",  // 3rd date Q
+        current_stage:         "entry.281419658",
+        hard_cost_estimate:    "entry.470369564",
+        notes:                 "entry.1371022317",
+      };
+
+      const overlay   = document.getElementById('customrep-intake-modal-overlay');
+      const modal     = document.getElementById('customrep-intake-modal');
+      const form      = document.getElementById('customrep-intake-form');
+      const statusEl  = document.getElementById('customrep-intake-status');
+      const openBtn   = document.getElementById('open-customrep-intake-modal');
+      const closeBtn  = document.getElementById('close-customrep-intake-modal');
+      const cancelBtn = document.getElementById('cancel-customrep-intake');
+      const submitBtn = document.getElementById('submit-customrep-intake');
+      const engagementStartInput = document.getElementById('crf-engagement-start');
+
+      if (!overlay || !form) return;
+
+      let lastFocus = null;
+
+      function focusables() {
+        return modal.querySelectorAll(
+          'a[href], input:not([disabled]):not([type=hidden]), select:not([disabled]), ' +
+          'textarea:not([disabled]), button:not([disabled])'
+        );
+      }
+      function clearStatus() {
+        statusEl.classList.remove('show', 'ok', 'err', 'warn');
+        statusEl.textContent = '';
+      }
+      function setStatus(level, msg) {
+        statusEl.classList.add('show');
+        statusEl.classList.remove('ok', 'err', 'warn');
+        if (level && level !== 'info') statusEl.classList.add(level);
+        statusEl.textContent = msg;
+      }
+
+      function openModal() {
+        lastFocus = document.activeElement;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        clearStatus();
+        // Pre-fill engagement-start with today since that's the most common case.
+        if (engagementStartInput && !engagementStartInput.value) {
+          engagementStartInput.value = new Date().toISOString().slice(0, 10);
+        }
+        requestAnimationFrame(() => {
+          const first = focusables()[0];
+          if (first) first.focus();
+        });
+      }
+      function closeModal() {
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+
+      // Backdrop click + ESC + focus trap
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') closeModal();
+      });
+      modal.addEventListener('keydown', (e) => {
+        if (e.key !== 'Tab') return;
+        const items = focusables(); if (!items.length) return;
+        const first = items[0], last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      });
+
+      openBtn  && openBtn.addEventListener('click', openModal);
+      closeBtn && closeBtn.addEventListener('click', closeModal);
+      cancelBtn && cancelBtn.addEventListener('click', closeModal);
+
+      // ---- Submit handler ----
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearStatus();
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+
+        // Gate behind the Form being wired up.
+        if (/PASTE_/.test(FORM_URL) ||
+            Object.values(FIELD_MAP).some((v) => /PASTE_/.test(v))) {
+          setStatus('warn',
+            'Form not wired up yet — paste the pre-filled link from the Google Form back to ' +
+            'the dashboard developer so FORM_URL + FIELD_MAP can be filled in.');
+          return;
+        }
+
+        const data = new FormData(form);
+        const body = new FormData();
+        for (const [key, entryId] of Object.entries(FIELD_MAP)) {
+          const v = data.get(key);
+          if (v != null) body.append(entryId, String(v));
+        }
+
+        const originalLabel = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Logging…';
+
+        try {
+          // no-cors: Google Forms ignores our origin and the response is
+          // opaque. We can't read status, but a thrown error here indicates
+          // a network failure, not a form rejection.
+          await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body: body });
+
+          setStatus('ok', 'Project logged. The pipeline will refresh in a moment.');
+          form.reset();
+          // Pre-fill engagement-start back to today for the next entry.
+          if (engagementStartInput) {
+            engagementStartInput.value = new Date().toISOString().slice(0, 10);
+          }
+          // Give Google a few seconds to propagate to the linked Sheet, then refresh.
+          setTimeout(() => {
+            if (typeof window.__loadCustomRepPipeline === 'function') {
+              window.__loadCustomRepPipeline();
+            }
+            closeModal();
+          }, 2500);
+        } catch (err) {
+          console.error('Custom rep intake submit failed:', err);
+          setStatus('err', 'Network error: ' + (err && err.message ? err.message : err));
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalLabel;
+        }
+      });
     })();
 
     // ============================================================
