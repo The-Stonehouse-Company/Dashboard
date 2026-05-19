@@ -6814,6 +6814,23 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           return;
         }
 
+        // Guard against logging an empty calculator. The Google Form has
+        // validation on numeric questions, so a "0" payload silently
+        // drops most fields and the OM ends up with a blank model page.
+        // Require the inputs that actually drive the model.
+        const missing = [];
+        if (!state.numHomes) missing.push('Number of Homes');
+        if (!state.sqft)     missing.push('Sq Footage / Home');
+        if (!state.buildPsf) missing.push('Build $/SF');
+        if (!state.salePsf)  missing.push('Target Sale $/SF');
+        if (!state.lotCost)  missing.push('Lot Cost');
+        if (missing.length) {
+          logStatus('warn',
+            'Fill the calculator before logging — these fields are required so the OM pages don\'t come out blank: ' +
+            missing.join(', '));
+          return;
+        }
+
         // Optional scenario name to differentiate multiple runs of the same property.
         const scenarioName = prompt(
           'Name this scenario (optional — e.g. "Base", "Stretch", "Conservative"). Leave blank for "Base".',
