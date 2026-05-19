@@ -2423,61 +2423,81 @@
       <div class="eyebrow">Division 04</div>
       <h1>Development</h1>
 
-      <div class="action-grid">
-        <button class="primary-action" type="button" id="open-uw-modal" aria-haspopup="dialog" aria-controls="uw-modal">
-          <span class="action-label">Underwriting Model</span>
-          <span class="action-sub">Project costs, returns, draw schedule, sensitivity — interactive</span>
-          <span class="action-arrow" aria-hidden="true">→</span>
-        </button>
-        <button class="primary-action" type="button" id="open-devintake-modal" aria-haspopup="dialog" aria-controls="devintake-modal">
-          <span class="action-label">Log a New Development</span>
-          <span class="action-sub">Add a project to the current developments pipeline</span>
-          <span class="action-arrow" aria-hidden="true">→</span>
-        </button>
-        <button class="primary-action soon" type="button" data-placeholder="Offer Memorandum Generator">
-          <span class="action-soon-pill">Coming Soon</span>
-          <span class="action-label">Offer Memorandum Generator</span>
-          <span class="action-sub">Produce a branded OM PDF for a development opportunity — auto-populated from the underwriting model</span>
-          <span class="action-arrow" aria-hidden="true">→</span>
-        </button>
-        <button class="primary-action soon" type="button" data-placeholder="Comparables Generator">
-          <span class="action-soon-pill">Coming Soon</span>
-          <span class="action-label">Comparables Generator</span>
-          <span class="action-sub">Pull recent comparable sales for pricing & valuation analysis on a development site</span>
-          <span class="action-arrow" aria-hidden="true">→</span>
-        </button>
+      <nav class="subtabbar" role="tablist" aria-label="Development sections" data-subtab-parent="development">
+        <button class="subtab" role="tab" aria-controls="subpanel-development-deals"     aria-selected="true"  data-subkey="deals">Deals</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-development-marketing" aria-selected="false" data-subkey="marketing">Marketing</button>
+      </nav>
+
+      <!-- DEALS sub-tab: underwriting + log new + pipeline + archive -->
+      <div class="subpanel" id="subpanel-development-deals" role="tabpanel" aria-hidden="false" tabindex="0">
+        <div class="action-grid">
+          <button class="primary-action" type="button" id="open-uw-modal" aria-haspopup="dialog" aria-controls="uw-modal">
+            <span class="action-label">Underwriting Model</span>
+            <span class="action-sub">Project costs, returns, draw schedule, sensitivity — interactive</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="primary-action" type="button" id="open-devintake-modal" aria-haspopup="dialog" aria-controls="devintake-modal">
+            <span class="action-label">Log a New Development</span>
+            <span class="action-sub">Add a project to the current developments pipeline</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <section class="pipeline-section" aria-labelledby="dev-pipeline-title">
+          <header class="pipeline-head">
+            <div>
+              <div class="eyebrow" style="margin-bottom:8px;">Current Developments</div>
+              <h2 class="pipeline-title" id="dev-pipeline-title">Active Projects</h2>
+            </div>
+            <div class="pipeline-meta" id="dev-pipeline-meta">Loading…</div>
+          </header>
+          <div class="deal-list" id="dev-pipeline-list">
+            <div class="deal-empty">Loading projects…</div>
+          </div>
+        </section>
+
+        <section class="pipeline-section" aria-labelledby="dev-completed-title">
+          <header class="pipeline-head">
+            <div>
+              <div class="eyebrow" style="margin-bottom:8px;">Archive</div>
+              <h2 class="pipeline-title" id="dev-completed-title">Sold Projects</h2>
+            </div>
+            <div class="pipeline-meta" id="dev-completed-meta">—</div>
+          </header>
+          <div class="deal-list completed-list" id="dev-completed-list">
+            <div class="deal-empty">No sold projects yet.</div>
+          </div>
+        </section>
+
+        <div class="placeholder">
+          <div class="mark">— Placeholder —</div>
+          <h2>More tools coming</h2>
+          <p>Investor reporting and capital-raise tracking will live here next.</p>
+        </div>
       </div>
 
-      <section class="pipeline-section" aria-labelledby="dev-pipeline-title">
-        <header class="pipeline-head">
-          <div>
-            <div class="eyebrow" style="margin-bottom:8px;">Current Developments</div>
-            <h2 class="pipeline-title" id="dev-pipeline-title">Active Projects</h2>
-          </div>
-          <div class="pipeline-meta" id="dev-pipeline-meta">Loading…</div>
-        </header>
-        <div class="deal-list" id="dev-pipeline-list">
-          <div class="deal-empty">Loading projects…</div>
+      <!-- MARKETING sub-tab: offer memorandum + comparables -->
+      <div class="subpanel" id="subpanel-development-marketing" role="tabpanel" aria-hidden="true" tabindex="0">
+        <div class="action-grid">
+          <button class="primary-action soon" type="button" data-placeholder="Offer Memorandum Generator">
+            <span class="action-soon-pill">Coming Soon</span>
+            <span class="action-label">Offer Memorandum Generator</span>
+            <span class="action-sub">Produce a branded OM PDF for a development opportunity — auto-populated from the underwriting model</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="primary-action soon" type="button" data-placeholder="Comparables Generator">
+            <span class="action-soon-pill">Coming Soon</span>
+            <span class="action-label">Comparables Generator</span>
+            <span class="action-sub">Pull recent comparable sales for pricing & valuation analysis on a development site</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
         </div>
-      </section>
 
-      <section class="pipeline-section" aria-labelledby="dev-completed-title">
-        <header class="pipeline-head">
-          <div>
-            <div class="eyebrow" style="margin-bottom:8px;">Archive</div>
-            <h2 class="pipeline-title" id="dev-completed-title">Sold Projects</h2>
-          </div>
-          <div class="pipeline-meta" id="dev-completed-meta">—</div>
-        </header>
-        <div class="deal-list completed-list" id="dev-completed-list">
-          <div class="deal-empty">No sold projects yet.</div>
+        <div class="placeholder">
+          <div class="mark">— Placeholder —</div>
+          <h2>More marketing tools coming</h2>
+          <p>Investor pitch decks, property landing pages, and listing-launch templates will live here next.</p>
         </div>
-      </section>
-
-      <div class="placeholder">
-        <div class="mark">— Placeholder —</div>
-        <h2>More tools coming</h2>
-        <p>Investor reporting and capital-raise tracking will live here next.</p>
       </div>
     </section>
   </main>
