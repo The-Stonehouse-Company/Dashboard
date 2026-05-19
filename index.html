@@ -771,6 +771,50 @@
       font-size: 12px;
     }
 
+    /* Offer Memorandum modal — repeating comp / project blocks */
+    .om-comp-stack, .om-project-stack {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    .om-comp-block, .om-project-block {
+      border: 1px solid var(--rule);
+      padding: 14px;
+      background: var(--bg);
+    }
+    .om-comp-block .om-block-head, .om-project-block .om-block-head {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-x-wide);
+      margin-bottom: 10px;
+    }
+    .om-comp-block .field, .om-project-block .field {
+      margin-bottom: 10px;
+    }
+    .om-comp-block .field:last-child, .om-project-block .field:last-child {
+      margin-bottom: 0;
+    }
+    .om-comp-block label, .om-project-block label {
+      display: block;
+      font-size: 9px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+      margin-bottom: 4px;
+    }
+    .om-comp-block input, .om-project-block input,
+    .om-comp-block select, .om-project-block select {
+      width: 100%;
+      font: inherit; font-size: 12px; font-weight: 300;
+      color: var(--text);
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+      padding: 8px 10px;
+      -webkit-appearance: none; appearance: none;
+      border-radius: 0;
+    }
+
     /* ---------------------------------------------------------
        Fee Calculator readout — shown live below the inputs.
        Matches the dashboard's elevated-card vocabulary.
@@ -2479,10 +2523,9 @@
       <!-- MARKETING sub-tab: offer memorandum + comparables -->
       <div class="subpanel" id="subpanel-development-marketing" role="tabpanel" aria-hidden="true" tabindex="0">
         <div class="action-grid">
-          <button class="primary-action soon" type="button" data-placeholder="Offer Memorandum Generator">
-            <span class="action-soon-pill">Coming Soon</span>
+          <button class="primary-action" type="button" id="open-om-modal" aria-haspopup="dialog" aria-controls="om-modal">
             <span class="action-label">Offer Memorandum Generator</span>
-            <span class="action-sub">Produce a branded OM PDF for a development opportunity — auto-populated from the underwriting model</span>
+            <span class="action-sub">14-page branded OM PDF — text, photos, and auto-populated underwriting numbers</span>
             <span class="action-arrow" aria-hidden="true">→</span>
           </button>
           <button class="primary-action soon" type="button" data-placeholder="Comparables Generator">
@@ -2984,6 +3027,229 @@
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="cancel-devintake">Cancel</button>
         <button class="btn" type="submit" form="devintake-form" id="submit-devintake">Log Development</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========================= OFFER MEMORANDUM MODAL ========================= -->
+  <div class="modal-overlay is-xwide" id="om-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="om-modal-title" id="om-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Development · Marketing</span>
+          <h2 class="modal-title" id="om-modal-title">Offer Memorandum Generator</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-om-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="om-form" autocomplete="off" novalidate>
+
+        <fieldset>
+          <legend>Cover (Page 1)</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="om-project-name">Project Name <span class="req">*</span></label>
+              <input id="om-project-name" name="project_name" type="text" required placeholder="Flagship Estate Development" />
+            </div>
+            <div>
+              <label for="om-neighborhood">Neighborhood <span class="req">*</span></label>
+              <input id="om-neighborhood" name="neighborhood" type="text" required placeholder="West Meade" />
+            </div>
+            <div>
+              <label for="om-address">Property Address <span class="req">*</span></label>
+              <input id="om-address" name="address" type="text" required placeholder="6440 Jocelyn Hollow Rd" />
+            </div>
+            <div class="full">
+              <label for="om-hero">Hero Rendering Photo <span class="req">*</span></label>
+              <input id="om-hero" name="hero_photo" type="file" accept="image/*" required />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Overview / Writeup (Page 2)</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="om-overview-text">Vision / Overview</label>
+              <textarea id="om-overview-text" name="overview_text" rows="4" placeholder="Our vision is to create a one of kind estate in one of Nashville's most sought after neighborhoods..."></textarea>
+            </div>
+            <div>
+              <label for="om-constr-start">Construction Start</label>
+              <input id="om-constr-start" name="construction_start" type="text" placeholder="45 days after closing on June 25th 2026" />
+            </div>
+            <div>
+              <label for="om-completion">Expected Completion</label>
+              <input id="om-completion" name="completion" type="text" placeholder="Fall 2027" />
+            </div>
+            <div class="full">
+              <label for="om-existing-photo">Existing Property Photo</label>
+              <input id="om-existing-photo" name="existing_photo" type="file" accept="image/*" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Lot (Page 3)</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="om-lot-text">Lot Description</label>
+              <textarea id="om-lot-text" name="lot_text" rows="5" placeholder="6440 Jocelyn Hollow Rd sits at the corner of...&#10;&#10;Sitting at .97 acres, with setbacks of 75 ft off Jocelyn Hollow Rd, 60ft off of Jocelyn Hollow Cir, 15 ft off interior side, and 20 ft off the rear.&#10;&#10;An expansive lot with a large building envelope for development"></textarea>
+            </div>
+            <div class="full">
+              <label for="om-lot-photo">Aerial / Lot Photo</label>
+              <input id="om-lot-photo" name="lot_photo" type="file" accept="image/*" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Location (Page 4)</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="om-location-text">Location / Neighborhood Writeup</label>
+              <textarea id="om-location-text" name="location_text" rows="5" placeholder="West Meade is one of Nashville's fastest growing luxury neighborhoods..."></textarea>
+            </div>
+            <div class="full">
+              <label for="om-map-photo">Map Screenshot</label>
+              <input id="om-map-photo" name="map_photo" type="file" accept="image/*" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Anticipated Build · Vibe (Page 5)</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="om-build-vibe-text">Design Narrative</label>
+              <textarea id="om-build-vibe-text" name="build_vibe_text" rows="3" placeholder="Large modern windows, natural exterior materials with high ceilings..."></textarea>
+            </div>
+            <div>
+              <label for="om-exterior-photo">Exterior Reference Photo</label>
+              <input id="om-exterior-photo" name="exterior_photo" type="file" accept="image/*" />
+            </div>
+            <div>
+              <label for="om-interior-photo">Interior Reference Photo</label>
+              <input id="om-interior-photo" name="interior_photo" type="file" accept="image/*" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Anticipated Build · Stats (Page 6)</legend>
+          <div class="form-grid">
+            <div>
+              <label for="om-sqft">Projected Square Footage</label>
+              <input id="om-sqft" name="sqft" type="text" placeholder="7,000+/-" />
+            </div>
+            <div>
+              <label for="om-bd-ba">Bedrooms / Baths</label>
+              <input id="om-bd-ba" name="bd_ba" type="text" placeholder="5 Bedrooms / 5+ Baths" />
+            </div>
+            <div>
+              <label for="om-yard-note">Yard / Amenities</label>
+              <input id="om-yard-note" name="yard_note" type="text" placeholder="Pool and hardscape" />
+            </div>
+            <div>
+              <label for="om-area-psf">Area Avg $/SF</label>
+              <input id="om-area-psf" name="area_psf" type="text" placeholder="$640" />
+            </div>
+            <div class="full">
+              <label for="om-build-stats-text">Build Narrative</label>
+              <textarea id="om-build-stats-text" name="build_stats_text" rows="4" placeholder="We are looking to build a one of a kind single story build. Very few single story builds have made it to market, with most pre selling during construction."></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Anticipated Build · Pricing (Page 7)</legend>
+          <div class="form-grid">
+            <div>
+              <label for="om-anchor-address">Anchor Comp Address</label>
+              <input id="om-anchor-address" name="anchor_address" type="text" placeholder="310 Jocelyn Hollow Cir" />
+            </div>
+            <div>
+              <label for="om-anchor-sold">Anchor Comp Sold Price</label>
+              <input id="om-anchor-sold" name="anchor_sold" type="text" placeholder="$4.55M" />
+            </div>
+            <div>
+              <label for="om-anchor-psf">Anchor Comp $/SF</label>
+              <input id="om-anchor-psf" name="anchor_psf" type="text" placeholder="$641" />
+            </div>
+            <div>
+              <label for="om-target-sale">Target Final Sale Price</label>
+              <input id="om-target-sale" name="target_sale" type="text" placeholder="$4.41M" />
+            </div>
+            <div>
+              <label for="om-target-psf">Target $/SF</label>
+              <input id="om-target-psf" name="target_psf" type="text" placeholder="$660" />
+            </div>
+            <div class="full">
+              <label for="om-pricing-text">Pricing Narrative (optional override)</label>
+              <textarea id="om-pricing-text" name="pricing_text" rows="3" placeholder="Auto-generated from the anchor comp + target numbers above. Leave blank to use the default narrative."></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>SOLD Comparables (Page 8)</legend>
+          <div id="om-sold-comps" class="om-comp-stack"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Single-Story Comparables (Page 9)</legend>
+          <div id="om-ss-comps" class="om-comp-stack"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Other Projects · Nashville / Brentwood (Page 10)</legend>
+          <div id="om-other-projects" class="om-project-stack"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Underwriting Numbers (Pages 11–12)</legend>
+          <div id="om-uw-status" class="form-status show" style="margin: 0 0 12px;">
+            Checking for saved Underwriting Model state…
+          </div>
+          <p style="font-size:11px; color:var(--text-muted); margin:0; letter-spacing:.02em; line-height:1.5;">
+            Pages 11 and 12 auto-populate from your most recent run of the Underwriting Model.
+            Open the Underwriting Model modal first if these numbers are stale.
+          </p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Nashville Market (Page 13)</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="om-market-text">Market Writeup (defaults to standard text)</label>
+              <textarea id="om-market-text" name="market_text" rows="5">Nashville has become a major draw for families coming from San Diego, Los Angeles, New York, Chicago, and other major cities.
+
+With an average of 100 people moving here per day Nashville has been ranked as one of the fastest-growing cities in the USA for the fourth year in a row.
+
+It has become a major relocation center for large companies like Amazon, Oracle, Starbucks, In N Out, and many others</textarea>
+            </div>
+            <div class="full">
+              <label for="om-skyline-photo">Cityscape Photo (defaults to standard image)</label>
+              <input id="om-skyline-photo" name="skyline_photo" type="file" accept="image/*" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Summary (Page 14)</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="om-summary-text">Summary / Close Paragraphs</label>
+              <textarea id="om-summary-text" name="summary_text" rows="5" placeholder="Overall, this model is built to take the market into consideration and plan for unforeseen development hurdles..."></textarea>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+
+      <div class="form-status" id="om-status"></div>
+
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-om">Cancel</button>
+        <button class="btn" type="submit" form="om-form" id="submit-om">Generate OM</button>
       </footer>
     </div>
   </div>
@@ -5407,6 +5673,291 @@
         if (!btn) return;
         e.preventDefault();
         showToast(btn.dataset.placeholder + ' · Coming Soon');
+      });
+    })();
+
+    // ============================================================
+    // Development · Offer Memorandum Generator modal
+    //  - Opens via the Marketing sub-tab action card.
+    //  - Captures all 14-page content + image uploads into a single
+    //    payload, writes to IndexedDB ("om-current" key), opens
+    //    om.html in a new tab to render + assemble the PDF.
+    //  - Pages 11–12 auto-populate from the most recent Underwriting
+    //    Model run (read from localStorage key "uw-model:v1").
+    // ============================================================
+    (function () {
+      const overlay   = document.getElementById('om-modal-overlay');
+      const modal     = document.getElementById('om-modal');
+      const form      = document.getElementById('om-form');
+      const statusEl  = document.getElementById('om-status');
+      const uwStatus  = document.getElementById('om-uw-status');
+      const openBtn   = document.getElementById('open-om-modal');
+      const closeBtn  = document.getElementById('close-om-modal');
+      const cancelBtn = document.getElementById('cancel-om');
+      const submitBtn = document.getElementById('submit-om');
+
+      if (!overlay || !form) return;
+
+      // ---- Render the 3 SOLD comp / 3 single-story comp / 3 other-project blocks ----
+      function renderCompStack(containerId, prefix) {
+        const c = document.getElementById(containerId);
+        if (!c) return;
+        c.innerHTML = '';
+        for (let i = 1; i <= 3; i++) {
+          c.insertAdjacentHTML('beforeend',
+            '<div class="om-comp-block">' +
+              '<div class="om-block-head">Comp ' + i + '</div>' +
+              '<div class="field"><label>Photo</label><input type="file" accept="image/*" data-om-key="' + prefix + i + '_photo" /></div>' +
+              '<div class="field"><label>Address</label><input type="text" data-om-key="' + prefix + i + '_address" placeholder="310 Jocelyn Hollow Cir" /></div>' +
+              '<div class="field"><label>BD / BA / SF</label><input type="text" data-om-key="' + prefix + i + '_specs" placeholder="5 Bed 5/1 Bath 7100 Sq Ft" /></div>' +
+              '<div class="field"><label>Sold Price / $ per SF</label><input type="text" data-om-key="' + prefix + i + '_price" placeholder="$4,550,000 / $641 Per Sq Ft" /></div>' +
+              '<div class="field"><label>Closing Status</label><input type="text" data-om-key="' + prefix + i + '_status" placeholder="Closed - 6 / 2 / 25 | DOM: 46" /></div>' +
+            '</div>'
+          );
+        }
+      }
+      function renderProjectStack(containerId, prefix) {
+        const c = document.getElementById(containerId);
+        if (!c) return;
+        c.innerHTML = '';
+        for (let i = 1; i <= 3; i++) {
+          c.insertAdjacentHTML('beforeend',
+            '<div class="om-project-block">' +
+              '<div class="om-block-head">Project ' + i + '</div>' +
+              '<div class="field"><label>Photo</label><input type="file" accept="image/*" data-om-key="' + prefix + i + '_photo" /></div>' +
+              '<div class="field"><label>Address</label><input type="text" data-om-key="' + prefix + i + '_address" placeholder="1211 Carl Seyfert" /></div>' +
+              '<div class="field"><label>Status</label>' +
+                '<select data-om-key="' + prefix + i + '_status">' +
+                  '<option value="">Select…</option>' +
+                  '<option value="COMING SOON">COMING SOON</option>' +
+                  '<option value="UNDER CONSTRUCTION">UNDER CONSTRUCTION</option>' +
+                  '<option value="LISTED">LISTED</option>' +
+                  '<option value="UNDER CONTRACT">UNDER CONTRACT</option>' +
+                  '<option value="SOLD">SOLD</option>' +
+                '</select>' +
+              '</div>' +
+              '<div class="field"><label>Price</label><input type="text" data-om-key="' + prefix + i + '_price" placeholder="$5,100,000" /></div>' +
+              '<div class="field"><label>Date / Note</label><input type="text" data-om-key="' + prefix + i + '_date" placeholder="Completion - Summer 2026" /></div>' +
+            '</div>'
+          );
+        }
+      }
+
+      renderCompStack('om-sold-comps', 'sold');
+      renderCompStack('om-ss-comps',   'ss');
+      renderProjectStack('om-other-projects', 'proj');
+
+      // ---- Read latest Underwriting Model state from localStorage ----
+      function loadUWState() {
+        try {
+          const raw = localStorage.getItem('uw-model:v1');
+          if (!raw) return null;
+          return JSON.parse(raw);
+        } catch (_) { return null; }
+      }
+      function refreshUWStatus() {
+        const uw = loadUWState();
+        if (!uw) {
+          uwStatus.classList.remove('ok');
+          uwStatus.classList.add('warn');
+          uwStatus.textContent = '⚠  No saved Underwriting Model state. Open the Underwriting Model modal, fill in numbers, then come back here.';
+          return;
+        }
+        const lot = uw.lotCost ? '$' + uw.lotCost.toLocaleString() : '—';
+        const tps = uw.salePsf && uw.sqft && uw.numHomes
+          ? '$' + (uw.salePsf * uw.sqft * uw.numHomes).toLocaleString()
+          : '—';
+        uwStatus.classList.remove('warn');
+        uwStatus.classList.add('ok');
+        uwStatus.textContent = '✓  Using your latest Underwriting Model run · Lot ' + lot + ' · Projected Sale ' + tps;
+      }
+
+      // ---- IndexedDB transport (same DB as one-pager, different store) ----
+      function idbOpen() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open('stonehouse-dashboard', 2);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('onepager')) db.createObjectStore('onepager');
+            if (!db.objectStoreNames.contains('om'))        db.createObjectStore('om');
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      }
+      async function idbPut(key, value) {
+        const db = await idbOpen();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction('om', 'readwrite');
+          tx.objectStore('om').put(value, key);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        });
+      }
+
+      function readFile(input) {
+        if (!input || !input.files || !input.files[0]) return null;
+        const f = input.files[0];
+        return { name: f.name, type: f.type, blob: f };
+      }
+      function val(id) {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+      }
+
+      function clearStatus() {
+        statusEl.classList.remove('show', 'ok', 'err', 'warn');
+        statusEl.textContent = '';
+      }
+      function setStatus(level, msg) {
+        statusEl.classList.add('show');
+        statusEl.classList.remove('ok', 'err', 'warn');
+        if (level && level !== 'info') statusEl.classList.add(level);
+        statusEl.textContent = msg;
+      }
+
+      let lastFocus = null;
+      function focusables() {
+        return modal.querySelectorAll(
+          'a[href], input:not([disabled]):not([type=hidden]), select:not([disabled]), ' +
+          'textarea:not([disabled]), button:not([disabled])'
+        );
+      }
+      function openModal() {
+        lastFocus = document.activeElement;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        clearStatus();
+        refreshUWStatus();
+        requestAnimationFrame(() => {
+          const first = focusables()[0];
+          if (first) first.focus();
+        });
+      }
+      function closeModal() {
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') closeModal();
+      });
+      openBtn  && openBtn.addEventListener('click', openModal);
+      closeBtn && closeBtn.addEventListener('click', closeModal);
+      cancelBtn && cancelBtn.addEventListener('click', closeModal);
+
+      // ---- Collect every block input (comps, projects) ----
+      function collectBlockInputs(containerId, prefix, count) {
+        const out = [];
+        for (let i = 1; i <= count; i++) {
+          const photoEl   = modal.querySelector('[data-om-key="' + prefix + i + '_photo"]');
+          const addressEl = modal.querySelector('[data-om-key="' + prefix + i + '_address"]');
+          const specsEl   = modal.querySelector('[data-om-key="' + prefix + i + '_specs"]');
+          const priceEl   = modal.querySelector('[data-om-key="' + prefix + i + '_price"]');
+          const statusEl  = modal.querySelector('[data-om-key="' + prefix + i + '_status"]');
+          const dateEl    = modal.querySelector('[data-om-key="' + prefix + i + '_date"]');
+          const item = {
+            photo: photoEl ? readFile(photoEl) : null,
+            address: addressEl ? addressEl.value.trim() : '',
+            specs:   specsEl   ? specsEl.value.trim()   : '',
+            price:   priceEl   ? priceEl.value.trim()   : '',
+            status:  statusEl  ? statusEl.value.trim()  : '',
+            date:    dateEl    ? dateEl.value.trim()    : '',
+          };
+          out.push(item);
+        }
+        return out;
+      }
+
+      // ---- Submit ----
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearStatus();
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+
+        const requestId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        const outputWin = window.open('om.html?req=' + requestId, '_blank');
+        if (!outputWin) {
+          setStatus('warn', 'Pop-up blocked — allow pop-ups, then click Generate again.');
+          return;
+        }
+
+        const originalLabel = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Preparing…';
+
+        try {
+          const payload = {
+            requestId: requestId,
+            generatedAt: new Date().toISOString(),
+
+            // Cover
+            projectName:    val('om-project-name'),
+            neighborhood:   val('om-neighborhood'),
+            address:        val('om-address'),
+            heroPhoto:      readFile(document.getElementById('om-hero')),
+
+            // Overview
+            overviewText:        val('om-overview-text'),
+            constructionStart:   val('om-constr-start'),
+            completion:          val('om-completion'),
+            existingPhoto:       readFile(document.getElementById('om-existing-photo')),
+
+            // Lot
+            lotText:        val('om-lot-text'),
+            lotPhoto:       readFile(document.getElementById('om-lot-photo')),
+
+            // Location
+            locationText:   val('om-location-text'),
+            mapPhoto:       readFile(document.getElementById('om-map-photo')),
+
+            // Anticipated build · vibe
+            buildVibeText:   val('om-build-vibe-text'),
+            exteriorPhoto:   readFile(document.getElementById('om-exterior-photo')),
+            interiorPhoto:   readFile(document.getElementById('om-interior-photo')),
+
+            // Anticipated build · stats
+            sqft:           val('om-sqft'),
+            bdBa:           val('om-bd-ba'),
+            yardNote:       val('om-yard-note'),
+            areaPsf:        val('om-area-psf'),
+            buildStatsText: val('om-build-stats-text'),
+
+            // Anticipated build · pricing
+            anchorAddress: val('om-anchor-address'),
+            anchorSold:    val('om-anchor-sold'),
+            anchorPsf:     val('om-anchor-psf'),
+            targetSale:    val('om-target-sale'),
+            targetPsf:     val('om-target-psf'),
+            pricingText:   val('om-pricing-text'),
+
+            // Comps & projects
+            soldComps:     collectBlockInputs('om-sold-comps',    'sold', 3),
+            singleStoryComps: collectBlockInputs('om-ss-comps',   'ss',   3),
+            otherProjects: collectBlockInputs('om-other-projects','proj', 3),
+
+            // Market
+            marketText:    val('om-market-text'),
+            skylinePhoto:  readFile(document.getElementById('om-skyline-photo')),
+
+            // Summary
+            summaryText:   val('om-summary-text'),
+
+            // Pull underwriting state for pages 11–12
+            uw:            loadUWState(),
+          };
+
+          await idbPut('current', payload);
+          closeModal();
+        } catch (err) {
+          console.error('OM submit failed:', err);
+          setStatus('err', 'Error preparing OM: ' + (err && err.message ? err.message : err));
+          try { outputWin.close(); } catch (_) {}
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalLabel;
+        }
       });
     })();
 
