@@ -478,6 +478,41 @@
       blobUrls.push(u);
       return u;
     }
+
+    // Convert a Blob → base64 data URL. Required because html2canvas does
+    // NOT reliably capture blob: URLs used in CSS background-image during
+    // its iframe-clone step. Data URLs survive that clone intact.
+    function blobToDataUrl(blob) {
+      return new Promise((resolve, reject) => {
+        const fr = new FileReader();
+        fr.onload  = () => resolve(fr.result);
+        fr.onerror = () => reject(fr.error);
+        fr.readAsDataURL(blob);
+      });
+    }
+    // Walk the payload, replacing every Blob with a stored dataUrl. After
+    // this runs, bgFromBlob can pull from file.dataUrl with no async.
+    async function preprocessPhotos(d) {
+      async function convert(p) {
+        if (!p || !p.blob || p.dataUrl) return p;
+        try { p.dataUrl = await blobToDataUrl(p.blob); }
+        catch (err) { console.warn('blob→dataUrl failed', err); }
+        return p;
+      }
+      const single = [
+        'heroPhoto','existingPhoto','lotPhoto','mapPhoto',
+        'exteriorPhoto','interiorPhoto','statsPhoto','pricingPhoto',
+        'skylinePhoto',
+      ];
+      for (const k of single) { if (d[k]) await convert(d[k]); }
+      for (const arr of [d.soldComps, d.singleStoryComps, d.otherProjects]) {
+        if (Array.isArray(arr)) {
+          for (const item of arr) {
+            if (item && item.photo) await convert(item.photo);
+          }
+        }
+      }
+    }
     function esc(s) {
       return String(s == null ? '' : s)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -504,8 +539,13 @@
       return '<div class="om-logo"><img src="assets/icon-512.png" alt="The Stonehouse Company" /></div>';
     }
     function bgFromBlob(file) {
-      if (!file || !file.blob) return '';
-      return 'background-image:url(' + JSON.stringify(blobToUrl(file.blob)) + ');';
+      if (!file) return '';
+      // Prefer the dataUrl set by preprocessPhotos — survives html2canvas's
+      // DOM clone reliably. Fall back to a fresh blob URL for on-screen
+      // preview if dataUrl conversion failed for some reason.
+      if (file.dataUrl) return 'background-image:url(' + JSON.stringify(file.dataUrl) + ');';
+      if (file.blob)    return 'background-image:url(' + JSON.stringify(blobToUrl(file.blob)) + ');';
+      return '';
     }
 
     // --- Translate a logged-deal row from the Underwriting Deal Log sheet
@@ -669,10 +709,12 @@
       const psfLine = d.areaPsf
         ? '<p>Average price per square foot exceeding ' + esc(d.areaPsf) + ' in the immediate area</p>'
         : '';
+      // Prefer the page-6-specific upload; fall back to hero rendering.
+      const photo = d.statsPhoto || d.heroPhoto;
       return (
         '<section class="om-page">' +
           '<div class="om-split">' +
-            '<div class="pane-photo' + (d.heroPhoto ? '' : ' empty') + '" style="' + bgFromBlob(d.heroPhoto) + '"></div>' +
+            '<div class="pane-photo' + (photo ? '' : ' empty') + '" style="' + bgFromBlob(photo) + '"></div>' +
             '<div class="pane-text">' +
               '<h2>Anticipated Build</h2>' +
               narrativeHtml +
@@ -703,10 +745,12 @@
           : '';
         html = (sqftBit || compBit) ? ('<p>We plan to build a similarly designed luxury estate. Our project will total approximately ' + sqftBit + compBit + '</p>' + targetBit) : '<p style="color:var(--text-dim);">(Pricing narrative not yet provided.)</p>';
       }
+      // Prefer the page-7-specific upload; fall back to the interior reference.
+      const photo = d.pricingPhoto || d.interiorPhoto;
       return (
         '<section class="om-page">' +
           '<div class="om-split">' +
-            '<div class="pane-photo' + (d.interiorPhoto ? '' : ' empty') + '" style="' + bgFromBlob(d.interiorPhoto) + '"></div>' +
+            '<div class="pane-photo' + (photo ? '' : ' empty') + '" style="' + bgFromBlob(photo) + '"></div>' +
             '<div class="pane-text">' +
               '<h2>Anticipated Build</h2>' +
               html +
@@ -1045,6 +1089,10 @@
         return;
       }
       __payload = d;
+      setStatus('Preparing photos…');
+      // Convert every uploaded photo to a base64 data URL so they survive
+      // html2canvas's DOM clone when we capture each page for the PDF.
+      await preprocessPhotos(d);
       setStatus('Rendering…');
       render(d);
       await whenReady();

@@ -3157,12 +3157,20 @@
               <label for="om-build-stats-text">Build Narrative</label>
               <textarea id="om-build-stats-text" name="build_stats_text" rows="4" placeholder="We are looking to build a one of a kind single story build. Very few single story builds have made it to market, with most pre selling during construction."></textarea>
             </div>
+            <div class="full">
+              <label for="om-stats-photo">Page 6 Photo (defaults to Hero Rendering if blank)</label>
+              <input id="om-stats-photo" name="stats_photo" type="file" accept="image/*" />
+            </div>
           </div>
         </fieldset>
 
         <fieldset>
           <legend>Anticipated Build · Pricing (Page 7)</legend>
           <div class="form-grid">
+            <div class="full">
+              <label for="om-pricing-photo">Page 7 Photo (defaults to Interior Reference if blank)</label>
+              <input id="om-pricing-photo" name="pricing_photo" type="file" accept="image/*" />
+            </div>
             <div>
               <label for="om-anchor-address">Anchor Comp Address</label>
               <input id="om-anchor-address" name="anchor_address" type="text" placeholder="310 Jocelyn Hollow Cir" />
@@ -6099,8 +6107,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             yardNote:       val('om-yard-note'),
             areaPsf:        val('om-area-psf'),
             buildStatsText: val('om-build-stats-text'),
+            statsPhoto:     readFile(document.getElementById('om-stats-photo')),
 
             // Anticipated build · pricing
+            pricingPhoto:  readFile(document.getElementById('om-pricing-photo')),
             anchorAddress: val('om-anchor-address'),
             anchorSold:    val('om-anchor-sold'),
             anchorPsf:     val('om-anchor-psf'),
