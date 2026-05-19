@@ -66,6 +66,17 @@
     .toolbar .tb-btn:hover { opacity: .85; }
     .toolbar .tb-btn:disabled { opacity: .4; cursor: wait; }
 
+    /* Universal image fill — used inside every photo slot so html2canvas
+       captures the image as a real DOM element rather than a CSS bg. */
+    .om-fill {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
     /* PAGE — landscape 10×5.625" widescreen.
        Width of 1000px → height 562.5px at 100% zoom. We render at this
        exact size on screen; html2canvas captures at scale:2 for crisp
@@ -96,8 +107,7 @@
     .om-page.cover .cover-hero {
       position: absolute; inset: 0;
       background-color: #111;
-      background-size: cover;
-      background-position: center;
+      overflow: hidden;
     }
     .om-page.cover .cover-hero::after {
       content: ""; position: absolute; inset: 0;
@@ -153,8 +163,8 @@
     .om-split.right-text { /* photo left, writeup right */ }
     .om-split .pane-photo {
       background-color: #111;
-      background-size: cover;
-      background-position: center;
+      position: relative;
+      overflow: hidden;
     }
     .om-split .pane-photo.empty {
       display: flex; align-items: center; justify-content: center;
@@ -217,7 +227,9 @@
     }
     .om-vibe .vibe-img {
       flex: 1;
-      background-color: #111; background-size: cover; background-position: center;
+      background-color: #111;
+      position: relative;
+      overflow: hidden;
     }
     .om-vibe .vibe-img.empty {
       display: flex; align-items: center; justify-content: center;
@@ -259,7 +271,8 @@
     .om-grid .grid-card .card-img {
       width: 100%; height: 200px;
       background-color: #111;
-      background-size: cover; background-position: center;
+      position: relative;
+      overflow: hidden;
       margin-bottom: 14px;
     }
     .om-grid .grid-card .card-img.empty {
@@ -365,18 +378,24 @@
     /* Summary page (page 14) - hero overlay + text */
     .om-page.summary {
       background-color: #111;
-      background-size: cover; background-position: center;
+      overflow: hidden;
+    }
+    .om-page.summary > .summary-bg {
+      position: absolute; inset: 0;
+      overflow: hidden;
     }
     .om-page.summary::after {
       content: ""; position: absolute; inset: 0;
       background: rgba(0,0,0,0.62);
+      z-index: 1;
     }
     .om-page.summary .summary-body {
-      position: relative; z-index: 1;
+      position: relative; z-index: 2;
       padding: 60px 80px;
       height: 100%;
       display: flex; flex-direction: column;
     }
+    .om-page.summary .brand-corner { z-index: 2; }
     .om-page.summary h2 {
       font-family: var(--font-display);
       font-size: 26px; letter-spacing: 0.1em; text-transform: uppercase;
@@ -538,14 +557,17 @@
     function logo() {
       return '<div class="om-logo"><img src="assets/icon-512.png" alt="The Stonehouse Company" /></div>';
     }
-    function bgFromBlob(file) {
+    // Return a real <img> element that fills its parent. We render images
+    // this way (rather than via CSS background-image) because html2canvas
+    // captures real <img> tags with data-url src reliably, but is flaky
+    // with large data URLs in CSS backgrounds.
+    function imgFill(file, alt) {
       if (!file) return '';
-      // Prefer the dataUrl set by preprocessPhotos — survives html2canvas's
-      // DOM clone reliably. Fall back to a fresh blob URL for on-screen
-      // preview if dataUrl conversion failed for some reason.
-      if (file.dataUrl) return 'background-image:url(' + JSON.stringify(file.dataUrl) + ');';
-      if (file.blob)    return 'background-image:url(' + JSON.stringify(blobToUrl(file.blob)) + ');';
-      return '';
+      let src = '';
+      if (file.dataUrl) src = file.dataUrl;
+      else if (file.blob) src = blobToUrl(file.blob);
+      if (!src) return '';
+      return '<img class="om-fill" src="' + src + '" alt="' + esc(alt || '') + '" />';
     }
 
     // --- Translate a logged-deal row from the Underwriting Deal Log sheet
@@ -610,7 +632,7 @@
     function pageCover(d) {
       return (
         '<section class="om-page cover">' +
-          '<div class="cover-hero" style="' + bgFromBlob(d.heroPhoto) + '"></div>' +
+          '<div class="cover-hero">' + imgFill(d.heroPhoto, 'Hero rendering') + '</div>' +
           '<div class="date-stamp">' + esc(fmtMonthYear(d.generatedAt)) + '</div>' +
           '<div class="cover-title">Offer<br/>Memorandum</div>' +
           '<div class="cover-subtitle">' +
@@ -633,7 +655,7 @@
       return (
         '<section class="om-page">' +
           '<div class="om-split">' +
-            '<div class="pane-photo' + (d.existingPhoto ? '' : ' empty') + '" style="' + bgFromBlob(d.existingPhoto) + '"></div>' +
+            '<div class="pane-photo' + (d.existingPhoto ? '' : ' empty') + '">' + imgFill(d.existingPhoto, 'Existing property') + '</div>' +
             '<div class="pane-text">' +
               '<h2>Overview / Writeup</h2>' +
               (d.overviewText ? nl2p(d.overviewText) : '<p style="color:var(--text-dim);">(Overview writeup not yet provided.)</p>') +
@@ -649,7 +671,7 @@
       return (
         '<section class="om-page">' +
           '<div class="om-split">' +
-            '<div class="pane-photo' + (d.lotPhoto ? '' : ' empty') + '" style="' + bgFromBlob(d.lotPhoto) + '"></div>' +
+            '<div class="pane-photo' + (d.lotPhoto ? '' : ' empty') + '">' + imgFill(d.lotPhoto, 'Lot') + '</div>' +
             '<div class="pane-text">' +
               '<h2>Lot</h2>' +
               (d.lotText ? nl2p(d.lotText) : '<p style="color:var(--text-dim);">(Lot description not yet provided.)</p>') +
@@ -668,7 +690,7 @@
               '<h2>Location</h2>' +
               (d.locationText ? nl2p(d.locationText) : '<p style="color:var(--text-dim);">(Location writeup not yet provided.)</p>') +
             '</div>' +
-            '<div class="pane-photo' + (d.mapPhoto ? '' : ' empty') + '" style="' + bgFromBlob(d.mapPhoto) + '"></div>' +
+            '<div class="pane-photo' + (d.mapPhoto ? '' : ' empty') + '">' + imgFill(d.mapPhoto, 'Location map') + '</div>' +
           '</div>' +
           logo() +
         '</section>'
@@ -684,11 +706,11 @@
               (d.buildVibeText ? nl2p(d.buildVibeText) : '<p style="color:var(--text-dim);">(Build narrative not yet provided.)</p>') +
             '</div>' +
             '<div class="vibe-pane">' +
-              '<div class="vibe-img' + (d.exteriorPhoto ? '' : ' empty') + '" style="' + bgFromBlob(d.exteriorPhoto) + '"></div>' +
+              '<div class="vibe-img' + (d.exteriorPhoto ? '' : ' empty') + '">' + imgFill(d.exteriorPhoto, 'Exterior reference') + '</div>' +
               '<div class="vibe-caption">Exterior</div>' +
             '</div>' +
             '<div class="vibe-pane">' +
-              '<div class="vibe-img' + (d.interiorPhoto ? '' : ' empty') + '" style="' + bgFromBlob(d.interiorPhoto) + '"></div>' +
+              '<div class="vibe-img' + (d.interiorPhoto ? '' : ' empty') + '">' + imgFill(d.interiorPhoto, 'Interior reference') + '</div>' +
               '<div class="vibe-caption">Interior</div>' +
             '</div>' +
           '</div>' +
@@ -714,7 +736,7 @@
       return (
         '<section class="om-page">' +
           '<div class="om-split">' +
-            '<div class="pane-photo' + (photo ? '' : ' empty') + '" style="' + bgFromBlob(photo) + '"></div>' +
+            '<div class="pane-photo' + (photo ? '' : ' empty') + '">' + imgFill(photo, 'Build photo') + '</div>' +
             '<div class="pane-text">' +
               '<h2>Anticipated Build</h2>' +
               narrativeHtml +
@@ -750,7 +772,7 @@
       return (
         '<section class="om-page">' +
           '<div class="om-split">' +
-            '<div class="pane-photo' + (photo ? '' : ' empty') + '" style="' + bgFromBlob(photo) + '"></div>' +
+            '<div class="pane-photo' + (photo ? '' : ' empty') + '">' + imgFill(photo, 'Pricing photo') + '</div>' +
             '<div class="pane-text">' +
               '<h2>Anticipated Build</h2>' +
               html +
@@ -769,7 +791,7 @@
             '<div class="three-up">' +
               items.map((c) => (
                 '<div class="grid-card">' +
-                  '<div class="card-img' + (c.photo ? '' : ' empty') + '" style="' + bgFromBlob(c.photo) + '"></div>' +
+                  '<div class="card-img' + (c.photo ? '' : ' empty') + '">' + imgFill(c.photo, c.address || 'Comp') + '</div>' +
                   (c.address ? '<div class="card-address">' + esc(c.address) + '</div>' : '') +
                   (c.specs   ? '<div class="card-row">' + esc(c.specs)   + '</div>' : '') +
                   (c.price   ? '<div class="card-row">' + esc(c.price)   + '</div>' : '') +
@@ -790,7 +812,7 @@
             '<div class="three-up">' +
               items.map((p) => (
                 '<div class="grid-card">' +
-                  '<div class="card-img' + (p.photo ? '' : ' empty') + '" style="' + bgFromBlob(p.photo) + '"></div>' +
+                  '<div class="card-img' + (p.photo ? '' : ' empty') + '">' + imgFill(p.photo, p.address || 'Project') + '</div>' +
                   (p.address ? '<div class="card-address">' + esc(p.address) + '</div>' : '') +
                   (p.status  ? '<div class="card-row status">' + esc(p.status) + '</div>' : '') +
                   (p.price   ? '<div class="card-row">' + esc(p.price) + '</div>' : '') +
@@ -913,7 +935,7 @@
       return (
         '<section class="om-page">' +
           '<div class="om-split">' +
-            '<div class="pane-photo' + (d.skylinePhoto ? '' : ' empty') + '" style="' + bgFromBlob(d.skylinePhoto) + '"></div>' +
+            '<div class="pane-photo' + (d.skylinePhoto ? '' : ' empty') + '">' + imgFill(d.skylinePhoto, 'Nashville skyline') + '</div>' +
             '<div class="pane-text">' +
               '<h2>Nashville Market</h2>' +
               (d.marketText ? nl2p(d.marketText) : '<p style="color:var(--text-dim);">(Market writeup not yet provided.)</p>') +
@@ -925,9 +947,9 @@
     }
 
     function pageSummary(d) {
-      const bg = d.heroPhoto ? bgFromBlob(d.heroPhoto) : '';
       return (
-        '<section class="om-page summary" style="' + bg + '">' +
+        '<section class="om-page summary">' +
+          '<div class="summary-bg">' + imgFill(d.heroPhoto, 'Background') + '</div>' +
           '<div class="brand-corner">' +
             '<img src="assets/icon-512.png" alt="The Stonehouse Company" />' +
             '<span class="text">The Stonehouse Co.</span>' +
