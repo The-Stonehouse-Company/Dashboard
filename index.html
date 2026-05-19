@@ -801,6 +801,45 @@
       .stage-stepper { padding: 0; gap: 0; }
       .stage-step .stage-label { font-size: 7px; }
     }
+
+    /* Completed-project compact row — archival look (no stepper, no
+       progress bar, smaller card). Lives below the active pipeline. */
+    .completed-list .deal-card {
+      padding: 16px 22px 14px;
+      background: transparent;
+      border-color: var(--rule);
+    }
+    .completed-list .deal-card .deal-head {
+      padding-bottom: 0;
+      border-bottom: 0;
+      margin-bottom: 0;
+      align-items: center;
+    }
+    .completed-list .deal-card .deal-address {
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: var(--text-muted);
+    }
+    .completed-list .deal-card .deal-meta {
+      font-size: 9px;
+    }
+    .completed-list .deal-card .deal-price {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .completed-list .completed-co {
+      font-size: 9px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+      margin-top: 2px;
+      text-align: right;
+    }
+    .completed-list .completed-co strong {
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-right: 4px;
+    }
     @media (max-width: 640px) {
       .deal-bar .bar-row { grid-template-columns: 1fr; gap: 6px; }
       .deal-bar .bar-dates { grid-column: 1; }
@@ -1967,6 +2006,19 @@
           </header>
           <div class="deal-list" id="customrep-pipeline-list">
             <div class="deal-empty">Loading projects…</div>
+          </div>
+        </section>
+
+        <section class="pipeline-section" aria-labelledby="customrep-completed-title">
+          <header class="pipeline-head">
+            <div>
+              <div class="eyebrow" style="margin-bottom:8px;">Archive</div>
+              <h2 class="pipeline-title" id="customrep-completed-title">Completed Projects</h2>
+            </div>
+            <div class="pipeline-meta" id="customrep-completed-meta">—</div>
+          </header>
+          <div class="deal-list completed-list" id="customrep-completed-list">
+            <div class="deal-empty">No completed projects yet.</div>
           </div>
         </section>
 
@@ -3891,6 +3943,37 @@
         );
       }
 
+      // Compact one-row card for completed projects — archival look.
+      // Drops the stepper + progress bar; just shows the essentials.
+      function renderCompletedRow(p) {
+        const teamRow = [
+          p.architect ? '<strong>Architect</strong><span class="v">' + esc(p.architect) + '</span>' : '',
+          p.builder   ? '<strong>Builder</strong><span class="v">'   + esc(p.builder)   + '</span>' : '',
+        ].filter(Boolean).join('<span class="sep" style="margin:0 10px;color:var(--text-dim);">·</span>');
+
+        return (
+          '<article class="deal-card">' +
+            '<header class="deal-head">' +
+              '<div>' +
+                '<h3 class="deal-address">' + esc(p.client || p.address || 'Untitled project') + '</h3>' +
+                '<div class="deal-meta">' + esc(p.address || '') + '</div>' +
+                (teamRow ? '<div class="deal-meta-row" style="margin-top:4px;">' + teamRow + '</div>' : '') +
+              '</div>' +
+              '<div>' +
+                (p.hardCost
+                  ? '<div class="deal-price">' + esc(fmtUSD(p.hardCost)) + '</div>'
+                  : ''
+                ) +
+                (p.projectedCO
+                  ? '<div class="completed-co"><strong>Completed</strong>' + esc(fmtDate(p.projectedCO)) + '</div>'
+                  : ''
+                ) +
+              '</div>' +
+            '</header>' +
+          '</article>'
+        );
+      }
+
       async function loadPipeline() {
         try {
           setMeta('Loading…');
@@ -3922,7 +4005,7 @@
           }
 
           const today = startOfDay(new Date());
-          const projects = rawRows.map((r) => {
+          const allProjects = rawRows.map((r) => {
             const c = r.c || [];
             return {
               client:           ix.client          >= 0 ? parseGvizString(c[ix.client])          : '',
@@ -3938,25 +4021,58 @@
               notes:            ix.notes           >= 0 ? parseGvizString(c[ix.notes])           : '',
             };
           })
-          // Active projects only: filter out anything that's clearly closed (CO date in the past)
-          .filter((p) => !p.projectedCO || p.projectedCO >= today)
-          // Need at least an identifying field
+          // Need at least an identifying field to render a card.
           .filter((p) => p.client || p.address);
 
+          // Split into active vs completed:
+          //   Completed = stage explicitly marked C.O. OR projected CO
+          //               date is in the past (regardless of stage).
+          //   Active    = everything else.
+          // This catches both "we updated stage to CO" and "the CO date
+          // has elapsed and we never updated stage" workflows.
+          function isCompleted(p) {
+            const stageDone = p.stage && /\bc\W*o\b|occupancy|complete/i.test(p.stage);
+            const dateDone  = p.projectedCO && p.projectedCO < today;
+            return stageDone || dateDone;
+          }
+          const completed = allProjects.filter(isCompleted);
+          const projects  = allProjects.filter((p) => !isCompleted(p));
+
+          // Active: sort by CO date ascending (soonest first)
           projects.sort((a, b) => {
             const ac = a.projectedCO ? a.projectedCO.getTime() : Infinity;
             const bc = b.projectedCO ? b.projectedCO.getTime() : Infinity;
             return ac - bc;
           });
+          // Completed: sort by CO date descending (most recently finished first)
+          completed.sort((a, b) => {
+            const ac = a.projectedCO ? a.projectedCO.getTime() : 0;
+            const bc = b.projectedCO ? b.projectedCO.getTime() : 0;
+            return bc - ac;
+          });
 
+          // --- Render active list ---
           if (projects.length === 0) {
             setMeta('0 active projects');
             setEmpty('No active custom-rep projects.');
-            return;
+          } else {
+            setMeta(projects.length + ' active project' + (projects.length === 1 ? '' : 's'));
+            listEl.innerHTML = projects.map((p) => renderProjectCard(p, today)).join('');
           }
 
-          setMeta(projects.length + ' active project' + (projects.length === 1 ? '' : 's'));
-          listEl.innerHTML = projects.map((p) => renderProjectCard(p, today)).join('');
+          // --- Render completed list ---
+          const completedListEl = document.getElementById('customrep-completed-list');
+          const completedMetaEl = document.getElementById('customrep-completed-meta');
+          if (completed.length === 0) {
+            if (completedMetaEl) completedMetaEl.textContent = '—';
+            if (completedListEl) completedListEl.innerHTML =
+              '<div class="deal-empty">No completed projects yet.</div>';
+          } else {
+            if (completedMetaEl) completedMetaEl.textContent =
+              completed.length + ' completed';
+            if (completedListEl) completedListEl.innerHTML =
+              completed.map(renderCompletedRow).join('');
+          }
         } catch (err) {
           console.error('Custom Rep pipeline load failed:', err);
           setMeta('Could not load');
