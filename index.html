@@ -2814,6 +2814,7 @@
                   <select id="uw-cap-mode">
                     <option value="LTC">% of Total Cost (LTC)</option>
                     <option value="LandSoft">% of Land + Soft Costs</option>
+                    <option value="LTV">% of Sales Price (LTV)</option>
                   </select>
                 </div>
                 <div class="uw-field" id="uw-ltc-wrap">
@@ -2829,6 +2830,17 @@
                 <div class="uw-field" id="uw-ltc-custom-wrap" hidden>
                   <label for="uw-ltc-custom">Custom Equity</label>
                   <div class="suffix" data-suffix="%"><input id="uw-ltc-custom" type="number" min="0" max="100" step="0.5" value="20" /></div>
+                </div>
+                <div class="uw-field" id="uw-ltv-wrap" hidden>
+                  <label for="uw-ltv-target">Target LTV</label>
+                  <div class="suffix" data-suffix="%"><input id="uw-ltv-target" type="number" min="0" max="100" step="0.5" value="70" /></div>
+                </div>
+                <div class="uw-field full" id="uw-cap-derived" style="margin-top:4px;">
+                  <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:var(--tracking-wide); line-height:1.7;">
+                    Derived &nbsp;·&nbsp; LTC <span id="uw-cap-ltc" style="color:var(--text-muted);">—</span>
+                    &nbsp;·&nbsp; LTV <span id="uw-cap-ltv" style="color:var(--text-muted);">—</span>
+                    &nbsp;·&nbsp; Equity <span id="uw-cap-eq" style="color:var(--text-muted);">—</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -4779,6 +4791,7 @@
         capMode:        document.getElementById('uw-cap-mode'),
         ltc:            document.getElementById('uw-ltc'),
         ltcCustom:      document.getElementById('uw-ltc-custom'),
+        ltvTarget:      document.getElementById('uw-ltv-target'),
         lotCost:        document.getElementById('uw-lot-cost'),
         ownerEquity:    document.getElementById('uw-owner-equity'),
         taxes:          document.getElementById('uw-taxes'),
@@ -4787,7 +4800,9 @@
         designer:       document.getElementById('uw-designer'),
         architect:      document.getElementById('uw-architect'),
       };
+      const ltcWrap       = document.getElementById('uw-ltc-wrap');
       const ltcCustomWrap = document.getElementById('uw-ltc-custom-wrap');
+      const ltvWrap       = document.getElementById('uw-ltv-wrap');
 
       // ---- output elements ----
       const out = (id) => document.getElementById(id);
@@ -4861,22 +4876,32 @@
         return { months, totalInterest, kc, kL, landLoan, constrLoan, totalHold };
       }
 
-      // ---- Closed-form total project cost solver ----
+      // ---- Total project cost solver ----
       // Inputs.c26 = subtotal hard costs (incl. developer fee). Returns
       // the equilibrium F20 given the active capital mode + factors.
-      function solveTotalProjectCost({ c26, landLoan, kc, kL, bankFeePct, capMode, equityFixed, equityFrac }) {
+      //
+      // LandSoft (Mode 1): equity fixed →
+      //   F20 = (C26 − E·ICF + landLoan·(kL−kc)) / (1 − ICF)
+      // LTC (Mode 2): equity = eq%·F20 →
+      //   F20 = (C26 + landLoan·(kL−kc)) / (1 − (1−eq%)·ICF)
+      // LTV (Mode 3): loan is fixed at ltv%·grossSales (no self-reference
+      //   on F20 → no closed-form solver, just direct addition).
+      //   F20 = C26 + loan·ICF + landLoan·(kL−kc)
+      function solveTotalProjectCost({ c26, landLoan, kc, kL, bankFeePct, capMode,
+                                       equityFixed, equityFrac, ltvLoan }) {
         const ICF = bankFeePct + kc;
         const adj = landLoan * (kL - kc);
         if (capMode === 'LandSoft') {
-          // F20 = (C26 - E*ICF + landLoan*(kL - kc)) / (1 - ICF)
           if (1 - ICF === 0) return 0;
           return (c26 - equityFixed * ICF + adj) / (1 - ICF);
-        } else {
-          // LTC: F20 = (C26 + landLoan*(kL - kc)) / (1 - (1 - eq%) * ICF)
-          const denom = 1 - (1 - equityFrac) * ICF;
-          if (denom === 0) return 0;
-          return (c26 + adj) / denom;
         }
+        if (capMode === 'LTV') {
+          return c26 + (ltvLoan || 0) * ICF + adj;
+        }
+        // LTC (default)
+        const denom = 1 - (1 - equityFrac) * ICF;
+        if (denom === 0) return 0;
+        return (c26 + adj) / denom;
       }
 
       // ---- Main model computation ----
@@ -4913,16 +4938,32 @@
         const equityFixed = state.ownerEquity + state.taxes + state.title;
         const equityFrac  = ltcEquityFrac();
 
+        // Mode 3 (LTV) — loan is sized to a target % of expected sales.
+        // Compute grossSales first so we can hand the loan to the solver.
+        const salePerHomePreview = state.salePsf * state.sqft;
+        const grossSalesPreview  = salePerHomePreview * state.numHomes;
+        const ltvFrac = (state.ltvTarget || 0) / 100;
+        const ltvLoan = state.capMode === 'LTV' ? ltvFrac * grossSalesPreview : 0;
+
         const tpc = solveTotalProjectCost({
           c26, landLoan, kc, kL,
           bankFeePct: state.bankFeePct,
           capMode: state.capMode,
-          equityFixed, equityFrac,
+          equityFixed, equityFrac, ltvLoan,
         });
 
         // Now derive equity, loan, etc.
-        const equity = state.capMode === 'LandSoft' ? equityFixed : tpc * equityFrac;
-        const loan   = tpc - equity;
+        let equity, loan;
+        if (state.capMode === 'LandSoft') {
+          equity = equityFixed;
+          loan   = tpc - equity;
+        } else if (state.capMode === 'LTV') {
+          loan   = ltvLoan;
+          equity = tpc - loan;
+        } else {
+          equity = tpc * equityFrac;
+          loan   = tpc - equity;
+        }
         const bankFees = loan * state.bankFeePct;
 
         // Recompute draw schedule with the actual loan amounts to fill
@@ -5001,6 +5042,7 @@
           capMode: inputs.capMode.value,
           ltc: inputs.ltc.value,
           ltcCustom: num(inputs.ltcCustom),
+          ltvTarget: num(inputs.ltvTarget),
           lotCost: num(inputs.lotCost),
           ownerEquity: num(inputs.ownerEquity),
           taxes: num(inputs.taxes),
@@ -5036,11 +5078,15 @@
           ['taxes', 'taxes'], ['title', 'title'],
           ['pool', 'pool'], ['designer', 'designer'], ['architect', 'architect'],
           ['ltcCustom', 'ltcCustom'],
+          ['ltvTarget', 'ltvTarget'],
         ];
         for (const [k, inputKey, mul = 1] of map) {
           if (typeof s[k] === 'number' && !isNaN(s[k])) {
-            const v = mul === 100 ? (s[k] * 100) : s[k];
-            inputs[inputKey].value = v;
+            // Round to kill JS float-math artifacts like 0.035 * 100 = 3.5000000000000004.
+            const raw = mul === 100 ? (s[k] * 100) : s[k];
+            const v = Number(raw.toFixed(6)).toString();
+            // Strip trailing zeros / decimal point for clean display ("3.5" not "3.500000").
+            inputs[inputKey].value = v.replace(/\.?0+$/, '');
           }
         }
         if (s.capMode) inputs.capMode.value = s.capMode;
@@ -5052,8 +5098,21 @@
         const state = readState();
         const r = compute(state);
 
-        // Toggle LTC custom field
-        ltcCustomWrap.hidden = inputs.ltc.value !== 'Custom';
+        // Show/hide mode-specific fields. Each capital mode reveals
+        // exactly the inputs that affect it (and hides the rest).
+        const mode = state.capMode;
+        ltcWrap.hidden        = mode !== 'LTC';
+        ltcCustomWrap.hidden  = mode !== 'LTC' || inputs.ltc.value !== 'Custom';
+        ltvWrap.hidden        = mode !== 'LTV';
+
+        // Always show derived LTC / LTV / Equity beneath the capital
+        // structure section so the agent can cross-reference.
+        const ltcDisp = out('uw-cap-ltc');
+        const ltvDisp = out('uw-cap-ltv');
+        const eqDisp  = out('uw-cap-eq');
+        if (ltcDisp) ltcDisp.textContent = fmtPct(r.ltc);
+        if (ltvDisp) ltvDisp.textContent = fmtPct(r.ltv);
+        if (eqDisp)  eqDisp.textContent  = fmtUSD(r.equity);
 
         // Show warning if Owner Equity > Lot Cost
         if (state.ownerEquity > state.lotCost && state.lotCost > 0) {
@@ -5259,6 +5318,7 @@
         inputs.capMode.value = 'LTC';
         inputs.ltc.value = '0.20';
         inputs.ltcCustom.value = 20;
+        inputs.ltvTarget.value = 70;
         render();
       });
 
