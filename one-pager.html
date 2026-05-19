@@ -1212,20 +1212,17 @@
       const summary = (1 + extraCount) + ' page' + (extraCount === 0 ? '' : 's') +
         (extraCount > 0 ? ' (cover + ' + extraCount + ' extra)' : ' (cover only)');
 
-      // If the dashboard reported any file-processing failures, show them
-      // prominently — silent failures were the reason plans/design board
-      // were going missing without any clue why. Receipts confirm what
-      // files we actually received, so it's visible whether the issue is
-      // upload-side or render-side.
-      const parts = ['Ready · ' + summary];
-      if (d.fileReceipts && d.fileReceipts.length) {
-        parts.push(d.fileReceipts.join('  ·  '));
-      }
+      // Show a clean, minimal status when things are working.
+      // Only surface file receipts + warnings if there's an actual
+      // failure — diagnostic clutter is only useful when debugging.
       if (d.warnings && d.warnings.length) {
-        parts.push('⚠  ' + d.warnings.join('  |  '));
+        const parts = ['Ready · ' + summary, '⚠  ' + d.warnings.join('  |  ')];
+        if (d.fileReceipts && d.fileReceipts.length) {
+          parts.splice(1, 0, d.fileReceipts.join('  ·  '));
+        }
         setStatus(parts.join('   '), 'warn');
       } else {
-        setStatus(parts.join('   '));
+        setStatus('Ready · ' + summary);
       }
       printBtn.disabled = false;
     })();
