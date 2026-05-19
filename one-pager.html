@@ -934,14 +934,44 @@
             setStatus('Merging ' + label + '…');
             const bytes = await blobToArrayBuffer(file.blob);
             const src = await PDFDocument.load(bytes, { ignoreEncryption: true });
-            const indices = src.getPageIndices();
-            // embedPdf returns PDFEmbeddedPage[] which we can draw onto
-            // newly-created Letter pages at any size. Unlike copyPages,
-            // this lets us SCALE the content rather than inheriting the
-            // source page's dimensions.
-            const embedded = await out.embedPdf(src, indices);
-            embedded.forEach((emb, i) => {
-              const isLandscape = emb.width > emb.height;
+            const srcPages = src.getPages();
+
+            // We embed each source page with an EXPLICIT bounding box
+            // taken from the CropBox (falling back to MediaBox). Some
+            // CAD/architectural exports use a MediaBox much larger than
+            // the visible content area, with the content positioned
+            // somewhere inside that box. The previous `embedPdf` call
+            // used MediaBox dimensions for sizing, so the visible
+            // content ended up offset to the bottom-left of the output
+            // page and partially clipped. Explicit cropbox bounds fix
+            // that by telling pdf-lib exactly which region of the source
+            // is the "real" page.
+            for (let i = 0; i < srcPages.length; i++) {
+              const srcPage = srcPages[i];
+
+              // Prefer CropBox (visible area), fall back to MediaBox.
+              // pdf-lib returns boxes as { x, y, width, height }.
+              let box;
+              try { box = srcPage.getCropBox(); }
+              catch (_) { box = srcPage.getMediaBox(); }
+              if (!box || !box.width || !box.height) {
+                box = srcPage.getMediaBox();
+              }
+
+              const bbox = {
+                left:   box.x,
+                bottom: box.y,
+                right:  box.x + box.width,
+                top:    box.y + box.height,
+              };
+
+              // embedPage(srcPage, bbox?) returns a PDFEmbeddedPage
+              // whose width/height equal the bbox dimensions (not the
+              // MediaBox), and whose drawn output is the contents of
+              // that exact region — no offset, no clipping.
+              const emb = await out.embedPage(srcPage, bbox);
+
+              const isLandscape = box.width > box.height;
               // Letter portrait = 612×792; Letter landscape = 792×612.
               const pageW = isLandscape ? PAGE_H_PT : PAGE_W_PT;
               const pageH = isLandscape ? PAGE_W_PT : PAGE_H_PT;
@@ -951,10 +981,10 @@
               // (usually white) and we don't want a black bar showing
               // through any letterboxing.
               page.drawRectangle({ x: 0, y: 0, width: pageW, height: pageH, color: rgb(1, 1, 1) });
-              const fit = fitInto(emb.width, emb.height, pageW, pageH);
+              const fit = fitInto(box.width, box.height, pageW, pageH);
               page.drawPage(emb, { x: fit.x, y: fit.y, width: fit.w, height: fit.h });
-            });
-            console.log('[one-pager] merged ' + label + ': ' + indices.length + ' page(s), scaled to Letter');
+            }
+            console.log('[one-pager] merged ' + label + ': ' + srcPages.length + ' page(s), scaled to Letter (cropbox-aware)');
           } else {
             setStatus('Embedding ' + label + '…');
             const { bytes, mime } = await fileToImageBytes(file);
