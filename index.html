@@ -1896,8 +1896,16 @@
       </div>
 
       <div class="subpanel" id="subpanel-sales-listings" role="tabpanel" aria-hidden="true" tabindex="0">
+        <div class="action-grid">
+          <button class="primary-action" type="button" id="open-newlisting-modal" aria-haspopup="dialog" aria-controls="newlisting-modal">
+            <span class="action-label">Log a New Listing</span>
+            <span class="action-sub">Add a new construction listing to the dashboard</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+
         <!-- Nested subtabbar: one tab per active listing.
-             Populated by the listings render script below. -->
+             Populated by the listings render script (hardcoded + sheet rows). -->
         <nav class="subtabbar listing-subtabbar" role="tablist" aria-label="Listings" id="listings-subtabbar"></nav>
         <!-- One .subpanel per listing is rendered here at load time. -->
         <div id="listings-subpanels"></div>
@@ -2431,6 +2439,121 @@
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="cancel-intake">Cancel</button>
         <button class="btn" type="submit" form="intake-form" id="submit-intake">Submit Property Intake</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========================= NEW LISTING MODAL ========================= -->
+  <div class="modal-overlay is-wide" id="newlisting-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="newlisting-title" id="newlisting-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Sales · New Construction</span>
+          <h2 class="modal-title" id="newlisting-title">Log a New Listing</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-newlisting-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="newlisting-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Listing</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="nlf-address">Listing Address <span class="req">*</span></label>
+              <input id="nlf-address" name="listing_address" type="text" required placeholder="1306 Clifton Ln, Nashville, TN" />
+            </div>
+            <div class="full">
+              <label for="nlf-label">Short Label <span class="req">*</span></label>
+              <input id="nlf-label" name="short_label" type="text" required placeholder="1306 Clifton" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Details</legend>
+          <div class="form-grid">
+            <div>
+              <label for="nlf-bd">Bedrooms</label>
+              <input id="nlf-bd" name="bedrooms" type="number" inputmode="numeric" min="0" step="1" placeholder="5" />
+            </div>
+            <div>
+              <label for="nlf-fb">Full Bathrooms</label>
+              <input id="nlf-fb" name="full_bathrooms" type="number" inputmode="numeric" min="0" step="1" placeholder="5" />
+            </div>
+            <div>
+              <label for="nlf-hb">Half Bathrooms</label>
+              <input id="nlf-hb" name="half_bathrooms" type="number" inputmode="numeric" min="0" step="1" placeholder="2" />
+            </div>
+            <div>
+              <label for="nlf-sqft">Square Footage</label>
+              <input id="nlf-sqft" name="square_footage" type="text" placeholder="3,941" />
+            </div>
+            <div>
+              <label for="nlf-garage">Garage</label>
+              <input id="nlf-garage" name="garage" type="text" placeholder="3 Car Garage" />
+            </div>
+            <div>
+              <label for="nlf-area">Area / Neighborhood</label>
+              <input id="nlf-area" name="area" type="text" placeholder="Green Hills" />
+            </div>
+            <div class="full">
+              <label for="nlf-features">Features</label>
+              <textarea id="nlf-features" name="features" rows="3" placeholder="One per line — Primary on Main, Elevator, Wine Cellar"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Price & Timeline</legend>
+          <div class="form-grid">
+            <div>
+              <label for="nlf-price">Price</label>
+              <input id="nlf-price" name="price" type="text" placeholder="$2.15M" />
+            </div>
+            <div>
+              <label for="nlf-completion">Completion</label>
+              <input id="nlf-completion" name="completion" type="text" placeholder="Winter 2026" />
+            </div>
+            <div class="full">
+              <label for="nlf-builder">Builder</label>
+              <input id="nlf-builder" name="builder" type="text" placeholder="Clear Creek" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Available Assets</legend>
+          <div class="form-grid">
+            <div>
+              <label for="nlf-onepager">One-Pager PDF</label>
+              <select id="nlf-onepager" name="one_pager_available" required>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+            <div>
+              <label for="nlf-plans">Building Plans PDF</label>
+              <select id="nlf-plans" name="building_plans_available" required>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+            <div>
+              <label for="nlf-designboard">Design Board PDF</label>
+              <select id="nlf-designboard" name="design_board_available" required>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+
+      <div class="form-status" id="newlisting-status"></div>
+
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-newlisting">Cancel</button>
+        <button class="btn" type="submit" form="newlisting-form" id="submit-newlisting">Log Listing</button>
       </footer>
     </div>
   </div>
@@ -4087,6 +4210,151 @@
     })();
 
     // ============================================================
+    // Sales · "Log a New Listing" modal controller
+    //  - Opens via the New Construction Listings sub-tab action card.
+    //  - Submit POSTs to the New Construction Listings Google Form
+    //    (no-cors). On success, triggers the listings renderer's
+    //    refresh hook so the new tab appears within a few seconds.
+    //
+    // SETUP REQUIRED:
+    //   1. Open the New Construction Listings Google Form.
+    //   2. Three-dot menu → Get pre-filled link → fill every field
+    //      with unique sentinel values → Get link → Copy.
+    //   3. Paste the URL back to the dashboard developer. Each
+    //      entry.NNNNNN=value pair gets mapped into FIELD_MAP.
+    //   4. Set FORM_URL to the form's /formResponse endpoint
+    //      (replace /viewform with /formResponse in the URL).
+    // ============================================================
+    (function () {
+      const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScMdR_BGfFoZkYsy8Y_V23sS00Cy-fz_sfrrD6pU0GpA7HCrQ/formResponse";
+
+      // Mapped from the pre-filled link's entry.NNN params in form-question order.
+      const FIELD_MAP = {
+        listing_address:          "entry.193342253",
+        short_label:              "entry.890599563",
+        bedrooms:                 "entry.714953027",
+        full_bathrooms:           "entry.480025202",
+        half_bathrooms:           "entry.1869637318",
+        square_footage:           "entry.609729977",
+        garage:                   "entry.336338971",
+        features:                 "entry.905389307",
+        price:                    "entry.1157852215",
+        completion:               "entry.451582373",
+        builder:                  "entry.403192281",
+        area:                     "entry.751729195",
+        one_pager_available:      "entry.398846306",
+        building_plans_available: "entry.1855974832",
+        design_board_available:   "entry.284726757",
+      };
+
+      const overlay   = document.getElementById('newlisting-modal-overlay');
+      const modal     = document.getElementById('newlisting-modal');
+      const form      = document.getElementById('newlisting-form');
+      const statusEl  = document.getElementById('newlisting-status');
+      const openBtn   = document.getElementById('open-newlisting-modal');
+      const closeBtn  = document.getElementById('close-newlisting-modal');
+      const cancelBtn = document.getElementById('cancel-newlisting');
+      const submitBtn = document.getElementById('submit-newlisting');
+
+      if (!overlay || !form) return;
+
+      let lastFocus = null;
+      function focusables() {
+        return modal.querySelectorAll(
+          'a[href], input:not([disabled]):not([type=hidden]), select:not([disabled]), ' +
+          'textarea:not([disabled]), button:not([disabled])'
+        );
+      }
+      function clearStatus() {
+        statusEl.classList.remove('show', 'ok', 'err', 'warn');
+        statusEl.textContent = '';
+      }
+      function setStatus(level, msg) {
+        statusEl.classList.add('show');
+        statusEl.classList.remove('ok', 'err', 'warn');
+        if (level && level !== 'info') statusEl.classList.add(level);
+        statusEl.textContent = msg;
+      }
+      function openModal() {
+        lastFocus = document.activeElement;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        clearStatus();
+        requestAnimationFrame(() => {
+          const first = focusables()[0];
+          if (first) first.focus();
+        });
+      }
+      function closeModal() {
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') closeModal();
+      });
+      modal.addEventListener('keydown', (e) => {
+        if (e.key !== 'Tab') return;
+        const items = focusables(); if (!items.length) return;
+        const first = items[0], last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      });
+
+      openBtn  && openBtn.addEventListener('click', openModal);
+      closeBtn && closeBtn.addEventListener('click', closeModal);
+      cancelBtn && cancelBtn.addEventListener('click', closeModal);
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearStatus();
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+
+        if (/PASTE_/.test(FORM_URL) ||
+            Object.values(FIELD_MAP).some((v) => /PASTE_/.test(v))) {
+          setStatus('warn',
+            'Form not wired up yet — paste the pre-filled link from the Google Form back to ' +
+            'the dashboard developer so FORM_URL + FIELD_MAP can be filled in.');
+          return;
+        }
+
+        const data = new FormData(form);
+        const body = new FormData();
+        for (const [key, entryId] of Object.entries(FIELD_MAP)) {
+          if (/PASTE_/.test(entryId)) continue;
+          const v = data.get(key);
+          if (v != null) body.append(entryId, String(v));
+        }
+
+        const originalLabel = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Logging…';
+
+        try {
+          await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body: body });
+
+          setStatus('ok', 'Listing logged. The tab will appear in a moment — drop hero.jpg + one-pager.pdf into Company/Dashboard/assets/listings/<slug>/ and commit.');
+          form.reset();
+          // Give Google a moment to write the row to the sheet, then refresh.
+          setTimeout(() => {
+            if (typeof window.__refreshListings === 'function') {
+              window.__refreshListings();
+            }
+            closeModal();
+          }, 2500);
+        } catch (err) {
+          console.error('New listing submit failed:', err);
+          setStatus('err', 'Network error: ' + (err && err.message ? err.message : err));
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalLabel;
+        }
+      });
+    })();
+
+    // ============================================================
     // Custom Home Rep · "Log a New Project" modal controller
     //  - Opens via the Pipeline sub-tab action card.
     //  - Same fire-and-forget POST pattern as Sales Commission +
@@ -5280,64 +5548,258 @@
         );
       }
 
-      if (!LISTINGS.length) {
-        bar.innerHTML = '';
-        container.innerHTML = '<div class="listings-empty">No listings yet.</div>';
-        return;
+      // ----------------------------------------------------------
+      // Sheet-driven listings: fetch from a Google Sheet, parse rows
+      // into LISTINGS-shaped objects, and merge with the hardcoded
+      // array above. Hardcoded entries (with assets in place) WIN on
+      // slug collision — but sheet data fills in any missing fields,
+      // so an existing listing can be "filled out" via the Log a New
+      // Listing form without needing a code edit.
+      // ----------------------------------------------------------
+      const LISTINGS_SHEET_ID = "10aIukA9pjBxTggcup1JXaTy7GLek6Vu-Z4HCgMLb__I";
+      // gviz auto-falls-back to the first sheet when the tab name is
+      // missing, so this default works whether Ryan kept the default
+      // "Form Responses 1" or renamed to "Form_Responses" etc.
+      const LISTINGS_SHEET_TAB = "Form Responses 1";
+      const LISTINGS_SHEET_URL =
+        "https://docs.google.com/spreadsheets/d/" + LISTINGS_SHEET_ID +
+        "/gviz/tq?tqx=out:json&headers=1&sheet=" + encodeURIComponent(LISTINGS_SHEET_TAB);
+
+      // Derive a URL-safe slug from a full address line. Matches the
+      // naming convention used for the existing 7 listing asset folders.
+      function slugify(addr) {
+        return String(addr || '')
+          .split(',')[0]                       // drop city/state suffix
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')         // non-alphanumeric → hyphen
+          .replace(/^-+|-+$/g, '')             // trim hyphens
+          .slice(0, 60) || 'listing';
       }
 
-      // Render the nested subtabbar (one .subtab per listing).
-      bar.innerHTML = LISTINGS.map((L, i) => (
-        '<button class="subtab" role="tab" ' +
-                'aria-controls="listing-panel-' + esc(L.slug) + '" ' +
-                'aria-selected="' + (i === 0 ? 'true' : 'false') + '" ' +
-                'data-subkey="listing-' + esc(L.slug) + '">' +
-          esc(L.label) +
-        '</button>'
-      )).join('');
+      function parseGvizCell(cell) {
+        if (!cell) return '';
+        if (cell.f != null) return String(cell.f);
+        if (cell.v != null) return String(cell.v);
+        return '';
+      }
+      function parseGvizEnvelope(text) {
+        const match = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
+        if (!match) throw new Error('gviz response in unexpected format');
+        const data = JSON.parse(match[1]);
+        if (data.status !== 'ok') {
+          const msg = (data.errors && data.errors[0] && data.errors[0].detailed_message) || data.status;
+          throw new Error('gviz: ' + msg);
+        }
+        return data.table || { cols: [], rows: [] };
+      }
+      function findCol(cols, ...candidates) {
+        const norm = (s) => String(s || '')
+          .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+        const labels = cols.map((c) => norm(c.label));
+        for (const cand of candidates) {
+          const t = norm(cand);
+          const idx = labels.findIndex((l) => l === t);
+          if (idx >= 0) return idx;
+        }
+        for (const cand of candidates) {
+          const t = norm(cand);
+          const idx = labels.findIndex((l) => l.indexOf(t) >= 0 || t.indexOf(l) >= 0);
+          if (idx >= 0) return idx;
+        }
+        return -1;
+      }
+      function yesish(v) { return /^y(es)?$/i.test(String(v || '').trim()); }
 
-      // Render the matching subpanels. First one is visible by default.
-      container.innerHTML = LISTINGS.map(listingPanelHtml).join('');
-      const firstPanel = container.querySelector('.subpanel');
-      if (firstPanel) firstPanel.setAttribute('aria-hidden', 'false');
+      // Build a LISTINGS-shaped object from a single sheet row.
+      async function fetchSheetListings() {
+        const res = await fetch(LISTINGS_SHEET_URL + '&t=' + Date.now(), { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const table = parseGvizEnvelope(await res.text());
+        const cols = table.cols || [];
+        const ix = {
+          address:        findCol(cols, 'Listing Address', 'Address'),
+          label:          findCol(cols, 'Short Label', 'Label'),
+          bd:             findCol(cols, 'Bedrooms'),
+          fb:             findCol(cols, 'Full Bathrooms'),
+          hb:             findCol(cols, 'Half Bathrooms'),
+          sqft:           findCol(cols, 'Square Footage', 'Square Feet', 'SF'),
+          garage:         findCol(cols, 'Garage'),
+          features:       findCol(cols, 'Features'),
+          price:          findCol(cols, 'Price'),
+          completion:     findCol(cols, 'Completion'),
+          builder:        findCol(cols, 'Builder'),
+          area:           findCol(cols, 'Area / Neighborhood', 'Area', 'Neighborhood'),
+          hasOnePager:    findCol(cols, 'One-Pager PDF Available', 'One-Pager'),
+          hasPlans:       findCol(cols, 'Building Plans PDF available', 'Building Plans', 'Plans'),
+          hasDesignBoard: findCol(cols, 'Design Board PDF available', 'Design Board'),
+        };
+        if (ix.address < 0) return [];
+        return (table.rows || []).map((r) => {
+          const c = r.c || [];
+          const addressLine = ix.address >= 0 ? parseGvizCell(c[ix.address]).trim() : '';
+          if (!addressLine) return null;
+          const labelRaw = ix.label >= 0 ? parseGvizCell(c[ix.label]).trim() : '';
+          const features = (ix.features >= 0 ? parseGvizCell(c[ix.features]) : '')
+            .split(/\r?\n|,/).map((s) => s.trim()).filter(Boolean);
+          return {
+            slug:        slugify(addressLine),
+            label:       labelRaw || addressLine.split(',')[0].trim(),
+            title:       addressLine.split(',')[0].trim(),
+            addressLine: addressLine,
+            bd:     ix.bd     >= 0 ? parseGvizCell(c[ix.bd])     : '',
+            fb:     ix.fb     >= 0 ? parseGvizCell(c[ix.fb])     : '',
+            hb:     ix.hb     >= 0 ? parseGvizCell(c[ix.hb])     : '',
+            sqft:   ix.sqft   >= 0 ? parseGvizCell(c[ix.sqft])   : '',
+            garage: ix.garage >= 0 ? parseGvizCell(c[ix.garage]) : '',
+            features: features,
+            price:      ix.price      >= 0 ? parseGvizCell(c[ix.price])      : '',
+            completion: ix.completion >= 0 ? parseGvizCell(c[ix.completion]) : '',
+            builder:    ix.builder    >= 0 ? parseGvizCell(c[ix.builder])    : '',
+            area:       ix.area       >= 0 ? parseGvizCell(c[ix.area])       : '',
+            hasOnePager:    ix.hasOnePager    >= 0 && yesish(parseGvizCell(c[ix.hasOnePager])),
+            hasPlans:       ix.hasPlans       >= 0 && yesish(parseGvizCell(c[ix.hasPlans])),
+            hasDesignBoard: ix.hasDesignBoard >= 0 && yesish(parseGvizCell(c[ix.hasDesignBoard])),
+            _fromSheet: true,
+          };
+        }).filter(Boolean);
+      }
+
+      // Merge hardcoded + sheet listings by slug. Hardcoded slug/label/
+      // title/addressLine/flags win (asset files match hardcoded slugs);
+      // sheet fills in any missing detail fields (bd/fb/hb/sqft/etc.)
+      // — so once a hardcoded listing is also entered in the sheet,
+      // the form-submitted stats will appear on the existing tab.
+      function mergeListings(hard, sheet) {
+        const bySlug = new Map();
+        hard.forEach((L) => bySlug.set(L.slug, { ...L }));
+        sheet.forEach((s) => {
+          const existing = bySlug.get(s.slug);
+          if (existing) {
+            // Merge: prefer existing for identity/asset flags;
+            // fill in any blank stats from the sheet entry.
+            const fillKeys = ['bd', 'fb', 'hb', 'sqft', 'garage', 'features', 'price', 'completion', 'builder', 'area'];
+            fillKeys.forEach((k) => {
+              if (!existing[k] || (Array.isArray(existing[k]) && !existing[k].length)) {
+                existing[k] = s[k];
+              }
+            });
+          } else {
+            bySlug.set(s.slug, s);
+          }
+        });
+        return Array.from(bySlug.values());
+      }
+
+      // Render the subtabbar + subpanels for a given listings list,
+      // preserving which tab is currently active (so a sheet refresh
+      // doesn't reset the user's selection).
+      function renderListings(list) {
+        if (!list.length) {
+          bar.innerHTML = '';
+          container.innerHTML = '<div class="listings-empty">No listings yet.</div>';
+          return;
+        }
+        // Capture the currently-active sub-tab (if any) so we can
+        // preserve selection across re-renders.
+        const activeKey = (() => {
+          const cur = bar.querySelector('.subtab[aria-selected="true"]');
+          return cur ? cur.dataset.subkey : null;
+        })();
+        const firstKey = 'listing-' + list[0].slug;
+        const targetKey = (activeKey && list.some((L) => 'listing-' + L.slug === activeKey))
+          ? activeKey : firstKey;
+
+        bar.innerHTML = list.map((L) => (
+          '<button class="subtab" role="tab" ' +
+                  'aria-controls="listing-panel-' + esc(L.slug) + '" ' +
+                  'aria-selected="' + ('listing-' + L.slug === targetKey ? 'true' : 'false') + '" ' +
+                  'data-subkey="listing-' + esc(L.slug) + '">' +
+            esc(L.label) +
+          '</button>'
+        )).join('');
+
+        container.innerHTML = list.map(listingPanelHtml).join('');
+        // Show the matching panel
+        list.forEach((L) => {
+          const panel = document.getElementById('listing-panel-' + L.slug);
+          if (panel) {
+            panel.setAttribute('aria-hidden',
+              ('listing-' + L.slug === targetKey) ? 'false' : 'true');
+          }
+        });
+      }
+
+      // ---- Initial paint: render hardcoded listings instantly ----
+      renderListings(LISTINGS);
+
+      // ---- Async: fetch sheet, merge, re-render ----
+      (async () => {
+        try {
+          const sheetListings = await fetchSheetListings();
+          if (sheetListings.length === 0) return; // nothing to do
+          const merged = mergeListings(LISTINGS, sheetListings);
+          renderListings(merged);
+        } catch (err) {
+          // Sheet fetch failures are non-fatal — hardcoded listings
+          // still render. Log so we know in DevTools.
+          console.warn('Listings sheet fetch failed:', err);
+        }
+      })();
+
+      // Expose a manual refresh hook so the "Log a New Listing" modal
+      // can re-fetch after a successful submission.
+      window.__refreshListings = async () => {
+        try {
+          const sheetListings = await fetchSheetListings();
+          renderListings(mergeListings(LISTINGS, sheetListings));
+        } catch (err) {
+          console.warn('Listings refresh failed:', err);
+        }
+      };
     })();
 
     // ============================================================
-    // Sub-tab controller (reusable)
+    // Sub-tab controller (reusable, event-delegated)
     //  - Any panel can host its own .subtabbar with .subtab buttons.
     //  - Each .subtab has data-subkey and aria-controls pointing at the panel.
-    //  - Click any subtab → its panel is shown, siblings are hidden.
+    //  - Uses EVENT DELEGATION so .subtab buttons added after initial
+    //    render (e.g. listings injected from a Google Sheet) still
+    //    work without re-init.
     // ============================================================
     (function () {
       document.querySelectorAll('.subtabbar').forEach((bar) => {
-        const tabs = Array.from(bar.querySelectorAll('.subtab'));
-        const panels = tabs.map(t => document.getElementById(t.getAttribute('aria-controls')));
+        function tabs() { return Array.from(bar.querySelectorAll('.subtab')); }
 
         function activate(key) {
-          tabs.forEach((t, i) => {
+          tabs().forEach((t) => {
             const active = t.dataset.subkey === key;
             t.setAttribute('aria-selected', active ? 'true' : 'false');
             t.tabIndex = active ? 0 : -1;
-            if (panels[i]) panels[i].setAttribute('aria-hidden', active ? 'false' : 'true');
+            const panel = document.getElementById(t.getAttribute('aria-controls'));
+            if (panel) panel.setAttribute('aria-hidden', active ? 'false' : 'true');
           });
         }
 
-        tabs.forEach((t) => {
-          t.addEventListener('click', () => activate(t.dataset.subkey));
+        // Click delegation — catches buttons inserted later.
+        bar.addEventListener('click', (e) => {
+          const tab = e.target.closest('.subtab');
+          if (!tab || !bar.contains(tab)) return;
+          activate(tab.dataset.subkey);
         });
 
         bar.addEventListener('keydown', (e) => {
-          const idx = tabs.findIndex(t => t.getAttribute('aria-selected') === 'true');
+          const t = tabs();
+          const idx = t.findIndex((x) => x.getAttribute('aria-selected') === 'true');
           if (idx < 0) return;
           let next = null;
-          if (e.key === 'ArrowRight') next = (idx + 1) % tabs.length;
-          else if (e.key === 'ArrowLeft') next = (idx - 1 + tabs.length) % tabs.length;
+          if (e.key === 'ArrowRight') next = (idx + 1) % t.length;
+          else if (e.key === 'ArrowLeft') next = (idx - 1 + t.length) % t.length;
           else if (e.key === 'Home') next = 0;
-          else if (e.key === 'End') next = tabs.length - 1;
+          else if (e.key === 'End') next = t.length - 1;
           if (next !== null) {
             e.preventDefault();
-            activate(tabs[next].dataset.subkey);
-            tabs[next].focus();
+            activate(t[next].dataset.subkey);
+            t[next].focus();
           }
         });
       });
