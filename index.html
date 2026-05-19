@@ -3133,13 +3133,30 @@
       // Find a column by header label. Tries exact match (case-insensitive)
       // first, then falls back to "contains."
       function findCol(cols, ...candidates) {
-        const norm = (s) => String(s || '').toLowerCase().trim();
+        // Normalize: lowercase, collapse any non-alphanumeric run (hyphens,
+        // em-dashes, parens, slashes, extra whitespace) to a single space,
+        // then trim. So "Setback - Front (ft)" and "Setback — Front (ft)"
+        // both become "setback front ft", which matches the candidate
+        // "Setback Front" → "setback front" via substring.
+        const norm = (s) => String(s || '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, ' ')
+          .trim();
+        const normLabels = cols.map((c) => norm(c.label));
+        // 1) Exact normalized match
         for (const cand of candidates) {
-          const idx = cols.findIndex((c) => norm(c.label) === norm(cand));
+          const target = norm(cand);
+          const idx = normLabels.findIndex((l) => l === target);
           if (idx >= 0) return idx;
         }
+        // 2) Substring match in either direction (candidate inside label
+        //    OR label inside candidate — handles both "Setback Front" →
+        //    "setback front ft" and the inverse).
         for (const cand of candidates) {
-          const idx = cols.findIndex((c) => norm(c.label).indexOf(norm(cand)) >= 0);
+          const target = norm(cand);
+          const idx = normLabels.findIndex((l) =>
+            l.indexOf(target) >= 0 || target.indexOf(l) >= 0
+          );
           if (idx >= 0) return idx;
         }
         return -1;
@@ -3613,13 +3630,30 @@
         return data.table || { cols: [], rows: [] };
       }
       function findCol(cols, ...candidates) {
-        const norm = (s) => String(s || '').toLowerCase().trim();
+        // Normalize: lowercase, collapse any non-alphanumeric run (hyphens,
+        // em-dashes, parens, slashes, extra whitespace) to a single space,
+        // then trim. So "Setback - Front (ft)" and "Setback — Front (ft)"
+        // both become "setback front ft", which matches the candidate
+        // "Setback Front" → "setback front" via substring.
+        const norm = (s) => String(s || '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, ' ')
+          .trim();
+        const normLabels = cols.map((c) => norm(c.label));
+        // 1) Exact normalized match
         for (const cand of candidates) {
-          const idx = cols.findIndex((c) => norm(c.label) === norm(cand));
+          const target = norm(cand);
+          const idx = normLabels.findIndex((l) => l === target);
           if (idx >= 0) return idx;
         }
+        // 2) Substring match in either direction (candidate inside label
+        //    OR label inside candidate — handles both "Setback Front" →
+        //    "setback front ft" and the inverse).
         for (const cand of candidates) {
-          const idx = cols.findIndex((c) => norm(c.label).indexOf(norm(cand)) >= 0);
+          const target = norm(cand);
+          const idx = normLabels.findIndex((l) =>
+            l.indexOf(target) >= 0 || target.indexOf(l) >= 0
+          );
           if (idx >= 0) return idx;
         }
         return -1;
@@ -3736,6 +3770,7 @@
           dimSideLeft:    findCol(cols, 'Lot Dimension — Side Left (ft)', 'Dimension Side Left', 'Side Left'),
           dimRear:        findCol(cols, 'Lot Dimension — Rear (ft)', 'Dimension Rear', 'Rear Dimension'),
           dimSideRight:   findCol(cols, 'Lot Dimension — Side Right (ft)', 'Dimension Side Right', 'Side Right'),
+          compInArea:     findCol(cols, 'Comp in Area', 'Comps in Area'),
           bestComp:       findCol(cols, 'Best Comp'),
           cma:            findCol(cols, 'CMA'),
           landComps:      findCol(cols, 'Land Comps'),
@@ -3777,6 +3812,7 @@
             rear:      s(ix.dimRear),
             sideRight: s(ix.dimSideRight),
           },
+          compInArea:     s(ix.compInArea),
           bestComp:       s(ix.bestComp),
           cma:            s(ix.cma),
           landComps:      s(ix.landComps),

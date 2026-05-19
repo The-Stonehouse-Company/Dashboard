@@ -803,13 +803,14 @@
         (d.closing       ? '<div class="glance-row"><div class="k">Closing</div><div class="v">'        + escapeHTML(d.closing)       + '</div></div>' : '');
 
       // Optional comps section below the two-col block.
-      const compsHtml = (d.bestComp || d.cma || d.landComps)
+      const compsHtml = (d.compInArea || d.bestComp || d.cma || d.landComps)
         ? '<section class="comps-section">' +
             '<h3 class="col-head">Comparables</h3>' +
             '<div class="comps-grid">' +
-              (d.bestComp   ? '<div class="comp-row"><div class="k">Best Comp</div><div class="v">'  + escapeHTML(d.bestComp)   + '</div></div>' : '') +
-              (d.cma        ? '<div class="comp-row"><div class="k">CMA</div><div class="v">'        + escapeHTML(d.cma)        + '</div></div>' : '') +
-              (d.landComps  ? '<div class="comp-row full"><div class="k">Land Comps</div><div class="v">' + escapeHTML(d.landComps) + '</div></div>' : '') +
+              (d.bestComp    ? '<div class="comp-row"><div class="k">Best Comp</div><div class="v">'      + escapeHTML(d.bestComp)    + '</div></div>' : '') +
+              (d.cma         ? '<div class="comp-row"><div class="k">CMA</div><div class="v">'            + escapeHTML(d.cma)         + '</div></div>' : '') +
+              (d.compInArea  ? '<div class="comp-row full"><div class="k">Comp in Area</div><div class="v">' + escapeHTML(d.compInArea) + '</div></div>' : '') +
+              (d.landComps   ? '<div class="comp-row full"><div class="k">Land Comps</div><div class="v">'   + escapeHTML(d.landComps)  + '</div></div>' : '') +
             '</div>' +
           '</section>'
         : '';
