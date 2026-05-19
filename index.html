@@ -828,6 +828,23 @@
       cursor: not-allowed;
       pointer-events: none;
     }
+    /* Primary download button — filled, so the One Pager
+       reads as the main share-this asset for each listing. */
+    .listing-btn.primary {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+    }
+    .listing-btn.primary:hover {
+      background: transparent;
+      color: var(--text);
+      border-color: var(--text);
+    }
+    .listing-btn .arrow {
+      display: inline-block;
+      margin-left: 8px;
+      font-family: var(--font-display);
+    }
     .listings-empty {
       padding: 26px;
       border: 1px solid var(--rule);
@@ -3715,7 +3732,7 @@
           bd: '', fb: '', hb: '', sqft: '', garage: '', features: [],
           price: '', completion: '',
           builder: '', area: '',
-          hasPlans: false, hasDesignBoard: false,
+          hasPlans: false, hasDesignBoard: false, hasOnePager: true,
         },
         {
           slug:        '1308-clifton-ln',
@@ -3725,7 +3742,7 @@
           bd: '', fb: '', hb: '', sqft: '', garage: '', features: [],
           price: '', completion: '',
           builder: '', area: '',
-          hasPlans: false, hasDesignBoard: false,
+          hasPlans: false, hasDesignBoard: false, hasOnePager: false,
         },
         {
           slug:        '715-davis-dr',
@@ -3735,7 +3752,7 @@
           bd: '', fb: '', hb: '', sqft: '', garage: '', features: [],
           price: '', completion: '',
           builder: '', area: '',
-          hasPlans: false, hasDesignBoard: false,
+          hasPlans: false, hasDesignBoard: false, hasOnePager: false,
         },
         {
           slug:        '2495-deer-meadow-ln',
@@ -3745,7 +3762,7 @@
           bd: '', fb: '', hb: '', sqft: '', garage: '', features: [],
           price: '', completion: '',
           builder: '', area: '',
-          hasPlans: false, hasDesignBoard: false,
+          hasPlans: false, hasDesignBoard: false, hasOnePager: false,
         },
         {
           slug:        '1055-zophi-st',
@@ -3755,7 +3772,7 @@
           bd: '', fb: '', hb: '', sqft: '', garage: '', features: [],
           price: '', completion: '',
           builder: '', area: '',
-          hasPlans: false, hasDesignBoard: false,
+          hasPlans: false, hasDesignBoard: false, hasOnePager: false,
         },
         {
           slug:        '934-thomas-ave',
@@ -3765,7 +3782,7 @@
           bd: '', fb: '', hb: '', sqft: '', garage: '', features: [],
           price: '', completion: '',
           builder: '', area: '',
-          hasPlans: false, hasDesignBoard: false,
+          hasPlans: false, hasDesignBoard: false, hasOnePager: false,
         },
         {
           slug:        '735-clematis-dr',
@@ -3775,7 +3792,7 @@
           bd: '', fb: '', hb: '', sqft: '', garage: '', features: [],
           price: '', completion: '',
           builder: '', area: '',
-          hasPlans: false, hasDesignBoard: false,
+          hasPlans: false, hasDesignBoard: false, hasOnePager: false,
         },
       ];
 
@@ -3825,6 +3842,18 @@
         const addrUp    = esc(L.addressLine || '').toUpperCase();
 
         const actions = [];
+        // One Pager goes first as the primary share-this asset.
+        // download attribute forces the browser to save (not open) the PDF;
+        // its value becomes the suggested filename.
+        if (L.hasOnePager) {
+          const dlName = 'One-Pager-' + esc(L.slug) + '.pdf';
+          actions.push(
+            '<a class="listing-btn primary" href="' + assetBase + 'one-pager.pdf" ' +
+              'download="' + dlName + '" target="_blank" rel="noopener">' +
+              'Download One Pager <span class="arrow">↓</span>' +
+            '</a>'
+          );
+        }
         if (L.hasPlans) {
           actions.push('<a class="listing-btn" href="' + assetBase + 'plans.pdf" target="_blank" rel="noopener">Building Plans</a>');
         }
