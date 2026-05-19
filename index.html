@@ -705,6 +705,102 @@
       text-align: center;
     }
     .deal-error { color: #f4b9b9; border-color: #4a1f1f; text-transform: none; }
+
+    /* Custom Home Rep · project card extras
+       Adds a stage chip in the deal head and a stepped stage indicator
+       below the build-progress bar. */
+    .deal-stage-chip {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 9px;
+      letter-spacing: var(--tracking-x-wide);
+      text-transform: uppercase;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--rule-strong);
+      margin-top: 6px;
+      white-space: nowrap;
+    }
+    .deal-meta-row {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+      line-height: 1.7;
+      margin-top: 8px;
+    }
+    .deal-meta-row strong {
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-right: 6px;
+    }
+    .deal-meta-row .v {
+      color: var(--text);
+    }
+    /* Stepped stage indicator: 7 dots connected by lines.
+       The current/completed stages are filled white, future are muted. */
+    .stage-stepper {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      align-items: center;
+      gap: 0;
+      margin-top: 14px;
+      padding: 0 4px;
+    }
+    .stage-step {
+      position: relative;
+      text-align: center;
+      padding-top: 14px;
+    }
+    .stage-step::before {
+      content: "";
+      position: absolute;
+      top: 4px;
+      left: 0; right: 0;
+      height: 1px;
+      background: var(--rule);
+    }
+    .stage-step:first-child::before { left: 50%; }
+    .stage-step:last-child::before  { right: 50%; }
+    .stage-step::after {
+      content: "";
+      position: absolute;
+      top: -1px;
+      left: 50%; transform: translateX(-50%);
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1px solid var(--rule-strong);
+    }
+    .stage-step.done::after {
+      background: var(--text);
+      border-color: var(--text);
+    }
+    .stage-step.done::before {
+      background: var(--text);
+    }
+    .stage-step.current::after {
+      background: var(--text);
+      border-color: var(--text);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18);
+    }
+    .stage-step .stage-label {
+      display: block;
+      font-size: 8px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      line-height: 1.2;
+      margin-top: 4px;
+    }
+    .stage-step.done .stage-label,
+    .stage-step.current .stage-label {
+      color: var(--text);
+    }
+    @media (max-width: 640px) {
+      .stage-stepper { padding: 0; gap: 0; }
+      .stage-step .stage-label { font-size: 7px; }
+    }
     @media (max-width: 640px) {
       .deal-bar .bar-row { grid-template-columns: 1fr; gap: 6px; }
       .deal-bar .bar-dates { grid-column: 1; }
@@ -1846,10 +1942,56 @@
     <section class="panel" id="panel-customrep" role="tabpanel" aria-labelledby="tab-customrep" aria-hidden="true" tabindex="0">
       <div class="eyebrow">Division 03</div>
       <h1>Custom Home Owners Representation</h1>
-      <div class="placeholder">
-        <div class="mark">— Placeholder —</div>
-        <h2>Content coming soon</h2>
-        <p>This is where the Custom Home Owners Representation Division dashboard will live.</p>
+
+      <nav class="subtabbar" role="tablist" aria-label="Custom Home Rep sections" data-subtab-parent="customrep">
+        <button class="subtab" role="tab" aria-controls="subpanel-customrep-pipeline" aria-selected="true"  data-subkey="pipeline">Pipeline</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-customrep-files"    aria-selected="false" data-subkey="files">Files</button>
+      </nav>
+
+      <div class="subpanel" id="subpanel-customrep-pipeline" role="tabpanel" aria-hidden="false" tabindex="0">
+        <section class="pipeline-section" aria-labelledby="customrep-pipeline-title">
+          <header class="pipeline-head">
+            <div>
+              <div class="eyebrow" style="margin-bottom:8px;">Active Projects</div>
+              <h2 class="pipeline-title" id="customrep-pipeline-title">In Build</h2>
+            </div>
+            <div class="pipeline-meta" id="customrep-pipeline-meta">Loading…</div>
+          </header>
+          <div class="deal-list" id="customrep-pipeline-list">
+            <div class="deal-empty">Loading projects…</div>
+          </div>
+        </section>
+
+        <div class="placeholder">
+          <div class="mark">— Placeholder —</div>
+          <h2>More tools coming</h2>
+          <p>Fee calculator, client intake form, and engagement tracking will live here next.</p>
+        </div>
+      </div>
+
+      <div class="subpanel" id="subpanel-customrep-files" role="tabpanel" aria-hidden="true" tabindex="0">
+        <div class="eyebrow" style="margin-bottom:8px;">Custom Home Rep</div>
+        <h2 style="font-family:var(--font-display);font-size:24px;letter-spacing:0.08em;text-transform:uppercase;margin:0 0 24px;">Files & Documents</h2>
+
+        <div class="file-grid">
+          <article class="file-card">
+            <div class="file-eyebrow">Agreement</div>
+            <h3 class="file-title">Engagement Letter</h3>
+            <p class="file-desc">Owner-rep engagement letter outlining Stonehouse's fiduciary scope, deliverables across pre-con and construction, fee structure, and term.</p>
+            <a class="file-btn" href="assets/customrep-files/engagement-letter.pdf" download="Stonehouse-Engagement-Letter.pdf" target="_blank" rel="noopener">
+              Download PDF <span class="arrow">↓</span>
+            </a>
+          </article>
+
+          <article class="file-card">
+            <div class="file-eyebrow">Reference</div>
+            <h3 class="file-title">Scope of Services</h3>
+            <p class="file-desc">Client-facing overview of the owner-rep role, the 5% fee on hard construction costs, what counts as hard vs. soft cost, and how the fee is paid across the build.</p>
+            <a class="file-btn" href="assets/customrep-files/scope-of-services.pdf" download="Stonehouse-Custom-Home-Rep-Scope-of-Services.pdf" target="_blank" rel="noopener">
+              Download PDF <span class="arrow">↓</span>
+            </a>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -2531,7 +2673,7 @@
       const SHEET_TAB  = "Dashboard";
       const STATS_CSV_URL =
         "https://docs.google.com/spreadsheets/d/" + SHEET_ID +
-        "/gviz/tq?tqx=out:json&sheet=" + encodeURIComponent(SHEET_TAB);
+        "/gviz/tq?tqx=out:json&headers=1&sheet=" + encodeURIComponent(SHEET_TAB);
 
       const usd = new Intl.NumberFormat('en-US', {
         style: 'currency', currency: 'USD', maximumFractionDigits: 0,
@@ -3164,7 +3306,7 @@
 
       const STATS_URL =
         "https://docs.google.com/spreadsheets/d/" + LAND_SHEET_ID +
-        "/gviz/tq?tqx=out:json&sheet=" + encodeURIComponent(LAND_SHEET_TAB);
+        "/gviz/tq?tqx=out:json&headers=1&sheet=" + encodeURIComponent(LAND_SHEET_TAB);
 
       // ---------- Helpers ----------
       function esc(s) {
@@ -3413,6 +3555,315 @@
     })();
 
     // ============================================================
+    // Custom Home Rep · Active Projects pipeline
+    //  - Mirrors the Land Acquisition pipeline architecture: gviz fetch
+    //    from a Google Sheet, header-label-based column resolution,
+    //    rendered per-project cards.
+    //  - Each card shows client, property, architect/designer/builder,
+    //    hard-cost estimate, current stage (chip), and a stepped
+    //    7-stage indicator (Pre-Con → Demolition → Framing →
+    //    Mechanicals → Drywall → Finishes → CO) PLUS an overall
+    //    build-progress bar from engagement start → projected CO with
+    //    a today marker.
+    //
+    // SETUP REQUIRED:
+    //   1. Paste the Custom Home Rep Intake sheet ID into CUSTOMREP_SHEET_ID.
+    //   2. Make sure the sheet is shared as "Anyone with the link can view."
+    //   3. If the responses tab isn't named "Form Responses 1", update
+    //      CUSTOMREP_SHEET_TAB.
+    //
+    // EXPECTED COLUMN HEADERS (resolved via fuzzy match):
+    //   Client Name, Property Address, Architect, Designer, Builder,
+    //   Engagement Start Date, Projected Start Date, Projected CO Date,
+    //   Current Stage, Hard Cost Estimate, Notes
+    // ============================================================
+    (function () {
+      const CUSTOMREP_SHEET_ID  = "1_KDEUKCkLZZgeKWbio40H-7qqKdvA8K7DZ1URw_8sGQ";
+      const CUSTOMREP_SHEET_TAB = "Form_Responses";
+
+      const listEl = document.getElementById('customrep-pipeline-list');
+      const metaEl = document.getElementById('customrep-pipeline-meta');
+      if (!listEl) return;
+
+      function setEmpty(message) {
+        listEl.innerHTML = '<div class="deal-empty">' + esc(message) + '</div>';
+      }
+      function setError(message) {
+        listEl.innerHTML = '<div class="deal-error">' + esc(message) + '</div>';
+      }
+      function setMeta(text) {
+        if (metaEl) metaEl.textContent = text;
+      }
+
+      // Pre-flight: if the sheet ID hasn't been wired up yet, render a
+      // friendly setup prompt so the section stays in place visually.
+      if (!CUSTOMREP_SHEET_ID || /PASTE_/.test(CUSTOMREP_SHEET_ID)) {
+        setMeta('Setup pending');
+        setEmpty('Custom Home Rep sheet not yet connected. Create the intake Google Form/Sheet, then paste the sheet ID into CUSTOMREP_SHEET_ID in the dashboard source.');
+        return;
+      }
+
+      const STATS_URL =
+        "https://docs.google.com/spreadsheets/d/" + CUSTOMREP_SHEET_ID +
+        "/gviz/tq?tqx=out:json&headers=1&sheet=" + encodeURIComponent(CUSTOMREP_SHEET_TAB);
+
+      // ----- Local helpers (mirror the Land pipeline) -----
+      function esc(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+      const usdFull = new Intl.NumberFormat('en-US', {
+        style: 'currency', currency: 'USD', maximumFractionDigits: 0,
+      });
+      function fmtUSD(n) {
+        if (!isFinite(n) || !n) return '';
+        return usdFull.format(n);
+      }
+      function fmtDate(d) {
+        if (!(d instanceof Date) || isNaN(d)) return '—';
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+      function startOfDay(d) {
+        const x = new Date(d); x.setHours(0, 0, 0, 0); return x;
+      }
+      function daysBetween(a, b) {
+        const ms = startOfDay(b).getTime() - startOfDay(a).getTime();
+        return Math.round(ms / (1000 * 60 * 60 * 24));
+      }
+      function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+
+      function parseGvizDate(cell) {
+        if (!cell || cell.v == null) return null;
+        if (typeof cell.v === 'string') {
+          const m = cell.v.match(/^Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?\)$/);
+          if (m) return new Date(+m[1], +m[2], +m[3]);
+        }
+        if (cell.f) { const p = new Date(cell.f); if (!isNaN(p)) return p; }
+        return null;
+      }
+      function parseGvizNumber(cell) {
+        if (!cell || cell.v == null) return 0;
+        if (typeof cell.v === 'number') return cell.v;
+        const n = parseFloat(String(cell.v).replace(/[$,\s]/g, ''));
+        return isNaN(n) ? 0 : n;
+      }
+      function parseGvizString(cell) {
+        if (!cell) return '';
+        if (cell.f != null) return String(cell.f);
+        if (cell.v != null) return String(cell.v);
+        return '';
+      }
+      function parseGvizEnvelope(text) {
+        const match = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
+        if (!match) throw new Error('gviz response in unexpected format');
+        const data = JSON.parse(match[1]);
+        if (data.status !== 'ok') {
+          const msg = (data.errors && data.errors[0] && data.errors[0].detailed_message) || data.status;
+          throw new Error('gviz: ' + msg);
+        }
+        return data.table || { cols: [], rows: [] };
+      }
+      function findCol(cols, ...candidates) {
+        const norm = (s) => String(s || '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, ' ')
+          .trim();
+        const normLabels = cols.map((c) => norm(c.label));
+        for (const cand of candidates) {
+          const t = norm(cand);
+          const idx = normLabels.findIndex((l) => l === t);
+          if (idx >= 0) return idx;
+        }
+        for (const cand of candidates) {
+          const t = norm(cand);
+          const idx = normLabels.findIndex((l) =>
+            l.indexOf(t) >= 0 || t.indexOf(l) >= 0
+          );
+          if (idx >= 0) return idx;
+        }
+        return -1;
+      }
+
+      // The 7 construction stages, in order. The "Current Stage" column
+      // in the sheet should match one of these (case-insensitive); a
+      // fuzzy match falls back to the first stage when unmapped.
+      const STAGES = [
+        { key: 'precon',     label: 'Pre-Con',     match: /pre[-\s]?con/i        },
+        { key: 'demolition', label: 'Demo',        match: /demo/i                },
+        { key: 'framing',    label: 'Framing',     match: /fram/i                },
+        { key: 'mechanicals',label: 'Mechanicals', match: /mech|hvac|plumb|elec/i},
+        { key: 'drywall',    label: 'Drywall',     match: /drywall|insul/i       },
+        { key: 'finishes',   label: 'Finishes',    match: /finish|trim|paint/i   },
+        { key: 'co',         label: 'C.O.',        match: /\bc\W*o\b|occupancy|complete/i },
+      ];
+      function stageIndex(stageStr) {
+        if (!stageStr) return -1;
+        for (let i = 0; i < STAGES.length; i++) {
+          if (STAGES[i].match.test(stageStr)) return i;
+        }
+        return -1;
+      }
+
+      function renderStageStepper(curIdx) {
+        return (
+          '<div class="stage-stepper">' +
+            STAGES.map((s, i) => {
+              const cls = i < curIdx ? 'done' : (i === curIdx ? 'current' : '');
+              return (
+                '<div class="stage-step ' + cls + '">' +
+                  '<div class="stage-label">' + esc(s.label) + '</div>' +
+                '</div>'
+              );
+            }).join('') +
+          '</div>'
+        );
+      }
+
+      // Single overall progress bar from engagement start → projected CO.
+      function renderOverallBar(start, end, today) {
+        if (!start || !end) return '';
+        const total = Math.max(1, daysBetween(start, end));
+        const elapsed = clamp(daysBetween(start, today), 0, total);
+        const remaining = daysBetween(today, end);
+        const pct = (elapsed / total) * 100;
+
+        let state = '';
+        if (remaining < 0)        state = 'past';
+        else if (remaining <= 30) state = 'approaching';
+        else if (elapsed >= total) state = 'done';
+
+        const status =
+          remaining < 0  ? Math.abs(remaining) + ' day' + (Math.abs(remaining) === 1 ? '' : 's') + ' past projected CO' :
+          remaining === 0 ? 'CO target today' :
+                            remaining + ' day' + (remaining === 1 ? '' : 's') + ' to projected CO';
+
+        return (
+          '<div class="deal-bar ' + state + '" style="margin-top:18px;">' +
+            '<div class="bar-row">' +
+              '<div class="bar-label">Build Progress</div>' +
+              '<div class="bar-track"><div class="bar-fill" style="width:' + pct.toFixed(1) + '%"></div></div>' +
+              '<div class="bar-status">' + esc(status) + '</div>' +
+            '</div>' +
+            '<div class="bar-dates">' + esc(fmtDate(start)) + ' → ' + esc(fmtDate(end)) + '</div>' +
+          '</div>'
+        );
+      }
+
+      function renderProjectCard(p, today) {
+        const curIdx  = stageIndex(p.stage);
+        const stageLabel = curIdx >= 0 ? STAGES[curIdx].label : (p.stage || '—');
+        const teamRow = [
+          p.architect ? '<strong>Architect</strong><span class="v">' + esc(p.architect) + '</span>' : '',
+          p.designer  ? '<strong>Designer</strong><span class="v">'  + esc(p.designer)  + '</span>' : '',
+          p.builder   ? '<strong>Builder</strong><span class="v">'   + esc(p.builder)   + '</span>' : '',
+        ].filter(Boolean).join('<span class="sep" style="margin:0 10px;color:var(--text-dim);">·</span>');
+
+        return (
+          '<article class="deal-card">' +
+            '<header class="deal-head">' +
+              '<div>' +
+                '<h3 class="deal-address">' + esc(p.client || p.address || 'Untitled project') + '</h3>' +
+                '<div class="deal-meta">' + esc(p.address || '') + '</div>' +
+                (p.stage ? '<div class="deal-stage-chip">Stage · ' + esc(stageLabel) + '</div>' : '') +
+              '</div>' +
+              (p.hardCost
+                ? '<div class="deal-price">' + esc(fmtUSD(p.hardCost)) + '<div style="font-size:9px;color:var(--text-dim);letter-spacing:var(--tracking-wide);text-transform:uppercase;margin-top:4px;text-align:right;">Hard Cost Est.</div></div>'
+                : ''
+              ) +
+            '</header>' +
+
+            (teamRow
+              ? '<div class="deal-meta-row">' + teamRow + '</div>'
+              : ''
+            ) +
+
+            (curIdx >= 0 ? renderStageStepper(curIdx) : '') +
+            renderOverallBar(p.engagementStart, p.projectedCO, today) +
+          '</article>'
+        );
+      }
+
+      async function loadPipeline() {
+        try {
+          setMeta('Loading…');
+          setEmpty('Loading projects…');
+          const url = STATS_URL + '&t=' + Date.now();
+          const res = await fetch(url, { cache: 'no-store' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const text = await res.text();
+          const table = parseGvizEnvelope(text);
+          const cols  = table.cols || [];
+          const rawRows = table.rows || [];
+
+          const ix = {
+            client:           findCol(cols, 'Client Name', 'Client', 'Owner Name'),
+            address:          findCol(cols, 'Property Address', 'Address'),
+            architect:        findCol(cols, 'Architect'),
+            designer:         findCol(cols, 'Designer', 'Interior Designer'),
+            builder:          findCol(cols, 'Builder', 'General Contractor'),
+            engagementStart:  findCol(cols, 'Engagement Start Date', 'Engagement Start', 'Start Date'),
+            projectedStart:   findCol(cols, 'Projected Start Date', 'Groundbreaking'),
+            projectedCO:      findCol(cols, 'Projected CO Date', 'Projected Completion', 'Completion Date'),
+            stage:            findCol(cols, 'Current Stage', 'Stage', 'Construction Stage'),
+            hardCost:         findCol(cols, 'Hard Cost Estimate', 'Hard Cost', 'Construction Budget'),
+            notes:            findCol(cols, 'Notes', 'Additional Notes'),
+          };
+
+          if (ix.client < 0 && ix.address < 0) {
+            throw new Error('Sheet needs at least a "Client Name" or "Property Address" column to render projects.');
+          }
+
+          const today = startOfDay(new Date());
+          const projects = rawRows.map((r) => {
+            const c = r.c || [];
+            return {
+              client:           ix.client          >= 0 ? parseGvizString(c[ix.client])          : '',
+              address:          ix.address         >= 0 ? parseGvizString(c[ix.address])         : '',
+              architect:        ix.architect       >= 0 ? parseGvizString(c[ix.architect])       : '',
+              designer:         ix.designer        >= 0 ? parseGvizString(c[ix.designer])        : '',
+              builder:          ix.builder         >= 0 ? parseGvizString(c[ix.builder])         : '',
+              engagementStart:  ix.engagementStart >= 0 ? parseGvizDate(c[ix.engagementStart])   : null,
+              projectedStart:   ix.projectedStart  >= 0 ? parseGvizDate(c[ix.projectedStart])    : null,
+              projectedCO:      ix.projectedCO     >= 0 ? parseGvizDate(c[ix.projectedCO])       : null,
+              stage:            ix.stage           >= 0 ? parseGvizString(c[ix.stage])           : '',
+              hardCost:         ix.hardCost        >= 0 ? parseGvizNumber(c[ix.hardCost])        : 0,
+              notes:            ix.notes           >= 0 ? parseGvizString(c[ix.notes])           : '',
+            };
+          })
+          // Active projects only: filter out anything that's clearly closed (CO date in the past)
+          .filter((p) => !p.projectedCO || p.projectedCO >= today)
+          // Need at least an identifying field
+          .filter((p) => p.client || p.address);
+
+          projects.sort((a, b) => {
+            const ac = a.projectedCO ? a.projectedCO.getTime() : Infinity;
+            const bc = b.projectedCO ? b.projectedCO.getTime() : Infinity;
+            return ac - bc;
+          });
+
+          if (projects.length === 0) {
+            setMeta('0 active projects');
+            setEmpty('No active custom-rep projects.');
+            return;
+          }
+
+          setMeta(projects.length + ' active project' + (projects.length === 1 ? '' : 's'));
+          listEl.innerHTML = projects.map((p) => renderProjectCard(p, today)).join('');
+        } catch (err) {
+          console.error('Custom Rep pipeline load failed:', err);
+          setMeta('Could not load');
+          setError('Could not load pipeline: ' + (err && err.message ? err.message : err));
+        }
+      }
+
+      loadPipeline();
+      const tabBtn = document.getElementById('tab-customrep');
+      if (tabBtn) tabBtn.addEventListener('click', () => loadPipeline());
+      window.__loadCustomRepPipeline = loadPipeline;
+    })();
+
+    // ============================================================
     // Property Intake modal controller (Land Acquisition)
     //  - Opens via the Land Acquisition tab "Submit Property Intake" button.
     //  - Same UX as the Commission modal (X / Cancel / ESC / click overlay
@@ -3621,7 +4072,7 @@
       const LAND_SHEET_TAB = "Form Responses 1";
       const STATS_URL =
         "https://docs.google.com/spreadsheets/d/" + LAND_SHEET_ID +
-        "/gviz/tq?tqx=out:json&sheet=" + encodeURIComponent(LAND_SHEET_TAB);
+        "/gviz/tq?tqx=out:json&headers=1&sheet=" + encodeURIComponent(LAND_SHEET_TAB);
 
       const overlay   = document.getElementById('land-onepager-modal-overlay');
       const modal     = document.getElementById('land-onepager-modal');
