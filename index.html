@@ -856,6 +856,76 @@
       text-align: center;
     }
 
+    /* =========================================================
+       File grid (Land Acquisition · Files sub-tab)
+       Downloadable docs as cards. Same elevated-card pattern as
+       template cards but with a prominent filled download CTA.
+       ========================================================= */
+    .file-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      margin-bottom: 48px;
+    }
+    .file-card {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+      padding: 28px 28px 24px;
+      transition: border-color .2s, background .2s;
+    }
+    .file-card:hover {
+      border-color: var(--text);
+      background: #181818;
+    }
+    .file-card .file-eyebrow {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-x-wide);
+      margin-bottom: 12px;
+    }
+    .file-card .file-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1.15;
+      margin: 0 0 12px;
+      color: var(--text);
+    }
+    .file-card .file-desc {
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--text-muted);
+      margin: 0 0 22px;
+      flex: 1;
+    }
+    .file-card .file-btn {
+      align-self: flex-start;
+      font: inherit;
+      font-size: 11px;
+      padding: 12px 22px;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+      color: var(--bg);
+      background: var(--text);
+      border: 1px solid var(--text);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .file-card .file-btn:hover {
+      background: transparent;
+      color: var(--text);
+    }
+    .file-card .file-btn .arrow {
+      display: inline-block;
+      margin-left: 8px;
+      font-family: var(--font-display);
+    }
+
     /* Mode toggle (two-pill segmented control used in the One Pager modal) */
     .mode-toggle {
       display: flex;
@@ -1703,41 +1773,73 @@
       <div class="eyebrow">Division 02</div>
       <h1>Land Acquisition</h1>
 
-      <div class="action-grid">
-        <button class="primary-action" type="button" id="open-feecalc-modal" aria-haspopup="dialog" aria-controls="feecalc-modal">
-          <span class="action-label">Fee Calculator</span>
-          <span class="action-sub">Run a deal through the MRC class & commission schedule</span>
-          <span class="action-arrow" aria-hidden="true">→</span>
-        </button>
-        <button class="primary-action" type="button" id="open-intake-modal" aria-haspopup="dialog" aria-controls="intake-modal">
-          <span class="action-label">Submit Property Intake</span>
-          <span class="action-sub">Log a property under evaluation for acquisition</span>
-          <span class="action-arrow" aria-hidden="true">→</span>
-        </button>
-        <button class="primary-action" type="button" id="open-land-onepager-modal" aria-haspopup="dialog" aria-controls="land-onepager-modal">
-          <span class="action-label">Generate One-Pager</span>
-          <span class="action-sub">Auto-populate from the Intake sheet by property address</span>
-          <span class="action-arrow" aria-hidden="true">→</span>
-        </button>
+      <nav class="subtabbar" role="tablist" aria-label="Land Acquisition sections" data-subtab-parent="land">
+        <button class="subtab" role="tab" aria-controls="subpanel-land-pipeline" aria-selected="true"  data-subkey="pipeline">Pipeline</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-land-files"    aria-selected="false" data-subkey="files">Files</button>
+      </nav>
+
+      <div class="subpanel" id="subpanel-land-pipeline" role="tabpanel" aria-hidden="false" tabindex="0">
+        <div class="action-grid">
+          <button class="primary-action" type="button" id="open-feecalc-modal" aria-haspopup="dialog" aria-controls="feecalc-modal">
+            <span class="action-label">Fee Calculator</span>
+            <span class="action-sub">Run a deal through the MRC class & commission schedule</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="primary-action" type="button" id="open-intake-modal" aria-haspopup="dialog" aria-controls="intake-modal">
+            <span class="action-label">Submit Property Intake</span>
+            <span class="action-sub">Log a property under evaluation for acquisition</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="primary-action" type="button" id="open-land-onepager-modal" aria-haspopup="dialog" aria-controls="land-onepager-modal">
+            <span class="action-label">Generate One-Pager</span>
+            <span class="action-sub">Auto-populate from the Intake sheet by property address</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <section class="pipeline-section" aria-labelledby="land-pipeline-title">
+          <header class="pipeline-head">
+            <div>
+              <div class="eyebrow" style="margin-bottom:8px;">Active Pipeline</div>
+              <h2 class="pipeline-title" id="land-pipeline-title">Under Contract</h2>
+            </div>
+            <div class="pipeline-meta" id="land-pipeline-meta">Loading…</div>
+          </header>
+          <div class="deal-list" id="land-pipeline-list">
+            <div class="deal-empty">Loading deals…</div>
+          </div>
+        </section>
+
+        <div class="placeholder">
+          <div class="mark">— Placeholder —</div>
+          <h2>More tools coming</h2>
+          <p>MRC class summary, deal aggregates, and historical analytics will live here next.</p>
+        </div>
       </div>
 
-      <section class="pipeline-section" aria-labelledby="land-pipeline-title">
-        <header class="pipeline-head">
-          <div>
-            <div class="eyebrow" style="margin-bottom:8px;">Active Pipeline</div>
-            <h2 class="pipeline-title" id="land-pipeline-title">Under Contract</h2>
-          </div>
-          <div class="pipeline-meta" id="land-pipeline-meta">Loading…</div>
-        </header>
-        <div class="deal-list" id="land-pipeline-list">
-          <div class="deal-empty">Loading deals…</div>
-        </div>
-      </section>
+      <div class="subpanel" id="subpanel-land-files" role="tabpanel" aria-hidden="true" tabindex="0">
+        <div class="eyebrow" style="margin-bottom:8px;">Land Acquisition</div>
+        <h2 style="font-family:var(--font-display);font-size:24px;letter-spacing:0.08em;text-transform:uppercase;margin:0 0 24px;">Files & Documents</h2>
 
-      <div class="placeholder">
-        <div class="mark">— Placeholder —</div>
-        <h2>More tools coming</h2>
-        <p>MRC class summary, deal aggregates, and historical analytics will live here next.</p>
+        <div class="file-grid">
+          <article class="file-card">
+            <div class="file-eyebrow">Form</div>
+            <h3 class="file-title">Assignment Form</h3>
+            <p class="file-desc">Contract-assignment form used to assign a property under contract to a builder, custom-home client, or the internal Development Division.</p>
+            <a class="file-btn" href="assets/land-files/assignment-form.pdf" download="Stonehouse-Assignment-Form.pdf" target="_blank" rel="noopener">
+              Download PDF <span class="arrow">↓</span>
+            </a>
+          </article>
+
+          <article class="file-card">
+            <div class="file-eyebrow">Reference</div>
+            <h3 class="file-title">Commission One Pager</h3>
+            <p class="file-desc">Agent-facing overview of MRC and the Land Acquisition commission structure — deal classes, criteria, and agent payout by tier.</p>
+            <a class="file-btn" href="assets/land-files/commission-one-pager.pdf" download="Stonehouse-Land-Acquisition-Commission-One-Pager.pdf" target="_blank" rel="noopener">
+              Download PDF <span class="arrow">↓</span>
+            </a>
+          </article>
+        </div>
       </div>
     </section>
 
