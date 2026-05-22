@@ -1982,6 +1982,61 @@
       line-height: 1.55;
     }
 
+    /* ========================= CMA modal comp grid =========================
+       Three columns inside each comparables fieldset; each comp card holds the
+       photo + address + specs + price + status fields in a single column. */
+    .cma-comp-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .cma-comp {
+      background: var(--bg);
+      border: 1px solid var(--rule-strong);
+      padding: 16px 14px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .cma-comp-label {
+      font-family: var(--font-display);
+      font-size: 11px;
+      letter-spacing: var(--tracking-x-wide);
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .cma-comp label {
+      font-size: 10px;
+      letter-spacing: var(--tracking-wide);
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    .cma-comp input[type="text"],
+    .cma-comp input[type="url"] {
+      width: 100%;
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+      color: var(--text);
+      padding: 8px 10px;
+      font-family: var(--font-body);
+      font-size: 12px;
+    }
+    .cma-comp input[type="file"] {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .legend-hint {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin: -4px 0 12px;
+      letter-spacing: 0.02em;
+    }
+    @media (max-width: 900px) {
+      .cma-comp-grid { grid-template-columns: 1fr; }
+    }
+
     /* Empty-state card */
     .placeholder {
       border: 1px solid var(--rule);
@@ -2278,13 +2333,13 @@
             <p>Single-page listing summary for showings, open houses, and broker tours. Generates a print-ready PDF.</p>
           </article>
 
-          <article class="template-card" data-template-key="cma">
+          <article class="template-card is-clickable" data-template-key="cma" id="open-cma-modal" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="cma-modal">
             <div class="template-card-head">
               <span class="template-kind">Template · Analysis</span>
-              <span class="template-status is-soon">Coming soon</span>
+              <span class="template-status">Ready</span>
             </div>
             <h3>CMA</h3>
-            <p>Comparative Market Analysis — pricing strategy and comp set for listing presentations and seller conversations.</p>
+            <p>Comparative Market Analysis — fill in the subject + comps (Under Contract and Sold) and generate a Stonehouse-branded multi-page PDF for listing presentations and seller conversations.</p>
           </article>
 
           <a class="template-card is-clickable" data-template-key="strategic-marketing-plan-newcon"
@@ -3270,6 +3325,206 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="cancel-om">Cancel</button>
         <button class="btn" type="submit" form="om-form" id="submit-om">Generate OM</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========================= CMA MODAL =========================
+       Comparative Market Analysis generator. Fixed sections — one per PDF page.
+       Each comparables page has a fixed 3-comp grid (leave fields blank to omit a card).
+       Subject hero + each comp photo are uploaded files; everything else is free-text. -->
+  <div class="modal-overlay is-xwide" id="cma-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cma-modal-title" id="cma-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Sales · Marketing Templates</span>
+          <h2 class="modal-title" id="cma-modal-title">CMA Generator</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-cma-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="cma-form" autocomplete="off" novalidate>
+
+        <!-- COVER (PAGE 1) -->
+        <fieldset>
+          <legend>Cover (Page 1)</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="cma-subject-address">Subject Property Address <span class="req">*</span></label>
+              <input id="cma-subject-address" name="subject_address" type="text" required placeholder="735 Clematis Dr" />
+            </div>
+            <div>
+              <label for="cma-date">Date</label>
+              <input id="cma-date" name="cma_date" type="text" placeholder="4 / 2026" />
+            </div>
+            <div class="full">
+              <label for="cma-subject-hero">Subject Hero Photo <span class="req">*</span></label>
+              <input id="cma-subject-hero" name="subject_hero" type="file" accept="image/*" required />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- UNDER CONTRACT COMPARABLES (PAGE 2) -->
+        <fieldset>
+          <legend>Under Contract Comparables (Page 2)</legend>
+          <div class="cma-comp-grid">
+            <!-- Comps generated by JS below in three slots -->
+            <div class="cma-comp" data-comp-section="uc" data-comp="1">
+              <div class="cma-comp-label">Comp 1</div>
+              <label>Photo</label>
+              <input name="uc1_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="uc1_address" type="text" placeholder="6233 Vosswood Dr" />
+              <label>BD / BA / SF</label>
+              <input name="uc1_specs" type="text" placeholder="6 Bed 5/2 Bath 6377 Sq Ft" />
+              <label>List Price / $ Per SF</label>
+              <input name="uc1_price" type="text" placeholder="$4,150,000 / $651 Per Sq Ft" />
+              <label>Under Contract Status</label>
+              <input name="uc1_status" type="text" placeholder="UC - 01 / 15 / 26 | DOM: 0" />
+            </div>
+            <div class="cma-comp" data-comp-section="uc" data-comp="2">
+              <div class="cma-comp-label">Comp 2</div>
+              <label>Photo</label>
+              <input name="uc2_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="uc2_address" type="text" placeholder="754 West Meade Dr" />
+              <label>BD / BA / SF</label>
+              <input name="uc2_specs" type="text" placeholder="5 Bed 8 Bath $727 Sq Ft" />
+              <label>List Price / $ Per SF</label>
+              <input name="uc2_price" type="text" placeholder="$4,699,900 / $821 Per Sq Ft" />
+              <label>Under Contract Status</label>
+              <input name="uc2_status" type="text" placeholder="UC - 12 / 1 / 25 | DOM: 0" />
+            </div>
+            <div class="cma-comp" data-comp-section="uc" data-comp="3">
+              <div class="cma-comp-label">Comp 3</div>
+              <label>Photo</label>
+              <input name="uc3_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="uc3_address" type="text" placeholder="(leave blank to skip)" />
+              <label>BD / BA / SF</label>
+              <input name="uc3_specs" type="text" />
+              <label>List Price / $ Per SF</label>
+              <input name="uc3_price" type="text" />
+              <label>Under Contract Status</label>
+              <input name="uc3_status" type="text" />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- SOLD COMPARABLES (PAGE 3) -->
+        <fieldset>
+          <legend>Sold Comparables (Page 3)</legend>
+          <div class="cma-comp-grid">
+            <div class="cma-comp" data-comp-section="sold-a" data-comp="1">
+              <div class="cma-comp-label">Comp 1</div>
+              <label>Photo</label>
+              <input name="sa1_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="sa1_address" type="text" placeholder="310 Jocelyn Hollow Cir" />
+              <label>BD / BA / SF</label>
+              <input name="sa1_specs" type="text" placeholder="5 Bed 5/1 Bath 7100 Sq Ft" />
+              <label>Sold Price / $ Per SF</label>
+              <input name="sa1_price" type="text" placeholder="$4,550,000 / $641 Per Sq Ft" />
+              <label>Closing Status</label>
+              <input name="sa1_status" type="text" placeholder="Closed - 6 / 2 / 25 | DOM: 46" />
+            </div>
+            <div class="cma-comp" data-comp-section="sold-a" data-comp="2">
+              <div class="cma-comp-label">Comp 2</div>
+              <label>Photo</label>
+              <input name="sa2_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="sa2_address" type="text" placeholder="6201 Bresslyn Rd" />
+              <label>BD / BA / SF</label>
+              <input name="sa2_specs" type="text" placeholder="5 Bed 5/2 Bath 6956 Sq Ft" />
+              <label>Sold Price / $ Per SF</label>
+              <input name="sa2_price" type="text" placeholder="$4,625,000 / $665 Per Sq Ft" />
+              <label>Closing Status</label>
+              <input name="sa2_status" type="text" placeholder="Closed - 8 / 14 / 25 | DOM: 13" />
+            </div>
+            <div class="cma-comp" data-comp-section="sold-a" data-comp="3">
+              <div class="cma-comp-label">Comp 3</div>
+              <label>Photo</label>
+              <input name="sa3_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="sa3_address" type="text" placeholder="508 Davidson Rd" />
+              <label>BD / BA / SF</label>
+              <input name="sa3_specs" type="text" placeholder="6 Bed 6/2 Bath 6516 Sq Ft" />
+              <label>Sold Price / $ Per SF</label>
+              <input name="sa3_price" type="text" placeholder="$4,275,000 / $656 Per Sq Ft" />
+              <label>Closing Status</label>
+              <input name="sa3_status" type="text" placeholder="Closed - 1 / 5 / 26 | DOM: 2" />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- SOLD COMPARABLES (PAGE 4 — OVERFLOW) -->
+        <fieldset>
+          <legend>Sold Comparables (Page 4 — optional overflow)</legend>
+          <p class="legend-hint">Leave any comp blank to skip. If all three are blank, this page is omitted from the PDF.</p>
+          <div class="cma-comp-grid">
+            <div class="cma-comp" data-comp-section="sold-b" data-comp="1">
+              <div class="cma-comp-label">Comp 1</div>
+              <label>Photo</label>
+              <input name="sb1_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="sb1_address" type="text" placeholder="605 Brook Hollow Rd" />
+              <label>BD / BA / SF</label>
+              <input name="sb1_specs" type="text" placeholder="6 Bed 6/3 Bath 6496 Sq Ft" />
+              <label>Sold Price / $ Per SF</label>
+              <input name="sb1_price" type="text" placeholder="$4,250,000 / $654 Per Sq Ft" />
+              <label>Closing Status</label>
+              <input name="sb1_status" type="text" placeholder="Closed - 12 / 23 / 25 | DOM: 0" />
+            </div>
+            <div class="cma-comp" data-comp-section="sold-b" data-comp="2">
+              <div class="cma-comp-label">Comp 2</div>
+              <label>Photo</label>
+              <input name="sb2_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="sb2_address" type="text" />
+              <label>BD / BA / SF</label>
+              <input name="sb2_specs" type="text" />
+              <label>Sold Price / $ Per SF</label>
+              <input name="sb2_price" type="text" />
+              <label>Closing Status</label>
+              <input name="sb2_status" type="text" />
+            </div>
+            <div class="cma-comp" data-comp-section="sold-b" data-comp="3">
+              <div class="cma-comp-label">Comp 3</div>
+              <label>Photo</label>
+              <input name="sb3_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="sb3_address" type="text" />
+              <label>BD / BA / SF</label>
+              <input name="sb3_specs" type="text" />
+              <label>Sold Price / $ Per SF</label>
+              <input name="sb3_price" type="text" />
+              <label>Closing Status</label>
+              <input name="sb3_status" type="text" />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- LINKS (FINAL PAGE) -->
+        <fieldset>
+          <legend>RealTracs Links (Final Page — optional)</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="cma-comps-url">Comparables URL</label>
+              <input id="cma-comps-url" name="comps_url" type="url" placeholder="https://go.realtracs.com/1geUu99" />
+            </div>
+            <div class="full">
+              <label for="cma-cma-url">CMA URL</label>
+              <input id="cma-cma-url" name="cma_url" type="url" placeholder="https://go.realtracs.com/1geV24o" />
+            </div>
+          </div>
+        </fieldset>
+      </form>
+
+      <div class="form-status" id="cma-status"></div>
+
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-cma">Cancel</button>
+        <button class="btn" type="submit" form="cma-form" id="submit-cma">Generate CMA</button>
       </footer>
     </div>
   </div>
@@ -6159,6 +6414,182 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         } finally {
           submitBtn.disabled = false;
           submitBtn.textContent = originalLabel;
+        }
+      });
+    })();
+
+    // ============================================================
+    // CMA Modal controller
+    // Opens the CMA Generator modal, collects subject + comp inputs +
+    // photos, persists them to IndexedDB ("stonehouse-cma"), then opens
+    // cma.html in a new tab where the PDF is rendered/downloaded.
+    // ============================================================
+    (function () {
+      const overlay   = document.getElementById('cma-modal-overlay');
+      const modal     = document.getElementById('cma-modal');
+      const form      = document.getElementById('cma-form');
+      const statusEl  = document.getElementById('cma-status');
+      const openBtn   = document.getElementById('open-cma-modal');
+      const closeBtn  = document.getElementById('close-cma-modal');
+      const cancelBtn = document.getElementById('cancel-cma');
+      const submitBtn = document.getElementById('submit-cma');
+      if (!overlay || !form) return;
+
+      let lastFocus = null;
+      function openModal() {
+        lastFocus = document.activeElement;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        // Focus first input for keyboard users
+        const firstInput = modal.querySelector('input, textarea, select');
+        if (firstInput && firstInput.focus) {
+          requestAnimationFrame(() => firstInput.focus());
+        }
+      }
+      function closeModal() {
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') closeModal();
+      });
+      if (openBtn) {
+        openBtn.addEventListener('click', openModal);
+        openBtn.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(); }
+        });
+      }
+      closeBtn && closeBtn.addEventListener('click', closeModal);
+      cancelBtn && cancelBtn.addEventListener('click', closeModal);
+
+      // ---- Read a file input as a data URL (for photo uploads) ----
+      function readFileAsDataURL(fileInput) {
+        if (!fileInput || !fileInput.files || !fileInput.files[0]) return Promise.resolve(null);
+        const file = fileInput.files[0];
+        return new Promise((resolve) => {
+          const r = new FileReader();
+          r.onload  = () => resolve(r.result);
+          r.onerror = () => resolve(null);
+          r.readAsDataURL(file);
+        });
+      }
+
+      // ---- Collect a single comp's fields from the modal ----
+      function collectComp(prefix) {
+        const get = (suffix) => {
+          const el = modal.querySelector('[name="' + prefix + '_' + suffix + '"]');
+          return el ? el.value.trim() : '';
+        };
+        return {
+          address: get('address'),
+          specs:   get('specs'),
+          price:   get('price'),
+          status:  get('status'),
+        };
+      }
+      async function collectCompPhoto(prefix) {
+        const el = modal.querySelector('[name="' + prefix + '_photo"]');
+        return readFileAsDataURL(el);
+      }
+      function isBlankComp(c) {
+        return !(c.address || c.specs || c.price || c.status);
+      }
+
+      // ---- IndexedDB write (single "current" record) ----
+      function dbOpen() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open('stonehouse-cma', 1);
+          req.onupgradeneeded = () => {
+            const db = req.result;
+            if (!db.objectStoreNames.contains('cma')) {
+              db.createObjectStore('cma', { keyPath: 'id' });
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror   = () => reject(req.error);
+        });
+      }
+      async function dbPut(record) {
+        const db = await dbOpen();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction('cma', 'readwrite');
+          tx.objectStore('cma').put(record);
+          tx.oncomplete = () => resolve();
+          tx.onerror    = () => reject(tx.error);
+        });
+      }
+
+      // ---- Form submit handler ----
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        statusEl.textContent = 'Preparing CMA…';
+        statusEl.className = 'form-status';
+        if (submitBtn) submitBtn.disabled = true;
+
+        try {
+          // Subject
+          const subjectAddress = modal.querySelector('[name="subject_address"]').value.trim();
+          const cmaDate        = modal.querySelector('[name="cma_date"]').value.trim();
+          if (!subjectAddress) {
+            statusEl.textContent = 'Subject address is required.';
+            statusEl.className = 'form-status is-error';
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+          }
+          const subjectHero = await readFileAsDataURL(
+            modal.querySelector('[name="subject_hero"]')
+          );
+
+          // Collect all 9 comps; group into sections; drop blanks.
+          async function gather(prefixes) {
+            const out = [];
+            for (const p of prefixes) {
+              const data = collectComp(p);
+              if (isBlankComp(data)) continue;
+              data.photo = await collectCompPhoto(p);
+              out.push(data);
+            }
+            return out;
+          }
+          const ucComps   = await gather(['uc1', 'uc2', 'uc3']);
+          const soldAComps = await gather(['sa1', 'sa2', 'sa3']);
+          const soldBComps = await gather(['sb1', 'sb2', 'sb3']);
+
+          const compsUrl = modal.querySelector('[name="comps_url"]').value.trim();
+          const cmaUrl   = modal.querySelector('[name="cma_url"]').value.trim();
+
+          // Persist a single "current" record — cma.html will read this on load
+          const record = {
+            id: 'current',
+            generatedAt: new Date().toISOString(),
+            subject: { address: subjectAddress, date: cmaDate, hero: subjectHero },
+            underContract: ucComps,
+            sold: [...soldAComps, ...soldBComps],
+            links: { comparables: compsUrl, cma: cmaUrl },
+          };
+          await dbPut(record);
+
+          statusEl.textContent = 'Opening CMA in a new tab…';
+          statusEl.className = 'form-status is-ok';
+
+          // Open the rendered CMA page in a new tab.
+          // cma.html reads "current" from IndexedDB and renders/downloads the PDF.
+          window.open('cma.html', '_blank', 'noopener');
+
+          // Close the modal shortly after navigation kicks off
+          setTimeout(() => {
+            closeModal();
+            if (submitBtn) submitBtn.disabled = false;
+            statusEl.textContent = '';
+            statusEl.className = 'form-status';
+          }, 1500);
+        } catch (err) {
+          console.error('CMA submit failed', err);
+          statusEl.textContent = 'Something went wrong building the CMA. Check the console for details.';
+          statusEl.className = 'form-status is-error';
+          if (submitBtn) submitBtn.disabled = false;
         }
       });
     })();
