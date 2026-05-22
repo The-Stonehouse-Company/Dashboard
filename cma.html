@@ -80,12 +80,13 @@
       margin-right: 18px;
     }
 
-    /* PDF pages — each .page renders at 16:9 ratio (1280 x 720)
-       Matches the Liebo reference which is a slide/landscape layout. */
+    /* PDF pages — sized to letter landscape ratio (11 × 8.5 in = 1.294).
+       Using 1320 × 1020 px keeps things crisp at print resolution and
+       prevents the html2canvas → jsPDF squish that happened with 16:9. */
     #cma-output { padding: 28px; }
     .page {
-      width: 1280px;
-      height: 720px;
+      width: 1320px;
+      height: 1020px;
       margin: 0 auto 28px;
       background: var(--bg);
       color: var(--text);
@@ -112,35 +113,36 @@
     }
     .cover-date {
       position: absolute;
-      top: 32px; right: 40px;
-      font-size: 13px;
+      top: 40px; right: 50px;
+      font-size: 15px;
       letter-spacing: 0.06em;
       color: var(--text);
       z-index: 2;
     }
     .cover-title {
       position: absolute;
-      top: 200px; left: 70px;
-      font-size: 84px;
+      top: 270px; left: 80px;
+      font-size: 100px;
       letter-spacing: 0.04em;
       color: var(--text);
       z-index: 2;
       line-height: 1.0;
+      margin: 0;
     }
     .cover-address {
       position: absolute;
-      top: 320px; left: 70px;
+      top: 440px; left: 80px;   /* generous gap below COMPARABLES title */
       font-family: 'Aboreto', serif;
-      font-size: 36px;
+      font-size: 42px;
       letter-spacing: 0.02em;
       color: var(--text);
       z-index: 2;
     }
     .cover-company {
       position: absolute;
-      bottom: 36px; left: 70px;
+      bottom: 50px; left: 80px;
       font-family: 'Aboreto', serif;
-      font-size: 14px;
+      font-size: 16px;
       letter-spacing: var(--tracking-xwide);
       text-transform: uppercase;
       color: var(--text);
@@ -148,27 +150,27 @@
     }
     .cover-logo {
       position: absolute;
-      bottom: 36px; right: 50px;
-      width: 96px;
-      height: 96px;
+      bottom: 50px; right: 70px;
+      width: 110px;
+      height: 110px;
       z-index: 2;
       opacity: 0.95;
     }
 
     /* ===== Comparables pages (2..N) ===== */
     .comps-page {
-      padding: 60px 70px 50px;
+      padding: 80px 90px 70px;
       display: flex;
       flex-direction: column;
     }
     .comps-header {
       font-family: 'Aboreto', serif;
-      font-size: 30px;
+      font-size: 38px;
       letter-spacing: 0.04em;
-      margin-bottom: 38px;
+      margin-bottom: 60px;
       color: var(--text);
     }
-    .comps-header .dash { color: var(--accent); margin: 0 14px; }
+    .comps-header .dash { color: var(--accent); margin: 0 18px; }
     .comps-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -190,19 +192,19 @@
     .comp-card .address {
       font-family: 'Aboreto', serif;
       font-style: italic;
-      font-size: 22px;
+      font-size: 26px;
       letter-spacing: 0.01em;
-      margin: 18px 0 10px;
+      margin: 22px 0 14px;
       line-height: 1.15;
     }
     .comp-card .specs,
     .comp-card .price,
     .comp-card .status {
-      font-size: 12px;
+      font-size: 14px;
       color: var(--text);
       letter-spacing: 0.02em;
-      margin: 3px 0;
-      line-height: 1.4;
+      margin: 4px 0;
+      line-height: 1.45;
     }
     .comp-card .status { color: var(--muted); }
 
