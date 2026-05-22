@@ -1931,6 +1931,9 @@
       position: relative;
       transition: background .2s, border-color .2s;
       cursor: default;
+      /* Anchor tags carrying .template-card should look like cards, not links */
+      text-decoration: none;
+      color: inherit;
     }
     .template-card.is-clickable {
       cursor: pointer;
@@ -2284,14 +2287,17 @@
             <p>Comparative Market Analysis — pricing strategy and comp set for listing presentations and seller conversations.</p>
           </article>
 
-          <article class="template-card" data-template-key="strategic-marketing-plan-newcon">
+          <a class="template-card is-clickable" data-template-key="strategic-marketing-plan-newcon"
+             href="assets/marketing-templates/strategic-marketing-plan-new-construction.pdf"
+             download="Stonehouse-Strategic-Marketing-Plan-New-Construction.pdf"
+             target="_blank" rel="noopener">
             <div class="template-card-head">
               <span class="template-kind">Template · Plan</span>
-              <span class="template-status is-soon">Coming soon</span>
+              <span class="template-status">Ready</span>
             </div>
             <h3>Strategic Marketing Plan — New Construction</h3>
-            <p>Go-to-market strategy for spec builds and ground-up projects. Positioning, channels, timeline, and key milestones.</p>
-          </article>
+            <p>Go-to-market strategy for spec builds and ground-up projects. Positioning, channels, timeline, and key milestones. Click to download the latest version (PDF).</p>
+          </a>
         </div>
       </div>
 
