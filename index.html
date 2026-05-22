@@ -4539,12 +4539,15 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       // ----------------------------------------------------------
       function idbOpen() {
         return new Promise((resolve, reject) => {
-          const req = indexedDB.open('stonehouse-dashboard', 1);
+          // Version 2 — shared with OM modal. Upgrade handler creates BOTH
+          // stores so the DB stays consistent regardless of which modal the
+          // user opens first. Bumping back to v1 from v2 throws VersionError,
+          // which is what produced the "lower version than existing" toast.
+          const req = indexedDB.open('stonehouse-dashboard', 2);
           req.onupgradeneeded = (e) => {
             const db = e.target.result;
-            if (!db.objectStoreNames.contains('onepager')) {
-              db.createObjectStore('onepager');
-            }
+            if (!db.objectStoreNames.contains('onepager')) db.createObjectStore('onepager');
+            if (!db.objectStoreNames.contains('om'))       db.createObjectStore('om');
           };
           req.onsuccess = () => resolve(req.result);
           req.onerror = () => reject(req.error);
@@ -8063,15 +8066,15 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       // Same-shape IndexedDB transport as the Sales one-pager controller,
       // duplicated here because that helper is scoped inside that IIFE.
       // Same DB + store names so both writers and the one-pager.html
-      // reader stay in sync.
+      // reader stay in sync. Version 2 with both stores — must match the
+      // OM modal so opening order doesn't trigger a VersionError.
       function idbOpen() {
         return new Promise((resolve, reject) => {
-          const req = indexedDB.open('stonehouse-dashboard', 1);
+          const req = indexedDB.open('stonehouse-dashboard', 2);
           req.onupgradeneeded = (e) => {
             const db = e.target.result;
-            if (!db.objectStoreNames.contains('onepager')) {
-              db.createObjectStore('onepager');
-            }
+            if (!db.objectStoreNames.contains('onepager')) db.createObjectStore('onepager');
+            if (!db.objectStoreNames.contains('om'))       db.createObjectStore('om');
           };
           req.onsuccess = () => resolve(req.result);
           req.onerror = () => reject(req.error);
