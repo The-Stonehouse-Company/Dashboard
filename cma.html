@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Comparables · The Stonehouse Company</title>
+  <title>Comparative's Presentation · The Stonehouse Company</title>
 
   <!-- Same brand fonts as the rest of the dashboard / feasibility docs -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -264,7 +264,7 @@
 <body>
 
   <div class="toolbar">
-    <div class="toolbar-title">CMA · The Stonehouse Company</div>
+    <div class="toolbar-title">Comparative's Presentation · The Stonehouse Company</div>
     <div class="toolbar-actions">
       <span class="status" id="status"></span>
       <button class="btn-ghost" type="button" onclick="window.close()">Close</button>
@@ -432,7 +432,7 @@
             if (i > 0) pdf.addPage('letter', 'landscape');
             pdf.addImage(img, 'JPEG', 0, 0, 11, 8.5);
           }
-          const fileName = 'Stonehouse-CMA-' +
+          const fileName = 'Stonehouse-Comparatives-Presentation-' +
             (data.subject.address || 'untitled').replace(/[^A-Za-z0-9]+/g, '-') +
             '.pdf';
           pdf.save(fileName);
