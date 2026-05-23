@@ -27,7 +27,7 @@
          straight into a 612pt × 792pt PDF page (1pt = 1.333 px). */
       --page-w: 816px;
       --page-h: 1056px;
-      --page-pad: 88px;
+      --page-pad: 78px;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -90,10 +90,10 @@
       height: var(--page-h);
       background: var(--paper);
       color: var(--ink);
-      padding: var(--page-pad);
+      padding: var(--page-pad) var(--page-pad) 64px;
       position: relative;
       box-shadow: 0 6px 28px rgba(0,0,0,0.45);
-      font-size: 13.5px;
+      font-size: 14px;
       line-height: 1.55;
       font-weight: 400;
       overflow: hidden;
@@ -101,15 +101,15 @@
     .el-page .footer {
       position: absolute;
       left: var(--page-pad); right: var(--page-pad);
-      bottom: 28px;
+      bottom: 24px;
       font-family: var(--font-heading);
-      font-size: 10px;
+      font-size: 9.5px;
       letter-spacing: 0.12em;
       color: var(--ink-muted);
       text-transform: none;
       text-align: center;
       border-top: 1px solid var(--rule);
-      padding-top: 10px;
+      padding-top: 8px;
     }
 
     /* Cover header */
@@ -158,21 +158,22 @@
     .el-page h2 {
       font-family: var(--font-heading);
       font-weight: 700;
-      font-size: 12.5px;
+      font-size: 12px;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--ink);
-      margin: 22px 0 10px;
-      padding-bottom: 6px;
+      margin: 18px 0 8px;
+      padding-bottom: 5px;
       border-bottom: 1px solid var(--accent);
     }
+    .el-page h2:first-child { margin-top: 0; }
     .el-page h3 {
       font-family: var(--font-heading);
       font-weight: 600;
-      font-size: 11.5px;
+      font-size: 11px;
       letter-spacing: 0.05em;
       color: var(--ink);
-      margin: 14px 0 6px;
+      margin: 12px 0 5px;
     }
 
     .el-page p {
@@ -183,11 +184,11 @@
     .el-page p.tight { margin-bottom: 4px; }
 
     .el-page ul {
-      margin: 0 0 10px 22px;
+      margin: 0 0 8px 22px;
       padding: 0;
     }
     .el-page ul li {
-      margin: 3px 0;
+      margin: 2px 0;
       text-align: justify;
     }
 
@@ -384,14 +385,15 @@
     // Header strip shared by every non-cover page.
     function header() { return ''; /* keep clean text-only pages — brand on cover only */ }
 
-    // Footer strip shared by every page (page X of 10 added per page).
+    // Footer strip shared by every page (page X of N — N filled in below).
+    const TOTAL_PAGES = 8;
     function footer(n) {
-      return '<div class="footer">The Stonehouse Company · Owner&rsquo;s Representative Engagement Letter · Page ' + n + ' of 10</div>';
+      return '<div class="footer">The Stonehouse Company · Owner&rsquo;s Representative Engagement Letter · Page ' + n + ' of ' + TOTAL_PAGES + '</div>';
     }
 
     const pages = [];
 
-    // --- PAGE 1 ---
+    // --- PAGE 1 — Cover + Parties + Section 1 + Section 2 intro ---
     pages.push(
       '<section class="el-page">' +
         '<div class="brand">The Stonehouse Company</div>' +
@@ -409,19 +411,18 @@
         '<h2>1. Engagement and Role of Owner&rsquo;s Representative</h2>' +
         '<p>The Client engages Stonehouse, and Stonehouse accepts the engagement, to serve as the Client&rsquo;s Owner&rsquo;s Representative in connection with the Project on the terms set forth in this Agreement. In that capacity Stonehouse will represent the Client&rsquo;s interests in dealings with the architect, designer, builder, contractors, suppliers, and other Project participants, and will provide the management, coordination, and oversight services described in Section 2.</p>' +
         '<p>Stonehouse is not the architect, designer, engineer, builder, general contractor, subcontractor, or supplier on the Project, does not perform construction work, and does not act as the Client&rsquo;s real estate broker in connection with this engagement. All Project decisions — including selection of the architect, designer, builder, finishes, materials, scope, budget, and schedule — are made solely by the Client. Stonehouse provides recommendations, analysis, coordination, and oversight; the Client is responsible for its own decisions and their consequences.</p>' +
-
-        footer(1) +
-      '</section>'
-    );
-
-    // --- PAGE 2 ---
-    pages.push(
-      '<section class="el-page">' +
         '<p>Stonehouse will perform its services with the reasonable skill and care of an owner&rsquo;s representative engaged on similar projects in the Nashville / Middle Tennessee market. The Parties expressly agree that this is the sole standard of performance for Stonehouse under this Agreement and that no broader duty or warranty — express or implied — applies.</p>' +
 
         '<h2>2. Scope of Services</h2>' +
         '<p>Stonehouse will provide the following services with respect to the Project:</p>' +
 
+        footer(1) +
+      '</section>'
+    );
+
+    // --- PAGE 2 — Section 2 details + Section 3 fee + hard build cost defined ---
+    pages.push(
+      '<section class="el-page">' +
         '<h3>Pre-Construction</h3>' +
         '<ul>' +
           '<li>Coordinate the interview, vetting, and selection process for the architect, designer, builder, and any other consultants the Client elects to engage.</li>' +
@@ -442,15 +443,7 @@
         '<h3>Exclusions</h3>' +
         '<p>This Agreement covers Owner&rsquo;s Rep services for the construction phase only (the &ldquo;Build&rdquo;). It does not cover land acquisition, brokerage representation, legal services, architectural or engineering services, interior design services, or construction lending advice. If the Client wishes to engage Stonehouse&rsquo;s land acquisition team or any other Stonehouse division, a separate written agreement will govern those services and any associated fees.</p>' +
 
-        footer(2) +
-      '</section>'
-    );
-
-    // --- PAGE 3 ---
-    pages.push(
-      '<section class="el-page">' +
         '<h2>3. Fees and Payment</h2>' +
-
         '<h3>Fee Structure</h3>' +
         '<p>In consideration of the services described in Section 2, the Client shall pay Stonehouse an Owner&rsquo;s Rep fee equal to <strong>five percent (5%) of the Hard Build Cost</strong> (the &ldquo;Owner&rsquo;s Rep Fee&rdquo;).</p>' +
 
@@ -461,6 +454,14 @@
           '<li>Construction labor; and</li>' +
           '<li>Site preparation work.</li>' +
         '</ul>' +
+
+        footer(2) +
+      '</section>'
+    );
+
+    // --- PAGE 3 — Section 3 excludes + payment + section 4 + section 5 ---
+    pages.push(
+      '<section class="el-page">' +
         '<p>Hard Build Cost expressly excludes (and the Owner&rsquo;s Rep Fee will not be calculated on) the following soft costs:</p>' +
         '<ul>' +
           '<li>Architect, designer, and engineer fees;</li>' +
@@ -473,14 +474,6 @@
 
         '<h3>Payment Schedule</h3>' +
         '<p>The Owner&rsquo;s Rep Fee is earned and payable in approximately equal monthly installments over the construction period of the Project. The first installment is due upon commencement of demolition (or, if no demolition is required, upon the first day of site work), and the final installment is due upon issuance of the Certificate of Occupancy. The Parties may agree in writing to align installments with builder draw cycles.</p>' +
-
-        footer(3) +
-      '</section>'
-    );
-
-    // --- PAGE 4 ---
-    pages.push(
-      '<section class="el-page">' +
         '<p>The Owner&rsquo;s Rep Fee is payable to Stonehouse by check or ACH within fifteen (15) days of each invoice. Amounts not paid within thirty (30) days of invoice will accrue interest at the lesser of 1.5% per month or the maximum rate permitted by Tennessee law.</p>' +
 
         '<h3>Adjustments</h3>' +
@@ -490,16 +483,15 @@
         '<p>All Project decisions — including but not limited to selection of vendors, approval of designs, approval of materials and finishes, authorization of change orders, approval of draws and payments, and acceptance of completed work — are made solely by the Client. Stonehouse will provide recommendations, analysis, and options, but Stonehouse has no authority to bind the Client, commit the Client&rsquo;s funds, sign contracts on behalf of the Client, or accept delivery of work on the Client&rsquo;s behalf, except to the extent the Client gives Stonehouse specific written authorization for a defined action.</p>' +
         '<p>The Client acknowledges that Stonehouse&rsquo;s recommendations are advisory. The Client is responsible for performing its own diligence, obtaining independent legal, financial, tax, insurance, engineering, and architectural advice as the Client deems necessary, and for evaluating and accepting the risk of any decision.</p>' +
 
-        '<h2>5. Communication Protocol</h2>' +
-        '<p>Unless the Parties expressly agree otherwise in writing, all routine Project communication between the Client and the architect, designer, builder, and trades will flow through Stonehouse. Stonehouse will copy the Client on material written communications and will invite the Client to all interview and major-decision meetings. Meetings the Client elects not to attend live may, where practical, be recorded by Stonehouse for the Client&rsquo;s subsequent review.</p>' +
-
-        footer(4) +
+        footer(3) +
       '</section>'
     );
 
-    // --- PAGE 5 ---
+    // --- PAGE 4 — Sections 5, 6, 7 + Marketing ---
     pages.push(
       '<section class="el-page">' +
+        '<h2>5. Communication Protocol</h2>' +
+        '<p>Unless the Parties expressly agree otherwise in writing, all routine Project communication between the Client and the architect, designer, builder, and trades will flow through Stonehouse. Stonehouse will copy the Client on material written communications and will invite the Client to all interview and major-decision meetings. Meetings the Client elects not to attend live may, where practical, be recorded by Stonehouse for the Client&rsquo;s subsequent review.</p>' +
         '<p>The Client is welcome to communicate directly with any Project vendor, but is encouraged to copy Stonehouse so that Stonehouse can perform its Owner&rsquo;s Rep role effectively. Where the Client deals directly with vendors without notifying Stonehouse, Stonehouse is not responsible for any consequences arising from that direct communication.</p>' +
 
         '<h2>6. Independent Contractor; No Agency</h2>' +
@@ -510,43 +502,36 @@
         '<p>At the Client&rsquo;s request, the Parties will execute a separate non-disclosure agreement on terms reasonably acceptable to both Parties. The Client may also direct Stonehouse to enter into reasonable confidentiality covenants with builders, architects, designers, and other Project vendors.</p>' +
         '<p>The obligations in this Section 7 do not apply to information that (a) is or becomes publicly available through no breach of this Agreement; (b) is independently developed by Stonehouse without reference to Client information; (c) was rightfully known to Stonehouse before disclosure; or (d) is required to be disclosed by law, court order, or governmental authority, provided that Stonehouse gives the Client prompt notice (where lawful) to allow the Client to seek a protective order.</p>' +
 
-        footer(5) +
-      '</section>'
-    );
-
-    // --- PAGE 6 ---
-    pages.push(
-      '<section class="el-page">' +
         '<h3>Marketing and Social Media</h3>' +
         '<p>Stonehouse will not post, publish, or otherwise market the Project — including by reference to the address, photographs, floor plans, or the Client&rsquo;s identity — without the Client&rsquo;s prior written consent. The Client controls the marketing posture of the Project. Permissions granted by the Client may be revoked at any time on written notice; Stonehouse will remove prospectively published Stonehouse-controlled content within a reasonable time after notice.</p>' +
 
+        footer(4) +
+      '</section>'
+    );
+
+    // --- PAGE 5 — Sections 8, 9, 10 ---
+    pages.push(
+      '<section class="el-page">' +
         '<h2>8. No Legal, Engineering, or Architectural Advice</h2>' +
         '<p>Stonehouse does not provide legal, accounting, tax, engineering, architectural, surveying, geotechnical, environmental, real estate brokerage (in connection with this engagement), insurance, or financial advice. Any input from Stonehouse on these subjects is provided for general informational purposes only and is not a substitute for advice from a licensed professional. The Client is responsible for engaging its own licensed professionals where required.</p>' +
 
         '<h2>9. Limitation of Liability; No Warranty</h2>' +
         '<p>The Client acknowledges that Stonehouse does not perform construction work, does not design the Project, and does not control the schedule, means, methods, sequence, or quality of the work performed by the architect, designer, builder, contractors, subcontractors, suppliers, or any other third party. Stonehouse makes no representation, warranty, or guarantee — express or implied — regarding the Project&rsquo;s cost, schedule, quality, code compliance, marketability, fitness for any particular purpose, or any other outcome.</p>' +
-
-        footer(6) +
-      '</section>'
-    );
-
-    // --- PAGE 7 ---
-    pages.push(
-      '<section class="el-page">' +
         '<p>To the maximum extent permitted by applicable law, Stonehouse will not be liable to the Client or to any third party for: (a) the acts, errors, omissions, breaches, defects, delays, cost overruns, or insolvency of any architect, designer, engineer, builder, contractor, subcontractor, supplier, lender, or other third party; (b) any consequences of decisions made by the Client; (c) loss of use, lost profits, lost rental income, diminution in value, or any indirect, incidental, special, consequential, exemplary, or punitive damages; or (d) any matter outside Stonehouse&rsquo;s direct, willful misconduct or fraud.</p>' +
         '<p>Stonehouse&rsquo;s aggregate liability under or in connection with this Agreement, whether in contract, tort (including negligence), warranty, or otherwise, will not exceed the total Owner&rsquo;s Rep Fees actually paid by the Client to Stonehouse under this Agreement during the twelve (12) months preceding the event giving rise to the claim. The Parties acknowledge that this allocation of risk is a material part of the consideration for the Owner&rsquo;s Rep Fee and that the Owner&rsquo;s Rep Fee would be substantially higher absent this allocation.</p>' +
 
         '<h2>10. Insurance</h2>' +
         '<p>Stonehouse strongly recommends — but does not require — that the Client procure and maintain throughout the Project: (a) builder&rsquo;s risk insurance on the Project in an amount at least equal to the full replacement cost of the work in place; and (b) general liability and umbrella coverage in commercially reasonable amounts. Stonehouse further recommends that the Client require the builder and each subcontractor of consequence to maintain general liability, workers&rsquo; compensation, and (where applicable) professional liability insurance, with the Client named as an additional insured where appropriate.</p>' +
-        '<p>The Client may, at the Client&rsquo;s sole election, decline to procure or require any of the foregoing coverage. The Client acknowledges that any such election to forgo recommended coverage is the Client&rsquo;s decision and that the Client assumes all risk of uninsured loss with respect to the Project. Stonehouse&rsquo;s recommendation to carry insurance is advisory only, is not a duty, and the absence or insufficiency of insurance does not shift any risk or liability to Stonehouse.</p>' +
 
-        footer(7) +
+        footer(5) +
       '</section>'
     );
 
-    // --- PAGE 8 ---
+    // --- PAGE 6 — Section 10 closer + Sections 11, 12 ---
     pages.push(
       '<section class="el-page">' +
+        '<p>The Client may, at the Client&rsquo;s sole election, decline to procure or require any of the foregoing coverage. The Client acknowledges that any such election to forgo recommended coverage is the Client&rsquo;s decision and that the Client assumes all risk of uninsured loss with respect to the Project. Stonehouse&rsquo;s recommendation to carry insurance is advisory only, is not a duty, and the absence or insufficiency of insurance does not shift any risk or liability to Stonehouse.</p>' +
+
         '<h2>11. Term and Termination</h2>' +
         '<p>This Agreement commences on the Effective Date and continues until the earlier of (a) issuance of the Certificate of Occupancy for the Project, (b) mutual written agreement of the Parties, or (c) termination in accordance with this Section 11.</p>' +
         '<p>Either Party may terminate this Agreement at any time, for convenience or for cause, on thirty (30) days&rsquo; prior written notice to the other Party. Either Party may terminate this Agreement immediately for cause if the other Party materially breaches this Agreement and fails to cure the breach within fifteen (15) days after written notice describing the breach in reasonable detail.</p>' +
@@ -555,39 +540,37 @@
         '<h2>12. Indemnification by Client</h2>' +
         '<p>To the maximum extent permitted by applicable law, the Client will defend, indemnify, and hold harmless Stonehouse, its members, officers, employees, contractors, and affiliates from and against any and all third-party claims, demands, suits, proceedings, losses, damages, liabilities, judgments, settlements, costs, and expenses (including reasonable attorneys&rsquo; fees) arising out of or related to (a) the Project, (b) the acts or omissions of any architect, designer, engineer, builder, contractor, subcontractor, supplier, lender, or other third party engaged on the Project, (c) any decision made by the Client, or (d) the Client&rsquo;s breach of this Agreement. This indemnity does not extend to claims arising from Stonehouse&rsquo;s own willful misconduct or fraud.</p>' +
 
-        footer(8) +
+        footer(6) +
       '</section>'
     );
 
-    // --- PAGE 9 ---
+    // --- PAGE 7 — Sections 13, 14, 15, 16 ---
     pages.push(
       '<section class="el-page">' +
         '<h2>13. Governing Law; Dispute Resolution</h2>' +
         '<p>This Agreement is governed by and construed in accordance with the laws of the State of Tennessee, without regard to its conflict-of-law principles. The Parties consent to exclusive venue in the state and federal courts located in Davidson County, Tennessee for any matter not subject to the arbitration provisions below.</p>' +
-        '<p>If a dispute arises out of or relates to this Agreement, the Parties will first attempt to resolve the dispute through good-faith negotiation between senior representatives. If the dispute is not resolved within thirty (30) days of written notice of the dispute, the Parties will submit the matter to non-binding mediation in Davidson County, Tennessee before a mutually agreed mediator. If the dispute is not resolved within sixty (60) days after the commencement of mediation, the dispute will be finally resolved by binding arbitration administered by the American Arbitration Association under its Commercial Arbitration Rules, before a single arbitrator, in Davidson County, Tennessee. Judgment on the award may be entered in any court of competent jurisdiction. Nothing in this Section limits either Party&rsquo;s right to seek injunctive or equitable relief in court to protect confidential information or intellectual property.</p>' +
-        '<p>The prevailing Party in any action to enforce this Agreement is entitled to recover its reasonable attorneys&rsquo; fees and costs.</p>' +
+        '<p>If a dispute arises out of or relates to this Agreement, the Parties will first attempt to resolve the dispute through good-faith negotiation between senior representatives. If the dispute is not resolved within thirty (30) days of written notice of the dispute, the Parties will submit the matter to non-binding mediation in Davidson County, Tennessee before a mutually agreed mediator. If the dispute is not resolved within sixty (60) days after the commencement of mediation, the dispute will be finally resolved by binding arbitration administered by the American Arbitration Association under its Commercial Arbitration Rules, before a single arbitrator, in Davidson County, Tennessee. Judgment on the award may be entered in any court of competent jurisdiction. The prevailing Party in any action to enforce this Agreement is entitled to recover its reasonable attorneys&rsquo; fees and costs.</p>' +
 
         '<h2>14. Notices</h2>' +
         '<p>All notices under this Agreement must be in writing and delivered by hand, by overnight courier with tracking, or by email with confirmation of receipt, to the addresses set forth on the signature page (or to such other address as a Party may designate in writing). Notice by email is deemed received on the next business day after sending if not bounced back, provided that termination and breach notices must additionally be sent by hand or courier.</p>' +
 
         '<h2>15. Entire Agreement; Amendment; Assignment</h2>' +
-        '<p>This Agreement constitutes the entire agreement between the Parties with respect to its subject matter and supersedes all prior or contemporaneous proposals, negotiations, and understandings, written or oral. This Agreement may be amended only by a written instrument signed by both Parties.</p>' +
-        '<p>Neither Party may assign this Agreement without the other Party&rsquo;s prior written consent, except that Stonehouse may assign to a successor in connection with a merger, reorganization, or sale of substantially all of its assets.</p>' +
+        '<p>This Agreement constitutes the entire agreement between the Parties with respect to its subject matter and supersedes all prior or contemporaneous proposals, negotiations, and understandings, written or oral. This Agreement may be amended only by a written instrument signed by both Parties. Neither Party may assign this Agreement without the other Party&rsquo;s prior written consent, except that Stonehouse may assign to a successor in connection with a merger, reorganization, or sale of substantially all of its assets.</p>' +
 
         '<h2>16. Miscellaneous</h2>' +
         '<ol class="lower-alpha">' +
           '<li><strong>Severability.</strong> If any provision of this Agreement is held to be unenforceable, the remaining provisions remain in full force and effect, and the unenforceable provision will be reformed to the minimum extent necessary to be enforceable while preserving the Parties&rsquo; original intent.</li>' +
           '<li><strong>No Waiver.</strong> A Party&rsquo;s failure to enforce any right or provision is not a waiver of that right or provision or of any other right or provision.</li>' +
-          '<li><strong>Counterparts; Electronic Signatures.</strong> This Agreement may be executed in counterparts, each of which is an original and all of which together constitute one agreement. Electronic signatures (including DocuSign and PDF signatures) are valid and binding.</li>' +
+          '<li><strong>Counterparts; Electronic Signatures.</strong> This Agreement may be executed in counterparts, each of which is an original and all of which together constitute one agreement. Electronic signatures are valid and binding.</li>' +
           '<li><strong>Headings.</strong> Section headings are for convenience only and do not affect interpretation.</li>' +
           '<li><strong>Force Majeure.</strong> Neither Party is liable for any delay or failure to perform (other than payment obligations) caused by events beyond its reasonable control, including acts of God, government action, labor disputes, supply-chain disruptions, severe weather, fire, pandemic, or war.</li>' +
         '</ol>' +
 
-        footer(9) +
+        footer(7) +
       '</section>'
     );
 
-    // --- PAGE 10 (Signatures) ---
+    // --- PAGE 8 — Signatures + Acknowledgement ---
     pages.push(
       '<section class="el-page">' +
         '<h2>Signatures</h2>' +
@@ -628,7 +611,7 @@
           '<p>By signing above, the Client acknowledges that the Client has read this Agreement in full, has had the opportunity to consult independent legal and financial advisors, understands that Stonehouse is acting solely as the Client&rsquo;s Owner&rsquo;s Representative (and not as the builder, architect, designer, engineer, or broker on the Project), and accepts the allocation of decision-making authority and the limitations of liability set forth herein.</p>' +
         '</div>' +
 
-        footer(10) +
+        footer(8) +
       '</section>'
     );
 
