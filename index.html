@@ -2142,21 +2142,15 @@
       <div style="
         width: 60px; height: 1px; background: #d9c8a3;
         margin: 0 auto 36px;"></div>
-      <label for="gate-code" style="
+      <label style="
         display: block;
         font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
-        color: #b8b8b8; margin-bottom: 14px;">Employee Access Code</label>
-      <input id="gate-code" type="password" autocomplete="off" autofocus
-        inputmode="numeric" pattern="[0-9]{6}" maxlength="6"
-        placeholder="6-digit code"
-        style="
-          width: 100%; padding: 14px 16px;
-          background: #0e0e0e; color: #fff;
-          border: 1px solid #2a2a2a;
-          font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-          font-size: 22px; letter-spacing: 0.6em;
-          text-align: center;
-          outline: none;" />
+        color: #b8b8b8; margin-bottom: 18px;">Employee Access Code</label>
+      <div id="gate-code-row" style="
+        display: flex; gap: 10px; justify-content: center; margin-bottom: 6px;">
+        <!-- Six inputs injected by the gate script so we can wire focus/paste
+             behaviour without hand-maintaining each one. -->
+      </div>
       <div id="gate-error" style="
         min-height: 18px; margin: 10px 0 18px;
         font-size: 11px; color: #f4b9b9; letter-spacing: 0.05em;"></div>
@@ -2199,18 +2193,57 @@
 
       // Render the gate.
       const gate    = document.getElementById('employee-gate');
-      const codeEl  = document.getElementById('gate-code');
+      const row     = document.getElementById('gate-code-row');
       const errEl   = document.getElementById('gate-error');
       const btn     = document.getElementById('gate-submit');
-      if (!gate || !codeEl || !btn) return;
+      if (!gate || !row || !btn) return;
+
+      // Build six per-digit input boxes (2FA-style).
+      const inputs = [];
+      for (let i = 0; i < 6; i++) {
+        const inp = document.createElement('input');
+        inp.type = 'tel';                    // shows number pad on mobile, no spinner
+        inp.inputMode = 'numeric';
+        inp.pattern = '[0-9]*';
+        inp.maxLength = 1;
+        inp.autocomplete = 'off';
+        inp.setAttribute('aria-label', 'Access code digit ' + (i + 1));
+        inp.style.cssText = [
+          'width: 48px', 'height: 60px',
+          'background: #0e0e0e', 'color: #fff',
+          'border: 1px solid #2a2a2a',
+          'border-radius: 2px',
+          'font-family: Inter, Helvetica Neue, Arial, sans-serif',
+          'font-size: 26px', 'font-weight: 500',
+          'text-align: center',
+          'outline: none',
+          'caret-color: #d9c8a3',
+          'transition: border-color .15s, background .15s',
+        ].join(';');
+        inp.addEventListener('focus', () => { inp.style.borderColor = '#d9c8a3'; });
+        inp.addEventListener('blur',  () => { inp.style.borderColor = '#2a2a2a'; });
+        row.appendChild(inp);
+        inputs.push(inp);
+      }
+      inputs[0].autofocus = true;
+      // Defer focus to next tick so it lands after the overlay is on screen.
+      setTimeout(() => inputs[0].focus(), 30);
 
       gate.style.display = 'flex';
       // Prevent the underlying page from scrolling/interacting while gated.
       document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
 
+      function collectEntered() {
+        return inputs.map((el) => el.value).join('').replace(/\D/g, '');
+      }
+      function clearAll() {
+        inputs.forEach((el) => { el.value = ''; });
+        inputs[0].focus();
+      }
       function tryEnter() {
-        const entered = (codeEl.value || '').replace(/\D/g, '');
+        const entered = collectEntered();
+        if (entered.length !== 6) return;        // wait for all six digits
         if (entered === ACCESS_CODE) {
           try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -2223,23 +2256,66 @@
           if (gate.parentNode) gate.parentNode.removeChild(gate);
         } else {
           errEl.textContent = 'Incorrect code. Try again.';
-          codeEl.value = '';
-          codeEl.focus();
+          clearAll();
         }
       }
 
+      // Per-box behaviour: digit input advances focus; backspace on empty
+      // returns to the previous box.
+      inputs.forEach((inp, idx) => {
+        inp.addEventListener('input', () => {
+          // Strip anything non-digit. If a paste landed here, distribute
+          // additional digits across the following boxes.
+          const raw = (inp.value || '').replace(/\D/g, '');
+          if (raw.length === 0) { inp.value = ''; return; }
+          inp.value = raw[0];
+          if (raw.length > 1) {
+            // Spread overflow digits forward.
+            for (let j = 1; j < raw.length && (idx + j) < inputs.length; j++) {
+              inputs[idx + j].value = raw[j];
+            }
+          }
+          // Clear any stale error message the moment they start typing.
+          if (errEl.textContent) errEl.textContent = '';
+          // Move focus to the next empty box (or trigger submit).
+          const filled = collectEntered();
+          if (filled.length === 6) { tryEnter(); }
+          else {
+            const next = Math.min(idx + Math.max(raw.length, 1), inputs.length - 1);
+            inputs[next].focus();
+            inputs[next].select && inputs[next].select();
+          }
+        });
+        inp.addEventListener('keydown', (e) => {
+          if (e.key === 'Backspace' && !inp.value && idx > 0) {
+            inputs[idx - 1].focus();
+            inputs[idx - 1].value = '';
+            e.preventDefault();
+          } else if (e.key === 'ArrowLeft' && idx > 0) {
+            inputs[idx - 1].focus(); e.preventDefault();
+          } else if (e.key === 'ArrowRight' && idx < inputs.length - 1) {
+            inputs[idx + 1].focus(); e.preventDefault();
+          } else if (e.key === 'Enter') {
+            e.preventDefault(); tryEnter();
+          }
+        });
+        // Paste handler — paste 6 digits anywhere, they fill every box.
+        inp.addEventListener('paste', (e) => {
+          const text = (e.clipboardData || window.clipboardData).getData('text');
+          const digits = (text || '').replace(/\D/g, '').slice(0, 6);
+          if (!digits) return;
+          e.preventDefault();
+          for (let j = 0; j < 6; j++) inputs[j].value = digits[j] || '';
+          const lastFilled = Math.min(digits.length, 6) - 1;
+          inputs[Math.max(0, lastFilled)].focus();
+          if (digits.length === 6) tryEnter();
+        });
+      });
+
+      // The Enter button is still clickable as a fallback for users who
+      // want to confirm manually (e.g. partial fill, then realise the
+      // last digit is already there from autofill).
       btn.addEventListener('click', tryEnter);
-      codeEl.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); tryEnter(); }
-        if (errEl.textContent) errEl.textContent = '';
-      });
-      // Strip non-digits as the user types AND auto-submit on 6 digits
-      // so employees don't have to hit Enter or click the button.
-      codeEl.addEventListener('input', () => {
-        const cleaned = (codeEl.value || '').replace(/\D/g, '').slice(0, 6);
-        if (cleaned !== codeEl.value) codeEl.value = cleaned;
-        if (cleaned.length === 6) tryEnter();
-      });
     })();
   </script>
 
