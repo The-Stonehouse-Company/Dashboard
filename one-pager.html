@@ -529,15 +529,16 @@
     }
 
     // ----- IndexedDB helpers (mirror the dashboard) -----
-    // Version 2 with both stores — keeps this reader compatible regardless
-    // of which writer (One-Pager modal or OM modal) ran first.
+    // Version 3 with all three stores (onepager, om, engagement) — keeps
+    // this reader compatible regardless of which writer ran first.
     function idbOpen() {
       return new Promise((resolve, reject) => {
-        const req = indexedDB.open('stonehouse-dashboard', 2);
+        const req = indexedDB.open('stonehouse-dashboard', 3);
         req.onupgradeneeded = (e) => {
           const db = e.target.result;
-          if (!db.objectStoreNames.contains('onepager')) db.createObjectStore('onepager');
-          if (!db.objectStoreNames.contains('om'))       db.createObjectStore('om');
+          if (!db.objectStoreNames.contains('onepager'))   db.createObjectStore('onepager');
+          if (!db.objectStoreNames.contains('om'))         db.createObjectStore('om');
+          if (!db.objectStoreNames.contains('engagement')) db.createObjectStore('engagement');
         };
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);

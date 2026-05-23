@@ -455,14 +455,15 @@
     //  PDF for download.
     // ============================================================
 
-    // --- IDB transport ---
+    // --- IDB transport (version 3 — shared with one-pager + engagement) ---
     function idbOpen() {
       return new Promise((resolve, reject) => {
-        const req = indexedDB.open('stonehouse-dashboard', 2);
+        const req = indexedDB.open('stonehouse-dashboard', 3);
         req.onupgradeneeded = (e) => {
           const db = e.target.result;
-          if (!db.objectStoreNames.contains('onepager')) db.createObjectStore('onepager');
-          if (!db.objectStoreNames.contains('om'))        db.createObjectStore('om');
+          if (!db.objectStoreNames.contains('onepager'))   db.createObjectStore('onepager');
+          if (!db.objectStoreNames.contains('om'))         db.createObjectStore('om');
+          if (!db.objectStoreNames.contains('engagement')) db.createObjectStore('engagement');
         };
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);

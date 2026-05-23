@@ -1460,6 +1460,24 @@
       margin-left: 8px;
       font-family: var(--font-display);
     }
+    /* Secondary text-link beneath the primary file-btn — used for the
+       blank Word template download under the Engagement Letter generator
+       so the primary "Generate PDF" action stays unambiguous. */
+    .file-card .file-btn-secondary {
+      align-self: flex-start;
+      margin-top: 10px;
+      font-size: 10px;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-bottom: 1px solid var(--rule-strong);
+      padding-bottom: 2px;
+    }
+    .file-card .file-btn-secondary:hover {
+      color: var(--text);
+      border-bottom-color: var(--text);
+    }
 
     /* Mode toggle (two-pill segmented control used in the One Pager modal) */
     .mode-toggle {
@@ -2495,11 +2513,14 @@
 
         <div class="file-grid">
           <article class="file-card">
-            <div class="file-eyebrow">Agreement</div>
+            <div class="file-eyebrow">Agreement · Generator</div>
             <h3 class="file-title">Engagement Letter</h3>
-            <p class="file-desc">Owner-rep engagement letter outlining Stonehouse's fiduciary scope, deliverables across pre-con and construction, fee structure, and term.</p>
-            <a class="file-btn" href="assets/customrep-files/engagement-letter.pdf" download="Stonehouse-Engagement-Letter.pdf" target="_blank" rel="noopener">
-              Download PDF <span class="arrow">↓</span>
+            <p class="file-desc">Owner&rsquo;s Rep engagement letter — build-only scope, 5% of hard build cost. Fill in the client and project, generate a Stonehouse-branded PDF ready to send to a third-party signature platform.</p>
+            <button class="file-btn" type="button" id="open-engagement-modal" aria-haspopup="dialog" aria-controls="engagement-modal">
+              Generate PDF <span class="arrow">→</span>
+            </button>
+            <a class="file-btn-secondary" href="assets/customrep-files/Stonehouse-Engagement-Letter.docx" download="Stonehouse-Engagement-Letter.docx">
+              Download blank Word template
             </a>
           </article>
 
@@ -3520,6 +3541,70 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     </div>
   </div>
 
+  <!-- ========================= ENGAGEMENT LETTER MODAL =========================
+       Small form (5 inputs) that feeds engagement-letter.html. Same write-to-IDB,
+       open-new-tab pattern as the one-pager and OM generators. The output page
+       reads the payload back, fills the placeholders, then runs html2canvas +
+       pdf-lib to build the downloadable PDF. -->
+  <div class="modal-overlay" id="engagement-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="engagement-modal-title" id="engagement-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Custom Home Rep · Generator</span>
+          <h2 class="modal-title" id="engagement-modal-title">Engagement Letter Generator</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-engagement-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="engagement-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Agreement</legend>
+          <div class="form-grid">
+            <div>
+              <label for="el-effective-date">Effective Date <span class="req">*</span></label>
+              <input id="el-effective-date" name="effective_date" type="date" required />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Client</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="el-client-name">Client Name(s) <span class="req">*</span></label>
+              <input id="el-client-name" name="client_name" type="text" required placeholder="John & Jane Smith" />
+            </div>
+            <div class="full">
+              <label for="el-client-address">Client Address <span class="req">*</span></label>
+              <input id="el-client-address" name="client_address" type="text" required placeholder="123 Main St, Nashville, TN 37215" />
+            </div>
+            <div class="full">
+              <label for="el-client-email">Client Email <span class="req">*</span></label>
+              <input id="el-client-email" name="client_email" type="email" required placeholder="client@example.com" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Project</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="el-project-address">Project Address <span class="req">*</span></label>
+              <input id="el-project-address" name="project_address" type="text" required placeholder="456 Build Ln, Nashville, TN 37215" />
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="form-status" id="engagement-status" role="status" aria-live="polite"></div>
+
+        <footer class="modal-foot">
+          <button class="btn ghost" type="button" id="cancel-engagement-modal">Cancel</button>
+          <button class="btn" type="submit" id="submit-engagement-modal">Generate PDF</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
   <!-- ========================= UNDERWRITING MODEL MODAL ========================= -->
   <div class="modal-overlay is-xwide" id="uw-modal-overlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="uw-modal-title" id="uw-modal">
@@ -4529,15 +4614,17 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       // ----------------------------------------------------------
       function idbOpen() {
         return new Promise((resolve, reject) => {
-          // Version 2 — shared with OM modal. Upgrade handler creates BOTH
-          // stores so the DB stays consistent regardless of which modal the
-          // user opens first. Bumping back to v1 from v2 throws VersionError,
-          // which is what produced the "lower version than existing" toast.
-          const req = indexedDB.open('stonehouse-dashboard', 2);
+          // Version 3 — shared DB across the one-pager, OM, and engagement-
+          // letter modals. Upgrade handler creates ALL stores so the DB stays
+          // consistent regardless of which modal the user opens first.
+          // Opening with a lower version than the existing DB throws
+          // VersionError, so every callsite MUST be on the same version.
+          const req = indexedDB.open('stonehouse-dashboard', 3);
           req.onupgradeneeded = (e) => {
             const db = e.target.result;
-            if (!db.objectStoreNames.contains('onepager')) db.createObjectStore('onepager');
-            if (!db.objectStoreNames.contains('om'))       db.createObjectStore('om');
+            if (!db.objectStoreNames.contains('onepager'))   db.createObjectStore('onepager');
+            if (!db.objectStoreNames.contains('om'))         db.createObjectStore('om');
+            if (!db.objectStoreNames.contains('engagement')) db.createObjectStore('engagement');
           };
           req.onsuccess = () => resolve(req.result);
           req.onerror = () => reject(req.error);
@@ -6212,14 +6299,16 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         }
       }
 
-      // ---- IndexedDB transport (same DB as one-pager, different store) ----
+      // ---- IndexedDB transport (shared DB with one-pager + engagement letter) ----
       function idbOpen() {
         return new Promise((resolve, reject) => {
-          const req = indexedDB.open('stonehouse-dashboard', 2);
+          // Version 3 — see the one-pager idbOpen comment up the file.
+          const req = indexedDB.open('stonehouse-dashboard', 3);
           req.onupgradeneeded = (e) => {
             const db = e.target.result;
-            if (!db.objectStoreNames.contains('onepager')) db.createObjectStore('onepager');
-            if (!db.objectStoreNames.contains('om'))        db.createObjectStore('om');
+            if (!db.objectStoreNames.contains('onepager'))   db.createObjectStore('onepager');
+            if (!db.objectStoreNames.contains('om'))         db.createObjectStore('om');
+            if (!db.objectStoreNames.contains('engagement')) db.createObjectStore('engagement');
           };
           req.onsuccess = () => resolve(req.result);
           req.onerror = () => reject(req.error);
@@ -6589,6 +6678,127 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           statusEl.textContent = 'Something went wrong building the CMA. Check the console for details.';
           statusEl.className = 'form-status is-error';
           if (submitBtn) submitBtn.disabled = false;
+        }
+      });
+    })();
+
+    // ============================================================
+    // Engagement Letter Generator controller
+    // Modal-based form (5 inputs) → writes payload to IndexedDB
+    // ('stonehouse-dashboard' → 'engagement' store) → opens
+    // engagement-letter.html which reads the payload, fills the
+    // template placeholders, and downloads the PDF via html2canvas +
+    // pdf-lib (same plumbing as the OM generator).
+    // ============================================================
+    (function () {
+      const overlay   = document.getElementById('engagement-modal-overlay');
+      const modal     = document.getElementById('engagement-modal');
+      const form      = document.getElementById('engagement-form');
+      const statusEl  = document.getElementById('engagement-status');
+      const openBtn   = document.getElementById('open-engagement-modal');
+      const closeBtn  = document.getElementById('close-engagement-modal');
+      const cancelBtn = document.getElementById('cancel-engagement-modal');
+      const submitBtn = document.getElementById('submit-engagement-modal');
+      if (!overlay || !form) return;
+
+      let lastFocus = null;
+      function openModal() {
+        lastFocus = document.activeElement;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        // Pre-fill the effective date with today — most common case.
+        const dateEl = document.getElementById('el-effective-date');
+        if (dateEl && !dateEl.value) {
+          dateEl.value = new Date().toISOString().slice(0, 10);
+        }
+        setTimeout(() => { const f = modal.querySelector('input, button'); f && f.focus(); }, 30);
+      }
+      function closeModal() {
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+        setStatus('');
+      }
+      function setStatus(level, msg) {
+        if (!statusEl) return;
+        if (!msg && !level) { statusEl.textContent = ''; statusEl.className = 'form-status'; return; }
+        statusEl.textContent = msg || '';
+        statusEl.className = 'form-status show' + (level ? ' ' + level : '');
+      }
+
+      openBtn  && openBtn.addEventListener('click', openModal);
+      closeBtn && closeBtn.addEventListener('click', closeModal);
+      cancelBtn && cancelBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') closeModal();
+      });
+
+      // --- IDB (version 3, shared with one-pager + OM) ---
+      function idbOpen() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open('stonehouse-dashboard', 3);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('onepager'))   db.createObjectStore('onepager');
+            if (!db.objectStoreNames.contains('om'))         db.createObjectStore('om');
+            if (!db.objectStoreNames.contains('engagement')) db.createObjectStore('engagement');
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      }
+      async function idbPut(key, value) {
+        const db = await idbOpen();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction('engagement', 'readwrite');
+          tx.objectStore('engagement').put(value, key);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        });
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        setStatus('');
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+
+        // Open the tab BEFORE the async write — Safari blocks window.open
+        // calls that happen after the user-gesture context ends.
+        const requestId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        const outputWin = window.open('engagement-letter.html?req=' + requestId, '_blank');
+        if (!outputWin) {
+          setStatus('warn', 'Pop-up blocked — allow pop-ups, then click Generate PDF again.');
+          return;
+        }
+
+        const originalLabel = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Preparing…';
+
+        try {
+          const payload = {
+            requestId:       requestId,
+            generatedAt:     new Date().toISOString(),
+            effectiveDate:   document.getElementById('el-effective-date').value,
+            clientName:      document.getElementById('el-client-name').value.trim(),
+            clientAddress:   document.getElementById('el-client-address').value.trim(),
+            clientEmail:     document.getElementById('el-client-email').value.trim(),
+            projectAddress:  document.getElementById('el-project-address').value.trim(),
+          };
+          await idbPut('current', payload);
+          setStatus('ok', 'Sent to a new tab — the PDF will download automatically once the page renders.');
+          setTimeout(() => {
+            closeModal();
+            submitBtn.textContent = originalLabel;
+            submitBtn.disabled = false;
+          }, 1200);
+        } catch (err) {
+          console.error('Engagement letter submit failed:', err);
+          setStatus('err', 'Could not save engagement-letter data: ' + (err && err.message ? err.message : err));
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalLabel;
+          try { outputWin.close(); } catch (_) {}
         }
       });
     })();
@@ -8060,16 +8270,16 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
       // Same-shape IndexedDB transport as the Sales one-pager controller,
       // duplicated here because that helper is scoped inside that IIFE.
-      // Same DB + store names so both writers and the one-pager.html
-      // reader stay in sync. Version 2 with both stores — must match the
-      // OM modal so opening order doesn't trigger a VersionError.
+      // Version 3 with all three stores — must match every other idbOpen
+      // in the project so opening order doesn't trigger a VersionError.
       function idbOpen() {
         return new Promise((resolve, reject) => {
-          const req = indexedDB.open('stonehouse-dashboard', 2);
+          const req = indexedDB.open('stonehouse-dashboard', 3);
           req.onupgradeneeded = (e) => {
             const db = e.target.result;
-            if (!db.objectStoreNames.contains('onepager')) db.createObjectStore('onepager');
-            if (!db.objectStoreNames.contains('om'))       db.createObjectStore('om');
+            if (!db.objectStoreNames.contains('onepager'))   db.createObjectStore('onepager');
+            if (!db.objectStoreNames.contains('om'))         db.createObjectStore('om');
+            if (!db.objectStoreNames.contains('engagement')) db.createObjectStore('engagement');
           };
           req.onsuccess = () => resolve(req.result);
           req.onerror = () => reject(req.error);
