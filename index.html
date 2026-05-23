@@ -2110,6 +2110,139 @@
 </head>
 <body>
 
+  <!-- =========================================================================
+       EMPLOYEE ACCESS GATE
+       Friction barrier only — NOT real authentication. Anyone who knows to
+       look at the page source can read the code. Keeps casual visitors and
+       people who shouldn't be poking around from getting to the dashboard.
+
+       To change the code: edit ACCESS_CODE below. Codes are case-insensitive
+       and whitespace is trimmed. To force a re-gate for everyone (e.g. after
+       changing the code), bump ACCESS_VERSION; the next visit will require
+       re-entry even if the user is still inside the 30-day grace window.
+
+       To clear your own session: open DevTools → Application → Local Storage
+       → delete the key "stonehouse-employee-gate".
+       ========================================================================= -->
+  <div id="employee-gate" style="
+    position: fixed; inset: 0; z-index: 99999;
+    background: #000; color: #fff;
+    display: none;
+    align-items: center; justify-content: center;
+    font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;">
+    <div style="max-width: 420px; width: calc(100% - 48px); text-align: center; padding: 24px;">
+      <div style="
+        font-family: 'Aboreto', 'Cormorant Garamond', serif;
+        font-size: 22px; letter-spacing: 0.32em; text-transform: uppercase;
+        margin-bottom: 6px;">The Stonehouse Company</div>
+      <div style="
+        font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase;
+        color: #b8b8b8; margin-bottom: 36px;">Internal Dashboard</div>
+      <div style="
+        width: 60px; height: 1px; background: #d9c8a3;
+        margin: 0 auto 36px;"></div>
+      <label for="gate-code" style="
+        display: block;
+        font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+        color: #b8b8b8; margin-bottom: 14px;">Employee Access Code</label>
+      <input id="gate-code" type="password" autocomplete="off" autofocus
+        inputmode="numeric" pattern="[0-9]{6}" maxlength="6"
+        placeholder="6-digit code"
+        style="
+          width: 100%; padding: 14px 16px;
+          background: #0e0e0e; color: #fff;
+          border: 1px solid #2a2a2a;
+          font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+          font-size: 22px; letter-spacing: 0.6em;
+          text-align: center;
+          outline: none;" />
+      <div id="gate-error" style="
+        min-height: 18px; margin: 10px 0 18px;
+        font-size: 11px; color: #f4b9b9; letter-spacing: 0.05em;"></div>
+      <button id="gate-submit" type="button" style="
+        width: 100%; padding: 14px 22px;
+        background: #fff; color: #000;
+        border: 1px solid #fff;
+        font-family: inherit; font-size: 11px; font-weight: 500;
+        letter-spacing: 0.25em; text-transform: uppercase;
+        cursor: pointer;">Enter</button>
+      <div style="
+        margin-top: 28px;
+        font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase;
+        color: #707070;">Need access? Contact Ryan.</div>
+    </div>
+  </div>
+
+  <script>
+    // ---- Employee gate ----
+    // Friction barrier. Edit ACCESS_CODE to change the team code; bump
+    // ACCESS_VERSION to force everyone to re-enter after a code change.
+    (function () {
+      const ACCESS_CODE    = '051999';           // ← edit this to change the code (6 digits)
+      const ACCESS_VERSION = 3;                  // ← bump this to invalidate existing sessions
+      const STORAGE_KEY    = 'stonehouse-employee-gate';
+      const VALID_MS       = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+      // If a saved token is still valid AND the version matches, skip the gate.
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const t = JSON.parse(raw);
+          if (t && t.v === ACCESS_VERSION && t.ts && (Date.now() - t.ts) < VALID_MS) {
+            const gate = document.getElementById('employee-gate');
+            if (gate && gate.parentNode) gate.parentNode.removeChild(gate);
+            return;
+          }
+        }
+      } catch (_) { /* localStorage might be disabled; fall through to gate */ }
+
+      // Render the gate.
+      const gate    = document.getElementById('employee-gate');
+      const codeEl  = document.getElementById('gate-code');
+      const errEl   = document.getElementById('gate-error');
+      const btn     = document.getElementById('gate-submit');
+      if (!gate || !codeEl || !btn) return;
+
+      gate.style.display = 'flex';
+      // Prevent the underlying page from scrolling/interacting while gated.
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+
+      function tryEnter() {
+        const entered = (codeEl.value || '').replace(/\D/g, '');
+        if (entered === ACCESS_CODE) {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+              v:  ACCESS_VERSION,
+              ts: Date.now(),
+            }));
+          } catch (_) { /* if storage fails, they'll just re-enter next time */ }
+          document.documentElement.style.overflow = '';
+          document.body.style.overflow = '';
+          if (gate.parentNode) gate.parentNode.removeChild(gate);
+        } else {
+          errEl.textContent = 'Incorrect code. Try again.';
+          codeEl.value = '';
+          codeEl.focus();
+        }
+      }
+
+      btn.addEventListener('click', tryEnter);
+      codeEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); tryEnter(); }
+        if (errEl.textContent) errEl.textContent = '';
+      });
+      // Strip non-digits as the user types AND auto-submit on 6 digits
+      // so employees don't have to hit Enter or click the button.
+      codeEl.addEventListener('input', () => {
+        const cleaned = (codeEl.value || '').replace(/\D/g, '').slice(0, 6);
+        if (cleaned !== codeEl.value) codeEl.value = cleaned;
+        if (cleaned.length === 6) tryEnter();
+      });
+    })();
+  </script>
+
   <!-- ========================= HEADER ========================= -->
   <header class="site-header">
     <div class="wrap row">
