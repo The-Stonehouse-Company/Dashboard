@@ -5992,7 +5992,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               '<div class="field"><label>Photo</label><input type="file" accept="image/*" data-om-key="' + prefix + i + '_photo" /></div>' +
               '<div class="field"><label>Address</label><input type="text" data-om-key="' + prefix + i + '_address" placeholder="310 Jocelyn Hollow Cir" /></div>' +
               '<div class="field"><label>BD / BA / SF</label><input type="text" data-om-key="' + prefix + i + '_specs" placeholder="5 Bed 5/1 Bath 7100 Sq Ft" /></div>' +
-              '<div class="field"><label>Sold Price / $ per SF</label><input type="text" data-om-key="' + prefix + i + '_price" placeholder="$4,550,000 / $641 Per Sq Ft" /></div>' +
+              '<div class="field"><label>Sold Price</label><input type="text" data-om-key="' + prefix + i + '_price" placeholder="$4,550,000" /></div>' +
+              '<div class="field"><label>$ per Sq Ft</label><input type="text" data-om-key="' + prefix + i + '_psf" placeholder="$641 Per Sq Ft" /></div>' +
               '<div class="field"><label>Closing Status</label><input type="text" data-om-key="' + prefix + i + '_status" placeholder="Closed - 6 / 2 / 25 | DOM: 46" /></div>' +
             '</div>'
           );
@@ -6018,7 +6019,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
                   '<option value="SOLD">SOLD</option>' +
                 '</select>' +
               '</div>' +
+              '<div class="field"><label>BD / BA / SF</label><input type="text" data-om-key="' + prefix + i + '_specs" placeholder="6 Bed 6/1 Bath 8200 Sq Ft" /></div>' +
               '<div class="field"><label>Price</label><input type="text" data-om-key="' + prefix + i + '_price" placeholder="$5,100,000" /></div>' +
+              '<div class="field"><label>$ per Sq Ft</label><input type="text" data-om-key="' + prefix + i + '_psf" placeholder="$621 Per Sq Ft" /></div>' +
               '<div class="field"><label>Date / Note</label><input type="text" data-om-key="' + prefix + i + '_date" placeholder="Completion - Summer 2026" /></div>' +
             '</div>'
           );
@@ -6304,6 +6307,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           const addressEl = modal.querySelector('[data-om-key="' + prefix + i + '_address"]');
           const specsEl   = modal.querySelector('[data-om-key="' + prefix + i + '_specs"]');
           const priceEl   = modal.querySelector('[data-om-key="' + prefix + i + '_price"]');
+          const psfEl     = modal.querySelector('[data-om-key="' + prefix + i + '_psf"]');
           const statusEl  = modal.querySelector('[data-om-key="' + prefix + i + '_status"]');
           const dateEl    = modal.querySelector('[data-om-key="' + prefix + i + '_date"]');
           const item = {
@@ -6311,6 +6315,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             address: addressEl ? addressEl.value.trim() : '',
             specs:   specsEl   ? specsEl.value.trim()   : '',
             price:   priceEl   ? priceEl.value.trim()   : '',
+            psf:     psfEl     ? psfEl.value.trim()     : '',
             status:  statusEl  ? statusEl.value.trim()  : '',
             date:    dateEl    ? dateEl.value.trim()    : '',
           };

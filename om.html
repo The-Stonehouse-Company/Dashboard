@@ -66,14 +66,21 @@
     .toolbar .tb-btn:hover { opacity: .85; }
     .toolbar .tb-btn:disabled { opacity: .4; cursor: wait; }
 
-    /* Universal image fill — used inside every photo slot so html2canvas
-       captures the image as a real DOM element rather than a CSS bg. */
+    /* Universal image fill — used inside every photo slot.
+       Implemented as a background-image div (not an <img>) because
+       html2canvas 1.4.x silently drops `object-fit: cover` on <img>
+       elements when the image's natural aspect ratio differs strongly
+       from the slot — the canvas falls back to "fill" (stretch). Putting
+       the data URL on background-image with background-size: cover
+       renders reliably for every slot regardless of source dimensions. */
     .om-fill {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
       display: block;
     }
 
@@ -336,7 +343,9 @@
     }
     .om-model .kv .v {
       font-family: var(--font-body); font-weight: 500;
-      font-variant-numeric: tabular-nums;
+      /* NOTE: avoid `font-variant-numeric: tabular-nums` — html2canvas 1.4.x
+         renders the alt glyphs with bogus advance widths, producing gaps
+         like "$1 ,560,000" / "1 8 Months" in the exported PDF. */
       color: var(--text);
     }
     .om-model .col {
@@ -372,7 +381,7 @@
       font-weight: 600;
     }
     .om-financing .kv-list .row .v {
-      font-variant-numeric: tabular-nums;
+      /* No tabular-nums — see note on .om-model .kv .v above. */
     }
 
     /* Summary page (page 14) - hero overlay + text */
@@ -557,17 +566,23 @@
     function logo() {
       return '<div class="om-logo"><img src="assets/icon-arch-transparent.png" alt="The Stonehouse Company" /></div>';
     }
-    // Return a real <img> element that fills its parent. We render images
-    // this way (rather than via CSS background-image) because html2canvas
-    // captures real <img> tags with data-url src reliably, but is flaky
-    // with large data URLs in CSS backgrounds.
+    // Return a background-image div sized to fill its parent. We use a
+    // background-image (instead of an <img>) so html2canvas honours
+    // `background-size: cover` and centre-crops each photo — see the
+    // .om-fill CSS comment for the underlying html2canvas bug. The
+    // src is the same data URL we'd put on an <img>; we escape quotes
+    // so the inline style stays well-formed.
     function imgFill(file, alt) {
       if (!file) return '';
       let src = '';
       if (file.dataUrl) src = file.dataUrl;
       else if (file.blob) src = blobToUrl(file.blob);
       if (!src) return '';
-      return '<img class="om-fill" src="' + src + '" alt="' + esc(alt || '') + '" />';
+      // Single quotes in the url() — esc() handles "<>&\"" so we only
+      // need to guard the inline-style boundary character.
+      const safeSrc = src.replace(/'/g, "%27");
+      return '<div class="om-fill" role="img" aria-label="' + esc(alt || '') +
+             '" style="background-image:url(\'' + safeSrc + '\');"></div>';
     }
 
     // --- Translate a logged-deal row from the Underwriting Deal Log sheet
@@ -649,9 +664,12 @@
     }
 
     function pageOverview(d) {
-      const metaRows = [];
-      if (d.constructionStart) metaRows.push('<div class="row">Construction is set to begin ' + esc(d.constructionStart) + '</div>');
-      if (d.completion)        metaRows.push('<div class="row">Our expected completion is ' + esc(d.completion) + '</div>');
+      // Render construction / completion as plain body paragraphs (matching
+      // the overview writeup styling) rather than the muted-uppercase .meta
+      // block — user wants them to read like the rest of the prose.
+      const extraParas = [];
+      if (d.constructionStart) extraParas.push('<p>Construction is set to begin ' + esc(d.constructionStart) + '</p>');
+      if (d.completion)        extraParas.push('<p>Our expected completion is ' + esc(d.completion) + '</p>');
       return (
         '<section class="om-page">' +
           '<div class="om-split">' +
@@ -659,7 +677,7 @@
             '<div class="pane-text">' +
               '<h2>Overview / Writeup</h2>' +
               (d.overviewText ? nl2p(d.overviewText) : '<p style="color:var(--text-dim);">(Overview writeup not yet provided.)</p>') +
-              (metaRows.length ? '<div class="meta">' + metaRows.join('') + '</div>' : '') +
+              extraParas.join('') +
             '</div>' +
           '</div>' +
           logo() +
@@ -728,7 +746,10 @@
       }
       const narrativeHtml = d.buildStatsText ? nl2p(d.buildStatsText)
         : (lines.length ? '<p>' + lines.join(' ') + '</p>' : '');
-      const psfLine = d.areaPsf
+      // Auto-append the $/SF line ONLY when the user did not write their
+      // own narrative — otherwise we duplicate the sentence the user
+      // already typed in buildStatsText.
+      const psfLine = (!d.buildStatsText && d.areaPsf)
         ? '<p>Average price per square foot exceeding ' + esc(d.areaPsf) + ' in the immediate area</p>'
         : '';
       // Prefer the page-6-specific upload; fall back to hero rendering.
@@ -795,6 +816,7 @@
                   (c.address ? '<div class="card-address">' + esc(c.address) + '</div>' : '') +
                   (c.specs   ? '<div class="card-row">' + esc(c.specs)   + '</div>' : '') +
                   (c.price   ? '<div class="card-row">' + esc(c.price)   + '</div>' : '') +
+                  (c.psf     ? '<div class="card-row">' + esc(c.psf)     + '</div>' : '') +
                   (c.status  ? '<div class="card-row">' + esc(c.status)  + '</div>' : '') +
                 '</div>'
               )).join('') +
@@ -815,8 +837,10 @@
                   '<div class="card-img' + (p.photo ? '' : ' empty') + '">' + imgFill(p.photo, p.address || 'Project') + '</div>' +
                   (p.address ? '<div class="card-address">' + esc(p.address) + '</div>' : '') +
                   (p.status  ? '<div class="card-row status">' + esc(p.status) + '</div>' : '') +
-                  (p.price   ? '<div class="card-row">' + esc(p.price) + '</div>' : '') +
-                  (p.date    ? '<div class="card-row">' + esc(p.date)  + '</div>' : '') +
+                  (p.specs   ? '<div class="card-row">' + esc(p.specs)  + '</div>' : '') +
+                  (p.price   ? '<div class="card-row">' + esc(p.price)  + '</div>' : '') +
+                  (p.psf     ? '<div class="card-row">' + esc(p.psf)    + '</div>' : '') +
+                  (p.date    ? '<div class="card-row">' + esc(p.date)   + '</div>' : '') +
                 '</div>'
               )).join('') +
             '</div>' +
