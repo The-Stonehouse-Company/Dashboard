@@ -2830,6 +2830,11 @@
             <span class="action-sub">Fill in the subject + comps (Under Contract and Sold) and generate a Stonehouse-branded multi-page PDF for listing presentations and seller conversations.</span>
             <span class="action-arrow" aria-hidden="true">→</span>
           </button>
+          <button class="primary-action" type="button" id="open-loi-modal" aria-haspopup="dialog" aria-controls="loi-modal">
+            <span class="action-label">Letter of Intent Generator</span>
+            <span class="action-sub">Send a formal LOI to a seller — purchase price, earnest money, closing, contingencies, post-occupancy. Stonehouse-branded one-page PDF.</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
           <button class="primary-action soon" type="button" data-placeholder="Investor Deck Generator">
             <span class="action-soon-pill">Coming Soon</span>
             <span class="action-label">Investor Deck Generator</span>
@@ -3830,6 +3835,86 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         <footer class="modal-foot">
           <button class="btn ghost" type="button" id="cancel-engagement-modal">Cancel</button>
           <button class="btn" type="submit" id="submit-engagement-modal">Generate PDF</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================= LOI (LETTER OF INTENT) MODAL =========================
+       Small form (8 inputs) that feeds loi.html. Same write-to-IDB,
+       open-new-tab pattern as the other generators. The output page reads
+       the payload back, fills the LOI body, then runs html2canvas + pdf-lib
+       to build a one-page PDF. -->
+  <div class="modal-overlay" id="loi-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loi-modal-title" id="loi-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Development · Marketing</span>
+          <h2 class="modal-title" id="loi-modal-title">Letter of Intent Generator</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-loi-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="loi-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Letter</legend>
+          <div class="form-grid">
+            <div>
+              <label for="loi-date">Date <span class="req">*</span></label>
+              <input id="loi-date" name="date" type="date" required />
+            </div>
+            <div>
+              <label for="loi-recipient">Recipient First Name <span class="req">*</span></label>
+              <input id="loi-recipient" name="recipient" type="text" required placeholder="Sandra" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Property</legend>
+          <div class="form-grid">
+            <div>
+              <label for="loi-prop-short">Short Name <span class="req">*</span></label>
+              <input id="loi-prop-short" name="property_short" type="text" required placeholder="2000 Cromwell" />
+            </div>
+            <div>
+              <label for="loi-prop-full">Full Address <span class="req">*</span></label>
+              <input id="loi-prop-full" name="property_address" type="text" required placeholder="2000 Cromwell Dr, Nashville, TN 37215" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Proposed Terms</legend>
+          <div class="form-grid">
+            <div>
+              <label for="loi-price">Purchase Price <span class="req">*</span></label>
+              <input id="loi-price" name="purchase_price" type="text" required placeholder="$1,475,000" />
+            </div>
+            <div>
+              <label for="loi-earnest">Earnest Money <span class="req">*</span></label>
+              <input id="loi-earnest" name="earnest" type="text" required placeholder="$15,000" />
+            </div>
+            <div>
+              <label for="loi-closing">Closing Date</label>
+              <input id="loi-closing" name="closing" type="text" placeholder="Negotiable" value="Negotiable" />
+            </div>
+            <div>
+              <label for="loi-contingencies">Contingencies</label>
+              <input id="loi-contingencies" name="contingencies" type="text" placeholder="Negotiable" value="Negotiable" />
+            </div>
+            <div class="full">
+              <label for="loi-postocc">Post-Occupancy Period</label>
+              <input id="loi-postocc" name="post_occupancy" type="text" placeholder="Negotiable" value="Negotiable" />
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="form-status" id="loi-status" role="status" aria-live="polite"></div>
+
+        <footer class="modal-foot">
+          <button class="btn ghost" type="button" id="cancel-loi-modal">Cancel</button>
+          <button class="btn" type="submit" id="submit-loi-modal">Generate PDF</button>
         </footer>
       </form>
     </div>
@@ -4849,12 +4934,13 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           // consistent regardless of which modal the user opens first.
           // Opening with a lower version than the existing DB throws
           // VersionError, so every callsite MUST be on the same version.
-          const req = indexedDB.open('stonehouse-dashboard', 3);
+          const req = indexedDB.open('stonehouse-dashboard', 4);
           req.onupgradeneeded = (e) => {
             const db = e.target.result;
             if (!db.objectStoreNames.contains('onepager'))   db.createObjectStore('onepager');
             if (!db.objectStoreNames.contains('om'))         db.createObjectStore('om');
             if (!db.objectStoreNames.contains('engagement')) db.createObjectStore('engagement');
+            if (!db.objectStoreNames.contains('loi'))        db.createObjectStore('loi');
           };
           req.onsuccess = () => resolve(req.result);
           req.onerror = () => reject(req.error);
@@ -6533,12 +6619,13 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       function idbOpen() {
         return new Promise((resolve, reject) => {
           // Version 3 — see the one-pager idbOpen comment up the file.
-          const req = indexedDB.open('stonehouse-dashboard', 3);
+          const req = indexedDB.open('stonehouse-dashboard', 4);
           req.onupgradeneeded = (e) => {
             const db = e.target.result;
             if (!db.objectStoreNames.contains('onepager'))   db.createObjectStore('onepager');
             if (!db.objectStoreNames.contains('om'))         db.createObjectStore('om');
             if (!db.objectStoreNames.contains('engagement')) db.createObjectStore('engagement');
+            if (!db.objectStoreNames.contains('loi'))        db.createObjectStore('loi');
           };
           req.onsuccess = () => resolve(req.result);
           req.onerror = () => reject(req.error);
@@ -6967,12 +7054,13 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       // --- IDB (version 3, shared with one-pager + OM) ---
       function idbOpen() {
         return new Promise((resolve, reject) => {
-          const req = indexedDB.open('stonehouse-dashboard', 3);
+          const req = indexedDB.open('stonehouse-dashboard', 4);
           req.onupgradeneeded = (e) => {
             const db = e.target.result;
             if (!db.objectStoreNames.contains('onepager'))   db.createObjectStore('onepager');
             if (!db.objectStoreNames.contains('om'))         db.createObjectStore('om');
             if (!db.objectStoreNames.contains('engagement')) db.createObjectStore('engagement');
+            if (!db.objectStoreNames.contains('loi'))        db.createObjectStore('loi');
           };
           req.onsuccess = () => resolve(req.result);
           req.onerror = () => reject(req.error);
@@ -7026,6 +7114,130 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         } catch (err) {
           console.error('Engagement letter submit failed:', err);
           setStatus('err', 'Could not save engagement-letter data: ' + (err && err.message ? err.message : err));
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalLabel;
+          try { outputWin.close(); } catch (_) {}
+        }
+      });
+    })();
+
+    // ============================================================
+    // Letter of Intent (LOI) Generator controller
+    // Mirrors the Engagement Letter pattern: collect form inputs, write
+    // payload to IDB ('stonehouse-dashboard' → 'loi' store), open
+    // loi.html in a new tab where the PDF is rendered/downloaded.
+    // ============================================================
+    (function () {
+      const overlay   = document.getElementById('loi-modal-overlay');
+      const modal     = document.getElementById('loi-modal');
+      const form      = document.getElementById('loi-form');
+      const statusEl  = document.getElementById('loi-status');
+      const openBtn   = document.getElementById('open-loi-modal');
+      const closeBtn  = document.getElementById('close-loi-modal');
+      const cancelBtn = document.getElementById('cancel-loi-modal');
+      const submitBtn = document.getElementById('submit-loi-modal');
+      if (!overlay || !form) return;
+
+      let lastFocus = null;
+      function openModal() {
+        lastFocus = document.activeElement;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        // Default the date to today.
+        const dateEl = document.getElementById('loi-date');
+        if (dateEl && !dateEl.value) {
+          dateEl.value = new Date().toISOString().slice(0, 10);
+        }
+        setTimeout(() => { const f = modal.querySelector('input, button'); f && f.focus(); }, 30);
+      }
+      function closeModal() {
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+        setStatus('');
+      }
+      function setStatus(level, msg) {
+        if (!statusEl) return;
+        if (!msg && !level) { statusEl.textContent = ''; statusEl.className = 'form-status'; return; }
+        statusEl.textContent = msg || '';
+        statusEl.className = 'form-status show' + (level ? ' ' + level : '');
+      }
+
+      openBtn  && openBtn.addEventListener('click', openModal);
+      closeBtn && closeBtn.addEventListener('click', closeModal);
+      cancelBtn && cancelBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') closeModal();
+      });
+
+      // --- IDB (version 4, shared across all generators) ---
+      function idbOpen() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open('stonehouse-dashboard', 4);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('onepager'))   db.createObjectStore('onepager');
+            if (!db.objectStoreNames.contains('om'))         db.createObjectStore('om');
+            if (!db.objectStoreNames.contains('engagement')) db.createObjectStore('engagement');
+            if (!db.objectStoreNames.contains('loi'))        db.createObjectStore('loi');
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      }
+      async function idbPut(key, value) {
+        const db = await idbOpen();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction('loi', 'readwrite');
+          tx.objectStore('loi').put(value, key);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        });
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        setStatus('');
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+
+        // Open the tab BEFORE the async write — Safari blocks window.open
+        // calls that happen after the user-gesture context ends.
+        const requestId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        const outputWin = window.open('loi.html?req=' + requestId, '_blank');
+        if (!outputWin) {
+          setStatus('warn', 'Pop-up blocked — allow pop-ups, then click Generate PDF again.');
+          return;
+        }
+
+        const originalLabel = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Preparing…';
+
+        try {
+          const payload = {
+            requestId:       requestId,
+            generatedAt:     new Date().toISOString(),
+            date:            document.getElementById('loi-date').value,
+            recipient:       document.getElementById('loi-recipient').value.trim(),
+            propertyShort:   document.getElementById('loi-prop-short').value.trim(),
+            propertyAddress: document.getElementById('loi-prop-full').value.trim(),
+            purchasePrice:   document.getElementById('loi-price').value.trim(),
+            earnest:         document.getElementById('loi-earnest').value.trim(),
+            closing:         document.getElementById('loi-closing').value.trim() || 'Negotiable',
+            contingencies:   document.getElementById('loi-contingencies').value.trim() || 'Negotiable',
+            postOccupancy:   document.getElementById('loi-postocc').value.trim() || 'Negotiable',
+          };
+          await idbPut('current', payload);
+          setStatus('ok', 'Sent to a new tab — the PDF will download automatically once the page renders.');
+          setTimeout(() => {
+            closeModal();
+            submitBtn.textContent = originalLabel;
+            submitBtn.disabled = false;
+          }, 1200);
+        } catch (err) {
+          console.error('LOI submit failed:', err);
+          setStatus('err', 'Could not save LOI data: ' + (err && err.message ? err.message : err));
           submitBtn.disabled = false;
           submitBtn.textContent = originalLabel;
           try { outputWin.close(); } catch (_) {}
@@ -8504,12 +8716,13 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       // in the project so opening order doesn't trigger a VersionError.
       function idbOpen() {
         return new Promise((resolve, reject) => {
-          const req = indexedDB.open('stonehouse-dashboard', 3);
+          const req = indexedDB.open('stonehouse-dashboard', 4);
           req.onupgradeneeded = (e) => {
             const db = e.target.result;
             if (!db.objectStoreNames.contains('onepager'))   db.createObjectStore('onepager');
             if (!db.objectStoreNames.contains('om'))         db.createObjectStore('om');
             if (!db.objectStoreNames.contains('engagement')) db.createObjectStore('engagement');
+            if (!db.objectStoreNames.contains('loi'))        db.createObjectStore('loi');
           };
           req.onsuccess = () => resolve(req.result);
           req.onerror = () => reject(req.error);
