@@ -26,7 +26,7 @@
       /* US Letter portrait at 96 DPI = 816 × 1056. */
       --page-w: 816px;
       --page-h: 1056px;
-      --page-pad: 90px;
+      --page-pad: 72px;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -85,11 +85,11 @@
       height: var(--page-h);
       background: var(--paper);
       color: var(--ink);
-      padding: var(--page-pad) var(--page-pad) 64px;
+      padding: var(--page-pad) var(--page-pad) 56px;
       position: relative;
       box-shadow: 0 6px 28px rgba(0,0,0,0.45);
-      font-size: 15px;
-      line-height: 1.55;
+      font-size: 14.5px;
+      line-height: 1.5;
       font-weight: 400;
       overflow: hidden;
     }
@@ -97,106 +97,111 @@
     /* Logo + brand block at the top of the page */
     .loi-page .head {
       text-align: center;
-      margin-bottom: 38px;
+      margin-bottom: 26px;
     }
     .loi-page .head .arch {
-      width: 96px; height: 96px;
+      width: 78px; height: 78px;
       display: block;
-      margin: 0 auto 12px;
+      margin: 0 auto 10px;
     }
     .loi-page .head .arch img { width: 100%; height: 100%; display: block; }
     .loi-page .head .brand {
       font-family: var(--font-display);
-      font-size: 18px;
+      font-size: 17px;
       letter-spacing: 0.36em;
       text-transform: uppercase;
       color: var(--ink);
     }
     .loi-page .head .brand-sub {
       font-family: var(--font-heading);
-      font-size: 10px;
+      font-size: 9.5px;
       letter-spacing: 0.28em;
       color: var(--ink-muted);
-      margin-top: 6px;
+      margin-top: 5px;
       text-transform: uppercase;
     }
     .loi-page .head .rule {
-      width: 60px;
-      border-bottom: 1.5px solid var(--accent);
-      margin: 22px auto 0;
+      width: 56px;
+      border-bottom: 1.2px solid var(--accent);
+      margin: 16px auto 0;
     }
 
     /* Letter body */
     .loi-page h1.loi-title {
       font-family: var(--font-body);
       font-weight: 600;
-      font-size: 18px;
+      font-size: 17px;
       text-decoration: underline;
-      margin: 0 0 22px;
+      margin: 0 0 16px;
       color: var(--ink);
     }
     .loi-page .prop-line {
       font-family: var(--font-body);
       font-weight: 500;
-      font-size: 18px;
-      margin: 0 0 14px;
+      font-size: 17px;
+      margin: 0 0 10px;
     }
     .loi-page .date-line {
-      font-size: 14px;
-      margin: 0 0 22px;
+      font-size: 13.5px;
+      margin: 0 0 16px;
     }
     .loi-page .greeting {
       font-weight: 600;
-      margin: 0 0 14px;
+      margin: 0 0 10px;
     }
     .loi-page p {
-      margin: 0 0 16px;
+      margin: 0 0 12px;
     }
     .loi-page p strong { font-weight: 600; }
 
     /* Proposed Terms section */
     .loi-page .terms-head {
       font-weight: 700;
-      margin: 4px 0 14px;
+      margin: 2px 0 10px;
     }
     .loi-page .terms {
-      margin: 0 0 22px 16px;
+      margin: 0 0 14px 16px;
       font-weight: 500;
-      line-height: 1.9;
+      line-height: 1.75;
     }
     .loi-page .terms .row .k { font-weight: 700; }
 
     .loi-page .post-occ {
-      margin: 22px 0 18px;
+      margin: 14px 0 14px;
     }
     .loi-page .post-occ .label {
       font-weight: 700;
       text-decoration: underline;
     }
 
-    /* Signature area */
+    /* Signature area — tightened so the seller block doesn't clip off
+       the bottom of the page. Visual rhythm matches a printed letter. */
     .loi-page .sign-block {
-      margin-top: 56px;
+      margin-top: 28px;
     }
     .loi-page .sign-block .name {
       font-weight: 500;
-      margin-bottom: 56px;
+      margin-bottom: 36px;
     }
     .loi-page .sign-line {
       width: 280px;
       border-bottom: 1.2px solid var(--ink);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .loi-page .sign-block .meta {
-      font-size: 13px;
+      font-size: 12.5px;
       color: var(--ink-muted);
       margin-bottom: 4px;
     }
     .loi-page .seller-block {
-      margin-top: 56px;
+      margin-top: 28px;
+    }
+    .loi-page .seller-block .name {
+      font-weight: 500;
+      margin-bottom: 36px;
     }
     .loi-page .seller-block .label {
-      font-size: 13px;
+      font-size: 12.5px;
       color: var(--ink-muted);
     }
 
