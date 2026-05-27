@@ -2032,7 +2032,8 @@
       margin-top: 4px;
     }
     .cma-comp input[type="text"],
-    .cma-comp input[type="url"] {
+    .cma-comp input[type="url"],
+    .cma-comp textarea {
       width: 100%;
       background: var(--bg-elev);
       border: 1px solid var(--rule-strong);
@@ -2040,6 +2041,11 @@
       padding: 8px 10px;
       font-family: var(--font-body);
       font-size: 12px;
+    }
+    .cma-comp textarea {
+      resize: vertical;
+      min-height: 60px;
+      line-height: 1.4;
     }
     .cma-comp input[type="file"] {
       font-size: 11px;
@@ -3620,7 +3626,38 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           </div>
         </fieldset>
 
-        <!-- UNDER CONTRACT COMPARABLES (PAGE 2) -->
+        <!-- SUBJECT PROPERTY SUMMARY (PAGE 2) -->
+        <fieldset>
+          <legend>Subject Property Summary (Page 2)</legend>
+          <div class="form-grid">
+            <div>
+              <label for="cma-subject-sqft">Square Footage</label>
+              <input id="cma-subject-sqft" name="subject_sqft" type="text" placeholder="6,500 Sq Ft" />
+            </div>
+            <div>
+              <label for="cma-subject-beds">Bedrooms</label>
+              <input id="cma-subject-beds" name="subject_beds" type="text" placeholder="5" />
+            </div>
+            <div>
+              <label for="cma-subject-baths">Bathrooms</label>
+              <input id="cma-subject-baths" name="subject_baths" type="text" placeholder="5/2" />
+            </div>
+            <div>
+              <label for="cma-subject-pool">Pool</label>
+              <select id="cma-subject-pool" name="subject_pool">
+                <option value="">—</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+            <div class="full">
+              <label for="cma-subject-lot">Lot Size</label>
+              <input id="cma-subject-lot" name="subject_lot" type="text" placeholder="1.05 Acres / 45,738 Sq Ft" />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- UNDER CONTRACT COMPARABLES (PAGE 3) -->
         <fieldset>
           <legend>Under Contract Comparables (Page 2)</legend>
           <div class="cma-comp-grid">
@@ -3633,10 +3670,14 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               <input name="uc1_address" type="text" placeholder="6233 Vosswood Dr" />
               <label>BD / BA / SF</label>
               <input name="uc1_specs" type="text" placeholder="6 Bed 5/2 Bath 6377 Sq Ft" />
+              <label>Lot Size</label>
+              <input name="uc1_lot" type="text" placeholder="1.05 Acres" />
               <label>List Price / $ Per SF</label>
               <input name="uc1_price" type="text" placeholder="$4,150,000 / $651 Per Sq Ft" />
               <label>Under Contract Status</label>
               <input name="uc1_status" type="text" placeholder="UC - 01 / 15 / 26 | DOM: 0" />
+              <label>Comments</label>
+              <textarea name="uc1_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
             </div>
             <div class="cma-comp" data-comp-section="uc" data-comp="2">
               <div class="cma-comp-label">Comp 2</div>
@@ -3646,10 +3687,14 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               <input name="uc2_address" type="text" placeholder="754 West Meade Dr" />
               <label>BD / BA / SF</label>
               <input name="uc2_specs" type="text" placeholder="5 Bed 8 Bath $727 Sq Ft" />
+              <label>Lot Size</label>
+              <input name="uc2_lot" type="text" placeholder="1.05 Acres" />
               <label>List Price / $ Per SF</label>
               <input name="uc2_price" type="text" placeholder="$4,699,900 / $821 Per Sq Ft" />
               <label>Under Contract Status</label>
               <input name="uc2_status" type="text" placeholder="UC - 12 / 1 / 25 | DOM: 0" />
+              <label>Comments</label>
+              <textarea name="uc2_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
             </div>
             <div class="cma-comp" data-comp-section="uc" data-comp="3">
               <div class="cma-comp-label">Comp 3</div>
@@ -3659,10 +3704,14 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               <input name="uc3_address" type="text" placeholder="(leave blank to skip)" />
               <label>BD / BA / SF</label>
               <input name="uc3_specs" type="text" />
+              <label>Lot Size</label>
+              <input name="uc3_lot" type="text" placeholder="1.05 Acres" />
               <label>List Price / $ Per SF</label>
               <input name="uc3_price" type="text" />
               <label>Under Contract Status</label>
               <input name="uc3_status" type="text" />
+              <label>Comments</label>
+              <textarea name="uc3_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
             </div>
           </div>
         </fieldset>
@@ -3679,10 +3728,14 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               <input name="sa1_address" type="text" placeholder="310 Jocelyn Hollow Cir" />
               <label>BD / BA / SF</label>
               <input name="sa1_specs" type="text" placeholder="5 Bed 5/1 Bath 7100 Sq Ft" />
+              <label>Lot Size</label>
+              <input name="sa1_lot" type="text" placeholder="1.05 Acres" />
               <label>Sold Price / $ Per SF</label>
               <input name="sa1_price" type="text" placeholder="$4,550,000 / $641 Per Sq Ft" />
               <label>Closing Status</label>
               <input name="sa1_status" type="text" placeholder="Closed - 6 / 2 / 25 | DOM: 46" />
+              <label>Comments</label>
+              <textarea name="sa1_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
             </div>
             <div class="cma-comp" data-comp-section="sold-a" data-comp="2">
               <div class="cma-comp-label">Comp 2</div>
@@ -3692,10 +3745,14 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               <input name="sa2_address" type="text" placeholder="6201 Bresslyn Rd" />
               <label>BD / BA / SF</label>
               <input name="sa2_specs" type="text" placeholder="5 Bed 5/2 Bath 6956 Sq Ft" />
+              <label>Lot Size</label>
+              <input name="sa2_lot" type="text" placeholder="1.05 Acres" />
               <label>Sold Price / $ Per SF</label>
               <input name="sa2_price" type="text" placeholder="$4,625,000 / $665 Per Sq Ft" />
               <label>Closing Status</label>
               <input name="sa2_status" type="text" placeholder="Closed - 8 / 14 / 25 | DOM: 13" />
+              <label>Comments</label>
+              <textarea name="sa2_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
             </div>
             <div class="cma-comp" data-comp-section="sold-a" data-comp="3">
               <div class="cma-comp-label">Comp 3</div>
@@ -3705,10 +3762,14 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               <input name="sa3_address" type="text" placeholder="508 Davidson Rd" />
               <label>BD / BA / SF</label>
               <input name="sa3_specs" type="text" placeholder="6 Bed 6/2 Bath 6516 Sq Ft" />
+              <label>Lot Size</label>
+              <input name="sa3_lot" type="text" placeholder="1.05 Acres" />
               <label>Sold Price / $ Per SF</label>
               <input name="sa3_price" type="text" placeholder="$4,275,000 / $656 Per Sq Ft" />
               <label>Closing Status</label>
               <input name="sa3_status" type="text" placeholder="Closed - 1 / 5 / 26 | DOM: 2" />
+              <label>Comments</label>
+              <textarea name="sa3_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
             </div>
           </div>
         </fieldset>
@@ -3726,10 +3787,14 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               <input name="sb1_address" type="text" placeholder="605 Brook Hollow Rd" />
               <label>BD / BA / SF</label>
               <input name="sb1_specs" type="text" placeholder="6 Bed 6/3 Bath 6496 Sq Ft" />
+              <label>Lot Size</label>
+              <input name="sb1_lot" type="text" placeholder="1.05 Acres" />
               <label>Sold Price / $ Per SF</label>
               <input name="sb1_price" type="text" placeholder="$4,250,000 / $654 Per Sq Ft" />
               <label>Closing Status</label>
               <input name="sb1_status" type="text" placeholder="Closed - 12 / 23 / 25 | DOM: 0" />
+              <label>Comments</label>
+              <textarea name="sb1_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
             </div>
             <div class="cma-comp" data-comp-section="sold-b" data-comp="2">
               <div class="cma-comp-label">Comp 2</div>
@@ -3739,10 +3804,14 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               <input name="sb2_address" type="text" />
               <label>BD / BA / SF</label>
               <input name="sb2_specs" type="text" />
+              <label>Lot Size</label>
+              <input name="sb2_lot" type="text" placeholder="1.05 Acres" />
               <label>Sold Price / $ Per SF</label>
               <input name="sb2_price" type="text" />
               <label>Closing Status</label>
               <input name="sb2_status" type="text" />
+              <label>Comments</label>
+              <textarea name="sb2_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
             </div>
             <div class="cma-comp" data-comp-section="sold-b" data-comp="3">
               <div class="cma-comp-label">Comp 3</div>
@@ -3752,10 +3821,14 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               <input name="sb3_address" type="text" />
               <label>BD / BA / SF</label>
               <input name="sb3_specs" type="text" />
+              <label>Lot Size</label>
+              <input name="sb3_lot" type="text" placeholder="1.05 Acres" />
               <label>Sold Price / $ Per SF</label>
               <input name="sb3_price" type="text" />
               <label>Closing Status</label>
               <input name="sb3_status" type="text" />
+              <label>Comments</label>
+              <textarea name="sb3_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
             </div>
           </div>
         </fieldset>
@@ -6897,10 +6970,12 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           return el ? el.value.trim() : '';
         };
         return {
-          address: get('address'),
-          specs:   get('specs'),
-          price:   get('price'),
-          status:  get('status'),
+          address:  get('address'),
+          specs:    get('specs'),
+          lot:      get('lot'),
+          price:    get('price'),
+          status:   get('status'),
+          comments: get('comments'),
         };
       }
       async function collectCompPhoto(prefix) {
@@ -6908,7 +6983,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         return readFileAsDataURL(el);
       }
       function isBlankComp(c) {
-        return !(c.address || c.specs || c.price || c.status);
+        return !(c.address || c.specs || c.price || c.status || c.lot || c.comments);
       }
 
       // ---- IndexedDB write (single "current" record) ----
@@ -6944,8 +7019,12 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
         try {
           // Subject
-          const subjectAddress = modal.querySelector('[name="subject_address"]').value.trim();
-          const cmaDate        = modal.querySelector('[name="cma_date"]').value.trim();
+          const v = (n) => {
+            const el = modal.querySelector('[name="' + n + '"]');
+            return el ? el.value.trim() : '';
+          };
+          const subjectAddress = v('subject_address');
+          const cmaDate        = v('cma_date');
           if (!subjectAddress) {
             statusEl.textContent = 'Subject address is required.';
             statusEl.className = 'form-status is-error';
@@ -6955,6 +7034,13 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           const subjectHero = await readFileAsDataURL(
             modal.querySelector('[name="subject_hero"]')
           );
+          const subjectSummary = {
+            sqft:  v('subject_sqft'),
+            beds:  v('subject_beds'),
+            baths: v('subject_baths'),
+            pool:  v('subject_pool'),
+            lot:   v('subject_lot'),
+          };
 
           // Collect all 9 comps; group into sections; drop blanks.
           async function gather(prefixes) {
@@ -6978,7 +7064,16 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           const record = {
             id: 'current',
             generatedAt: new Date().toISOString(),
-            subject: { address: subjectAddress, date: cmaDate, hero: subjectHero },
+            subject: {
+              address: subjectAddress,
+              date:    cmaDate,
+              hero:    subjectHero,
+              sqft:    subjectSummary.sqft,
+              beds:    subjectSummary.beds,
+              baths:   subjectSummary.baths,
+              pool:    subjectSummary.pool,
+              lot:     subjectSummary.lot,
+            },
             underContract: ucComps,
             sold: [...soldAComps, ...soldBComps],
             links: { comparables: compsUrl, cma: cmaUrl },
