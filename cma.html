@@ -231,20 +231,31 @@
     }
 
     /* ===== Subject Property Summary (Page 2) =====
-       Hero photo on left, stats panel on right. */
+       Hero photo on left, stats panel on right.
+       Uses flex w/ explicit pixel widths (instead of CSS Grid w/ fr units)
+       because html2canvas 1.4 doesn't render Grid layouts reliably — the
+       photo container ends up undersized and `background-size: cover`
+       distorts the image. Flex + explicit width keeps the photo at its
+       true aspect ratio. */
     .summary-page {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0;
+      display: flex;
+      flex-direction: row;
       padding: 0;
-      height: 100%;
+      height: 1020px;
+      width: 1320px;
     }
     .summary-photo {
+      width: 660px;
+      height: 1020px;
+      flex: 0 0 660px;
       background-size: cover;
       background-position: center;
+      background-repeat: no-repeat;
       background-color: var(--bg-elev2);
     }
     .summary-content {
+      width: 660px;
+      flex: 0 0 660px;
       padding: 80px 80px 70px;
       display: flex;
       flex-direction: column;
@@ -647,19 +658,24 @@
       const hasComps = !!(d.links && d.links.comparables);
       const hasCma   = !!(d.links && d.links.cma);
       if (!hasComps && !hasCma) return '';
+      // data-url holds the raw URL — the PDF link-annotation pass reads
+      // it back, so RealTracs URLs land exactly as the user pasted them.
+      // (esc() output displays correctly on screen but we don't want
+      // entity-encoded ampersands going into the PDF link URL.)
+      const linkAttr = (u) => ' data-url="' + esc(u) + '"';
       return (
         '<section class="page links-page">' +
           '<div class="header">Sources</div>' +
           (hasComps ? (
             '<div class="link-block">' +
               '<span class="link-label">Comparables:</span> ' +
-              '<span class="link-url">' + esc(d.links.comparables) + '</span>' +
+              '<span class="link-url"' + linkAttr(d.links.comparables) + '>' + esc(d.links.comparables) + '</span>' +
             '</div>'
           ) : '') +
           (hasCma ? (
             '<div class="link-block">' +
               '<span class="link-label">CMA:</span> ' +
-              '<span class="link-url">' + esc(d.links.cma) + '</span>' +
+              '<span class="link-url"' + linkAttr(d.links.cma) + '>' + esc(d.links.cma) + '</span>' +
             '</div>'
           ) : '') +
           '<div class="page-footer-brand">' +
@@ -713,19 +729,52 @@
 
         try {
           const { jsPDF } = window.jspdf;
-          // Landscape letter — 11 x 8.5 in — matches Liebo CMA slide deck orientation
+          // Landscape letter — 11 x 8.5 in. Use 'in' units so we can map
+          // pixel positions inside each .page (1320×1020 px @ 96 dpi) to
+          // PDF inches via simple ratios: 1 in = 1320/11 = 120 px wide,
+          // and 1020/8.5 = 120 px tall (same scale).
           const pdf = new jsPDF({ orientation: 'landscape', unit: 'in', format: 'letter' });
+          const PAGE_PX_W = 1320, PAGE_PX_H = 1020;
+          const PAGE_IN_W = 11,   PAGE_IN_H = 8.5;
+          const pxToInX = (px) => (px / PAGE_PX_W) * PAGE_IN_W;
+          const pxToInY = (px) => (px / PAGE_PX_H) * PAGE_IN_H;
+
           const pages = document.querySelectorAll('.page');
           for (let i = 0; i < pages.length; i++) {
             status.textContent = 'Rendering page ' + (i + 1) + ' of ' + pages.length + '…';
+            // scale: 3 (was 2) → ~360 DPI in the embedded JPEG, much
+            // sharper for hero photos and small text. JPEG quality 0.96
+            // keeps file size sane while almost eliminating compression
+            // artifacts. Result is roughly 2× the file size of the old
+            // output and meaningfully cleaner photos.
             const canvas = await html2canvas(pages[i], {
               backgroundColor: '#000000',
-              scale: 2,
+              scale: 3,
               useCORS: true,
+              logging: false,
             });
-            const img = canvas.toDataURL('image/jpeg', 0.92);
+            const img = canvas.toDataURL('image/jpeg', 0.96);
             if (i > 0) pdf.addPage('letter', 'landscape');
-            pdf.addImage(img, 'JPEG', 0, 0, 11, 8.5);
+            pdf.addImage(img, 'JPEG', 0, 0, PAGE_IN_W, PAGE_IN_H);
+
+            // ----- Overlay clickable link annotations -----
+            // html2canvas captures URL text as flat pixels — PDF viewers
+            // then OCR them and frequently truncate query strings, which is
+            // why RealTracs was opening "expired" pages. We add native PDF
+            // link annotations on top of each <a> / .link-url element so
+            // the click goes to the exact intended URL.
+            const pageRect = pages[i].getBoundingClientRect();
+            const linkEls = pages[i].querySelectorAll('a[href], .link-url[data-url]');
+            linkEls.forEach((el) => {
+              const r = el.getBoundingClientRect();
+              const url = el.getAttribute('href') || el.dataset.url;
+              if (!url) return;
+              const x = pxToInX(r.left - pageRect.left);
+              const y = pxToInY(r.top  - pageRect.top);
+              const w = pxToInX(r.width);
+              const h = pxToInY(r.height);
+              try { pdf.link(x, y, w, h, { url }); } catch (_) {}
+            });
           }
           const fileName = 'Stonehouse-Comparatives-Presentation-' +
             (data.subject.address || 'untitled').replace(/[^A-Za-z0-9]+/g, '-') +
