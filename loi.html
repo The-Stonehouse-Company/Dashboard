@@ -344,13 +344,22 @@
 
         '<p>We do not intend to waste your time, and I&rsquo;d appreciate knowing your thoughts on the terms above. Please don&rsquo;t hesitate to contact me with any questions, comments, or if you would like me to formalize this in a written offer for your review.</p>' +
 
-        '<div class="sign-block">' +
-          '<div class="name">The Stonehouse Company</div>' +
-          '<div class="sign-line"></div>' +
-          '<div class="meta">Ryan Stonehouse · Founder</div>' +
-          (sPhone ? '<div class="meta">' + sPhone + '</div>' : '') +
-          (sEmail ? '<div class="meta">' + sEmail + '</div>' : '') +
-        '</div>' +
+        // "Ryan Stonehouse · Founder" only shows when the LOI is actually from
+        // Ryan. We treat the LOI as Ryan's if (a) the sender contact fields
+        // are left blank (default), or (b) the sender email starts with
+        // "ryan@" (any Stonehouse domain variant). Any other agent's email
+        // hides the Ryan attribution.
+        (function () {
+          const rawEmail = (p && p.senderEmail) ? String(p.senderEmail).toLowerCase() : '';
+          const isRyan = !rawEmail || rawEmail.startsWith('ryan@');
+          return '<div class="sign-block">' +
+            '<div class="name">The Stonehouse Company</div>' +
+            '<div class="sign-line"></div>' +
+            (isRyan ? '<div class="meta">Ryan Stonehouse · Founder</div>' : '') +
+            (sPhone ? '<div class="meta">' + sPhone + '</div>' : '') +
+            (sEmail ? '<div class="meta">' + sEmail + '</div>' : '') +
+          '</div>';
+        })() +
 
         '<div class="seller-block">' +
           '<div class="name">' + propAddr + '</div>' +
