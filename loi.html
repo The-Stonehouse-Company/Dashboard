@@ -312,6 +312,8 @@
     const closing  = esc(p && p.closing)          || 'Negotiable';
     const conting  = esc(p && p.contingencies)    || 'Negotiable';
     const postOcc  = esc(p && p.postOccupancy)    || 'Negotiable';
+    const sPhone   = esc(p && p.senderPhone)      || '';
+    const sEmail   = esc(p && p.senderEmail)      || '';
 
     return (
       '<section class="loi-page">' +
@@ -346,6 +348,8 @@
           '<div class="name">The Stonehouse Company</div>' +
           '<div class="sign-line"></div>' +
           '<div class="meta">Ryan Stonehouse · Founder</div>' +
+          (sPhone ? '<div class="meta">' + sPhone + '</div>' : '') +
+          (sEmail ? '<div class="meta">' + sEmail + '</div>' : '') +
         '</div>' +
 
         '<div class="seller-block">' +

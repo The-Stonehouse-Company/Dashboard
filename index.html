@@ -3992,6 +3992,21 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           </div>
         </fieldset>
 
+        <fieldset>
+          <legend>Sender Contact</legend>
+          <p class="legend-hint">Shown at the bottom of the LOI under the Stonehouse signature line. Use whichever agent is sending this letter.</p>
+          <div class="form-grid">
+            <div>
+              <label for="loi-sender-phone">Phone</label>
+              <input id="loi-sender-phone" name="sender_phone" type="tel" inputmode="tel" placeholder="(615) 555-0100" autocomplete="tel" />
+            </div>
+            <div>
+              <label for="loi-sender-email">Email</label>
+              <input id="loi-sender-email" name="sender_email" type="email" placeholder="agent@stonehouserealtyco.com" autocomplete="email" />
+            </div>
+          </div>
+        </fieldset>
+
         <div class="form-status" id="loi-status" role="status" aria-live="polite"></div>
 
         <footer class="modal-foot">
@@ -7331,6 +7346,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             closing:         document.getElementById('loi-closing').value.trim() || 'Negotiable',
             contingencies:   document.getElementById('loi-contingencies').value.trim() || 'Negotiable',
             postOccupancy:   document.getElementById('loi-postocc').value.trim() || 'Negotiable',
+            senderPhone:     document.getElementById('loi-sender-phone').value.trim(),
+            senderEmail:     document.getElementById('loi-sender-email').value.trim(),
           };
           await idbPut('current', payload);
           setStatus('ok', 'Sent to a new tab — the PDF will download automatically once the page renders.');
