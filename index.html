@@ -7758,8 +7758,11 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const REPO_OWNER  = 'The-Stonehouse-Company';
       const REPO_NAME   = 'Dashboard';
       const BRANCH      = 'main';
-      const PROPS_PATH  = 'Company/Dashboard/platinum-reserve/properties.json';
-      const ASSETS_DIR  = 'Company/Dashboard/platinum-reserve/assets';
+      // Paths are RELATIVE TO REPO ROOT. The Dashboard *folder* is the repo
+      // root (Company/Dashboard/.git lives there), so the in-repo path is
+      // just "platinum-reserve/...", not "Company/Dashboard/platinum-reserve/..."
+      const PROPS_PATH  = 'platinum-reserve/properties.json';
+      const ASSETS_DIR  = 'platinum-reserve/assets';
       const LS_TOKEN_KEY = 'stonehouse-gh-pat';
 
       // --- DOM refs ---
