@@ -3912,6 +3912,21 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
       <form class="modal-body" id="cma-form" autocomplete="off" novalidate>
 
+        <!-- ============================================================
+             REALTRACS PDF IMPORT (Dev side)
+             Same parser the Sales CMA modal uses — see the
+             setupRealTracsImport() helper near the CMA controller IIFEs.
+             ============================================================ -->
+        <fieldset>
+          <legend>Quick Import (optional)</legend>
+          <p class="legend-hint">Save typing — export your CMA from RealTracs as a PDF, drop it here, and we'll prefill the comp slots below. You still add the subject, photos, and notes.</p>
+          <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:6px;">
+            <input id="cma-rt-import" type="file" accept="application/pdf" style="display:none;" />
+            <button type="button" class="btn ghost" id="cma-rt-import-btn">📄 Import from RealTracs PDF</button>
+            <span id="cma-rt-import-status" class="legend-hint" style="margin:0;"></span>
+          </div>
+        </fieldset>
+
         <!-- COVER (PAGE 1) -->
         <fieldset>
           <legend>Cover (Page 1)</legend>
@@ -7996,16 +8011,17 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     })();
 
     // ============================================================
-    // RealTracs CMA PDF importer (Sales CMA modal only)
+    // RealTracs CMA PDF importer — shared by BOTH CMA modals
     //
     // Lazy-loads pdf.js (Mozilla's PDF renderer) when the user clicks
-    // "Import from RealTracs PDF" inside the SALES CMA Generator modal.
-    // Parses the summary CMA export (Under Contract + Closed sections)
-    // and prefills the comp slots so the user only has to add the
-    // subject info, photos, and notes.
+    // "Import from RealTracs PDF" inside a CMA Generator modal. Parses
+    // the summary CMA export (Under Contract + Closed sections) and
+    // prefills the comp slots so the user only has to add the subject
+    // info, photos, and notes.
     //
-    // (The Development "Comparative's Presentation" modal intentionally
-    // does NOT include this importer — it's a sales workflow.)
+    // Wired to:
+    //   - Sales CMA Generator        (cma-sales-form)
+    //   - Dev Comparative's Presentation (cma-form)
     //
     // What we parse per comp row:
     //   MLS, address, sub/dev, acres, BR, bath, year built, garage,
@@ -8018,11 +8034,12 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     //   - comp comments / "why this comp"
     //   - RealTracs share URLs (Sources page)
     // ============================================================
-    (function () {
-      const btn      = document.getElementById('cma-sales-rt-import-btn');
-      const fileEl   = document.getElementById('cma-sales-rt-import');
-      const statusEl = document.getElementById('cma-sales-rt-import-status');
-      if (!btn || !fileEl) return;
+    function setupRealTracsImport(cfg) {
+      const btn      = document.getElementById(cfg.btnId);
+      const fileEl   = document.getElementById(cfg.fileId);
+      const statusEl = document.getElementById(cfg.statusId);
+      const form     = document.getElementById(cfg.formId);
+      if (!btn || !fileEl || !form) return;
 
       const PDFJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
       const PDFJS_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -8188,14 +8205,12 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         };
       }
 
-      // Scope querySelectors to the Sales CMA form so the comp-slot name
+      // Scope querySelectors to THIS importer's form so the comp-slot name
       // attributes don't accidentally match identically-named inputs in
-      // the Dev "Comparative's Presentation" modal sitting in the same DOM.
-      const salesForm = document.getElementById('cma-sales-form');
+      // the OTHER CMA modal sitting in the same DOM.
       function fillSlot(prefix, fields) {
-        if (!salesForm) return;
         const setVal = (suffix, value) => {
-          const el = salesForm.querySelector('[name="' + prefix + '_' + suffix + '"]');
+          const el = form.querySelector('[name="' + prefix + '_' + suffix + '"]');
           if (el && value != null) el.value = value;
         };
         setVal('address', fields.address);
@@ -8252,7 +8267,21 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           fileEl.value = '';   // allow re-importing the same file
         }
       });
-    })();
+    }
+
+    // Wire both CMA modals to the shared RealTracs importer.
+    setupRealTracsImport({
+      formId:   'cma-sales-form',
+      btnId:    'cma-sales-rt-import-btn',
+      fileId:   'cma-sales-rt-import',
+      statusId: 'cma-sales-rt-import-status',
+    });
+    setupRealTracsImport({
+      formId:   'cma-form',
+      btnId:    'cma-rt-import-btn',
+      fileId:   'cma-rt-import',
+      statusId: 'cma-rt-import-status',
+    });
 
     // ============================================================
     // Engagement Letter Generator controller
