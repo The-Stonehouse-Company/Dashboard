@@ -220,26 +220,6 @@
     "priceMin": 1700000
   },
   {
-    "slug": "1006b-southside-ave",
-    "title": "1006B Southside Ave",
-    "fullAddress": "1006B Southside Ave, Nashville, TN 37203",
-    "specs": "4 BD | 3.2 BA | 3,648 SF | 2 Car Garage",
-    "price": "$1.7M – Summer 2026",
-    "builder": "",
-    "area": "Gulch",
-    "image": "https://the-stonehouse-company.github.io/platinum-reserve/1006_Southside_Ave.webp",
-    "photoComingSoon": false,
-    "links": [
-      {
-        "label": "Building Plans",
-        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_1006_Southside_Ave.pdf"
-      }
-    ],
-    "beds": 4,
-    "sqft": 3648,
-    "priceMin": 1700000
-  },
-  {
     "slug": "1020-bison-ridge",
     "title": "1020 Bison Ridge",
     "fullAddress": "1020 Bison Ridge, Joelton, TN",
