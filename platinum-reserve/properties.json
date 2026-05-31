@@ -1,0 +1,1396 @@
+[
+  {
+    "slug": "714-shawnee-dr",
+    "title": "714 Shawnee Dr",
+    "fullAddress": "714 Shawnee Dr, Nashville, TN",
+    "specs": "5 BD | 6.1 BA | 5,445 SF | 1.29 AC | Pool",
+    "price": "$3.499M – March 2026",
+    "builder": "",
+    "area": "West Meade",
+    "image": "https://static.wixstatic.com/media/ba6d68_a2937e6da18e405d8193b505140acef8~mv2.webp/v1/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ai-render-10128276.webp",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 5,
+    "sqft": 5445,
+    "priceMin": 3499000
+  },
+  {
+    "slug": "4406-sunnybrook-dr",
+    "title": "4406 Sunnybrook Dr",
+    "fullAddress": "4406 Sunnybrook Dr, Nashville, TN",
+    "specs": "10,000+/- SF | 1.07 AC | Pool",
+    "price": "Price TBD – Spring 2026",
+    "builder": "2K Development",
+    "area": "West Meade",
+    "image": "https://static.wixstatic.com/media/ba6d68_4bdc615e5f674dfaa5e5621fa60e8124~mv2.png/v1/crop/x_92,y_31,w_1162,h_709/fill/w_569,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Gemini_Generated_Image_lf3r9nlf3r9nlf3r.png",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": null,
+    "sqft": null,
+    "priceMin": null
+  },
+  {
+    "slug": "6008-elizabethan-dr",
+    "title": "6008 Elizabethan Dr",
+    "fullAddress": "6008 Elizabethan Dr, Nashville, TN 37205",
+    "specs": "5 BD | 9 BA | 8,543 SF | 1.46 AC | Pool",
+    "price": "$7.3M – Spring 2026",
+    "builder": "",
+    "area": "West Meade",
+    "image": "https://static.wixstatic.com/media/ba6d68_10c71c1fa3474234905215d8daa25d9d~mv2.jpeg/v1/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/image0.jpeg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 5,
+    "sqft": 8543,
+    "priceMin": 7300000
+  },
+  {
+    "slug": "610-westboro-dr",
+    "title": "610 Westboro Dr",
+    "fullAddress": "610 Westboro Dr, Nashville, TN 37209",
+    "specs": "4 BD | 4.5 BA | 3,500+ SF | .31 AC",
+    "price": "$1.375M – Spring 2026",
+    "builder": "MCH Construction",
+    "area": "Charlotte Park",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/610_Westboro_Dr.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_610_Westboro_Dr.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 3500,
+    "priceMin": 1375000
+  },
+  {
+    "slug": "750-templeton-dr",
+    "title": "750 Templeton Dr",
+    "fullAddress": "750 Templeton Dr, Nashville, TN",
+    "specs": "6 BD | 5.3 BA | 5,474 SF | .97 AC | Pool",
+    "price": "$3.799M – Spring 2026",
+    "builder": "Build Nashville",
+    "area": "West Meade",
+    "image": "https://static.wixstatic.com/media/ba6d68_a6398b87209740e9912e32310a81a7d9~mv2.webp/v1/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ai-render-10285042%2B(1).webp",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 6,
+    "sqft": 5474,
+    "priceMin": 3799000
+  },
+  {
+    "slug": "840-brentview-dr",
+    "title": "840 Brentview Dr",
+    "fullAddress": "840 Brentview Dr, Nashville, TN",
+    "specs": "6 BD | 8 BA | 7,450 SF | 1.05 AC | Pool",
+    "price": "$5.499M – Spring 2026",
+    "builder": "Southern Edge Construction",
+    "area": "Oak Hill",
+    "image": "https://static.wixstatic.com/media/ba6d68_4bc2e0d29e204a4882883e771fac263a~mv2.jpg/v1/crop/x_122,y_0,w_1253,h_767/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/1500x1000.jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 6,
+    "sqft": 7450,
+    "priceMin": 5499000
+  },
+  {
+    "slug": "1004-rodney-dr",
+    "title": "1004 Rodney Dr",
+    "fullAddress": "1004 Rodney Dr, Nashville, TN",
+    "specs": "5 BD | 5.1 BA | 5,000 SF | .5 AC | Pool",
+    "price": "$2.3M – May 2026",
+    "builder": "Elliott Homes",
+    "area": "West Meade",
+    "image": "https://static.wixstatic.com/media/ba6d68_3a1b146afcf24f78a4fd7dd66f60a612~mv2.png/v1/crop/x_37,y_0,w_1286,h_784/fill/w_569,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Gemini_Generated_Image_qp848bqp848bqp84.png",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_1004_Rodney_Dr.pdf"
+      }
+    ],
+    "beds": 5,
+    "sqft": 5000,
+    "priceMin": 2300000
+  },
+  {
+    "slug": "1006-rodney-dr",
+    "title": "1006 Rodney Dr",
+    "fullAddress": "1006 Rodney Dr, Nashville, TN",
+    "specs": "5 BD | 5.1 BA | 5,000 SF | .5 AC | Pool",
+    "price": "$2.3M – May 2026",
+    "builder": "Elliott Homes",
+    "area": "West Meade",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/1006_Rodney.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Design Board",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/DESIGN_BOARD_1006_Rodney_Dr.pdf"
+      }
+    ],
+    "beds": 5,
+    "sqft": 5000,
+    "priceMin": 2300000
+  },
+  {
+    "slug": "1413-clifton-ln",
+    "title": "1413 Clifton Ln",
+    "fullAddress": "1413 Clifton Ln, Nashville, TN 37212",
+    "specs": "4 BD | 4 BA | 3,050 SF | 2 Car Garage",
+    "price": "$1.5M–$1.75M – May 2026",
+    "builder": "",
+    "area": "Green Hills",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/1413_Clifton_Ln.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_1413_CLIFTON_LN.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 3050,
+    "priceMin": 1500000
+  },
+  {
+    "slug": "2022-galbraith-dr",
+    "title": "2022 Galbraith Dr",
+    "fullAddress": "2022 Galbraith Dr, Nashville, TN",
+    "specs": "4 BD | 4.2 BA | 5,321 SF | .34 AC",
+    "price": "$2.5M – May 2026",
+    "builder": "Paros Group",
+    "area": "Green Hills",
+    "image": "https://static.wixstatic.com/media/ba6d68_bd3e4e7564044ba7b7d989d6160da3bd~mv2.jpg/v1/crop/x_32,y_20,w_963,h_588/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/unnamed%20(13).jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 4,
+    "sqft": 5321,
+    "priceMin": 2500000
+  },
+  {
+    "slug": "2495-deer-meadow-ln",
+    "title": "2495 Deer Meadow Ln",
+    "fullAddress": "2495 Deer Meadow Ln, Arrington, TN 37014",
+    "specs": "3 BD | 1.1 BA | 3,000 SF | 8.79 AC",
+    "price": "$2.8M – May 2026",
+    "builder": "Campi Development",
+    "area": "Arrington",
+    "image": "https://static.wixstatic.com/media/ba6d68_18e83fdf105f4d429b52d95b4aafdff4~mv2.jpg/v1/crop/x_177,y_106,w_876,h_534/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Design%20Inspo-Arrington%20Project.jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 3,
+    "sqft": 3000,
+    "priceMin": 2800000
+  },
+  {
+    "slug": "713-georgetown-dr",
+    "title": "713 Georgetown Dr",
+    "fullAddress": "713 Georgetown Dr, Nashville, TN 37205",
+    "specs": "6 BD | 8 BA | 7,237 SF | .98 AC | Pool",
+    "price": "$6.5M – May 2026",
+    "builder": "",
+    "area": "West Meade",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/713_Georgetown_Dr.jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 6,
+    "sqft": 7237,
+    "priceMin": 6500000
+  },
+  {
+    "slug": "1001-halcyon-ave",
+    "title": "1001 Halcyon Ave",
+    "fullAddress": "1001 Halcyon Ave, Nashville, TN 37204",
+    "specs": "4 BD | 4 BA | 5,000 SF | .17 AC | DADU",
+    "price": "$3.4M – June 2026",
+    "builder": "",
+    "area": "12 South",
+    "image": null,
+    "photoComingSoon": true,
+    "links": [
+      {
+        "label": "Design Board",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/DESIGN_BOARD_1001_Halcyon.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 5000,
+    "priceMin": 3400000
+  },
+  {
+    "slug": "1819-elliott-ave",
+    "title": "1819 Elliott Ave",
+    "fullAddress": "1819 Elliott Ave, Nashville, TN",
+    "specs": "4 BD | 3.2 BA | 2,300 SF | .27 AC | Pool",
+    "price": "$1.25M – June 2026",
+    "builder": "",
+    "area": "Wedgewood Houston",
+    "image": "https://static.wixstatic.com/media/ba6d68_cef01d934a694c36bbee664a90291e69~mv2.jpg/v1/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/1819%20Elliott%20Front2_JPG.jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 4,
+    "sqft": 2300,
+    "priceMin": 1250000
+  },
+  {
+    "slug": "813-montrose-ave",
+    "title": "813 Montrose Ave",
+    "fullAddress": "813 Montrose Ave, Nashville, TN",
+    "specs": "5 BD | 5.1 BA | 5,000+ SF | .34 AC | Pool",
+    "price": "$3.5M – June 2026",
+    "builder": "",
+    "area": "12 South",
+    "image": "https://static.wixstatic.com/media/ba6d68_305086c68b284ae89a0aa81f64bcaf34~mv2.png/v1/crop/x_0,y_33,w_1256,h_766/fill/w_569,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/IMG_6993_PNG.png",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 5,
+    "sqft": 5000,
+    "priceMin": 3500000
+  },
+  {
+    "slug": "2201-castleman-dr",
+    "title": "2201 Castleman Dr",
+    "fullAddress": "2201 Castleman Dr, Nashville, TN 37215",
+    "specs": "5 BD | 5 FB + 1 HB | 4,982 SF | 3 Car Garage",
+    "price": "$2.5M – June 2026",
+    "builder": "Paragon",
+    "area": "Green Hills",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/2201_Castleman_Dr.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_2201_CASTLEMAN_DR.jpg"
+      }
+    ],
+    "beds": 5,
+    "sqft": 4982,
+    "priceMin": 2500000
+  },
+  {
+    "slug": "1006a-southside-ave",
+    "title": "1006A Southside Ave",
+    "fullAddress": "1006A Southside Ave, Nashville, TN 37203",
+    "specs": "4 BD | 3.2 BA | 3,648 SF | 2 Car Garage",
+    "price": "$1.7M – Summer 2026",
+    "builder": "",
+    "area": "Gulch",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/1006_Southside_Ave.webp",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_1006_Southside_Ave.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 3648,
+    "priceMin": 1700000
+  },
+  {
+    "slug": "1006b-southside-ave",
+    "title": "1006B Southside Ave",
+    "fullAddress": "1006B Southside Ave, Nashville, TN 37203",
+    "specs": "4 BD | 3.2 BA | 3,648 SF | 2 Car Garage",
+    "price": "$1.7M – Summer 2026",
+    "builder": "",
+    "area": "Gulch",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/1006_Southside_Ave.webp",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_1006_Southside_Ave.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 3648,
+    "priceMin": 1700000
+  },
+  {
+    "slug": "1020-bison-ridge",
+    "title": "1020 Bison Ridge",
+    "fullAddress": "1020 Bison Ridge, Joelton, TN",
+    "specs": "4 BD | 4.2 BA | 4,310 SF | 5.01 AC | Gated",
+    "price": "$3.75M – Summer 2026",
+    "builder": "",
+    "area": "Joelton",
+    "image": "https://static.wixstatic.com/media/ba6d68_01de78a3d2154e5bbfbb6c14231bf257~mv2.jpeg/v1/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/image0.jpeg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 4,
+    "sqft": 4310,
+    "priceMin": 3750000
+  },
+  {
+    "slug": "120-39th-ave-n",
+    "title": "120 39th Ave N",
+    "fullAddress": "120 39th Ave N, Nashville, TN 37209",
+    "specs": "5 BD | 7 BA | 4,610 SF | .18 AC | DADU",
+    "price": "$2.699M – Summer 2026",
+    "builder": "",
+    "area": "Sylvan Park",
+    "image": "https://static.wixstatic.com/media/ba6d68_f95af271467948f1b4edeb798a12e542~mv2.webp/v1/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/4700%20Kentucky.webp",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 5,
+    "sqft": 4610,
+    "priceMin": 2699000
+  },
+  {
+    "slug": "1211-carl-seyfert-memorial-dr",
+    "title": "1211 Carl Seyfert Memorial Dr",
+    "fullAddress": "1211 Carl Seyfert Memorial Dr, Brentwood, TN",
+    "specs": "6 BD | 6.2 BA | 7,400 SF | 1.28 AC | Pool",
+    "price": "$4.8M – Summer 2026",
+    "builder": "Shepherd Group",
+    "area": "Forest Hills",
+    "image": "https://static.wixstatic.com/media/ba6d68_eaf5a59bc4ff4d47a4ac7005e76b5035~mv2.jpg/v1/fill/w_807,h_492,al_c,q_85,enc_avif,quality_auto/582980754_18024005045777378_1736757674503928607_n.jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 6,
+    "sqft": 7400,
+    "priceMin": 4800000
+  },
+  {
+    "slug": "1600-burton-ave",
+    "title": "1600 Burton Ave",
+    "fullAddress": "1600 Burton Ave, Nashville, TN",
+    "specs": "5 BD | 5.2 BA | 6,603 SF | Pool",
+    "price": "$2.895M – Summer 2026",
+    "builder": "",
+    "area": "Green Hills",
+    "image": "https://static.wixstatic.com/media/ba6d68_d34f156c6fd5437db583c60e7d2f8d0a~mv2.jpeg/v1/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/burton.jpeg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 5,
+    "sqft": 6603,
+    "priceMin": 2895000
+  },
+  {
+    "slug": "2630-clayton-arnold-rd",
+    "title": "2630 Clayton Arnold Rd",
+    "fullAddress": "2630 Clayton Arnold Rd, Franklin, TN",
+    "specs": "5 BD | 5.2 BA | 7,000 SF | 2.4 AC | Pool",
+    "price": "$4.5M – Summer 2026",
+    "builder": "",
+    "area": "Franklin",
+    "image": "https://static.wixstatic.com/media/ba6d68_132db6ce55144d2dbaf55a509ad7ad7e~mv2.png/v1/fill/w_569,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Gemini_Generated_Image_w7rdtxw7rdtxw7rd.png",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 5,
+    "sqft": 7000,
+    "priceMin": 4500000
+  },
+  {
+    "slug": "3433-stokesmont-rd",
+    "title": "3433 Stokesmont Rd",
+    "fullAddress": "3433 Stokesmont Rd, Nashville, TN",
+    "specs": "5 BD | 5.1 BA | 5,831 SF | .23 AC",
+    "price": "$2.5M – July 2026",
+    "builder": "John Sharpe",
+    "area": "Green Hills",
+    "image": "https://static.wixstatic.com/media/ba6d68_e8ca2a06e35749cd9409117626b42ab6~mv2.jpg/v1/crop/x_0,y_173,w_1024,h_625/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/unnamed%20(9).jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 5,
+    "sqft": 5831,
+    "priceMin": 2500000
+  },
+  {
+    "slug": "4700-kentucky-ave",
+    "title": "4700 Kentucky Ave",
+    "fullAddress": "4700 Kentucky Ave, Nashville, TN 37209",
+    "specs": "4 BD | 5.1 BA | 3,340 SF",
+    "price": "$1.05M – Summer 2026",
+    "builder": "",
+    "area": "Nations",
+    "image": "https://static.wixstatic.com/media/ba6d68_2b4f52e8cf4440ed941dd4a88ce8658a~mv2.webp",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 4,
+    "sqft": 3340,
+    "priceMin": 1050000
+  },
+  {
+    "slug": "6052-bresslyn-rd",
+    "title": "6052 Bresslyn Rd",
+    "fullAddress": "6052 Bresslyn Rd, Nashville, TN",
+    "specs": "12,000+/- SF | 1.7 AC | Pool",
+    "price": "Price TBD – Summer 2026",
+    "builder": "2K Development",
+    "area": "West Meade",
+    "image": "https://static.wixstatic.com/media/ba6d68_881ff5c74e224945b1cc61d2b5dfe555~mv2.png/v1/fill/w_569,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Screen%20Shot%202026-01-31%20at%203_13_19%20AM.png",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": null,
+    "sqft": null,
+    "priceMin": null
+  },
+  {
+    "slug": "738-templeton-dr",
+    "title": "738 Templeton Dr",
+    "fullAddress": "738 Templeton Dr, Nashville, TN",
+    "specs": "5 BD | 5.3 BA | 5,796 SF | .97 AC | Pool",
+    "price": "$4.7M – Summer 2026",
+    "builder": "Build Nashville",
+    "area": "West Meade",
+    "image": "https://static.wixstatic.com/media/ba6d68_2de7b51a0f7a402fa0f316b369afc496~mv2.webp/v1/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/UNDER%2BCONTRACT%2B(1).webp",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 5,
+    "sqft": 5796,
+    "priceMin": 4700000
+  },
+  {
+    "slug": "1421-b-rosebank-ave",
+    "title": "1421 B Rosebank Ave",
+    "fullAddress": "1421 B Rosebank Ave, Nashville, TN 37216",
+    "specs": "4 BD | 4 FB + 1 HB | 2,726 SF | 2 Car Garage",
+    "price": "$925K – Summer 2026",
+    "builder": "",
+    "area": "Inglewood",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/rosebankrender.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_1421B_ROSEBANK_AVE.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 2726,
+    "priceMin": 925000
+  },
+  {
+    "slug": "938-battlefield-ave",
+    "title": "938 Battlefield Ave",
+    "fullAddress": "938 Battlefield Ave, Nashville, TN 37204",
+    "specs": "4 BD | 4 FB + 2 HB | 3,800 SF | Pool | 3 Car Garage",
+    "price": "$2.1M – Summer 2026",
+    "builder": "May Construction",
+    "area": "Green Hills",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/938Battle.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_938_BATTLEFIELD_AVE.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 3800,
+    "priceMin": 2100000
+  },
+  {
+    "slug": "940-battlefield-ave",
+    "title": "940 Battlefield Ave",
+    "fullAddress": "940 Battlefield Ave, Nashville, TN 37204",
+    "specs": "4 BD | 4 FB + 2 HB | 3,800 SF | Pool | 3 Car Garage",
+    "price": "$2.1M – Summer 2026",
+    "builder": "May Construction",
+    "area": "Green Hills",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/940battle.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_940_BATTLEFIELD_AVE.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 3800,
+    "priceMin": 2100000
+  },
+  {
+    "slug": "940-s-douglas-ave",
+    "title": "940 S Douglas Ave",
+    "fullAddress": "940 S Douglas Ave, Nashville, TN 37204",
+    "specs": "4 BD | 4 BA | 5,000 SF | .25 AC | 3 Car Garage | DADU",
+    "price": "$3.375M – July 2026",
+    "builder": "",
+    "area": "Belmont Hillsboro",
+    "image": null,
+    "photoComingSoon": true,
+    "links": [
+      {
+        "label": "Design Board",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/DESIGN_BOARD_940_S_Douglas_Ave.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 5000,
+    "priceMin": 3375000
+  },
+  {
+    "slug": "1512-gale-ln",
+    "title": "1512 Gale Ln",
+    "fullAddress": "1512 Gale Ln, Nashville, TN 37212",
+    "specs": "6 BD | 6 FB + 2 HB | 6,030 SF | .33 AC | Pool | Spa | 3 Car Garage | 2 Bed DADU",
+    "price": "$4M+ – July 2026",
+    "builder": "",
+    "area": "12 South",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/Galerender.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_1512_GALE_LN.pdf"
+      }
+    ],
+    "beds": 6,
+    "sqft": 6030,
+    "priceMin": 4000000
+  },
+  {
+    "slug": "6397-temple-rd",
+    "title": "6397 Temple Rd",
+    "fullAddress": "6397 Temple Rd, Nashville, TN",
+    "specs": "5 BD | 5 BA | 6,500 SF | 4.35 AC | Pool",
+    "price": "$4.5M – August 2026",
+    "builder": "Southern Edge Construction",
+    "area": "Franklin",
+    "image": "https://static.wixstatic.com/media/ba6d68_ca4ae6e49d6c43ce9cdf9cbf38a5efb3~mv2.webp/v1/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/1500x844%20(11).webp",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 5,
+    "sqft": 6500,
+    "priceMin": 4500000
+  },
+  {
+    "slug": "832-brook-hollow-rd",
+    "title": "832 Brook Hollow Rd",
+    "fullAddress": "832 Brook Hollow Rd, Nashville, TN",
+    "specs": "5 BD | 5.2 BA | 6,700 SF | 4.35 AC | Pool",
+    "price": "$4.5M – August 2026",
+    "builder": "Southern Edge Construction",
+    "area": "West Meade",
+    "image": "https://static.wixstatic.com/media/ba6d68_e762d78467aa4b2586acd75c8377e700~mv2.jpeg/v1/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Project_Brook%20Hollow%20V1_014.jpeg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 5,
+    "sqft": 6700,
+    "priceMin": 4500000
+  },
+  {
+    "slug": "2903-snowden-rd",
+    "title": "2903 Snowden Rd",
+    "fullAddress": "2903 Snowden Rd, Nashville, TN 37204",
+    "specs": "5 BD | 6 BA | 5,005 SF | Pool",
+    "price": "$3.2M – August 2026",
+    "builder": "",
+    "area": "Green Hills",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/2903snowden.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_2903_SNOWDEN_RD.pdf"
+      },
+      {
+        "label": "Design Board",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/DESIGN_BOARD_2903_SNOWDEN_RD.pdf"
+      }
+    ],
+    "beds": 5,
+    "sqft": 5005,
+    "priceMin": 3200000
+  },
+  {
+    "slug": "1200-clifton-ln",
+    "title": "1200 Clifton Ln",
+    "fullAddress": "1200 Clifton Ln, Nashville, TN 37212",
+    "specs": "4 BD | 4.2 BA | 4,090 SF | .18 AC | Primary on Main | Pool",
+    "price": "$2M – Fall 2026",
+    "builder": "Jackson Builders",
+    "area": "12 South",
+    "image": "https://static.wixstatic.com/media/ba6d68_8d26827c20734d3ca0fcfb2d1def5c0a~mv2.png/v1/fill/w_569,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Screen%20Shot%202026-02-05%20at%2010_26_23%20PM.png",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_1200_Clifton_Ln.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 4090,
+    "priceMin": 2000000
+  },
+  {
+    "slug": "1202-clifton-ln",
+    "title": "1202 Clifton Ln",
+    "fullAddress": "1202 Clifton Ln, Nashville, TN 37212",
+    "specs": "4 BD | 4.2 BA | 4,090 SF | .18 AC | Primary on Main | Pool",
+    "price": "$2M – Fall 2026",
+    "builder": "Jackson Builders",
+    "area": "12 South",
+    "image": "https://static.wixstatic.com/media/ba6d68_8d26827c20734d3ca0fcfb2d1def5c0a~mv2.png/v1/fill/w_569,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Screen%20Shot%202026-02-05%20at%2010_26_23%20PM.png",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_1202_Clifton_Ln.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 4090,
+    "priceMin": 2000000
+  },
+  {
+    "slug": "322-gun-club-rd",
+    "title": "322 Gun Club Rd",
+    "fullAddress": "322 Gun Club Rd, Nashville, TN",
+    "specs": "1.46 AC | Pool | Details Coming Soon",
+    "price": "Price TBD – Fall 2026",
+    "builder": "2K Development",
+    "area": "West Meade",
+    "image": "https://static.wixstatic.com/media/ba6d68_6fb8e20e3e9a47ada1adb7ff5b615609~mv2.png/v1/fill/w_569,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Screen%20Shot%202026-01-31%20at%203_14_57%20AM.png",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": null,
+    "sqft": null,
+    "priceMin": null
+  },
+  {
+    "slug": "4424a-lealand-ln",
+    "title": "4424A Lealand Ln",
+    "fullAddress": "4424A Lealand Ln, Nashville, TN 37204",
+    "specs": "4 BD | 5.1 BA | 4,399 SF | .23 AC | 2 Car Garage",
+    "price": "$2.2M – Fall 2026",
+    "builder": "Ark Development",
+    "area": "Green Hills",
+    "image": "https://static.wixstatic.com/media/ba6d68_cdb0690c751f41ed95d594b1c8df9ddc~mv2.png/v1/crop/x_0,y_44,w_1536,h_937/fill/w_569,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/55404d35-ec71-4ff6-8afb-177e30c561fe.png",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_4424A_Lealand_Ln.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 4399,
+    "priceMin": 2200000
+  },
+  {
+    "slug": "4424b-lealand-ln",
+    "title": "4424B Lealand Ln",
+    "fullAddress": "4424B Lealand Ln, Nashville, TN 37204",
+    "specs": "4 BD | 5.1 BA | 4,346 SF | .23 AC | 2 Car Garage",
+    "price": "$2.2M – Fall 2026",
+    "builder": "Ark Development",
+    "area": "Green Hills",
+    "image": "https://static.wixstatic.com/media/ba6d68_cdb0690c751f41ed95d594b1c8df9ddc~mv2.png/v1/crop/x_0,y_44,w_1536,h_937/fill/w_569,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/55404d35-ec71-4ff6-8afb-177e30c561fe.png",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_4424B_Lealand_Ln.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 4346,
+    "priceMin": 2200000
+  },
+  {
+    "slug": "6036-jocelyn-hollow-rd",
+    "title": "6036 Jocelyn Hollow Rd",
+    "fullAddress": "6036 Jocelyn Hollow Rd, Nashville, TN",
+    "specs": "12,000+/- SF | 1.6 AC | Pool",
+    "price": "Price TBD – Fall 2026",
+    "builder": "2K Development",
+    "area": "West Meade",
+    "image": "https://static.wixstatic.com/media/ba6d68_bd0ddb70849044cabf185587476bfdba~mv2.jpg/v1/crop/x_61,y_39,w_903,h_550/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/unnamed%20(10).jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": null,
+    "sqft": null,
+    "priceMin": null
+  },
+  {
+    "slug": "1055-zophi-st",
+    "title": "1055 Zophi St",
+    "fullAddress": "1055 Zophi St, Nashville, TN 37216",
+    "specs": "4 BD | 3 FB + 1 HB | 2,151 SF | 1 Car Garage",
+    "price": "$730K – Fall 2026",
+    "builder": "Ark Development",
+    "area": "East Nashville",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/zophi.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/1055zophi-plans.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 2151,
+    "priceMin": 730000
+  },
+  {
+    "slug": "934-thomas-ave",
+    "title": "934 Thomas Ave",
+    "fullAddress": "934 Thomas Ave, Nashville, TN 37216",
+    "specs": "4 BD | 3 FB + 1 HB | 2,151 SF | 1 Car Garage",
+    "price": "$730K – Fall 2026",
+    "builder": "Ark Development",
+    "area": "East Nashville",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/thomas.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/934thomas-plans.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 2151,
+    "priceMin": 730000
+  },
+  {
+    "slug": "915-kirkwood-ave",
+    "title": "915 Kirkwood Ave",
+    "fullAddress": "915 Kirkwood Ave, Nashville, TN",
+    "specs": "Historical Remodel | 9,000+ SF | .5 AC | 3 Car Garage | Pool | Basement",
+    "price": "$5M – October 2026",
+    "builder": "Elliott Homes",
+    "area": "12 South",
+    "image": null,
+    "photoComingSoon": true,
+    "links": [],
+    "beds": null,
+    "sqft": 9000,
+    "priceMin": 5000000
+  },
+  {
+    "slug": "1010-draughon-ave",
+    "title": "1010 Draughon Ave",
+    "fullAddress": "1010 Draughon Ave, Nashville, TN 37204",
+    "specs": "5 BD | 5,200 SF | Pool",
+    "price": "$3.5M – Winter 2026",
+    "builder": "Hidden Trail Construction",
+    "area": "Green Hills",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/draughonrender.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_1010_DRAUGHON_AVE.pdf"
+      }
+    ],
+    "beds": 5,
+    "sqft": 5200,
+    "priceMin": 3500000
+  },
+  {
+    "slug": "1306-clifton-ln",
+    "title": "1306 Clifton Ln",
+    "fullAddress": "1306 Clifton Ln, Nashville, TN 37212",
+    "specs": "4 BD | 4.1 BA | 3,895 SF | .17 AC | 2 Car Garage | Spa",
+    "price": "$2.05M – Winter 2026",
+    "builder": "Shepherd Group",
+    "area": "Green Hills",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/1306_Clifton_Ln.avif",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_1306_Clifton_Ln.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 3895,
+    "priceMin": 2049999
+  },
+  {
+    "slug": "1308-clifton-ln",
+    "title": "1308 Clifton Ln",
+    "fullAddress": "1308 Clifton Ln, Nashville, TN 37212",
+    "specs": "4 BD | 4.1 BA | 3,923 SF | .17 AC | 2 Car Garage | Pool",
+    "price": "$2.1M – Winter 2026",
+    "builder": "Shepherd Group",
+    "area": "Green Hills",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/1308_Clifton_Ln.avif",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_1308_Clifton_Ln.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 3923,
+    "priceMin": 2100000
+  },
+  {
+    "slug": "2145-sharondale-dr",
+    "title": "2145 Sharondale Dr",
+    "fullAddress": "2145 Sharondale Dr, Nashville, TN 37215",
+    "specs": "5 BD | 5 FB + 2 HB | 3,941 SF | 3 Car Garage | Primary on Main | Elevator",
+    "price": "$2.15M – Winter 2026",
+    "builder": "Clear Creek",
+    "area": "Green Hills",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/2145_Sharondale_Dr.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_2145_Sharondale_Dr.pdf"
+      },
+      {
+        "label": "Design Board",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/DESIGN_BOARD_2145_Sharondale_Dr.pdf"
+      }
+    ],
+    "beds": 5,
+    "sqft": 3941,
+    "priceMin": 2150000
+  },
+  {
+    "slug": "6011-don-allen-ave",
+    "title": "6011 Don Allen Ave",
+    "fullAddress": "6011 Don Allen Ave, Nashville, TN",
+    "specs": "5 BD | 6.2 BA | 5,000+ SF | .5 AC | Pool",
+    "price": "$4.499M – December 2026",
+    "builder": "Cole Woodworks",
+    "area": "West Meade",
+    "image": "https://static.wixstatic.com/media/ba6d68_5b65a9c3e9364467bfa98cc2f7ed9cbe~mv2.png/v1/crop/x_135,y_0,w_964,h_588/fill/w_569,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Screen%20Shot%202026-01-31%20at%2012_18_02%20PM.png",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 5,
+    "sqft": 5000,
+    "priceMin": 4499000
+  },
+  {
+    "slug": "715-davis-dr",
+    "title": "715 Davis Dr",
+    "fullAddress": "715 Davis Dr, Brentwood, TN 37027",
+    "specs": "6 BD | 7.2 BA | 7,000 SF | 1.06 AC | Pool",
+    "price": "$4.799M – Winter 2026",
+    "builder": "Liebo Builders",
+    "area": "Brentwood",
+    "image": "https://static.wixstatic.com/media/ba6d68_1f0cfa4cca3347609d549e550965b413~mv2.jpeg/v1/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/PHOTO-2026-01-29-14-05-04_JPEG.jpeg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 6,
+    "sqft": 7000,
+    "priceMin": 4799000
+  },
+  {
+    "slug": "83-brookwood-ter",
+    "title": "83 Brookwood Ter",
+    "fullAddress": "83 Brookwood Ter, Nashville, TN 37205",
+    "specs": "4 BD | 4.5 BA | 4,363 SF | .25 AC",
+    "price": "$2.2M – Winter 2026",
+    "builder": "MCH Construction",
+    "area": "Hillwood",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/83_Brookwood_Ter.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_83_BROOKWOOD_TER.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 4363,
+    "priceMin": 2200000
+  },
+  {
+    "slug": "316-gun-club-rd",
+    "title": "316 Gun Club Rd",
+    "fullAddress": "316 Gun Club Rd, Nashville, TN",
+    "specs": "12,000+ SF | 1.01 AC | Pool",
+    "price": "Price TBD – Early 2027",
+    "builder": "2K Development",
+    "area": "West Meade",
+    "image": "https://static.wixstatic.com/media/ba6d68_439eb072558042f6a1c78b422b7a18cb~mv2.png/v1/fill/w_569,h_347,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Gemini_Generated_Image_a9vylia9vylia9vy.png",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": null,
+    "sqft": 12000,
+    "priceMin": null
+  },
+  {
+    "slug": "3604-woodmont-blvd",
+    "title": "3604 Woodmont Blvd",
+    "fullAddress": "3604 Woodmont Blvd, Nashville, TN",
+    "specs": "5 BD | 4.2 BA | 4,463 SF | .36 AC",
+    "price": "$2.5M – Early 2027",
+    "builder": "Elliott Homes",
+    "area": "Green Hills",
+    "image": "https://static.wixstatic.com/media/ba6d68_d2cee1c241c143a7abab5c84cdc176d5~mv2.jpg/v1/crop/x_0,y_239,w_1024,h_624/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/unnamed%20(2).jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 5,
+    "sqft": 4463,
+    "priceMin": 2500000
+  },
+  {
+    "slug": "708-clematis-dr",
+    "title": "708 Clematis Dr",
+    "fullAddress": "708 Clematis Dr, Nashville, TN",
+    "specs": ".94 AC | Details Coming Soon",
+    "price": "Price TBD – Early 2027",
+    "builder": "",
+    "area": "West Meade",
+    "image": "https://static.wixstatic.com/media/ba6d68_04856f7b949e43b09ca113aa469c2433~mv2.jpg/v1/crop/x_149,y_0,w_539,h_329/fill/w_569,h_347,al_c,lg_1,q_80,enc_avif,quality_auto/unnamed%20(11).jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": null,
+    "sqft": null,
+    "priceMin": null
+  },
+  {
+    "slug": "2901-belmont-blvd",
+    "title": "2901 Belmont Blvd",
+    "fullAddress": "2901 Belmont Blvd, Nashville, TN 37212",
+    "specs": "5 BD | 5 FB + 2 HB | 8,000 SF | .5 AC | Pool | Spa",
+    "price": "$4M+ – April 2027",
+    "builder": "",
+    "area": "12 South",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/2901_Belmont_Blvd.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_2901_BELMONT_BLVD.pdf"
+      }
+    ],
+    "beds": 5,
+    "sqft": 8000,
+    "priceMin": 4000000
+  },
+  {
+    "slug": "1211-jefferson-davis",
+    "title": "1211 Jefferson Davis",
+    "fullAddress": "1211 Jefferson Davis, Nashville, TN",
+    "specs": "6 BD | 5.3 BA | 7,600 SF | 1.24 AC | Pool",
+    "price": "$5.3M – Spring 2027",
+    "builder": "Shepherd Group",
+    "area": "Forest Hills",
+    "image": "https://static.wixstatic.com/media/ba6d68_32aeb48aa3d24e66acdd7f2c0b0a364b~mv2.jpg/v1/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/591155530_18026324219777378_5258489329646174750_n.jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 6,
+    "sqft": 7600,
+    "priceMin": 5300000
+  },
+  {
+    "slug": "515-shenandoah-dr",
+    "title": "515 Shenandoah Dr",
+    "fullAddress": "515 Shenandoah Dr, Brentwood, TN",
+    "specs": "6 BD | 5.3 BA | 8,000 SF | 1.23 AC | Pool",
+    "price": "$4.8M – Spring 2027",
+    "builder": "Shepherd Group",
+    "area": "Brentwood",
+    "image": "https://static.wixstatic.com/media/ba6d68_15ffc52ed7254ee7b275337c48fb3a8f~mv2.jpg/v1/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/601104295_18027199778777378_4690276583472516587_n.jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 6,
+    "sqft": 8000,
+    "priceMin": 4800000
+  },
+  {
+    "slug": "804-wilson-pike",
+    "title": "804 Wilson Pike",
+    "fullAddress": "804 Wilson Pike, Brentwood, TN",
+    "specs": "6 BD | 5.3 BA | 7,300 SF | 1.66 AC | Pool",
+    "price": "$4.7M – Spring 2027",
+    "builder": "Shepherd Group",
+    "area": "Brentwood",
+    "image": "https://static.wixstatic.com/media/ba6d68_75ec3f5a50f141859622f4a0d6783b6b~mv2.jpg/v1/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/unnamed%20(4).jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 6,
+    "sqft": 7300,
+    "priceMin": 4700000
+  },
+  {
+    "slug": "1115-halcyon-ave",
+    "title": "1115 Halcyon Ave",
+    "fullAddress": "1115 Halcyon Ave, Nashville, TN 37204",
+    "specs": "Details Coming Soon",
+    "price": "Price TBD – Late 2027",
+    "builder": "",
+    "area": "12 South",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/1115Halcyonrender.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_1115_Halcyon_Ave.pdf"
+      }
+    ],
+    "beds": null,
+    "sqft": null,
+    "priceMin": null
+  },
+  {
+    "slug": "1117-halcyon-ave",
+    "title": "1117 Halcyon Ave",
+    "fullAddress": "1117 Halcyon Ave, Nashville, TN 37204",
+    "specs": "Details Coming Soon",
+    "price": "Price TBD – Late 2027",
+    "builder": "",
+    "area": "12 South",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/1117Halcyonrender.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_1117_Halcyon_Ave.pdf"
+      }
+    ],
+    "beds": null,
+    "sqft": null,
+    "priceMin": null
+  },
+  {
+    "slug": "3724-benham-ave",
+    "title": "3724 Benham Ave",
+    "fullAddress": "3724 Benham Ave, Nashville, TN 37215",
+    "specs": "5 BD | 6 FB + 1 HB | 6,369 SF | 3 Car Garage | Pool | Gym | Office | Primary on Main",
+    "price": "$4.6M – 2027",
+    "builder": "Elliott Homes",
+    "area": "Green Hills",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/3724 Benham Dr..png",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_3724_Benham_Ave.pdf"
+      },
+      {
+        "label": "Design Board",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/DESIGN_BOARD_3724_Benham_Ave.pdf"
+      }
+    ],
+    "beds": 5,
+    "sqft": 6369,
+    "priceMin": 4600000
+  },
+  {
+    "slug": "1109-montrose-ave",
+    "title": "1109 Montrose Ave",
+    "fullAddress": "1109 Montrose Ave, Nashville, TN",
+    "specs": "Details Coming Soon",
+    "price": "$4M+",
+    "builder": "",
+    "area": "12 South",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/1109montroserender..jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_1109_Montrose.pdf"
+      }
+    ],
+    "beds": null,
+    "sqft": null,
+    "priceMin": 4000000
+  },
+  {
+    "slug": "111-page-rd",
+    "title": "111 Page Rd",
+    "fullAddress": "111 Page Rd, Nashville, TN 37205",
+    "specs": "5 BD | 6 FB + 2 HB | 7,215 SF | 3 Car Garage | Office",
+    "price": "Price TBD",
+    "builder": "Catalyst Builders",
+    "area": "West Meade",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/111Page.png",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_111_Page_Rd.pdf"
+      }
+    ],
+    "beds": 5,
+    "sqft": 7215,
+    "priceMin": null
+  },
+  {
+    "slug": "4509-wyoming-ave",
+    "title": "4509 Wyoming Ave",
+    "fullAddress": "4509 Wyoming Ave, Nashville, TN 37209",
+    "specs": "5 BD | 5 FB + 2 HB | 4,000+ SF",
+    "price": "$2.8M",
+    "builder": "",
+    "area": "Sylvan Park",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/4509_Wyoming_Ave.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_4509_WYOMING_AVE.pdf"
+      }
+    ],
+    "beds": 5,
+    "sqft": 4000,
+    "priceMin": 2800000
+  },
+  {
+    "slug": "126-taggart-ave",
+    "title": "126 Taggart Ave",
+    "fullAddress": "126 Taggart Ave, Nashville, TN 37205",
+    "specs": "5 BD | 5 FB + 2 HB | 5,659 SF | .5 AC | 3 Car Garage",
+    "price": "$4.5M",
+    "builder": "Catalyst Builders",
+    "area": "West Meade",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/126_Taggart_Ave.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_126_Taggart_Ave.pdf"
+      }
+    ],
+    "beds": 5,
+    "sqft": 5659,
+    "priceMin": 4500000
+  },
+  {
+    "slug": "220-heady-dr",
+    "title": "220 Heady Dr",
+    "fullAddress": "220 Heady Dr, Nashville, TN 37205",
+    "specs": "5 BD | 2 HB | 6,219 SF | .5 AC | 3 Car Garage | Library",
+    "price": "$4.5M",
+    "builder": "Catalyst Builders",
+    "area": "West Meade",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/220headydr.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_220_Heady_Dr.pdf"
+      }
+    ],
+    "beds": 5,
+    "sqft": 6219,
+    "priceMin": 4500000
+  },
+  {
+    "slug": "3720-benham-ave",
+    "title": "3720 Benham Ave",
+    "fullAddress": "3720 Benham Ave, Nashville, TN",
+    "specs": "5 BD | 6 FB + 1 HB | 6,369 SF | 3 Car Garage | Pool | Gym | Office | Primary on Main",
+    "price": "$4.4M",
+    "builder": "Elliott Homes",
+    "area": "Green Hills",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/3720ben.png",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_3720_Benham_Ave.pdf"
+      },
+      {
+        "label": "Pool Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/POOL_PLANS_3720_Benham_Ave.pdf"
+      },
+      {
+        "label": "Property Layout",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/PROPERTY_LAYOUT_3720_Benham_Ave.pdf"
+      },
+      {
+        "label": "Design Board",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/DESIGN_BOARD_3720_Benham_Ave.pdf"
+      }
+    ],
+    "beds": 5,
+    "sqft": 6369,
+    "priceMin": 4400000
+  },
+  {
+    "slug": "928-montrose-ave",
+    "title": "928 Montrose Ave",
+    "fullAddress": "928 Montrose Ave, Nashville, TN 37204",
+    "specs": "3 BD | 2 BA | 2,600 SF",
+    "price": "$1.4M",
+    "builder": "",
+    "area": "12 South",
+    "image": null,
+    "photoComingSoon": true,
+    "links": [],
+    "beds": 3,
+    "sqft": 2600,
+    "priceMin": 1400000
+  },
+  {
+    "slug": "922-halcyon-ave",
+    "title": "922 Halcyon Ave",
+    "fullAddress": "922 Halcyon Ave, Nashville, TN 37204",
+    "specs": "5 BD | 5 FB + 1 HB | 5,069 SF | Historic Reno & DADU",
+    "price": "Price TBD",
+    "builder": "Ascent",
+    "area": "12 South",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/922halcyon.jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 5,
+    "sqft": 5069,
+    "priceMin": null
+  },
+  {
+    "slug": "1804-cedar-ln",
+    "title": "1804 Cedar Ln",
+    "fullAddress": "1804 Cedar Ln, Nashville, TN 37212",
+    "specs": "7 BD | 7 FB + 1 HB | 6,415 SF",
+    "price": "Price TBD",
+    "builder": "Ascent",
+    "area": "12 South",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/1804cedar.jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 7,
+    "sqft": 6415,
+    "priceMin": null
+  },
+  {
+    "slug": "1806-cedar-ln",
+    "title": "1806 Cedar Ln",
+    "fullAddress": "1806 Cedar Ln, Nashville, TN 37212",
+    "specs": "6 BD | 7 BA | 6,500 SF | Pool | DADU",
+    "price": "Price TBD",
+    "builder": "",
+    "area": "12 South",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/1806cedar.jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 6,
+    "sqft": 6500,
+    "priceMin": null
+  },
+  {
+    "slug": "119-woodvale-dr",
+    "title": "119 Woodvale Dr",
+    "fullAddress": "119 Woodvale Dr, Nashville, TN 37204",
+    "specs": "4 BD | 4 FB + 1 HB | 4,267 SF",
+    "price": "Price TBD",
+    "builder": "Ascent",
+    "area": "Green Hills",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/1119woodvale.jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 4,
+    "sqft": 4267,
+    "priceMin": null
+  },
+  {
+    "slug": "2412-vaulx-ln",
+    "title": "2412 Vaulx Ln",
+    "fullAddress": "2412 Vaulx Ln, Nashville, TN 37204",
+    "specs": "4 BD | 4 BA | 5,376 SF",
+    "price": "Price TBD",
+    "builder": "Ascent",
+    "area": "12 South",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/2412vaulx.jpg",
+    "photoComingSoon": false,
+    "links": [],
+    "beds": 4,
+    "sqft": 5376,
+    "priceMin": null
+  },
+  {
+    "slug": "5617-cloverland-dr",
+    "title": "5617 Cloverland Dr",
+    "fullAddress": "5617 Cloverland Dr, Brentwood, TN 37027",
+    "specs": "5 BD | 5 FB + 3 HB | 5,040 SF | .88 AC | Pool | Elevator",
+    "price": "$2.95M – Completion TBD",
+    "builder": "May Construction",
+    "area": "Brentwood",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/5617.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/5617cloverland-plans.pdf"
+      }
+    ],
+    "beds": 5,
+    "sqft": 5040,
+    "priceMin": 2950000
+  },
+  {
+    "slug": "5619-cloverland-dr",
+    "title": "5619 Cloverland Dr",
+    "fullAddress": "5619 Cloverland Dr, Brentwood, TN 37027",
+    "specs": "5 BD | 5 FB + 3 HB | 5,040 SF | .88 AC | Pool | Elevator",
+    "price": "$2.95M – Completion TBD",
+    "builder": "May Construction",
+    "area": "Brentwood",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/5619.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/5619cloverland-plans.pdf"
+      }
+    ],
+    "beds": 5,
+    "sqft": 5040,
+    "priceMin": 2950000
+  },
+  {
+    "slug": "1212-battlefield-dr",
+    "title": "1212 Battlefield Dr",
+    "fullAddress": "1212 Battlefield Dr, Nashville, TN 37215",
+    "specs": "4 BD | 4 FB + 2 HB | 2,972 SF",
+    "price": "$1.5M – Completion TBD",
+    "builder": "May Construction",
+    "area": "12 South",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/battlefield12.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/1212battlefield-plans.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 2972,
+    "priceMin": 1500000
+  },
+  {
+    "slug": "1214-battlefield-dr",
+    "title": "1214 Battlefield Dr",
+    "fullAddress": "1214 Battlefield Dr, Nashville, TN 37215",
+    "specs": "4 BD | 4 FB + 2 HB | 2,972 SF",
+    "price": "$1.5M – Completion TBD",
+    "builder": "May Construction",
+    "area": "12 South",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/battlefield12.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/1214battlefield-plans.pdf"
+      }
+    ],
+    "beds": 4,
+    "sqft": 2972,
+    "priceMin": 1500000
+  },
+  {
+    "slug": "1917-old-hickory-blvd",
+    "title": "1917 Old Hickory Blvd",
+    "fullAddress": "1917 Old Hickory Blvd, Brentwood, TN 37027",
+    "specs": "6 BD | 9 FB + 3 HB | 9,000 SF | Pool | 4 Car Garage | Elevator",
+    "price": "$5.89M – Completion TBD",
+    "builder": "May Construction",
+    "area": "Brentwood",
+    "image": "https://the-stonehouse-company.github.io/platinum-reserve/1917.jpg",
+    "photoComingSoon": false,
+    "links": [
+      {
+        "label": "Building Plans",
+        "url": "https://the-stonehouse-company.github.io/platinum-reserve/1917oldhickory-plans.pdf"
+      }
+    ],
+    "beds": 6,
+    "sqft": 9000,
+    "priceMin": 5890000
+  }
+]
