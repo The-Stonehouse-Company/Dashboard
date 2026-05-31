@@ -2187,29 +2187,46 @@
     .pr-row-btn.danger:hover { background: #b03030; color: var(--text); border-color: #b03030; }
 
     /* Modal — link-rows */
-    #pr-links-stack { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+    #pr-links-stack { display: flex; flex-direction: column; gap: 14px; margin-bottom: 12px; }
     .pr-link-row {
       display: grid;
       grid-template-columns: 180px 1fr auto;
-      gap: 10px; align-items: center;
-    }
-    .pr-link-row input {
+      gap: 10px; align-items: start;
+      padding: 12px;
       background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+    }
+    .pr-link-row .pr-link-mid { display: flex; flex-direction: column; gap: 6px; }
+    .pr-link-row input[type="text"], .pr-link-row input[type="url"] {
+      background: var(--bg-elev-2);
       border: 1px solid var(--rule-strong);
       color: var(--text);
       padding: 8px 10px;
       font-family: var(--font-body);
       font-size: 12px;
+      width: 100%;
     }
-    .pr-link-row button {
+    .pr-link-row input[type="file"] {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .pr-link-row .pr-link-hint {
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      margin-top: 2px;
+    }
+    .pr-link-row button.js-link-remove {
       background: transparent;
       border: 1px solid var(--rule-strong);
       color: var(--text-muted);
-      padding: 8px 10px;
+      padding: 8px 12px;
       cursor: pointer;
-      font-size: 11px;
+      font-size: 14px;
+      align-self: start;
+      margin-top: 4px;
     }
-    .pr-link-row button:hover { background: var(--text); color: var(--bg); }
+    .pr-link-row button.js-link-remove:hover { background: #b03030; color: var(--text); border-color: #b03030; }
     .pr-check {
       display: inline-flex; align-items: center; gap: 8px;
       cursor: pointer;
@@ -4208,9 +4225,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
         <fieldset>
           <legend>Document Links (optional)</legend>
-          <p class="legend-hint">Building plans, design boards, etc. Each link adds a button to the property card. Click "+ Add link" to add more rows.</p>
+          <p class="legend-hint">Building plans, design boards, etc. Each link adds a button to the property card. Either <strong>upload a PDF</strong> (gets pushed to the repo, URL auto-fills) OR <strong>paste a URL</strong> to an existing file. Click "+ Add link" for more rows.</p>
           <div id="pr-links-stack">
-            <!-- Rows injected by JS: { label, url } each -->
+            <!-- Rows injected by JS: { label, url, fileInput } each -->
           </div>
           <button type="button" class="btn ghost btn-small" id="pr-add-link">+ Add link</button>
         </fieldset>
@@ -8053,20 +8070,69 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         row.className = 'pr-link-row';
         row.innerHTML =
           '<input type="text" class="js-link-label" placeholder="Label (e.g. Building Plans)" value="' + esc(link.label) + '" />' +
-          '<input type="url"  class="js-link-url"   placeholder="https://… (URL)" value="' + esc(link.url) + '" />' +
+          '<div class="pr-link-mid">' +
+            '<input type="url" class="js-link-url" placeholder="https://… (paste an existing URL)" value="' + esc(link.url) + '" />' +
+            '<input type="file" class="js-link-file" accept="application/pdf,image/*" />' +
+            '<div class="pr-link-hint">Upload a PDF (it\'ll be committed to the repo) OR paste a URL above.</div>' +
+          '</div>' +
           '<button type="button" class="js-link-remove" title="Remove link">×</button>';
         row.querySelector('.js-link-remove').addEventListener('click', () => row.remove());
+        // If the user picks a file, dim the URL field as a visual cue that
+        // the file takes priority on save.
+        const fileEl = row.querySelector('.js-link-file');
+        const urlEl  = row.querySelector('.js-link-url');
+        fileEl.addEventListener('change', () => {
+          if (fileEl.files && fileEl.files[0]) {
+            urlEl.placeholder = '(will be replaced by upload URL on save)';
+            urlEl.style.opacity = '0.45';
+          } else {
+            urlEl.placeholder = 'https://… (paste an existing URL)';
+            urlEl.style.opacity = '';
+          }
+        });
         mLinksStack.appendChild(row);
       }
       function setLinkRows(links) {
         mLinksStack.innerHTML = '';
         (links || []).forEach(addLinkRow);
       }
-      function collectLinkRows() {
-        return Array.from(mLinksStack.querySelectorAll('.pr-link-row')).map(r => ({
-          label: r.querySelector('.js-link-label').value.trim(),
-          url:   r.querySelector('.js-link-url').value.trim(),
-        })).filter(l => l.label && l.url);
+      // collectLinkRows is now async because rows with a file picked need
+      // to upload the PDF to GitHub before we can record the final URL.
+      // Returns the final {label, url} array.
+      async function collectLinkRows(slug) {
+        const out = [];
+        const rows = Array.from(mLinksStack.querySelectorAll('.pr-link-row'));
+        for (const r of rows) {
+          const label = r.querySelector('.js-link-label').value.trim();
+          if (!label) continue;          // skip rows with no label
+          let url = r.querySelector('.js-link-url').value.trim();
+          const fileEl = r.querySelector('.js-link-file');
+          const file = fileEl && fileEl.files && fileEl.files[0];
+          if (file) {
+            // Upload to platinum-reserve/assets/<slug>/<sanitized-filename>
+            // Use the file's original name so the public-side URL is recognisable
+            // when viewed in a browser ("Building Plans" → BUILDING_PLANS_xxx.pdf).
+            const safeName = (file.name || 'document')
+              .replace(/[^A-Za-z0-9._-]+/g, '_')
+              .replace(/^_+|_+$/g, '') || 'document.pdf';
+            const assetPath = ASSETS_DIR + '/' + slug + '/' + safeName;
+            setModalStatus('', 'Uploading "' + label + '"…');
+            const b64 = await fileToBase64(file);
+            let existingSha = null;
+            try {
+              const existing = await ghGetFile(assetPath);
+              if (existing) existingSha = existing.sha;
+            } catch (_) {}
+            await ghPutFile(
+              assetPath, b64, existingSha,
+              'Add PR document · ' + slug + ' · ' + label
+            );
+            url = 'https://the-stonehouse-company.github.io/Dashboard/platinum-reserve/assets/' +
+                  slug + '/' + safeName;
+          }
+          if (url) out.push({ label: label, url: url });
+        }
+        return out;
       }
 
       // ---- Submit (add or update) ----
@@ -8138,6 +8204,11 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             return Math.round(v * (m[2].toUpperCase() === 'M' ? 1000000 : 1000));
           })();
 
+          // Document links — may include file uploads, so this awaits.
+          // Each file gets pushed to platinum-reserve/assets/<slug>/<filename>
+          // and the resulting public URL is recorded in the JSON.
+          const links = await collectLinkRows(slug);
+
           const record = {
             slug:            slug,
             title:           title,
@@ -8148,7 +8219,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             area:            area,
             image:           image,
             photoComingSoon: !!photoComingSoon && !image,
-            links:           collectLinkRows(),
+            links:           links,
             beds:            beds,
             sqft:            sqft,
             priceMin:        priceMin,
