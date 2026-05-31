@@ -7886,9 +7886,40 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           body: JSON.stringify(body),
         });
         if (!res.ok) {
-          throw new Error('PUT ' + path + ': ' + res.status + ' ' + (await res.text()));
+          const err = new Error('PUT ' + path + ': ' + res.status + ' ' + (await res.text()));
+          err.status = res.status;
+          throw err;
         }
         return await res.json();
+      }
+
+      // Read properties.json → mutate via callback → PUT back. Auto-retries
+      // up to 3 times on HTTP 409 ("SHA mismatch") by re-fetching the
+      // current SHA. GitHub's contents API can serve a stale SHA briefly
+      // after a recent commit, which is exactly when a 409 hits.
+      async function mutateProperties(commitMsg, mutateFn) {
+        let lastErr = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const file = await ghGetFile(PROPS_PATH);
+          if (!file) throw new Error('properties.json not found in repo');
+          const liveArr = JSON.parse(b64decodeStr(file.content));
+          const newArr = mutateFn(liveArr);                  // may throw
+          try {
+            await ghPutFile(
+              PROPS_PATH,
+              b64encodeStr(JSON.stringify(newArr, null, 2)),
+              file.sha,
+              commitMsg
+            );
+            return newArr;
+          } catch (e) {
+            lastErr = e;
+            if (e.status !== 409) throw e;
+            // 409 = SHA mismatch — wait a beat and retry with fresh SHA
+            await new Promise(r => setTimeout(r, 600));
+          }
+        }
+        throw lastErr || new Error('properties.json save failed after retries');
       }
       // UTF-8 safe base64 (atob/btoa fail on non-Latin1; this handles emoji etc.)
       function b64encodeStr(str) {
@@ -8225,33 +8256,25 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             priceMin:        priceMin,
           };
 
-          // Reload the JSON from GitHub to get a fresh SHA (concurrent-edit safety).
+          // Save the record — mutateProperties retries on 409 (GitHub edge
+          // can briefly return a stale SHA right after a previous commit).
           setModalStatus('', 'Saving record…');
-          const file = await ghGetFile(PROPS_PATH);
-          if (!file) throw new Error('properties.json not found in repo');
-          const liveArr = JSON.parse(b64decodeStr(file.content));
-
-          let newArr;
-          if (editingSlug) {
-            const idx = liveArr.findIndex(p => p.slug === editingSlug);
-            if (idx === -1) throw new Error('Property no longer exists (someone may have deleted it).');
-            // If the slug changed because the title was edited, update the slug too
-            // BUT keep editingSlug for finding existing rows. Use new slug going forward.
-            newArr = liveArr.slice();
-            newArr[idx] = record;
-          } else {
-            // Add — check for slug collision
-            if (liveArr.some(p => p.slug === record.slug)) {
-              throw new Error('A property with slug "' + record.slug + '" already exists. Use a different title.');
+          const newArr = await mutateProperties(
+            (editingSlug ? 'Update' : 'Add') + ' PR property · ' + record.title,
+            (liveArr) => {
+              if (editingSlug) {
+                const idx = liveArr.findIndex(p => p.slug === editingSlug);
+                if (idx === -1) throw new Error('Property no longer exists (someone may have deleted it).');
+                const next = liveArr.slice();
+                next[idx] = record;
+                return next;
+              } else {
+                if (liveArr.some(p => p.slug === record.slug)) {
+                  throw new Error('A property with slug "' + record.slug + '" already exists. Use a different title.');
+                }
+                return liveArr.concat([record]);
+              }
             }
-            newArr = liveArr.concat([record]);
-          }
-
-          await ghPutFile(
-            PROPS_PATH,
-            b64encodeStr(JSON.stringify(newArr, null, 2)),
-            file.sha,
-            (editingSlug ? 'Update' : 'Add') + ' PR property · ' + record.title
           );
 
           // Refresh local cache
@@ -8282,15 +8305,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         mDelete.disabled = true;
         mDelete.textContent = 'Deleting…';
         try {
-          const file = await ghGetFile(PROPS_PATH);
-          if (!file) throw new Error('properties.json not found');
-          const liveArr = JSON.parse(b64decodeStr(file.content));
-          const newArr = liveArr.filter(x => x.slug !== editingSlug);
-          await ghPutFile(
-            PROPS_PATH,
-            b64encodeStr(JSON.stringify(newArr, null, 2)),
-            file.sha,
-            'Delete PR property · ' + p.title
+          const newArr = await mutateProperties(
+            'Delete PR property · ' + p.title,
+            (liveArr) => liveArr.filter(x => x.slug !== editingSlug)
           );
           propsArr = newArr;
           renderList();
