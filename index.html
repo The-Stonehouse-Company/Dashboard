@@ -2243,6 +2243,13 @@
       color: var(--text) !important;
       border-color: #b03030 !important;
     }
+    /* Long URLs in the modal (current-photo line, link rows, etc.) must wrap
+       or they push the modal wider than its max-width. word-break: break-all
+       is intentionally aggressive — readability > aesthetics for raw URLs. */
+    #pr-modal a,
+    #pr-modal .legend-hint a,
+    #pr-modal .pr-link-row,
+    #pr-photo-current { word-break: break-all; overflow-wrap: anywhere; }
 
     /* ========================= CMA modal comp grid =========================
        Three columns inside each comparables fieldset; each comp card holds the
@@ -4162,8 +4169,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
          - Edit button on any property row → mode 'edit', pre-filled
        On submit, the controller writes via GitHub API (PUT properties.json
        + optional PUT photo file). -->
-  <div class="modal-overlay" id="pr-modal-overlay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pr-modal-title" id="pr-modal">
+  <div class="modal-overlay is-wide" id="pr-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pr-modal-title" id="pr-modal" style="max-width:880px;">
       <header class="modal-head">
         <div class="modal-title-group">
           <span class="modal-eyebrow">Platinum Reserve · Property</span>
