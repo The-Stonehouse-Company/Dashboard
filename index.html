@@ -7871,15 +7871,16 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         return Object.assign(h, extra || {});
       }
       async function ghGetFile(path) {
-        // ALWAYS bypass any browser / edge cache for these reads. The
-        // SHA we get back is used immediately as the basis for a PUT,
-        // and any staleness in the SHA produces a 409 on the write.
-        // Cache-busting query param + cache: 'no-store' + Cache-Control
-        // header are belt-and-suspenders.
+        // Bypass browser cache for these reads. The SHA we get back is
+        // used immediately as the basis for a PUT, and any staleness
+        // produces a 409. We use a cache-busting query param + the
+        // `cache: 'no-store'` fetch option. NOTE: don't add a
+        // Cache-Control request header — that triggers a CORS preflight
+        // that GitHub's API rejects, breaking the request entirely.
         const url = 'https://api.github.com/repos/' + REPO_OWNER + '/' + REPO_NAME +
                     '/contents/' + path + '?ref=' + BRANCH + '&_=' + Date.now();
         const res = await fetch(url, {
-          headers: ghHeaders({ 'Cache-Control': 'no-cache' }),
+          headers: ghHeaders(),
           cache: 'no-store',
         });
         if (res.status === 404) return null;
