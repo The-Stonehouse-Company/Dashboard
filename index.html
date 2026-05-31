@@ -2000,6 +2000,233 @@
       line-height: 1.55;
     }
 
+    /* ========================= Platinum Reserve property manager =========================
+       UI inside the Sales > Platinum Reserve subpanel. Two states:
+         #pr-setup    — shown when no GitHub PAT in localStorage
+         #pr-manager  — shown when token is present; lists properties + Add button
+       The Add/Edit modal (#pr-modal-overlay) is reused for both flows. */
+    .pr-setup { padding: 12px 0; }
+    .pr-setup-card {
+      max-width: 760px;
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+      padding: 28px 32px 24px;
+    }
+    .pr-setup-card h3 {
+      font-family: var(--font-body);
+      font-weight: 500; font-size: 16px;
+      letter-spacing: 0.02em;
+      margin: 6px 0 18px;
+      color: var(--text);
+    }
+    .pr-setup-card ol {
+      list-style: decimal inside;
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.7;
+      margin: 0 0 22px;
+    }
+    .pr-setup-card ol li { margin-bottom: 4px; }
+    .pr-setup-card ol li a { color: var(--accent); text-decoration: underline; }
+    .pr-setup-card code {
+      background: var(--bg-elev-2);
+      padding: 2px 6px;
+      font-size: 12px;
+      color: var(--accent);
+      border-radius: 2px;
+    }
+    .pr-setup-card label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .pr-setup-card input[type="password"] {
+      width: 100%;
+      background: var(--bg-elev-2);
+      border: 1px solid var(--rule-strong);
+      color: var(--text);
+      padding: 10px 12px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      letter-spacing: 0.02em;
+    }
+    .pr-setup-actions {
+      display: flex; align-items: center;
+      gap: 18px; margin-top: 16px;
+    }
+
+    .pr-manager-head {
+      display: flex; justify-content: space-between;
+      align-items: flex-end;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .pr-manager-actions {
+      display: flex; align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .pr-search {
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+      color: var(--text);
+      padding: 9px 12px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      min-width: 280px;
+    }
+    .pr-search::placeholder { color: var(--text-dim); }
+    .pr-meta {
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--text);
+    }
+    .pr-meta-dim {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .pr-meta-dim a { color: var(--text-muted); text-decoration: underline; }
+    .pr-meta-dim a:hover { color: var(--text); }
+
+    .pr-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 14px;
+    }
+    .pr-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 12px;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      padding: 60px 20px;
+    }
+    .pr-row {
+      display: flex; gap: 14px;
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+      padding: 12px;
+      align-items: stretch;
+      min-height: 96px;
+    }
+    .pr-row .pr-thumb {
+      width: 110px; min-width: 110px;
+      background: var(--bg-elev-2);
+      background-size: cover; background-position: center;
+      border: 1px solid var(--rule);
+    }
+    .pr-row .pr-thumb.empty {
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-dim);
+      font-size: 9px;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+    .pr-row .pr-body {
+      flex: 1;
+      display: flex; flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .pr-row .pr-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text);
+      margin: 2px 0 0;
+    }
+    .pr-row .pr-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .pr-row .pr-specs {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+      line-height: 1.45;
+    }
+    .pr-row .pr-price {
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      margin-top: auto;
+    }
+    .pr-row .pr-actions {
+      display: flex; flex-direction: column;
+      gap: 6px; align-items: stretch;
+      min-width: 78px;
+    }
+    .pr-row-btn {
+      font-family: var(--font-body);
+      font-size: 10px;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      padding: 6px 10px;
+      background: transparent;
+      border: 1px solid var(--rule-strong);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .pr-row-btn:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .pr-row-btn.danger:hover { background: #b03030; color: var(--text); border-color: #b03030; }
+
+    /* Modal — link-rows */
+    #pr-links-stack { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+    .pr-link-row {
+      display: grid;
+      grid-template-columns: 180px 1fr auto;
+      gap: 10px; align-items: center;
+    }
+    .pr-link-row input {
+      background: var(--bg-elev);
+      border: 1px solid var(--rule-strong);
+      color: var(--text);
+      padding: 8px 10px;
+      font-family: var(--font-body);
+      font-size: 12px;
+    }
+    .pr-link-row button {
+      background: transparent;
+      border: 1px solid var(--rule-strong);
+      color: var(--text-muted);
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    .pr-link-row button:hover { background: var(--text); color: var(--bg); }
+    .pr-check {
+      display: inline-flex; align-items: center; gap: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text);
+    }
+    .pr-check input[type="checkbox"] { width: 16px; height: 16px; }
+    .btn-danger {
+      color: #f4b9b9 !important;
+      border-color: #4a1f1f !important;
+    }
+    .btn-danger:hover {
+      background: #b03030 !important;
+      color: var(--text) !important;
+      border-color: #b03030 !important;
+    }
+
     /* ========================= CMA modal comp grid =========================
        Three columns inside each comparables fieldset; each comp card holds the
        photo + address + specs + price + status fields in a single column. */
@@ -2607,16 +2834,55 @@
       </div>
 
       <!-- PLATINUM RESERVE — Sales sub-brand for luxury / off-market service tier.
-           Placeholder for now; add concierge tools, vetted client roster, private
-           collection PDFs, etc. as the offering takes shape. -->
+           Manages properties listed at /platinum-reserve/. All add/edit/delete
+           operations commit directly to the Dashboard repo via the GitHub API
+           (PAT stored in localStorage). Property data: /platinum-reserve/properties.json
+           Photos: /platinum-reserve/assets/<slug>/hero.<ext> -->
       <div class="subpanel" id="subpanel-sales-platinum" role="tabpanel" aria-hidden="true" tabindex="0">
         <div class="eyebrow" style="margin-bottom:8px;">Sales · Sub-Brand</div>
         <h2 style="font-family:var(--font-display);font-size:24px;letter-spacing:0.08em;text-transform:uppercase;margin:0 0 24px;">Platinum Reserve</h2>
 
-        <div class="placeholder">
-          <div class="mark">— Placeholder —</div>
-          <h2>Platinum Reserve workspace</h2>
-          <p>The luxury / private-collection tier of the Sales Division. Concierge tools, vetted client roster, private listing collection PDFs, and bespoke marketing collateral will live here.</p>
+        <!-- One-time GitHub PAT setup. Shown only when no token has been
+             saved to localStorage. Hides itself once a token is in. -->
+        <div id="pr-setup" class="pr-setup" hidden>
+          <div class="pr-setup-card">
+            <div class="eyebrow">Connect to GitHub</div>
+            <h3>Before you can add / edit / delete properties, generate a personal access token.</h3>
+            <ol>
+              <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a> (logged in as <strong>stonehousecompanyadmin</strong>).</li>
+              <li>Token name: <code>Platinum Reserve Editor</code>. Expiration: pick your preference (1 year is fine).</li>
+              <li>Resource owner: <strong>The-Stonehouse-Company</strong>. Repository access: <em>Only select repositories</em> → choose <strong>Dashboard</strong>.</li>
+              <li>Permissions → Repository permissions → <strong>Contents: Read and write</strong>.</li>
+              <li>Click <strong>Generate token</strong>, copy the token (starts with <code>github_pat_</code>), and paste it below.</li>
+            </ol>
+            <label for="pr-token-input">Token</label>
+            <input id="pr-token-input" type="password" autocomplete="off" placeholder="github_pat_..." />
+            <div class="pr-setup-actions">
+              <button class="btn" type="button" id="pr-token-save">Save token</button>
+              <div class="form-status" id="pr-token-status"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main manager UI -->
+        <div id="pr-manager" hidden>
+          <div class="pr-manager-head">
+            <div>
+              <div class="pr-meta" id="pr-count">—</div>
+              <div class="pr-meta pr-meta-dim">Live at <a href="https://the-stonehouse-company.github.io/Dashboard/platinum-reserve/" target="_blank" rel="noopener">the-stonehouse-company.github.io/Dashboard/platinum-reserve/</a></div>
+            </div>
+            <div class="pr-manager-actions">
+              <input class="pr-search" id="pr-search" type="search" placeholder="Search by address, area, builder…" />
+              <button class="btn" type="button" id="pr-add-btn">+ Add Property</button>
+              <button class="btn ghost btn-small" type="button" id="pr-token-reset" title="Reset GitHub token">⟳ Token</button>
+            </div>
+          </div>
+
+          <div class="form-status" id="pr-status"></div>
+
+          <div class="pr-list" id="pr-list">
+            <div class="pr-empty">Loading properties…</div>
+          </div>
         </div>
       </div>
     </section>
@@ -3870,6 +4136,93 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         <button class="btn ghost" type="button" id="cancel-cma">Cancel</button>
         <button class="btn" type="submit" form="cma-form" id="submit-cma">Generate Presentation</button>
       </footer>
+    </div>
+  </div>
+
+  <!-- ========================= PLATINUM RESERVE PROPERTY MODAL =========================
+       Add OR edit a property. Opened by:
+         - Add button in the Platinum Reserve manager → mode 'add'
+         - Edit button on any property row → mode 'edit', pre-filled
+       On submit, the controller writes via GitHub API (PUT properties.json
+       + optional PUT photo file). -->
+  <div class="modal-overlay" id="pr-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pr-modal-title" id="pr-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Platinum Reserve · Property</span>
+          <h2 class="modal-title" id="pr-modal-title">Add Property</h2>
+        </div>
+        <button class="modal-close" type="button" id="pr-modal-close" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="pr-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Basics</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="pr-f-title">Title <span class="req">*</span></label>
+              <input id="pr-f-title" name="title" type="text" required placeholder="714 Shawnee Dr" />
+            </div>
+            <div class="full">
+              <label for="pr-f-full-address">Full Address <span class="req">*</span></label>
+              <input id="pr-f-full-address" name="fullAddress" type="text" required placeholder="714 Shawnee Dr, Nashville, TN 37205" />
+            </div>
+            <div class="full">
+              <label for="pr-f-specs">Specs <span class="req">*</span></label>
+              <input id="pr-f-specs" name="specs" type="text" required placeholder="5 BD | 6.1 BA | 5,445 SF | 1.29 AC | Pool" />
+            </div>
+            <div class="full">
+              <label for="pr-f-price">Price &amp; Completion</label>
+              <input id="pr-f-price" name="price" type="text" placeholder="$3.499M – March 2026" />
+            </div>
+            <div>
+              <label for="pr-f-builder">Builder</label>
+              <input id="pr-f-builder" name="builder" type="text" placeholder="Southern Edge Construction" />
+            </div>
+            <div>
+              <label for="pr-f-area">Area</label>
+              <input id="pr-f-area" name="area" type="text" list="pr-area-list" placeholder="West Meade" />
+              <datalist id="pr-area-list"><!-- populated from existing areas --></datalist>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Hero Photo</legend>
+          <p class="legend-hint" id="pr-photo-current" style="display:none;">Current: <a href="#" target="_blank" rel="noopener" id="pr-photo-current-link"></a></p>
+          <div class="form-grid">
+            <div class="full">
+              <label for="pr-f-photo">Upload new photo (leave blank to keep current)</label>
+              <input id="pr-f-photo" type="file" accept="image/*" />
+              <p class="legend-hint">Uploaded to Dashboard/platinum-reserve/assets/&lt;slug&gt;/hero.&lt;ext&gt;. The site will show whatever's there.</p>
+            </div>
+            <div class="full">
+              <label for="pr-f-photo-url">…OR paste a photo URL (overrides upload)</label>
+              <input id="pr-f-photo-url" type="url" placeholder="https://… (Wix media, etc.)" />
+            </div>
+            <div class="full">
+              <label class="pr-check"><input type="checkbox" id="pr-f-photo-coming-soon" /> No photo yet — show "Photo Coming Soon" placeholder</label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Document Links (optional)</legend>
+          <p class="legend-hint">Building plans, design boards, etc. Each link adds a button to the property card. Click "+ Add link" to add more rows.</p>
+          <div id="pr-links-stack">
+            <!-- Rows injected by JS: { label, url } each -->
+          </div>
+          <button type="button" class="btn ghost btn-small" id="pr-add-link">+ Add link</button>
+        </fieldset>
+
+        <div class="form-status" id="pr-modal-status" role="status" aria-live="polite"></div>
+
+        <footer class="modal-foot">
+          <button class="btn ghost" type="button" id="pr-modal-cancel">Cancel</button>
+          <button class="btn ghost btn-danger" type="button" id="pr-modal-delete" style="display:none;">Delete</button>
+          <button class="btn" type="submit" id="pr-modal-save">Save</button>
+        </footer>
+      </form>
     </div>
   </div>
 
@@ -7379,6 +7732,584 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           try { outputWin.close(); } catch (_) {}
         }
       });
+    })();
+
+    // ============================================================
+    // Platinum Reserve property manager
+    //
+    // Reads/writes platinum-reserve/properties.json in the Dashboard
+    // repo via the GitHub Contents API. Photos uploaded via the modal
+    // get pushed to platinum-reserve/assets/<slug>/hero.<ext>.
+    //
+    // Auth: a GitHub fine-grained Personal Access Token (PAT) stored
+    // in localStorage. The setup card walks the user through creating
+    // one with Contents: Read/Write scope on just this repo.
+    //
+    // Workflow per write:
+    //   1. GET properties.json → get current array + SHA
+    //   2. Mutate the array (add / edit / delete)
+    //   3. PUT properties.json with new content + same SHA (GitHub
+    //      rejects with 409 if anyone else committed in between, which
+    //      we surface as a "refresh and try again" message)
+    //   4. For new/replaced photos: PUT the image bytes (separate API
+    //      call) before step 3 so the JSON references the live URL.
+    // ============================================================
+    (function () {
+      const REPO_OWNER  = 'The-Stonehouse-Company';
+      const REPO_NAME   = 'Dashboard';
+      const BRANCH      = 'main';
+      const PROPS_PATH  = 'Company/Dashboard/platinum-reserve/properties.json';
+      const ASSETS_DIR  = 'Company/Dashboard/platinum-reserve/assets';
+      const LS_TOKEN_KEY = 'stonehouse-gh-pat';
+
+      // --- DOM refs ---
+      const setupEl     = document.getElementById('pr-setup');
+      const managerEl   = document.getElementById('pr-manager');
+      const tokenInput  = document.getElementById('pr-token-input');
+      const tokenSaveBtn= document.getElementById('pr-token-save');
+      const tokenStatus = document.getElementById('pr-token-status');
+      const tokenResetBtn= document.getElementById('pr-token-reset');
+      const countEl     = document.getElementById('pr-count');
+      const statusEl    = document.getElementById('pr-status');
+      const searchEl    = document.getElementById('pr-search');
+      const addBtn      = document.getElementById('pr-add-btn');
+      const listEl      = document.getElementById('pr-list');
+
+      // Modal refs
+      const mOverlay    = document.getElementById('pr-modal-overlay');
+      const mForm       = document.getElementById('pr-form');
+      const mTitle      = document.getElementById('pr-modal-title');
+      const mClose      = document.getElementById('pr-modal-close');
+      const mCancel     = document.getElementById('pr-modal-cancel');
+      const mSave       = document.getElementById('pr-modal-save');
+      const mDelete     = document.getElementById('pr-modal-delete');
+      const mStatus     = document.getElementById('pr-modal-status');
+      const mPhotoCur   = document.getElementById('pr-photo-current');
+      const mPhotoCurLink = document.getElementById('pr-photo-current-link');
+      const mAreaList   = document.getElementById('pr-area-list');
+      const mLinksStack = document.getElementById('pr-links-stack');
+      const mAddLink    = document.getElementById('pr-add-link');
+
+      if (!setupEl || !managerEl || !mForm) return;
+
+      // --- State ---
+      let token   = null;     // GitHub PAT
+      let propsArr = [];      // cached array
+      let propsSha = null;    // SHA of properties.json (for safe PUT)
+      let editingSlug = null; // slug of property being edited, or null for add
+
+      // ---- Token storage ----
+      function loadToken() {
+        try { token = localStorage.getItem(LS_TOKEN_KEY) || null; }
+        catch (_) { token = null; }
+      }
+      function saveToken(t) {
+        try { localStorage.setItem(LS_TOKEN_KEY, t); token = t; }
+        catch (e) { console.error('Could not save token', e); }
+      }
+      function clearToken() {
+        try { localStorage.removeItem(LS_TOKEN_KEY); token = null; }
+        catch (_) {}
+      }
+
+      function showSetup() {
+        setupEl.hidden = false;
+        managerEl.hidden = true;
+      }
+      function showManager() {
+        setupEl.hidden = true;
+        managerEl.hidden = false;
+      }
+
+      function setStatus(level, msg) {
+        if (!statusEl) return;
+        if (!msg) { statusEl.textContent = ''; statusEl.className = 'form-status'; return; }
+        statusEl.textContent = msg;
+        statusEl.className = 'form-status show ' + (level || '');
+      }
+      function setModalStatus(level, msg) {
+        if (!mStatus) return;
+        if (!msg) { mStatus.textContent = ''; mStatus.className = 'form-status'; return; }
+        mStatus.textContent = msg;
+        mStatus.className = 'form-status show ' + (level || '');
+      }
+
+      // ---- GitHub API helpers ----
+      function ghHeaders(extra) {
+        const h = {
+          'Accept': 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+        };
+        if (token) h['Authorization'] = 'Bearer ' + token;
+        return Object.assign(h, extra || {});
+      }
+      async function ghGetFile(path) {
+        const url = 'https://api.github.com/repos/' + REPO_OWNER + '/' + REPO_NAME +
+                    '/contents/' + path + '?ref=' + BRANCH;
+        const res = await fetch(url, { headers: ghHeaders() });
+        if (res.status === 404) return null;
+        if (!res.ok) throw new Error('GET ' + path + ': ' + res.status + ' ' + (await res.text()));
+        return await res.json();   // { content: base64, sha, ... }
+      }
+      async function ghPutFile(path, contentB64, sha, message) {
+        const url = 'https://api.github.com/repos/' + REPO_OWNER + '/' + REPO_NAME +
+                    '/contents/' + path;
+        const body = {
+          message: message,
+          content: contentB64,
+          branch: BRANCH,
+        };
+        if (sha) body.sha = sha;
+        const res = await fetch(url, {
+          method: 'PUT',
+          headers: ghHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          throw new Error('PUT ' + path + ': ' + res.status + ' ' + (await res.text()));
+        }
+        return await res.json();
+      }
+      // UTF-8 safe base64 (atob/btoa fail on non-Latin1; this handles emoji etc.)
+      function b64encodeStr(str) {
+        const bytes = new TextEncoder().encode(str);
+        let bin = '';
+        for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+        return btoa(bin);
+      }
+      function b64decodeStr(b64) {
+        const bin = atob(b64.replace(/\s/g, ''));
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        return new TextDecoder().decode(bytes);
+      }
+      function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+          const fr = new FileReader();
+          fr.onload = () => {
+            // Strip the "data:image/jpeg;base64," prefix
+            const dataUrl = fr.result;
+            const comma = dataUrl.indexOf(',');
+            resolve(comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl);
+          };
+          fr.onerror = () => reject(fr.error);
+          fr.readAsDataURL(file);
+        });
+      }
+
+      // ---- Token verify by making a dry-run API call ----
+      async function verifyToken(tok) {
+        const res = await fetch(
+          'https://api.github.com/repos/' + REPO_OWNER + '/' + REPO_NAME,
+          { headers: { 'Authorization': 'Bearer ' + tok, 'Accept': 'application/vnd.github+json' } }
+        );
+        return res.ok;
+      }
+
+      // ---- Load properties.json from GitHub ----
+      async function loadProperties() {
+        setStatus('', '');
+        listEl.innerHTML = '<div class="pr-empty">Loading…</div>';
+        try {
+          const file = await ghGetFile(PROPS_PATH);
+          if (!file) throw new Error('properties.json not found in repo');
+          propsSha = file.sha;
+          const json = b64decodeStr(file.content);
+          propsArr = JSON.parse(json);
+          renderList();
+          countEl.textContent = propsArr.length + ' propert' + (propsArr.length === 1 ? 'y' : 'ies') +
+            ' · synced with GitHub';
+        } catch (err) {
+          console.error('loadProperties failed', err);
+          if (err.message && err.message.indexOf('401') !== -1) {
+            setStatus('err', 'GitHub token rejected. Click "⟳ Token" to enter a new one.');
+            countEl.textContent = '—';
+          } else {
+            setStatus('err', 'Could not load properties: ' + err.message);
+          }
+          listEl.innerHTML = '<div class="pr-empty">Could not load. ' + esc(err.message) + '</div>';
+        }
+      }
+
+      function esc(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function rowHtml(p) {
+        const thumbStyle = p.image && !p.photoComingSoon
+          ? 'style="background-image:url(\'' + esc(p.image) + '\');"'
+          : '';
+        const thumbCls = p.image && !p.photoComingSoon ? '' : ' empty';
+        const thumbBody = p.image && !p.photoComingSoon ? '' : 'No photo';
+        return (
+          '<div class="pr-row" data-slug="' + esc(p.slug) + '">' +
+            '<div class="pr-thumb' + thumbCls + '" ' + thumbStyle + '>' + thumbBody + '</div>' +
+            '<div class="pr-body">' +
+              '<div class="pr-title">' + esc(p.title || '—') + '</div>' +
+              '<div class="pr-sub">' + esc(p.area || '—') + ' · ' + esc(p.fullAddress || '') + '</div>' +
+              '<div class="pr-specs">' + esc(p.specs || '—') + '</div>' +
+              '<div class="pr-price">' + esc(p.price || '') + '</div>' +
+            '</div>' +
+            '<div class="pr-actions">' +
+              '<button type="button" class="pr-row-btn js-pr-edit" data-slug="' + esc(p.slug) + '">Edit</button>' +
+              '<button type="button" class="pr-row-btn danger js-pr-delete" data-slug="' + esc(p.slug) + '">Delete</button>' +
+            '</div>' +
+          '</div>'
+        );
+      }
+
+      function renderList() {
+        const q = (searchEl.value || '').toLowerCase().trim();
+        let view = propsArr;
+        if (q) {
+          view = propsArr.filter(p => {
+            const s = (p.title + ' ' + p.fullAddress + ' ' + p.area + ' ' + p.builder).toLowerCase();
+            return s.indexOf(q) !== -1;
+          });
+        }
+        if (view.length === 0) {
+          listEl.innerHTML = '<div class="pr-empty">No properties match.</div>';
+          return;
+        }
+        listEl.innerHTML = view.map(rowHtml).join('');
+      }
+
+      // Slugify a title for image file naming and in-JSON ID.
+      function slugify(title) {
+        return String(title || '').toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '');
+      }
+
+      // ---- Modal ----
+      function openAddModal() {
+        editingSlug = null;
+        mTitle.textContent = 'Add Property';
+        mDelete.style.display = 'none';
+        mForm.reset();
+        document.getElementById('pr-f-photo-coming-soon').checked = false;
+        mPhotoCur.style.display = 'none';
+        setLinkRows([]);
+        refreshAreaList();
+        setModalStatus('', '');
+        mOverlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        setTimeout(() => document.getElementById('pr-f-title').focus(), 30);
+      }
+      function openEditModal(slug) {
+        const p = propsArr.find(x => x.slug === slug);
+        if (!p) return;
+        editingSlug = slug;
+        mTitle.textContent = 'Edit · ' + p.title;
+        mDelete.style.display = '';
+        document.getElementById('pr-f-title').value         = p.title || '';
+        document.getElementById('pr-f-full-address').value  = p.fullAddress || '';
+        document.getElementById('pr-f-specs').value         = p.specs || '';
+        document.getElementById('pr-f-price').value         = p.price || '';
+        document.getElementById('pr-f-builder').value       = p.builder || '';
+        document.getElementById('pr-f-area').value          = p.area || '';
+        document.getElementById('pr-f-photo').value         = '';
+        document.getElementById('pr-f-photo-url').value     = '';
+        document.getElementById('pr-f-photo-coming-soon').checked = !!p.photoComingSoon;
+        if (p.image) {
+          mPhotoCur.style.display = '';
+          mPhotoCurLink.href = p.image;
+          mPhotoCurLink.textContent = p.image;
+        } else {
+          mPhotoCur.style.display = 'none';
+        }
+        setLinkRows(p.links || []);
+        refreshAreaList();
+        setModalStatus('', '');
+        mOverlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+      }
+      function closeModal() {
+        mOverlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        editingSlug = null;
+      }
+
+      function refreshAreaList() {
+        const seen = new Set();
+        const areas = [];
+        for (const p of propsArr) {
+          if (p.area && !seen.has(p.area)) { seen.add(p.area); areas.push(p.area); }
+        }
+        areas.sort((a, b) => a.localeCompare(b));
+        mAreaList.innerHTML = areas.map(a => '<option value="' + esc(a) + '">').join('');
+      }
+
+      function addLinkRow(link) {
+        link = link || { label: '', url: '' };
+        const row = document.createElement('div');
+        row.className = 'pr-link-row';
+        row.innerHTML =
+          '<input type="text" class="js-link-label" placeholder="Label (e.g. Building Plans)" value="' + esc(link.label) + '" />' +
+          '<input type="url"  class="js-link-url"   placeholder="https://… (URL)" value="' + esc(link.url) + '" />' +
+          '<button type="button" class="js-link-remove" title="Remove link">×</button>';
+        row.querySelector('.js-link-remove').addEventListener('click', () => row.remove());
+        mLinksStack.appendChild(row);
+      }
+      function setLinkRows(links) {
+        mLinksStack.innerHTML = '';
+        (links || []).forEach(addLinkRow);
+      }
+      function collectLinkRows() {
+        return Array.from(mLinksStack.querySelectorAll('.pr-link-row')).map(r => ({
+          label: r.querySelector('.js-link-label').value.trim(),
+          url:   r.querySelector('.js-link-url').value.trim(),
+        })).filter(l => l.label && l.url);
+      }
+
+      // ---- Submit (add or update) ----
+      async function handleSubmit(e) {
+        e.preventDefault();
+        if (!mForm.checkValidity()) { mForm.reportValidity(); return; }
+
+        const originalLabel = mSave.textContent;
+        mSave.disabled = true;
+        mSave.textContent = 'Saving…';
+        setModalStatus('', '');
+
+        try {
+          // Build the new/updated property record
+          const title       = document.getElementById('pr-f-title').value.trim();
+          const fullAddress = document.getElementById('pr-f-full-address').value.trim();
+          const specs       = document.getElementById('pr-f-specs').value.trim();
+          const price       = document.getElementById('pr-f-price').value.trim();
+          const builder     = document.getElementById('pr-f-builder').value.trim();
+          const area        = document.getElementById('pr-f-area').value.trim();
+          const photoUrl    = document.getElementById('pr-f-photo-url').value.trim();
+          const comingSoon  = document.getElementById('pr-f-photo-coming-soon').checked;
+          const photoFile   = document.getElementById('pr-f-photo').files[0];
+
+          const slug = editingSlug || slugify(title);
+          if (!slug) throw new Error('Title is required to derive a slug.');
+
+          let image = null;
+          let photoComingSoon = !!comingSoon;
+
+          if (photoUrl) {
+            image = photoUrl;
+            photoComingSoon = false;
+          } else if (photoFile) {
+            // Upload the file to /platinum-reserve/assets/<slug>/hero.<ext>
+            const extMatch = (photoFile.name || '').match(/\.([a-z0-9]+)$/i);
+            const ext = (extMatch ? extMatch[1] : 'jpg').toLowerCase();
+            const assetPath = ASSETS_DIR + '/' + slug + '/hero.' + ext;
+            setModalStatus('', 'Uploading photo…');
+            const photoB64 = await fileToBase64(photoFile);
+            // If a previous hero exists at any extension under the same slug,
+            // GitHub doesn't know about it — we ignore and just write the new one.
+            let existingSha = null;
+            try {
+              const existing = await ghGetFile(assetPath);
+              if (existing) existingSha = existing.sha;
+            } catch (_) {}
+            await ghPutFile(
+              assetPath, photoB64, existingSha,
+              (editingSlug ? 'Update' : 'Add') + ' PR photo · ' + slug
+            );
+            // Live image URL — Pages serves Dashboard/ at root path
+            image = 'https://the-stonehouse-company.github.io/Dashboard/platinum-reserve/assets/' + slug + '/hero.' + ext;
+            photoComingSoon = false;
+          } else if (editingSlug) {
+            // Editing without a new file/URL — keep existing image
+            const existing = propsArr.find(p => p.slug === slug);
+            image = existing ? existing.image : null;
+            // (photoComingSoon already from checkbox)
+          }
+
+          // Derive filter helpers from specs/price strings
+          const beds = (() => { const m = specs.match(/(\d+)\s*BD/); return m ? parseInt(m[1], 10) : null; })();
+          const sqft = (() => { const m = specs.match(/([\d,]+)\+?\s*SF/); return m ? parseInt(m[1].replace(/,/g, ''), 10) : null; })();
+          const priceMin = (() => {
+            const m = price.match(/\$([\d.]+)\s*([MK])/i);
+            if (!m) return null;
+            const v = parseFloat(m[1]);
+            return Math.round(v * (m[2].toUpperCase() === 'M' ? 1000000 : 1000));
+          })();
+
+          const record = {
+            slug:            slug,
+            title:           title,
+            fullAddress:     fullAddress,
+            specs:           specs,
+            price:           price,
+            builder:         builder,
+            area:            area,
+            image:           image,
+            photoComingSoon: !!photoComingSoon && !image,
+            links:           collectLinkRows(),
+            beds:            beds,
+            sqft:            sqft,
+            priceMin:        priceMin,
+          };
+
+          // Reload the JSON from GitHub to get a fresh SHA (concurrent-edit safety).
+          setModalStatus('', 'Saving record…');
+          const file = await ghGetFile(PROPS_PATH);
+          if (!file) throw new Error('properties.json not found in repo');
+          const liveArr = JSON.parse(b64decodeStr(file.content));
+
+          let newArr;
+          if (editingSlug) {
+            const idx = liveArr.findIndex(p => p.slug === editingSlug);
+            if (idx === -1) throw new Error('Property no longer exists (someone may have deleted it).');
+            // If the slug changed because the title was edited, update the slug too
+            // BUT keep editingSlug for finding existing rows. Use new slug going forward.
+            newArr = liveArr.slice();
+            newArr[idx] = record;
+          } else {
+            // Add — check for slug collision
+            if (liveArr.some(p => p.slug === record.slug)) {
+              throw new Error('A property with slug "' + record.slug + '" already exists. Use a different title.');
+            }
+            newArr = liveArr.concat([record]);
+          }
+
+          await ghPutFile(
+            PROPS_PATH,
+            b64encodeStr(JSON.stringify(newArr, null, 2)),
+            file.sha,
+            (editingSlug ? 'Update' : 'Add') + ' PR property · ' + record.title
+          );
+
+          // Refresh local cache
+          propsArr = newArr;
+          propsSha = null; // will be refreshed on next load
+          renderList();
+          countEl.textContent = propsArr.length + ' propert' + (propsArr.length === 1 ? 'y' : 'ies') +
+            ' · synced with GitHub';
+          setModalStatus('ok', 'Saved. Pages will rebuild in ~60s.');
+          setTimeout(() => { closeModal(); }, 1200);
+        } catch (err) {
+          console.error('PR save failed', err);
+          setModalStatus('err', err.message || String(err));
+        } finally {
+          mSave.disabled = false;
+          mSave.textContent = originalLabel;
+        }
+      }
+
+      // ---- Delete ----
+      async function handleDelete() {
+        if (!editingSlug) return;
+        const p = propsArr.find(x => x.slug === editingSlug);
+        if (!p) return;
+        if (!confirm('Delete "' + p.title + '"? This removes it from the live site. Cannot be undone (other than reverting the commit in GitHub).')) return;
+
+        const originalLabel = mDelete.textContent;
+        mDelete.disabled = true;
+        mDelete.textContent = 'Deleting…';
+        try {
+          const file = await ghGetFile(PROPS_PATH);
+          if (!file) throw new Error('properties.json not found');
+          const liveArr = JSON.parse(b64decodeStr(file.content));
+          const newArr = liveArr.filter(x => x.slug !== editingSlug);
+          await ghPutFile(
+            PROPS_PATH,
+            b64encodeStr(JSON.stringify(newArr, null, 2)),
+            file.sha,
+            'Delete PR property · ' + p.title
+          );
+          propsArr = newArr;
+          renderList();
+          countEl.textContent = propsArr.length + ' propert' + (propsArr.length === 1 ? 'y' : 'ies') +
+            ' · synced with GitHub';
+          setModalStatus('ok', 'Deleted.');
+          setTimeout(() => closeModal(), 800);
+        } catch (err) {
+          console.error('PR delete failed', err);
+          setModalStatus('err', err.message || String(err));
+        } finally {
+          mDelete.disabled = false;
+          mDelete.textContent = originalLabel;
+        }
+      }
+
+      // ---- Wire ----
+      // Token save
+      tokenSaveBtn.addEventListener('click', async () => {
+        const t = tokenInput.value.trim();
+        if (!t) { tokenStatus.textContent = 'Paste a token first.'; tokenStatus.className = 'form-status show err'; return; }
+        tokenSaveBtn.disabled = true;
+        tokenStatus.textContent = 'Verifying…';
+        tokenStatus.className = 'form-status show';
+        try {
+          const ok = await verifyToken(t);
+          if (!ok) throw new Error('Token rejected by GitHub. Check the steps above and try again.');
+          saveToken(t);
+          tokenInput.value = '';
+          tokenStatus.textContent = '';
+          showManager();
+          loadProperties();
+        } catch (err) {
+          tokenStatus.textContent = err.message;
+          tokenStatus.className = 'form-status show err';
+        } finally {
+          tokenSaveBtn.disabled = false;
+        }
+      });
+      tokenResetBtn.addEventListener('click', () => {
+        if (!confirm('Clear the saved GitHub token? You\'ll need to paste a new one.')) return;
+        clearToken();
+        showSetup();
+      });
+
+      // Add / row actions
+      addBtn.addEventListener('click', openAddModal);
+      listEl.addEventListener('click', (e) => {
+        const editBtn = e.target.closest('.js-pr-edit');
+        const delBtn  = e.target.closest('.js-pr-delete');
+        if (editBtn) openEditModal(editBtn.dataset.slug);
+        else if (delBtn) {
+          // Use the modal delete flow — open edit modal then trigger delete
+          openEditModal(delBtn.dataset.slug);
+          // immediate confirm
+          setTimeout(handleDelete, 50);
+        }
+      });
+      searchEl.addEventListener('input', renderList);
+
+      // Modal handlers
+      mClose.addEventListener('click', closeModal);
+      mCancel.addEventListener('click', closeModal);
+      mOverlay.addEventListener('click', (e) => { if (e.target === mOverlay) closeModal(); });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mOverlay.getAttribute('aria-hidden') === 'false') closeModal();
+      });
+      mForm.addEventListener('submit', handleSubmit);
+      mDelete.addEventListener('click', handleDelete);
+      mAddLink.addEventListener('click', () => addLinkRow());
+
+      // ---- Boot ----
+      // Only do anything when the user actually opens the Platinum Reserve tab.
+      // Use a MutationObserver on the subpanel's aria-hidden to detect that.
+      const subpanel = document.getElementById('subpanel-sales-platinum');
+      let bootstrapped = false;
+      function bootstrap() {
+        if (bootstrapped) return;
+        bootstrapped = true;
+        loadToken();
+        if (token) {
+          showManager();
+          loadProperties();
+        } else {
+          showSetup();
+        }
+      }
+      const mo = new MutationObserver(() => {
+        if (subpanel.getAttribute('aria-hidden') === 'false') bootstrap();
+      });
+      mo.observe(subpanel, { attributes: true, attributeFilter: ['aria-hidden'] });
+      // If the page loads with the subpanel already visible (deep link), boot immediately.
+      if (subpanel.getAttribute('aria-hidden') === 'false') bootstrap();
     })();
 
     // ============================================================
