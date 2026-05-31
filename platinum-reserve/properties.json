@@ -65,21 +65,6 @@
     "priceMin": 3799000
   },
   {
-    "slug": "840-brentview-dr",
-    "title": "840 Brentview Dr",
-    "fullAddress": "840 Brentview Dr, Nashville, TN",
-    "specs": "6 BD | 8 BA | 7,450 SF | 1.05 AC | Pool",
-    "price": "$5.499M – Spring 2026",
-    "builder": "Southern Edge Construction",
-    "area": "Oak Hill",
-    "image": "https://static.wixstatic.com/media/ba6d68_4bc2e0d29e204a4882883e771fac263a~mv2.jpg/v1/crop/x_122,y_0,w_1253,h_767/fill/w_569,h_347,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/1500x1000.jpg",
-    "photoComingSoon": false,
-    "links": [],
-    "beds": 6,
-    "sqft": 7450,
-    "priceMin": 5499000
-  },
-  {
     "slug": "1006-rodney-dr",
     "title": "1006 Rodney Dr",
     "fullAddress": "1006 Rodney Dr, Nashville, TN",
