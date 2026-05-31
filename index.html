@@ -3912,6 +3912,24 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
       <form class="modal-body" id="cma-form" autocomplete="off" novalidate>
 
+        <!-- ============================================================
+             REALTRACS PDF IMPORT
+             One-click prefill for the 9 comp slots from a RealTracs CMA
+             PDF export. Parses Under Contract + Closed sections via
+             pdf.js (lazy-loaded on first click) and fills addresses,
+             specs, lot, price, status. Subject property, photos, and
+             notes are still entered manually.
+             ============================================================ -->
+        <fieldset>
+          <legend>Quick Import (optional)</legend>
+          <p class="legend-hint">Save typing — export your CMA from RealTracs as a PDF, drop it here, and we'll prefill the comp slots below. You still add the subject, photos, and notes.</p>
+          <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:6px;">
+            <input id="cma-rt-import" type="file" accept="application/pdf" style="display:none;" />
+            <button type="button" class="btn ghost" id="cma-rt-import-btn">📄 Import from RealTracs PDF</button>
+            <span id="cma-rt-import-status" class="legend-hint" style="margin:0;"></span>
+          </div>
+        </fieldset>
+
         <!-- COVER (PAGE 1) -->
         <fieldset>
           <legend>Cover (Page 1)</legend>
@@ -7506,6 +7524,257 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           statusEl.textContent = 'Something went wrong building the CMA. Check the console for details.';
           statusEl.className = 'form-status is-error';
           if (submitBtn) submitBtn.disabled = false;
+        }
+      });
+    })();
+
+    // ============================================================
+    // RealTracs CMA PDF importer
+    //
+    // Lazy-loads pdf.js (Mozilla's PDF renderer) when the user clicks
+    // "Import from RealTracs PDF" inside the Comparative's Presentation
+    // modal. Parses the summary CMA export (Under Contract + Closed
+    // sections) and prefills the comp slots so the user only has to
+    // add the subject info, photos, and notes.
+    //
+    // What we parse per comp row:
+    //   MLS, address, sub/dev, acres, BR, bath, year built, garage,
+    //   sqft, list $/sf, list price, [for Closed: sold $/sf, sale
+    //   price, closed date, CTC], DOM, LTC
+    //
+    // What we DON'T pull (still manual):
+    //   - subject property (the PDF only lists comps)
+    //   - comp photos
+    //   - comp comments / "why this comp"
+    //   - RealTracs share URLs (Sources page)
+    // ============================================================
+    (function () {
+      const btn      = document.getElementById('cma-rt-import-btn');
+      const fileEl   = document.getElementById('cma-rt-import');
+      const statusEl = document.getElementById('cma-rt-import-status');
+      if (!btn || !fileEl) return;
+
+      const PDFJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      const PDFJS_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+      function setStatus(level, msg) {
+        if (!statusEl) return;
+        statusEl.textContent = msg || '';
+        statusEl.style.color = level === 'err' ? '#f4b9b9'
+                            : level === 'ok'  ? '#b6e3c5'
+                            : '';
+      }
+
+      function loadPdfJs() {
+        if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+        return new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = PDFJS_URL; s.async = true;
+          s.onload = () => {
+            if (!window.pdfjsLib) return reject(new Error('pdf.js loaded but pdfjsLib missing'));
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+            resolve(window.pdfjsLib);
+          };
+          s.onerror = () => reject(new Error('Failed to load pdf.js'));
+          document.head.appendChild(s);
+        });
+      }
+
+      // ---- Extract text lines from a PDF via pdf.js ----
+      // We group text items by Y coordinate so a single row of the CMA
+      // table becomes a single line, then sort by X and join with
+      // double-spaces (mimicking pdftotext's "-layout" output that the
+      // Python proof-of-concept parser was built against).
+      async function extractLines(arrayBuffer) {
+        const pdfjsLib = await loadPdfJs();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const allLines = [];
+        for (let pn = 1; pn <= pdf.numPages; pn++) {
+          const page = await pdf.getPage(pn);
+          const tc = await page.getTextContent();
+          // Group items by their Y position (transform[5]). Within each
+          // line, sort by X (transform[4]) and join with two spaces.
+          const buckets = new Map();
+          for (const item of tc.items) {
+            const y = Math.round(item.transform[5]);
+            const x = item.transform[4];
+            if (!buckets.has(y)) buckets.set(y, []);
+            buckets.get(y).push({ x: x, s: item.str });
+          }
+          // Sort Y descending (PDF coordinates have Y growing upward)
+          const ys = Array.from(buckets.keys()).sort((a, b) => b - a);
+          for (const y of ys) {
+            const row = buckets.get(y).sort((a, b) => a.x - b.x);
+            // Join with 2 spaces — adjacent items with a visible gap will
+            // end up with even more spaces, which our parser uses as a
+            // soft column boundary signal.
+            allLines.push(row.map(r => r.s).join('  '));
+          }
+        }
+        return allLines;
+      }
+
+      // ---- Parser (ported from the Python proof-of-concept) ----
+      const STREET_SUFFIX_RE = /\b(Dr|Rd|Ct|Pl|Ave|St|Cir|Ln|Way|Blvd|Pkwy|Pike|Hwy|Trl|Sq|Ter|Xing|Loop|Park|Place|Court|Drive|Road|Avenue|Street|Boulevard|Lane|Trail)\b\.?/;
+
+      function looksLikeCompRow(line) {
+        return /^\s*\d{7}\s/.test(line);
+      }
+      function parseRow(line, isClosed) {
+        line = line.trim();
+        const m1 = /^(\d{7})\s+(.*)$/.exec(line);
+        if (!m1) return null;
+        const mls = m1[1];
+        const rest = m1[2];
+
+        // Find year built (1900–2099)
+        const yb = /\b(19\d{2}|20\d{2})\b/.exec(rest);
+        if (!yb) return null;
+
+        // Acres / BR / Bath just before the year
+        const head = rest.slice(0, yb.index);
+        const headRe = /(\d+(?:\.\d+)?)\s+(\d{1,2})\s+(\d+(?:\/\d+)?)\s*$/;
+        const hm = headRe.exec(head);
+        if (!hm) return null;
+        const acres = hm[1], br = hm[2], bath = hm[3];
+
+        // Address + sub/dev = everything in `rest` BEFORE the head match
+        const addrSubdev = rest.slice(0, hm.index).trim();
+        // Prefer street-suffix split (more reliable than space-count)
+        let address = addrSubdev, subdev = '';
+        const suf = STREET_SUFFIX_RE.exec(addrSubdev);
+        if (suf) {
+          const end = suf.index + suf[0].length;
+          address = addrSubdev.slice(0, end).trim();
+          subdev  = addrSubdev.slice(end).trim();
+        } else {
+          // Fallback: split on 2+ spaces
+          const parts = addrSubdev.split(/\s{2,}/);
+          address = (parts[0] || '').trim();
+          subdev  = (parts.slice(1).join(' ')).trim();
+        }
+
+        const tail = rest.slice(yb.index).trim();
+        const tokens = tail.split(/\s+/);
+        if (tokens.length < 7) return null;
+
+        const rec = {
+          mls: mls, address: address, subdev: subdev,
+          acres: acres, br: br, bath: bath,
+          yearBuilt: tokens[0], garage: tokens[1], sqft: tokens[2],
+          lpPsf: tokens[3], listPrice: tokens[4],
+        };
+        if (isClosed) {
+          if (tokens.length < 10) return null;
+          rec.spPsf     = tokens[5];
+          rec.salePrice = tokens[6];
+          rec.closed    = tokens[7];
+          rec.dom       = tokens[8];
+          rec.ltc       = tokens[9];
+          rec.ctc       = tokens[10] || '';
+        } else {
+          rec.dom = tokens[5];
+          rec.ltc = tokens[6];
+        }
+        return rec;
+      }
+
+      function parseCma(lines) {
+        const uc = [], closed = [];
+        let section = null;
+        for (const ln of lines) {
+          const lower = ln.toLowerCase();
+          if (lower.indexOf('under contract') !== -1 && lower.indexOf('showing') !== -1) { section = 'uc'; continue; }
+          if (lower.trim() === 'closed' || lower.indexOf('closed - showing') !== -1) { section = 'closed'; continue; }
+          if (!section) continue;
+          if (/^\s*(Average|Median)\b/.test(ln)) continue;
+          if (looksLikeCompRow(ln)) {
+            const rec = parseRow(ln, section === 'closed');
+            if (rec) (section === 'closed' ? closed : uc).push(rec);
+          }
+        }
+        return { uc, closed };
+      }
+
+      // ---- Mapping into Stonehouse comp slot field strings ----
+      function toStonehouseFields(rec, isClosed) {
+        const specs = rec.br + ' Bed ' + rec.bath + ' Bath ' + rec.sqft + ' Sq Ft';
+        const lot = rec.acres + ' Acres';
+        let price, status;
+        if (isClosed) {
+          const sp = (rec.salePrice || '').replace(/^\$/, '');
+          price  = '$' + sp + ' / ' + rec.spPsf + ' Per Sq Ft';
+          status = 'Closed - ' + rec.closed + ' | DOM: ' + rec.dom;
+        } else {
+          price  = rec.listPrice + ' / ' + rec.lpPsf + ' Per Sq Ft';
+          status = 'UC | DOM: ' + rec.dom + ' | LTC: ' + rec.ltc;
+        }
+        return {
+          address: rec.address,
+          specs:   specs,
+          lot:     lot,
+          price:   price,
+          status:  status,
+        };
+      }
+
+      function fillSlot(prefix, fields) {
+        const setVal = (suffix, value) => {
+          const el = document.querySelector('[name="' + prefix + '_' + suffix + '"]');
+          if (el && value != null) el.value = value;
+        };
+        setVal('address', fields.address);
+        setVal('specs',   fields.specs);
+        setVal('lot',     fields.lot);
+        setVal('price',   fields.price);
+        setVal('status',  fields.status);
+      }
+
+      // ---- File handler ----
+      btn.addEventListener('click', () => fileEl.click());
+      fileEl.addEventListener('change', async () => {
+        const file = fileEl.files && fileEl.files[0];
+        if (!file) return;
+        setStatus('', 'Reading PDF…');
+        btn.disabled = true;
+        try {
+          const buf = await file.arrayBuffer();
+          const lines = await extractLines(buf);
+          console.log('[RT-IMPORT] extracted lines:', lines);
+          const { uc, closed } = parseCma(lines);
+          console.log('[RT-IMPORT] parsed UC:', uc);
+          console.log('[RT-IMPORT] parsed CLOSED:', closed);
+
+          if (uc.length === 0 && closed.length === 0) {
+            setStatus('err', 'No comps found in this PDF. Make sure it\'s the RealTracs Residential Property CMA summary export.');
+            return;
+          }
+
+          // Fill UC slots (uc1..uc3)
+          uc.slice(0, 3).forEach((rec, i) => {
+            fillSlot('uc' + (i + 1), toStonehouseFields(rec, false));
+          });
+          // Fill Sold slots — first 3 → sa1..sa3, next 3 → sb1..sb3
+          closed.slice(0, 3).forEach((rec, i) => {
+            fillSlot('sa' + (i + 1), toStonehouseFields(rec, true));
+          });
+          closed.slice(3, 6).forEach((rec, i) => {
+            fillSlot('sb' + (i + 1), toStonehouseFields(rec, true));
+          });
+
+          const ucMsg     = uc.length     ? uc.length + ' Under Contract'   : '';
+          const closedMsg = closed.length ? closed.length + ' Sold'         : '';
+          const summary = [ucMsg, closedMsg].filter(Boolean).join(' + ');
+          let extra = '';
+          if (uc.length > 3)     extra += ' (only first 3 UC kept — modal supports 3 UC slots)';
+          if (closed.length > 6) extra += ' (only first 6 sold kept — modal supports 6 sold slots)';
+          setStatus('ok', '✅ Imported ' + summary + '. Add subject, photos, and notes below.' + extra);
+        } catch (err) {
+          console.error('[RT-IMPORT] parse failed:', err);
+          setStatus('err', 'Could not read this PDF: ' + (err && err.message ? err.message : err));
+        } finally {
+          btn.disabled = false;
+          fileEl.value = '';   // allow re-importing the same file
         }
       });
     })();
