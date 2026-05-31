@@ -65,26 +65,6 @@
     "priceMin": 3799000
   },
   {
-    "slug": "1006-rodney-dr",
-    "title": "1006 Rodney Dr",
-    "fullAddress": "1006 Rodney Dr, Nashville, TN",
-    "specs": "5 BD | 5.1 BA | 5,000 SF | .5 AC | Pool",
-    "price": "$2.3M – May 2026",
-    "builder": "Elliott Homes",
-    "area": "West Meade",
-    "image": "https://the-stonehouse-company.github.io/platinum-reserve/1006_Rodney.jpg",
-    "photoComingSoon": false,
-    "links": [
-      {
-        "label": "Design Board",
-        "url": "https://the-stonehouse-company.github.io/platinum-reserve/DESIGN_BOARD_1006_Rodney_Dr.pdf"
-      }
-    ],
-    "beds": 5,
-    "sqft": 5000,
-    "priceMin": 2300000
-  },
-  {
     "slug": "1413-clifton-ln",
     "title": "1413 Clifton Ln",
     "fullAddress": "1413 Clifton Ln, Nashville, TN 37212",
