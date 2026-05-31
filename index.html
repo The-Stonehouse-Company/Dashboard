@@ -2830,13 +2830,13 @@
             <p>Go-to-market strategy for spec builds and ground-up projects. Positioning, channels, timeline, and key milestones. Click to download the latest version (PDF).</p>
           </a>
 
-          <article class="template-card" data-template-key="cma-generator" aria-disabled="true">
+          <article class="template-card is-clickable" data-template-key="cma-generator" id="open-cma-sales-modal" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="cma-sales-modal">
             <div class="template-card-head">
               <span class="template-kind">Template · CMA</span>
-              <span class="template-status is-soon">Coming Soon</span>
+              <span class="template-status">Ready</span>
             </div>
             <h3>CMA Generator</h3>
-            <p>Comparative Market Analysis for sellers and buyer presentations — subject property, recent solds, active comps, pricing recommendation, and market notes. Stonehouse-branded PDF output.</p>
+            <p>Comparative Market Analysis for sellers and buyer presentations. Import a RealTracs CMA PDF to prefill the comps, add the subject, photos and notes, and generate a Stonehouse-branded multi-page PDF.</p>
           </article>
         </div>
       </div>
@@ -3912,24 +3912,6 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
       <form class="modal-body" id="cma-form" autocomplete="off" novalidate>
 
-        <!-- ============================================================
-             REALTRACS PDF IMPORT
-             One-click prefill for the 9 comp slots from a RealTracs CMA
-             PDF export. Parses Under Contract + Closed sections via
-             pdf.js (lazy-loaded on first click) and fills addresses,
-             specs, lot, price, status. Subject property, photos, and
-             notes are still entered manually.
-             ============================================================ -->
-        <fieldset>
-          <legend>Quick Import (optional)</legend>
-          <p class="legend-hint">Save typing — export your CMA from RealTracs as a PDF, drop it here, and we'll prefill the comp slots below. You still add the subject, photos, and notes.</p>
-          <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:6px;">
-            <input id="cma-rt-import" type="file" accept="application/pdf" style="display:none;" />
-            <button type="button" class="btn ghost" id="cma-rt-import-btn">📄 Import from RealTracs PDF</button>
-            <span id="cma-rt-import-status" class="legend-hint" style="margin:0;"></span>
-          </div>
-        </fieldset>
-
         <!-- COVER (PAGE 1) -->
         <fieldset>
           <legend>Cover (Page 1)</legend>
@@ -4180,6 +4162,293 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       </footer>
     </div>
   </div>
+
+  <!-- ========================= SALES CMA GENERATOR MODAL =========================
+       Sales-side CMA. Same shape as the Development Comparative's Presentation
+       modal — separate IDs (cma-sales-*) so it lives independently. Includes the
+       RealTracs PDF import that the Dev modal does NOT have. Writes its payload
+       to the 'cma' store with key 'sales-current'; renderer is cma-sales.html. -->
+  <div class="modal-overlay is-xwide" id="cma-sales-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cma-sales-modal-title" id="cma-sales-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Sales · Marketing Templates</span>
+          <h2 class="modal-title" id="cma-sales-modal-title">CMA Generator</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-cma-sales-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="cma-sales-form" autocomplete="off" novalidate>
+
+        <!-- ============================================================
+             REALTRACS PDF IMPORT
+             One-click prefill for the 9 comp slots from a RealTracs CMA
+             PDF export. Parses Under Contract + Closed sections via
+             pdf.js (lazy-loaded on first click) and fills addresses,
+             specs, lot, price, status. Subject property, photos, and
+             notes are still entered manually.
+             ============================================================ -->
+        <fieldset>
+          <legend>Quick Import (optional)</legend>
+          <p class="legend-hint">Save typing — export your CMA from RealTracs as a PDF, drop it here, and we'll prefill the comp slots below. You still add the subject, photos, and notes.</p>
+          <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:6px;">
+            <input id="cma-sales-rt-import" type="file" accept="application/pdf" style="display:none;" />
+            <button type="button" class="btn ghost" id="cma-sales-rt-import-btn">📄 Import from RealTracs PDF</button>
+            <span id="cma-sales-rt-import-status" class="legend-hint" style="margin:0;"></span>
+          </div>
+        </fieldset>
+
+        <!-- COVER (PAGE 1) -->
+        <fieldset>
+          <legend>Cover (Page 1)</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="cma-sales-subject-address">Subject Property Address <span class="req">*</span></label>
+              <input id="cma-sales-subject-address" name="subject_address" type="text" required placeholder="735 Clematis Dr" />
+            </div>
+            <div>
+              <label for="cma-sales-date">Date</label>
+              <input id="cma-sales-date" name="cma_date" type="text" placeholder="4 / 2026" />
+            </div>
+            <div class="full">
+              <label for="cma-sales-subject-hero">Subject Hero Photo <span class="req">*</span></label>
+              <input id="cma-sales-subject-hero" name="subject_hero" type="file" accept="image/*" required />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- SUBJECT PROPERTY SUMMARY (PAGE 2) -->
+        <fieldset>
+          <legend>Subject Property Summary (Page 2)</legend>
+          <div class="form-grid">
+            <div>
+              <label for="cma-sales-subject-sqft">Square Footage</label>
+              <input id="cma-sales-subject-sqft" name="subject_sqft" type="text" placeholder="6,500 Sq Ft" />
+            </div>
+            <div>
+              <label for="cma-sales-subject-beds">Bedrooms</label>
+              <input id="cma-sales-subject-beds" name="subject_beds" type="text" placeholder="5" />
+            </div>
+            <div>
+              <label for="cma-sales-subject-baths">Bathrooms</label>
+              <input id="cma-sales-subject-baths" name="subject_baths" type="text" placeholder="5/2" />
+            </div>
+            <div>
+              <label for="cma-sales-subject-pool">Pool</label>
+              <select id="cma-sales-subject-pool" name="subject_pool">
+                <option value="">—</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+            <div class="full">
+              <label for="cma-sales-subject-lot">Lot Size</label>
+              <input id="cma-sales-subject-lot" name="subject_lot" type="text" placeholder="1.05 Acres / 45,738 Sq Ft" />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- UNDER CONTRACT COMPARABLES (PAGE 3) -->
+        <fieldset>
+          <legend>Under Contract Comparables (Page 2)</legend>
+          <div class="cma-comp-grid">
+            <!-- Comps generated by JS below in three slots -->
+            <div class="cma-comp" data-comp-section="uc" data-comp="1">
+              <div class="cma-comp-label">Comp 1</div>
+              <label>Photo</label>
+              <input name="uc1_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="uc1_address" type="text" placeholder="6233 Vosswood Dr" />
+              <label>BD / BA / SF</label>
+              <input name="uc1_specs" type="text" placeholder="6 Bed 5/2 Bath 6377 Sq Ft" />
+              <label>Lot Size</label>
+              <input name="uc1_lot" type="text" placeholder="1.05 Acres" />
+              <label>List Price / $ Per SF</label>
+              <input name="uc1_price" type="text" placeholder="$4,150,000 / $651 Per Sq Ft" />
+              <label>Under Contract Status</label>
+              <input name="uc1_status" type="text" placeholder="UC - 01 / 15 / 26 | DOM: 0" />
+              <label>Comments</label>
+              <textarea name="uc1_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
+            </div>
+            <div class="cma-comp" data-comp-section="uc" data-comp="2">
+              <div class="cma-comp-label">Comp 2</div>
+              <label>Photo</label>
+              <input name="uc2_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="uc2_address" type="text" placeholder="754 West Meade Dr" />
+              <label>BD / BA / SF</label>
+              <input name="uc2_specs" type="text" placeholder="5 Bed 8 Bath $727 Sq Ft" />
+              <label>Lot Size</label>
+              <input name="uc2_lot" type="text" placeholder="1.05 Acres" />
+              <label>List Price / $ Per SF</label>
+              <input name="uc2_price" type="text" placeholder="$4,699,900 / $821 Per Sq Ft" />
+              <label>Under Contract Status</label>
+              <input name="uc2_status" type="text" placeholder="UC - 12 / 1 / 25 | DOM: 0" />
+              <label>Comments</label>
+              <textarea name="uc2_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
+            </div>
+            <div class="cma-comp" data-comp-section="uc" data-comp="3">
+              <div class="cma-comp-label">Comp 3</div>
+              <label>Photo</label>
+              <input name="uc3_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="uc3_address" type="text" placeholder="(leave blank to skip)" />
+              <label>BD / BA / SF</label>
+              <input name="uc3_specs" type="text" />
+              <label>Lot Size</label>
+              <input name="uc3_lot" type="text" placeholder="1.05 Acres" />
+              <label>List Price / $ Per SF</label>
+              <input name="uc3_price" type="text" />
+              <label>Under Contract Status</label>
+              <input name="uc3_status" type="text" />
+              <label>Comments</label>
+              <textarea name="uc3_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- SOLD COMPARABLES (PAGE 3) -->
+        <fieldset>
+          <legend>Sold Comparables (Page 3)</legend>
+          <div class="cma-comp-grid">
+            <div class="cma-comp" data-comp-section="sold-a" data-comp="1">
+              <div class="cma-comp-label">Comp 1</div>
+              <label>Photo</label>
+              <input name="sa1_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="sa1_address" type="text" placeholder="310 Jocelyn Hollow Cir" />
+              <label>BD / BA / SF</label>
+              <input name="sa1_specs" type="text" placeholder="5 Bed 5/1 Bath 7100 Sq Ft" />
+              <label>Lot Size</label>
+              <input name="sa1_lot" type="text" placeholder="1.05 Acres" />
+              <label>Sold Price / $ Per SF</label>
+              <input name="sa1_price" type="text" placeholder="$4,550,000 / $641 Per Sq Ft" />
+              <label>Closing Status</label>
+              <input name="sa1_status" type="text" placeholder="Closed - 6 / 2 / 25 | DOM: 46" />
+              <label>Comments</label>
+              <textarea name="sa1_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
+            </div>
+            <div class="cma-comp" data-comp-section="sold-a" data-comp="2">
+              <div class="cma-comp-label">Comp 2</div>
+              <label>Photo</label>
+              <input name="sa2_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="sa2_address" type="text" placeholder="6201 Bresslyn Rd" />
+              <label>BD / BA / SF</label>
+              <input name="sa2_specs" type="text" placeholder="5 Bed 5/2 Bath 6956 Sq Ft" />
+              <label>Lot Size</label>
+              <input name="sa2_lot" type="text" placeholder="1.05 Acres" />
+              <label>Sold Price / $ Per SF</label>
+              <input name="sa2_price" type="text" placeholder="$4,625,000 / $665 Per Sq Ft" />
+              <label>Closing Status</label>
+              <input name="sa2_status" type="text" placeholder="Closed - 8 / 14 / 25 | DOM: 13" />
+              <label>Comments</label>
+              <textarea name="sa2_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
+            </div>
+            <div class="cma-comp" data-comp-section="sold-a" data-comp="3">
+              <div class="cma-comp-label">Comp 3</div>
+              <label>Photo</label>
+              <input name="sa3_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="sa3_address" type="text" placeholder="508 Davidson Rd" />
+              <label>BD / BA / SF</label>
+              <input name="sa3_specs" type="text" placeholder="6 Bed 6/2 Bath 6516 Sq Ft" />
+              <label>Lot Size</label>
+              <input name="sa3_lot" type="text" placeholder="1.05 Acres" />
+              <label>Sold Price / $ Per SF</label>
+              <input name="sa3_price" type="text" placeholder="$4,275,000 / $656 Per Sq Ft" />
+              <label>Closing Status</label>
+              <input name="sa3_status" type="text" placeholder="Closed - 1 / 5 / 26 | DOM: 2" />
+              <label>Comments</label>
+              <textarea name="sa3_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- SOLD COMPARABLES (PAGE 4 — OVERFLOW) -->
+        <fieldset>
+          <legend>Sold Comparables (Page 4 — optional overflow)</legend>
+          <p class="legend-hint">Leave any comp blank to skip. If all three are blank, this page is omitted from the PDF.</p>
+          <div class="cma-comp-grid">
+            <div class="cma-comp" data-comp-section="sold-b" data-comp="1">
+              <div class="cma-comp-label">Comp 1</div>
+              <label>Photo</label>
+              <input name="sb1_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="sb1_address" type="text" placeholder="605 Brook Hollow Rd" />
+              <label>BD / BA / SF</label>
+              <input name="sb1_specs" type="text" placeholder="6 Bed 6/3 Bath 6496 Sq Ft" />
+              <label>Lot Size</label>
+              <input name="sb1_lot" type="text" placeholder="1.05 Acres" />
+              <label>Sold Price / $ Per SF</label>
+              <input name="sb1_price" type="text" placeholder="$4,250,000 / $654 Per Sq Ft" />
+              <label>Closing Status</label>
+              <input name="sb1_status" type="text" placeholder="Closed - 12 / 23 / 25 | DOM: 0" />
+              <label>Comments</label>
+              <textarea name="sb1_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
+            </div>
+            <div class="cma-comp" data-comp-section="sold-b" data-comp="2">
+              <div class="cma-comp-label">Comp 2</div>
+              <label>Photo</label>
+              <input name="sb2_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="sb2_address" type="text" />
+              <label>BD / BA / SF</label>
+              <input name="sb2_specs" type="text" />
+              <label>Lot Size</label>
+              <input name="sb2_lot" type="text" placeholder="1.05 Acres" />
+              <label>Sold Price / $ Per SF</label>
+              <input name="sb2_price" type="text" />
+              <label>Closing Status</label>
+              <input name="sb2_status" type="text" />
+              <label>Comments</label>
+              <textarea name="sb2_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
+            </div>
+            <div class="cma-comp" data-comp-section="sold-b" data-comp="3">
+              <div class="cma-comp-label">Comp 3</div>
+              <label>Photo</label>
+              <input name="sb3_photo" type="file" accept="image/*" />
+              <label>Address</label>
+              <input name="sb3_address" type="text" />
+              <label>BD / BA / SF</label>
+              <input name="sb3_specs" type="text" />
+              <label>Lot Size</label>
+              <input name="sb3_lot" type="text" placeholder="1.05 Acres" />
+              <label>Sold Price / $ Per SF</label>
+              <input name="sb3_price" type="text" />
+              <label>Closing Status</label>
+              <input name="sb3_status" type="text" />
+              <label>Comments</label>
+              <textarea name="sb3_comments" rows="3" placeholder="Why this comp is relevant"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- LINKS (FINAL PAGE) -->
+        <fieldset>
+          <legend>RealTracs Links (Final Page — optional)</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="cma-sales-comps-url">Comparables URL</label>
+              <input id="cma-sales-comps-url" name="comps_url" type="url" placeholder="https://go.realtracs.com/1geUu99" />
+            </div>
+            <div class="full">
+              <label for="cma-sales-cma-url">CMA URL</label>
+              <input id="cma-sales-cma-url" name="cma_url" type="url" placeholder="https://go.realtracs.com/1geV24o" />
+            </div>
+          </div>
+        </fieldset>
+      </form>
+
+      <div class="form-status" id="cma-sales-status"></div>
+
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-cma-sales">Cancel</button>
+        <button class="btn" type="submit" form="cma-sales-form" id="submit-cma-sales">Generate CMA</button>
+      </footer>
+    </div>
+  </div>
+
 
   <!-- ========================= PLATINUM RESERVE PROPERTY MODAL =========================
        Add OR edit a property. Opened by:
@@ -7529,13 +7798,214 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     })();
 
     // ============================================================
-    // RealTracs CMA PDF importer
+    // Sales CMA Modal controller
+    // Opens the Sales CMA Generator modal, collects subject + comp inputs +
+    // photos, persists them to IndexedDB ("stonehouse-cma" key "sales-current"),
+    // then opens cma-sales.html in a new tab where the PDF is rendered.
+    //
+    // Structurally identical to the Dev "Comparative's Presentation"
+    // controller above — separate IDs (cma-sales-*) keep them independent
+    // so the two tools can diverge in the future without stepping on each
+    // other.
+    // ============================================================
+    (function () {
+      const overlay   = document.getElementById('cma-sales-modal-overlay');
+      const modal     = document.getElementById('cma-sales-modal');
+      const form      = document.getElementById('cma-sales-form');
+      const statusEl  = document.getElementById('cma-sales-status');
+      const openBtn   = document.getElementById('open-cma-sales-modal');
+      const closeBtn  = document.getElementById('close-cma-sales-modal');
+      const cancelBtn = document.getElementById('cancel-cma-sales');
+      const submitBtn = document.getElementById('submit-cma-sales');
+      if (!overlay || !form) return;
+
+      let lastFocus = null;
+      function openModal() {
+        lastFocus = document.activeElement;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        const firstInput = modal.querySelector('input, textarea, select');
+        if (firstInput && firstInput.focus) {
+          requestAnimationFrame(() => firstInput.focus());
+        }
+      }
+      function closeModal() {
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') closeModal();
+      });
+      if (openBtn) {
+        openBtn.addEventListener('click', openModal);
+        openBtn.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(); }
+        });
+      }
+      closeBtn && closeBtn.addEventListener('click', closeModal);
+      cancelBtn && cancelBtn.addEventListener('click', closeModal);
+
+      // ---- Read a file input as a data URL (for photo uploads) ----
+      function readFileAsDataURL(fileInput) {
+        if (!fileInput || !fileInput.files || !fileInput.files[0]) return Promise.resolve(null);
+        const file = fileInput.files[0];
+        return new Promise((resolve) => {
+          const r = new FileReader();
+          r.onload  = () => resolve(r.result);
+          r.onerror = () => resolve(null);
+          r.readAsDataURL(file);
+        });
+      }
+
+      // ---- Collect a single comp's fields from the modal ----
+      function collectComp(prefix) {
+        const get = (suffix) => {
+          const el = modal.querySelector('[name="' + prefix + '_' + suffix + '"]');
+          return el ? el.value.trim() : '';
+        };
+        return {
+          address:  get('address'),
+          specs:    get('specs'),
+          lot:      get('lot'),
+          price:    get('price'),
+          status:   get('status'),
+          comments: get('comments'),
+        };
+      }
+      async function collectCompPhoto(prefix) {
+        const el = modal.querySelector('[name="' + prefix + '_photo"]');
+        return readFileAsDataURL(el);
+      }
+      function isBlankComp(c) {
+        return !(c.address || c.specs || c.price || c.status || c.lot || c.comments);
+      }
+
+      // ---- IndexedDB write (single "sales-current" record) ----
+      // Same store as Dev tool — keyed entries live side by side.
+      function dbOpen() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open('stonehouse-cma', 1);
+          req.onupgradeneeded = () => {
+            const db = req.result;
+            if (!db.objectStoreNames.contains('cma')) {
+              db.createObjectStore('cma', { keyPath: 'id' });
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror   = () => reject(req.error);
+        });
+      }
+      async function dbPut(record) {
+        const db = await dbOpen();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction('cma', 'readwrite');
+          tx.objectStore('cma').put(record);
+          tx.oncomplete = () => resolve();
+          tx.onerror    = () => reject(tx.error);
+        });
+      }
+
+      // ---- Form submit handler ----
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        statusEl.textContent = 'Preparing CMA…';
+        statusEl.className = 'form-status';
+        if (submitBtn) submitBtn.disabled = true;
+
+        try {
+          const v = (n) => {
+            const el = modal.querySelector('[name="' + n + '"]');
+            return el ? el.value.trim() : '';
+          };
+          const subjectAddress = v('subject_address');
+          const cmaDate        = v('cma_date');
+          if (!subjectAddress) {
+            statusEl.textContent = 'Subject address is required.';
+            statusEl.className = 'form-status is-error';
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+          }
+          const subjectHero = await readFileAsDataURL(
+            modal.querySelector('[name="subject_hero"]')
+          );
+          const subjectSummary = {
+            sqft:  v('subject_sqft'),
+            beds:  v('subject_beds'),
+            baths: v('subject_baths'),
+            pool:  v('subject_pool'),
+            lot:   v('subject_lot'),
+          };
+
+          async function gather(prefixes) {
+            const out = [];
+            for (const p of prefixes) {
+              const data = collectComp(p);
+              if (isBlankComp(data)) continue;
+              data.photo = await collectCompPhoto(p);
+              out.push(data);
+            }
+            return out;
+          }
+          const ucComps    = await gather(['uc1', 'uc2', 'uc3']);
+          const soldAComps = await gather(['sa1', 'sa2', 'sa3']);
+          const soldBComps = await gather(['sb1', 'sb2', 'sb3']);
+
+          const compsUrl = modal.querySelector('[name="comps_url"]').value.trim();
+          const cmaUrl   = modal.querySelector('[name="cma_url"]').value.trim();
+
+          // Persist a single "sales-current" record — cma-sales.html reads this.
+          const record = {
+            id: 'sales-current',
+            generatedAt: new Date().toISOString(),
+            subject: {
+              address: subjectAddress,
+              date:    cmaDate,
+              hero:    subjectHero,
+              sqft:    subjectSummary.sqft,
+              beds:    subjectSummary.beds,
+              baths:   subjectSummary.baths,
+              pool:    subjectSummary.pool,
+              lot:     subjectSummary.lot,
+            },
+            underContract: ucComps,
+            sold: [...soldAComps, ...soldBComps],
+            links: { comparables: compsUrl, cma: cmaUrl },
+          };
+          await dbPut(record);
+
+          statusEl.textContent = 'Opening CMA in a new tab…';
+          statusEl.className = 'form-status is-ok';
+
+          window.open('cma-sales.html', '_blank', 'noopener');
+
+          setTimeout(() => {
+            closeModal();
+            if (submitBtn) submitBtn.disabled = false;
+            statusEl.textContent = '';
+            statusEl.className = 'form-status';
+          }, 1500);
+        } catch (err) {
+          console.error('Sales CMA submit failed', err);
+          statusEl.textContent = 'Something went wrong building the CMA. Check the console for details.';
+          statusEl.className = 'form-status is-error';
+          if (submitBtn) submitBtn.disabled = false;
+        }
+      });
+    })();
+
+    // ============================================================
+    // RealTracs CMA PDF importer (Sales CMA modal only)
     //
     // Lazy-loads pdf.js (Mozilla's PDF renderer) when the user clicks
-    // "Import from RealTracs PDF" inside the Comparative's Presentation
-    // modal. Parses the summary CMA export (Under Contract + Closed
-    // sections) and prefills the comp slots so the user only has to
-    // add the subject info, photos, and notes.
+    // "Import from RealTracs PDF" inside the SALES CMA Generator modal.
+    // Parses the summary CMA export (Under Contract + Closed sections)
+    // and prefills the comp slots so the user only has to add the
+    // subject info, photos, and notes.
+    //
+    // (The Development "Comparative's Presentation" modal intentionally
+    // does NOT include this importer — it's a sales workflow.)
     //
     // What we parse per comp row:
     //   MLS, address, sub/dev, acres, BR, bath, year built, garage,
@@ -7549,9 +8019,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     //   - RealTracs share URLs (Sources page)
     // ============================================================
     (function () {
-      const btn      = document.getElementById('cma-rt-import-btn');
-      const fileEl   = document.getElementById('cma-rt-import');
-      const statusEl = document.getElementById('cma-rt-import-status');
+      const btn      = document.getElementById('cma-sales-rt-import-btn');
+      const fileEl   = document.getElementById('cma-sales-rt-import');
+      const statusEl = document.getElementById('cma-sales-rt-import-status');
       if (!btn || !fileEl) return;
 
       const PDFJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
@@ -7718,9 +8188,14 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         };
       }
 
+      // Scope querySelectors to the Sales CMA form so the comp-slot name
+      // attributes don't accidentally match identically-named inputs in
+      // the Dev "Comparative's Presentation" modal sitting in the same DOM.
+      const salesForm = document.getElementById('cma-sales-form');
       function fillSlot(prefix, fields) {
+        if (!salesForm) return;
         const setVal = (suffix, value) => {
-          const el = document.querySelector('[name="' + prefix + '_' + suffix + '"]');
+          const el = salesForm.querySelector('[name="' + prefix + '_' + suffix + '"]');
           if (el && value != null) el.value = value;
         };
         setVal('address', fields.address);
