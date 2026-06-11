@@ -8117,12 +8117,14 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         const yb = /\b(19\d{2}|20\d{2})\b/.exec(rest);
         if (!yb) return null;
 
-        // Acres / BR / Bath just before the year
+        // Acres / BR / Bath just before the year.
+        // RealTracs exports the bath as either "5/1" (no spaces) or
+        // "5 / 1" (with spaces) depending on the report style — accept both.
         const head = rest.slice(0, yb.index);
-        const headRe = /(\d+(?:\.\d+)?)\s+(\d{1,2})\s+(\d+(?:\/\d+)?)\s*$/;
+        const headRe = /(\d+(?:\.\d+)?)\s+(\d{1,2})\s+(\d+(?:\s*\/\s*\d+)?)\s*$/;
         const hm = headRe.exec(head);
         if (!hm) return null;
-        const acres = hm[1], br = hm[2], bath = hm[3];
+        const acres = hm[1], br = hm[2], bath = hm[3].replace(/\s+/g, '');
 
         // Address + sub/dev = everything in `rest` BEFORE the head match
         const addrSubdev = rest.slice(0, hm.index).trim();
