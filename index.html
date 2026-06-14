@@ -2363,6 +2363,183 @@
       .tab .num { margin-right: 8px; }
       .panels { padding: 56px 0 80px; }
     }
+
+    /* =========================================================
+       APP SHELL — Sidebar nav + main content area
+       (Phase 1 of the structured-for-growth redesign)
+       ========================================================= */
+    .app-shell {
+      display: grid;
+      grid-template-columns: 232px 1fr;
+      align-items: stretch;
+      min-height: calc(100vh - 72px);
+    }
+    .app-sidebar {
+      position: sticky; top: 0; align-self: start;
+      height: 100vh; overflow-y: auto;
+      background: #050505;
+      border-right: 1px solid var(--rule);
+      padding: 22px 0 40px;
+      scrollbar-width: thin;
+    }
+    .app-sidebar::-webkit-scrollbar { width: 6px; }
+    .app-sidebar::-webkit-scrollbar-thumb { background: #1a1a1a; }
+    .app-sidebar::-webkit-scrollbar-track { background: transparent; }
+    .nav-group { margin-bottom: 18px; }
+    .nav-group-label {
+      font-family: var(--font-body);
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 0 22px 8px;
+      display: block;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      width: 100%;
+      background: transparent;
+      border: 0;
+      border-left: 3px solid transparent;
+      padding: 11px 22px 11px 19px;
+      color: var(--text-dim);
+      font-family: var(--font-body);
+      font-weight: 300;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+      cursor: pointer;
+      text-align: left;
+      transition: color .15s ease, background .15s ease, border-left-color .15s ease;
+    }
+    .nav-item:hover { color: var(--text-muted); background: rgba(255,255,255,0.02); }
+    .nav-item[aria-selected="true"] {
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+      border-left-color: var(--text);
+    }
+    .nav-item .num {
+      font-family: var(--font-display);
+      font-size: 12px;
+      color: var(--text-dim);
+      width: 22px; flex-shrink: 0;
+    }
+    .nav-item[aria-selected="true"] .num { color: var(--text); }
+    .nav-item .ico {
+      font-size: 14px; width: 22px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: var(--text-dim);
+    }
+    .nav-item[aria-selected="true"] .ico { color: var(--text); }
+    .nav-divider {
+      height: 1px;
+      margin: 10px 22px;
+      background: var(--rule);
+    }
+    .app-main { background: var(--bg); min-width: 0; }
+    .app-main .panels { padding: 56px 0 120px; }
+
+    /* =========================================================
+       HOME panel — cross-division overview
+       ========================================================= */
+    .home-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      margin-bottom: 40px;
+    }
+    .home-card {
+      border: 1px solid var(--rule);
+      background: var(--bg-elev);
+      padding: 22px;
+      display: flex; flex-direction: column; gap: 8px;
+      transition: border-color .2s ease, background .2s ease;
+    }
+    .home-card:hover { border-color: var(--rule-strong); background: var(--bg-elev-2); }
+    .home-card.is-clickable { cursor: pointer; }
+    .home-card .h-eyebrow {
+      font-size: 9px; letter-spacing: var(--tracking-x-wide); text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .home-card .h-stat {
+      font-family: var(--font-display);
+      font-size: 32px;
+      color: var(--text);
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+    }
+    .home-card .h-label {
+      font-size: 12px; color: var(--text-muted);
+    }
+    .home-card .h-quick {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;
+    }
+    .home-card .h-quick a {
+      font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--text-muted); border: 1px solid var(--rule-strong);
+      padding: 6px 10px; cursor: pointer; text-decoration: none;
+    }
+    .home-card .h-quick a:hover { color: var(--text); border-color: var(--text); }
+
+    /* =========================================================
+       TOOLS LIBRARY panel
+       ========================================================= */
+    .tools-library {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .tool-filter-bar {
+      display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .tool-filter-bar input {
+      flex: 1; min-width: 200px;
+      background: var(--bg-elev);
+      border: 1px solid var(--rule);
+      color: var(--text);
+      padding: 10px 14px;
+      font: inherit; font-size: 12px;
+    }
+    .tool-filter-bar select {
+      background: var(--bg-elev); border: 1px solid var(--rule); color: var(--text);
+      padding: 10px 14px; font: inherit; font-size: 12px;
+    }
+    .tool-card {
+      border: 1px solid var(--rule); background: var(--bg-elev);
+      padding: 18px; cursor: pointer; text-decoration: none; color: inherit;
+      display: flex; flex-direction: column; gap: 6px;
+      transition: border-color .15s ease, background .15s ease;
+    }
+    .tool-card:hover { border-color: var(--text); background: var(--bg-elev-2); }
+    .tool-card .tool-tag {
+      font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .tool-card h3 {
+      font-family: var(--font-display); font-size: 16px; letter-spacing: 0.04em;
+      margin: 4px 0 6px; color: var(--text); text-transform: uppercase;
+    }
+    .tool-card p {
+      font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.5;
+    }
+
+    /* =========================================================
+       Mobile: collapse sidebar to a horizontal scrollable strip
+       ========================================================= */
+    @media (max-width: 900px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .app-sidebar {
+        position: static; height: auto;
+        border-right: 0; border-bottom: 1px solid var(--rule);
+        padding: 12px 0;
+        white-space: nowrap; overflow-x: auto;
+      }
+      .nav-group { display: inline-block; vertical-align: top; margin: 0 8px; }
+      .nav-group-label { padding: 0 12px 4px; }
+      .nav-item { padding: 8px 14px; border-left: 0; border-bottom: 2px solid transparent; }
+      .nav-item[aria-selected="true"] { border-left-color: transparent; border-bottom-color: var(--text); }
+      .nav-divider { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -2588,39 +2765,77 @@
     </div>
   </header>
 
-  <!-- ========================= TABS ========================= -->
-  <nav class="tabbar" aria-label="Divisions">
-    <div class="wrap tabbar-inner" role="tablist">
-      <button class="tab" role="tab" id="tab-sales"       aria-controls="panel-sales"       aria-selected="true"  data-key="sales">
-        <span class="num">01</span> Sales
-      </button>
-      <button class="tab" role="tab" id="tab-land"        aria-controls="panel-land"        aria-selected="false" data-key="land">
-        <span class="num">02</span> Land Acquisition
-      </button>
-      <button class="tab" role="tab" id="tab-customrep"   aria-controls="panel-customrep"   aria-selected="false" data-key="customrep">
-        <span class="num">03</span> Custom Home Rep.
-      </button>
-      <button class="tab" role="tab" id="tab-development" aria-controls="panel-development" aria-selected="false" data-key="development">
-        <span class="num">04</span> Development
-      </button>
-    </div>
-  </nav>
+  <!-- ========================= APP SHELL ========================= -->
+  <div class="app-shell">
+    <!-- LEFT NAV -->
+    <aside class="app-sidebar" aria-label="Primary navigation">
+      <div class="nav-group" role="tablist" aria-label="Workspaces">
+        <button class="nav-item" role="tab" id="tab-home" aria-controls="panel-home" aria-selected="true" data-key="home">
+          <span class="ico" aria-hidden="true">⌂</span> Home
+        </button>
+      </div>
 
-  <!-- ========================= PANELS ========================= -->
-  <main class="wrap panels">
-    <section class="panel" id="panel-sales" role="tabpanel" aria-labelledby="tab-sales" aria-hidden="false" tabindex="0">
+      <div class="nav-divider"></div>
+
+      <div class="nav-group" role="tablist" aria-label="Divisions">
+        <span class="nav-group-label">Divisions</span>
+        <button class="nav-item" role="tab" id="tab-sales"       aria-controls="panel-sales"       aria-selected="false" data-key="sales">
+          <span class="num">01</span> Sales
+        </button>
+        <button class="nav-item" role="tab" id="tab-land"        aria-controls="panel-land"        aria-selected="false" data-key="land">
+          <span class="num">02</span> Land Acquisition
+        </button>
+        <button class="nav-item" role="tab" id="tab-customrep"   aria-controls="panel-customrep"   aria-selected="false" data-key="customrep">
+          <span class="num">03</span> Custom Home Rep.
+        </button>
+        <button class="nav-item" role="tab" id="tab-development" aria-controls="panel-development" aria-selected="false" data-key="development">
+          <span class="num">04</span> Development
+        </button>
+      </div>
+
+      <div class="nav-divider"></div>
+
+      <div class="nav-group" role="tablist" aria-label="Company">
+        <span class="nav-group-label">Company</span>
+        <button class="nav-item" role="tab" id="tab-tools" aria-controls="panel-tools" aria-selected="false" data-key="tools">
+          <span class="ico" aria-hidden="true">◫</span> Tools Library
+        </button>
+        <button class="nav-item" role="tab" id="tab-team" aria-controls="panel-team" aria-selected="false" data-key="team">
+          <span class="ico" aria-hidden="true">⚇</span> Team
+        </button>
+        <button class="nav-item" role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" data-key="settings">
+          <span class="ico" aria-hidden="true">⚙</span> Settings
+        </button>
+      </div>
+    </aside>
+
+    <!-- ========================= PANELS ========================= -->
+    <main class="app-main">
+      <div class="wrap panels">
+    <section class="panel" id="panel-sales" role="tabpanel" aria-labelledby="tab-sales" aria-hidden="true" tabindex="0">
       <div class="eyebrow">Division 01</div>
       <h1>Sales</h1>
 
       <nav class="subtabbar" role="tablist" aria-label="Sales sections" data-subtab-parent="sales">
-        <button class="subtab" role="tab" aria-controls="subpanel-sales-commissions" aria-selected="true"  data-subkey="commissions">Commissions</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-sales-overview"    aria-selected="true"  data-subkey="overview">Overview</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-sales-commissions" aria-selected="false" data-subkey="commissions">Commissions</button>
         <button class="subtab" role="tab" aria-controls="subpanel-sales-marketing"   aria-selected="false" data-subkey="marketing">Marketing Templates</button>
         <button class="subtab" role="tab" aria-controls="subpanel-sales-openhouse"   aria-selected="false" data-subkey="openhouse">Open House</button>
         <button class="subtab" role="tab" aria-controls="subpanel-sales-listings"    aria-selected="false" data-subkey="listings">New Construction Listings</button>
         <button class="subtab" role="tab" aria-controls="subpanel-sales-platinum"    aria-selected="false" data-subkey="platinum">Platinum Reserve</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-sales-settings"    aria-selected="false" data-subkey="settings">Settings</button>
       </nav>
 
-      <div class="subpanel" id="subpanel-sales-commissions" role="tabpanel" aria-hidden="false" tabindex="0">
+      <div class="subpanel" id="subpanel-sales-overview" role="tabpanel" aria-hidden="false" tabindex="0">
+        <p class="subpanel-intro">Snapshot of the Sales division — your active pipeline, recent commissions, and the most-used tools. (Live tiles wire up next pass.)</p>
+        <div class="placeholder">
+          <div class="mark">— Coming —</div>
+          <h2>Sales overview snapshot</h2>
+          <p>Pipeline value, MTD commissions, active listings, agent activity — pulled from the Commission Tracker sheet.</p>
+        </div>
+      </div>
+
+      <div class="subpanel" id="subpanel-sales-commissions" role="tabpanel" aria-hidden="true" tabindex="0">
 
         <!-- ============= Headline stats ============= -->
         <section class="stats-section" aria-labelledby="sales-stats-title">
@@ -2871,6 +3086,15 @@
            operations commit directly to the Dashboard repo via the GitHub API
            (PAT stored in localStorage). Property data: /platinum-reserve/properties.json
            Photos: /platinum-reserve/assets/<slug>/hero.<ext> -->
+      <div class="subpanel" id="subpanel-sales-settings" role="tabpanel" aria-hidden="true" tabindex="0">
+        <p class="subpanel-intro">Sales-specific settings — commission split defaults, sheet IDs, agent assignments. (Global brokerage info lives in <a href="#settings" style="color:var(--text); border-bottom:1px solid var(--rule-strong);">Settings</a>.)</p>
+        <div class="placeholder">
+          <div class="mark">— Coming —</div>
+          <h2>Sales settings</h2>
+          <p>Default commission split, archive Google Sheet ID, listing-template style preferences.</p>
+        </div>
+      </div>
+
       <div class="subpanel" id="subpanel-sales-platinum" role="tabpanel" aria-hidden="true" tabindex="0">
         <div class="eyebrow" style="margin-bottom:8px;">Sales · Sub-Brand</div>
         <h2 style="font-family:var(--font-display);font-size:24px;letter-spacing:0.08em;text-transform:uppercase;margin:0 0 24px;">Platinum Reserve</h2>
@@ -2925,11 +3149,22 @@
       <h1>Land Acquisition</h1>
 
       <nav class="subtabbar" role="tablist" aria-label="Land Acquisition sections" data-subtab-parent="land">
-        <button class="subtab" role="tab" aria-controls="subpanel-land-pipeline" aria-selected="true"  data-subkey="pipeline">Pipeline</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-land-overview" aria-selected="true"  data-subkey="overview">Overview</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-land-pipeline" aria-selected="false" data-subkey="pipeline">Pipeline</button>
         <button class="subtab" role="tab" aria-controls="subpanel-land-files"    aria-selected="false" data-subkey="files">Files</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-land-settings" aria-selected="false" data-subkey="settings">Settings</button>
       </nav>
 
-      <div class="subpanel" id="subpanel-land-pipeline" role="tabpanel" aria-hidden="false" tabindex="0">
+      <div class="subpanel" id="subpanel-land-overview" role="tabpanel" aria-hidden="false" tabindex="0">
+        <p class="subpanel-intro">Snapshot of Land Acquisition — deals in pipeline, recent submissions, key stages.</p>
+        <div class="placeholder">
+          <div class="mark">— Coming —</div>
+          <h2>Land overview snapshot</h2>
+          <p>Active lots by stage, recent intake submissions, top targets — pulled from the Land Acquisition Intake sheet.</p>
+        </div>
+      </div>
+
+      <div class="subpanel" id="subpanel-land-pipeline" role="tabpanel" aria-hidden="true" tabindex="0">
         <div class="action-grid">
           <button class="primary-action" type="button" id="open-feecalc-modal" aria-haspopup="dialog" aria-controls="feecalc-modal">
             <span class="action-label">Fee Calculator</span>
@@ -2992,6 +3227,15 @@
           </article>
         </div>
       </div>
+
+      <div class="subpanel" id="subpanel-land-settings" role="tabpanel" aria-hidden="true" tabindex="0">
+        <p class="subpanel-intro">Land-specific settings — fee schedule, intake sheet config, archived sources.</p>
+        <div class="placeholder">
+          <div class="mark">— Coming —</div>
+          <h2>Land settings</h2>
+          <p>MRC class definitions, commission schedule defaults, intake sheet ID.</p>
+        </div>
+      </div>
     </section>
 
     <section class="panel" id="panel-customrep" role="tabpanel" aria-labelledby="tab-customrep" aria-hidden="true" tabindex="0">
@@ -2999,11 +3243,22 @@
       <h1>Custom Home Owners Representation</h1>
 
       <nav class="subtabbar" role="tablist" aria-label="Custom Home Rep sections" data-subtab-parent="customrep">
-        <button class="subtab" role="tab" aria-controls="subpanel-customrep-pipeline" aria-selected="true"  data-subkey="pipeline">Pipeline</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-customrep-overview" aria-selected="true"  data-subkey="overview">Overview</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-customrep-pipeline" aria-selected="false" data-subkey="pipeline">Pipeline</button>
         <button class="subtab" role="tab" aria-controls="subpanel-customrep-files"    aria-selected="false" data-subkey="files">Files</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-customrep-settings" aria-selected="false" data-subkey="settings">Settings</button>
       </nav>
 
-      <div class="subpanel" id="subpanel-customrep-pipeline" role="tabpanel" aria-hidden="false" tabindex="0">
+      <div class="subpanel" id="subpanel-customrep-overview" role="tabpanel" aria-hidden="false" tabindex="0">
+        <p class="subpanel-intro">Snapshot of Custom Home Rep — clients in active stage, recent intakes.</p>
+        <div class="placeholder">
+          <div class="mark">— Coming —</div>
+          <h2>Custom Rep overview snapshot</h2>
+          <p>Active clients by stage (1–7), recent intake submissions, builder pairings — from the Custom Rep Intake sheet.</p>
+        </div>
+      </div>
+
+      <div class="subpanel" id="subpanel-customrep-pipeline" role="tabpanel" aria-hidden="true" tabindex="0">
         <div class="action-grid">
           <button class="primary-action" type="button" id="open-customrep-intake-modal" aria-haspopup="dialog" aria-controls="customrep-intake-modal">
             <span class="action-label">Log a New Project</span>
@@ -3087,6 +3342,15 @@
           </article>
         </div>
       </div>
+
+      <div class="subpanel" id="subpanel-customrep-settings" role="tabpanel" aria-hidden="true" tabindex="0">
+        <p class="subpanel-intro">Custom Home Rep-specific settings — intake sheet config, builder roster.</p>
+        <div class="placeholder">
+          <div class="mark">— Coming —</div>
+          <h2>Custom Rep settings</h2>
+          <p>Intake sheet ID, builder partnership defaults, stage labels.</p>
+        </div>
+      </div>
     </section>
 
     <section class="panel" id="panel-development" role="tabpanel" aria-labelledby="tab-development" aria-hidden="true" tabindex="0">
@@ -3094,12 +3358,23 @@
       <h1>Development</h1>
 
       <nav class="subtabbar" role="tablist" aria-label="Development sections" data-subtab-parent="development">
-        <button class="subtab" role="tab" aria-controls="subpanel-development-deals"     aria-selected="true"  data-subkey="deals">Deals</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-development-overview"  aria-selected="true"  data-subkey="overview">Overview</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-development-deals"     aria-selected="false" data-subkey="deals">Deals</button>
         <button class="subtab" role="tab" aria-controls="subpanel-development-marketing" aria-selected="false" data-subkey="marketing">Marketing</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-development-settings"  aria-selected="false" data-subkey="settings">Settings</button>
       </nav>
 
+      <div class="subpanel" id="subpanel-development-overview" role="tabpanel" aria-hidden="false" tabindex="0">
+        <p class="subpanel-intro">Snapshot of Development — active projects, capital deployed, recent investor activity.</p>
+        <div class="placeholder">
+          <div class="mark">— Coming —</div>
+          <h2>Development overview snapshot</h2>
+          <p>Active projects with construction progress, total capital raised, recent investor updates.</p>
+        </div>
+      </div>
+
       <!-- DEALS sub-tab: underwriting + log new + pipeline + archive -->
-      <div class="subpanel" id="subpanel-development-deals" role="tabpanel" aria-hidden="false" tabindex="0">
+      <div class="subpanel" id="subpanel-development-deals" role="tabpanel" aria-hidden="true" tabindex="0">
         <div class="action-grid">
           <button class="primary-action" type="button" id="open-uw-modal" aria-haspopup="dialog" aria-controls="uw-modal">
             <span class="action-label">Underwriting Model</span>
@@ -3177,8 +3452,176 @@
           <p>Property landing pages and listing-launch templates will live here next.</p>
         </div>
       </div>
+
+      <div class="subpanel" id="subpanel-development-settings" role="tabpanel" aria-hidden="true" tabindex="0">
+        <p class="subpanel-intro">Development-specific settings — underwriting defaults, investor portal config, capital sources.</p>
+        <div class="placeholder">
+          <div class="mark">— Coming —</div>
+          <h2>Development settings</h2>
+          <p>Default IRR targets, draw schedule template, equity vs. debt split defaults.</p>
+        </div>
+      </div>
     </section>
-  </main>
+
+    <!-- ========================= HOME PANEL ========================= -->
+    <section class="panel" id="panel-home" role="tabpanel" aria-labelledby="tab-home" aria-hidden="false" tabindex="0">
+      <div class="eyebrow">Workspace</div>
+      <h1>Home</h1>
+      <p class="sub">Your cross-division snapshot. Jump to any active pipeline, recent activity, or launch a tool.</p>
+
+      <div class="home-grid">
+        <article class="home-card is-clickable" onclick="location.hash='#sales'">
+          <span class="h-eyebrow">Division 01 · Sales</span>
+          <div class="h-stat" id="home-sales-pipeline">—</div>
+          <div class="h-label">Active deals in pipeline</div>
+          <div class="h-quick">
+            <a href="#sales">Open Sales →</a>
+          </div>
+        </article>
+
+        <article class="home-card is-clickable" onclick="location.hash='#land'">
+          <span class="h-eyebrow">Division 02 · Land Acquisition</span>
+          <div class="h-stat" id="home-land-pipeline">—</div>
+          <div class="h-label">Land deals in progress</div>
+          <div class="h-quick">
+            <a href="#land">Open Land →</a>
+          </div>
+        </article>
+
+        <article class="home-card is-clickable" onclick="location.hash='#customrep'">
+          <span class="h-eyebrow">Division 03 · Custom Home Rep</span>
+          <div class="h-stat" id="home-custom-pipeline">—</div>
+          <div class="h-label">Active custom-rep clients</div>
+          <div class="h-quick">
+            <a href="#customrep">Open Custom Rep →</a>
+          </div>
+        </article>
+
+        <article class="home-card is-clickable" onclick="location.hash='#development'">
+          <span class="h-eyebrow">Division 04 · Development</span>
+          <div class="h-stat" id="home-dev-pipeline">—</div>
+          <div class="h-label">Active development projects</div>
+          <div class="h-quick">
+            <a href="#development">Open Development →</a>
+          </div>
+        </article>
+      </div>
+
+      <div class="eyebrow" style="margin-top:48px;">Quick Launch</div>
+      <h2 style="font-family:var(--font-display); font-size:20px; letter-spacing:0.04em; text-transform:uppercase; margin: 8px 0 24px;">Generators &amp; Tools</h2>
+      <div class="tools-library" id="home-quicklaunch">
+        <!-- Populated from TOOLS_REGISTRY at runtime -->
+      </div>
+    </section>
+
+    <!-- ========================= TOOLS LIBRARY PANEL ========================= -->
+    <section class="panel" id="panel-tools" role="tabpanel" aria-labelledby="tab-tools" aria-hidden="true" tabindex="0">
+      <div class="eyebrow">Company</div>
+      <h1>Tools Library</h1>
+      <p class="sub">Every Stonehouse generator and operational tool in one place. Each tool also lives in its division's workflow — this view exists to find anything fast as the library grows.</p>
+
+      <div class="tool-filter-bar">
+        <input type="search" id="tools-search" placeholder="Search tools by name or description…" />
+        <select id="tools-division-filter">
+          <option value="">All divisions</option>
+          <option value="sales">Sales</option>
+          <option value="land">Land Acquisition</option>
+          <option value="customrep">Custom Home Rep</option>
+          <option value="development">Development</option>
+          <option value="cross">Cross-division</option>
+        </select>
+        <select id="tools-category-filter">
+          <option value="">All categories</option>
+          <option value="generator">Generators</option>
+          <option value="tracker">Trackers</option>
+          <option value="intake">Intake</option>
+          <option value="dashboard">Dashboards</option>
+        </select>
+      </div>
+      <div class="tools-library" id="tools-grid">
+        <!-- Populated from TOOLS_REGISTRY -->
+      </div>
+    </section>
+
+    <!-- ========================= TEAM PANEL ========================= -->
+    <section class="panel" id="panel-team" role="tabpanel" aria-labelledby="tab-team" aria-hidden="true" tabindex="0">
+      <div class="eyebrow">Company</div>
+      <h1>Team</h1>
+      <p class="sub">Roster of agents and staff. Each member's contact info auto-populates into the offer instructions, listing materials, and other generators when they're selected as the active agent.</p>
+
+      <div class="home-grid">
+        <article class="home-card">
+          <span class="h-eyebrow">Founder &amp; Principal</span>
+          <div class="h-stat" style="font-size:22px; line-height:1.2;">Ryan Stonehouse</div>
+          <div class="h-label">ryan@stonehouserealtyco.com<br>(615) 812-0066</div>
+          <div class="h-label" style="margin-top:8px; color:var(--text-dim);">Divisions: All</div>
+        </article>
+
+        <article class="home-card">
+          <span class="h-eyebrow">Land Acquisition Specialist</span>
+          <div class="h-stat" style="font-size:22px; line-height:1.2;">Kneeland Hibbett</div>
+          <div class="h-label">Unlicensed · Land Acquisition only</div>
+          <div class="h-label" style="margin-top:8px; color:var(--text-dim);">Divisions: Land</div>
+        </article>
+
+        <article class="home-card" style="border-style:dashed; opacity:.6;">
+          <span class="h-eyebrow">+ Add Team Member</span>
+          <div class="h-stat" style="font-size:14px; line-height:1.2;">Coming soon</div>
+          <div class="h-label">Onboarding flow + license intake will live here.</div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ========================= SETTINGS PANEL ========================= -->
+    <section class="panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" aria-hidden="true" tabindex="0">
+      <div class="eyebrow">Company</div>
+      <h1>Settings</h1>
+      <p class="sub">Brokerage info, license numbers, and integration status. Anything stored here flows into every generator and template.</p>
+
+      <div class="home-grid">
+        <article class="home-card">
+          <span class="h-eyebrow">Legal Entity</span>
+          <div class="h-stat" style="font-size:18px; line-height:1.3;">Stonehouse Real Estate LLC</div>
+          <div class="h-label">DBA: The Stonehouse Company</div>
+          <div class="h-label" style="margin-top:6px;">206 Ben Allen Rd #7<br>Nashville, TN 37207</div>
+        </article>
+
+        <article class="home-card">
+          <span class="h-eyebrow">Brokerage License</span>
+          <div class="h-stat" style="font-size:22px; line-height:1.2;">— Pending —</div>
+          <div class="h-label">TN Firm License Number<br>Fill in once on record · auto-flows into all templates</div>
+        </article>
+
+        <article class="home-card">
+          <span class="h-eyebrow">Phone (Main)</span>
+          <div class="h-stat" style="font-size:22px; line-height:1.2;">(615) 812-0066</div>
+          <div class="h-label">Used in offer instructions, OM, LOI, signage</div>
+        </article>
+
+        <article class="home-card">
+          <span class="h-eyebrow">Admin Email</span>
+          <div class="h-stat" style="font-size:16px; line-height:1.3;">thestonehousecompany<br>admin@gmail.com</div>
+          <div class="h-label">Service account · Google Sheets, Forms, Drive</div>
+        </article>
+
+        <article class="home-card">
+          <span class="h-eyebrow">Website</span>
+          <div class="h-stat" style="font-size:18px; line-height:1.3;">thestonehouseco.com</div>
+          <div class="h-label">Public-facing site</div>
+        </article>
+
+        <article class="home-card">
+          <span class="h-eyebrow">Repository</span>
+          <div class="h-stat" style="font-size:14px; line-height:1.4;">github.com/<br>The-Stonehouse-Company/Dashboard</div>
+          <div class="h-label">Dashboard source · GitHub Pages</div>
+        </article>
+      </div>
+
+      <p class="sub" style="margin-top:48px; max-width:none;">More configuration (commission split defaults, sheet IDs, integration tokens, theme tokens) will land here as the system grows.</p>
+    </section>
+      </div>
+    </main>
+  </div>
 
   <!-- ========================= COMMISSION MODAL ========================= -->
   <div class="modal-overlay" id="commission-modal-overlay" aria-hidden="true">
@@ -5428,6 +5871,119 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
       // Year in footer
       document.getElementById('year').textContent = new Date().getFullYear();
+    })();
+
+    // ============================================================
+    // TOOLS REGISTRY — single source of truth for every Stonehouse tool
+    //
+    // Adding a new tool: push one entry to this array. It auto-appears in
+    // the Tools Library AND on the Home quick-launch row. Each tool can
+    // still also be linked directly from its native division card; the
+    // registry just adds a global view + search.
+    //
+    // fields:
+    //   id        — kebab-case stable identifier
+    //   name      — display title (uppercase rendering)
+    //   division  — 'sales' | 'land' | 'customrep' | 'development' | 'cross'
+    //   category  — 'generator' | 'tracker' | 'intake' | 'dashboard'
+    //   href      — relative URL (opens in same/new tab depending on `external`)
+    //   external  — true → opens in new tab (set for generators that pop their own window)
+    //   desc      — short description (one to two sentences)
+    //   status    — 'live' | 'beta' | 'soon'
+    // ============================================================
+    const TOOLS_REGISTRY = [
+      // Sales · Marketing Templates
+      { id: 'property-one-pager',  name: 'Property One Pager',     division: 'sales',       category: 'generator', href: '#sales',  external: false, desc: 'Single-page listing summary for showings, open houses, and broker tours.', status: 'live' },
+      { id: 'cma-generator',       name: 'CMA Generator',           division: 'sales',       category: 'generator', href: '#sales',  external: false, desc: 'Comparative Market Analysis. Imports a RealTracs PDF to prefill comps.', status: 'live' },
+      { id: 'offer-instructions',  name: 'Offer Instructions',      division: 'sales',       category: 'generator', href: 'offer-instructions.html', external: true, desc: 'Email-ready one-pager for buyer agents — utilities, conveyances, required docs, title block.', status: 'live' },
+      { id: 'strategic-marketing-plan', name: 'Marketing Plan · New Construction', division: 'sales', category: 'generator', href: 'assets/marketing-templates/strategic-marketing-plan-new-construction.pdf', external: true, desc: 'Go-to-market strategy for spec builds and ground-up projects.', status: 'live' },
+
+      // Sales · Operations
+      { id: 'open-house-signin',   name: 'Open House Sign-In',      division: 'sales',       category: 'intake',    href: 'open-house-signin.html', external: true, desc: 'iPad kiosk that captures attendee info into the per-agent Google Sheet.', status: 'live' },
+      { id: 'commission-tracker',  name: 'Commission Tracker',      division: 'sales',       category: 'tracker',   href: '#sales',  external: false, desc: 'Log closed deals, track agent volume + commission. Form-driven Google Sheet.', status: 'live' },
+
+      // Development · Marketing
+      { id: 'om-generator',        name: 'Offer Memorandum',        division: 'development', category: 'generator', href: 'om.html', external: true, desc: '14-page branded OM PDF — text, photos, auto-populated underwriting.', status: 'live' },
+      { id: 'cma-dev',             name: 'Comparatives Presentation', division: 'development', category: 'generator', href: '#development', external: false, desc: 'Multi-page Stonehouse-branded comparatives for listing presentations.', status: 'live' },
+      { id: 'loi-generator',       name: 'Letter of Intent',        division: 'development', category: 'generator', href: 'loi.html', external: true, desc: 'Formal LOI to a seller — purchase, EM, closing, contingencies.', status: 'live' },
+      { id: 'investor-deck',       name: 'Investor Deck',           division: 'development', category: 'generator', href: 'investor-deck.html', external: true, desc: '22-slide investor presentation per project — thesis, team, comps, underwriting, sensitivity.', status: 'live' },
+
+      // Development · Deals
+      { id: 'underwriting-model',  name: 'Underwriting Model',      division: 'development', category: 'tracker',   href: '#development', external: false, desc: 'Project costs, returns, draw schedule, sensitivity — interactive.', status: 'live' },
+      { id: 'log-new-dev',         name: 'Log a New Development',   division: 'development', category: 'intake',    href: '#development', external: false, desc: 'Add a project to the current developments pipeline.', status: 'live' },
+
+      // Land Acquisition
+      { id: 'land-intake',         name: 'Land Acquisition Intake', division: 'land',        category: 'intake',    href: '#land', external: false, desc: 'Log a new lot opportunity into the pipeline sheet.', status: 'live' },
+
+      // Custom Home Rep
+      { id: 'customrep-intake',    name: 'Custom Home Rep Intake',  division: 'customrep',   category: 'intake',    href: '#customrep', external: false, desc: 'Log a new buyer/builder pairing into the custom-rep pipeline.', status: 'live' },
+
+      // Cross-division
+      { id: 'engagement-letter',   name: 'Engagement Letter',       division: 'cross',       category: 'generator', href: 'engagement-letter.html', external: true, desc: 'Stonehouse-branded engagement letter — buyer/seller representation.', status: 'live' }
+    ];
+
+    // ============================================================
+    // Tools Library renderer + Home quick-launch
+    // ============================================================
+    (function () {
+      function makeToolCard(t) {
+        const a = document.createElement('a');
+        a.className = 'tool-card';
+        a.href = t.href;
+        if (t.external) { a.target = '_blank'; a.rel = 'noopener'; }
+        const tag = document.createElement('div');
+        tag.className = 'tool-tag';
+        tag.textContent = (t.division === 'cross' ? 'CROSS-DIVISION' : t.division.toUpperCase()) + ' · ' + t.category.toUpperCase();
+        const h = document.createElement('h3');
+        h.textContent = t.name;
+        const p = document.createElement('p');
+        p.textContent = t.desc;
+        a.appendChild(tag); a.appendChild(h); a.appendChild(p);
+        return a;
+      }
+
+      function renderTools(container, list) {
+        container.innerHTML = '';
+        if (list.length === 0) {
+          container.innerHTML = '<p style="color:var(--text-dim); padding:24px 0;">No tools match.</p>';
+          return;
+        }
+        list.forEach(t => container.appendChild(makeToolCard(t)));
+      }
+
+      // Tools Library full grid
+      const grid = document.getElementById('tools-grid');
+      const searchEl = document.getElementById('tools-search');
+      const divEl    = document.getElementById('tools-division-filter');
+      const catEl    = document.getElementById('tools-category-filter');
+      function applyFilters() {
+        const q = (searchEl.value || '').toLowerCase().trim();
+        const d = divEl.value;
+        const c = catEl.value;
+        const list = TOOLS_REGISTRY.filter(t => {
+          if (d && t.division !== d) return false;
+          if (c && t.category !== c) return false;
+          if (q) {
+            const blob = (t.name + ' ' + t.desc + ' ' + t.division + ' ' + t.category).toLowerCase();
+            if (blob.indexOf(q) === -1) return false;
+          }
+          return true;
+        });
+        renderTools(grid, list);
+      }
+      if (grid) {
+        applyFilters();
+        searchEl.addEventListener('input', applyFilters);
+        divEl.addEventListener('change', applyFilters);
+        catEl.addEventListener('change', applyFilters);
+      }
+
+      // Home quick-launch — top 6 generators
+      const quick = document.getElementById('home-quicklaunch');
+      if (quick) {
+        const featured = TOOLS_REGISTRY.filter(t => t.category === 'generator').slice(0, 6);
+        renderTools(quick, featured);
+      }
     })();
 
     // ============================================================
