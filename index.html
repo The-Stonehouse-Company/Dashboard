@@ -3231,6 +3231,32 @@
           </div>
         </section>
 
+        <section class="pipeline-section" aria-labelledby="land-fror-title">
+          <header class="pipeline-head">
+            <div>
+              <div class="eyebrow" style="margin-bottom:8px;">Active Pipeline</div>
+              <h2 class="pipeline-title" id="land-fror-title">First Right of Refusal</h2>
+            </div>
+            <div class="pipeline-meta" id="land-fror-meta">—</div>
+          </header>
+          <div class="deal-list" id="land-fror-list">
+            <div class="deal-empty">No properties on first right of refusal.</div>
+          </div>
+        </section>
+
+        <section class="pipeline-section" aria-labelledby="land-fellout-title">
+          <header class="pipeline-head">
+            <div>
+              <div class="eyebrow" style="margin-bottom:8px;">Archive</div>
+              <h2 class="pipeline-title" id="land-fellout-title">Fell Out of Contract</h2>
+            </div>
+            <div class="pipeline-meta" id="land-fellout-meta">—</div>
+          </header>
+          <div class="deal-list" id="land-fellout-list">
+            <div class="deal-empty">No deals have fallen out of contract.</div>
+          </div>
+        </section>
+
         <div class="placeholder">
           <div class="mark">— Placeholder —</div>
           <h2>More tools coming</h2>
@@ -6736,19 +6762,30 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const LAND_SHEET_ID  = "1pA82pl93-fhGpSoBmU4coJbkLf8KtJlMesc2p5XcKTA";
       const LAND_SHEET_TAB = "Form Responses 1";
 
-      const listEl = document.getElementById('land-pipeline-list');
-      const metaEl = document.getElementById('land-pipeline-meta');
+      // Three pipeline sections — Active (Under Contract), First Right of
+      // Refusal, and Fell Out of Contract. All driven by the same sheet:
+      // route by the "Status" column (blank/Active = Under Contract).
+      const SECTIONS = {
+        active:  { list: document.getElementById('land-pipeline-list'),  meta: document.getElementById('land-pipeline-meta') },
+        fror:    { list: document.getElementById('land-fror-list'),      meta: document.getElementById('land-fror-meta')     },
+        fellout: { list: document.getElementById('land-fellout-list'),   meta: document.getElementById('land-fellout-meta')  }
+      };
+      const listEl = SECTIONS.active.list;     // back-compat for setup-pending branch below
+      const metaEl = SECTIONS.active.meta;
       if (!listEl) return;
 
       // --- Friendly empty/error states ---
-      function setEmpty(message) {
-        listEl.innerHTML = '<div class="deal-empty">' + esc(message) + '</div>';
+      function setEmpty(message, sec = 'active') {
+        const s = SECTIONS[sec];
+        if (s && s.list) s.list.innerHTML = '<div class="deal-empty">' + esc(message) + '</div>';
       }
-      function setError(message) {
-        listEl.innerHTML = '<div class="deal-error">' + esc(message) + '</div>';
+      function setError(message, sec = 'active') {
+        const s = SECTIONS[sec];
+        if (s && s.list) s.list.innerHTML = '<div class="deal-error">' + esc(message) + '</div>';
       }
-      function setMeta(text) {
-        if (metaEl) metaEl.textContent = text;
+      function setMeta(text, sec = 'active') {
+        const s = SECTIONS[sec];
+        if (s && s.meta) s.meta.textContent = text;
       }
 
       // If the sheet ID hasn't been wired up yet, render a setup prompt
@@ -6926,6 +6963,33 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         );
       }
 
+      // Simpler card for FRoR / Fell Out — no progress bars (those deals
+      // either never went under contract or their date is no longer
+      // load-bearing). Shows address, neighborhood, last-known price,
+      // and a small caption line with the date that's most relevant.
+      function renderSimpleCard(d, caption) {
+        const priceVal = d.contract || d.askingPrice;
+        return (
+          '<article class="deal-card">' +
+            '<header class="deal-head">' +
+              '<div>' +
+                '<h3 class="deal-address">' + esc(d.address || 'Untitled property') + '</h3>' +
+                '<div class="deal-meta">' +
+                  esc(d.neighborhood || '') +
+                  (caption ? ' &nbsp;·&nbsp; <span style="color:var(--text-dim);">' + esc(caption) + '</span>' : '') +
+                '</div>' +
+              '</div>' +
+              (priceVal
+                ? '<div class="deal-price">' + esc(fmtUSD(priceVal)) +
+                    (!d.contract && d.askingPrice ? ' <span style="font-size:9px;color:var(--text-dim);letter-spacing:.15em;text-transform:uppercase;margin-left:6px;">asking</span>' : '') +
+                  '</div>'
+                : ''
+              ) +
+            '</header>' +
+          '</article>'
+        );
+      }
+
       // ---------- Main load ----------
       async function loadPipeline() {
         try {
@@ -6940,17 +7004,23 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           const cols  = table.cols || [];
           const rawRows = table.rows || [];
 
-          // Resolve column indices by header label.
+          // Resolve column indices by header label. Status is optional
+          // for back-compat: if the sheet doesn't have a Status column,
+          // everything routes by date rules (under-contract date → active).
           const ix = {
             address:        findCol(cols, 'Property Address'),
             neighborhood:   findCol(cols, 'Neighborhood / Area', 'Neighborhood'),
+            asking:         findCol(cols, 'Asking Price'),
             contract:       findCol(cols, 'Contract Price'),
             underContract:  findCol(cols, 'Date Under Contract', 'Under Contract'),
             ddEnd:          findCol(cols, 'Due Diligence End', 'DD End'),
             closing:        findCol(cols, 'Closing Date', 'Closing'),
+            status:         findCol(cols, 'Status', 'Pipeline Status', 'Stage'),
+            firstContact:   findCol(cols, 'First Contact Date'),
           };
 
-          const missing = Object.entries(ix).filter(([_, v]) => v < 0).map(([k]) => k);
+          const requiredKeys = ['address', 'underContract', 'ddEnd', 'closing'];
+          const missing = requiredKeys.filter((k) => ix[k] < 0);
           if (missing.length) {
             throw new Error('Required column(s) not found in sheet: ' + missing.join(', ') +
               '. Headers must include "Property Address", "Date Under Contract", "Due Diligence End", "Closing Date".');
@@ -6958,44 +7028,96 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
           const today = startOfDay(new Date());
 
-          const deals = rawRows
-            .map((r) => {
-              const c = r.c || [];
-              return {
-                address:       parseGvizString(c[ix.address]),
-                neighborhood:  parseGvizString(c[ix.neighborhood]),
-                contract:      parseGvizNumber(c[ix.contract]),
-                underContract: parseGvizDate(c[ix.underContract]),
-                ddEnd:         parseGvizDate(c[ix.ddEnd]),
-                closing:       parseGvizDate(c[ix.closing]),
-              };
-            })
-            // Only deals that have an Under Contract date
-            .filter((d) => d.underContract instanceof Date)
-            // Drop deals that have already closed (closing in the past).
-            // Empty closing date = still active, keep it.
-            .filter((d) => !d.closing || d.closing >= today);
-
-          // Sort by closing date ascending (next-up first). Deals without
-          // a closing date sink to the bottom.
-          deals.sort((a, b) => {
-            const ac = a.closing ? a.closing.getTime() : Infinity;
-            const bc = b.closing ? b.closing.getTime() : Infinity;
-            return ac - bc;
-          });
-
-          if (deals.length === 0) {
-            setMeta('0 active deals');
-            setEmpty('No deals currently under contract.');
-            return;
+          // Normalize a Status cell into one of our 3 buckets.
+          //   blank / "active" / "under contract"     → 'active'
+          //   "fell out" / "fell out of contract"    → 'fellout'
+          //   "first right of refusal" / "fror" / "fr" → 'fror'
+          //   "closed" / "killed" / "dead"            → 'hidden'
+          function bucketFor(statusRaw) {
+            const s = String(statusRaw || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+            if (!s || s === 'active' || s === 'under contract')           return 'active';
+            if (s.indexOf('fell out') >= 0 || s === 'fellout')             return 'fellout';
+            if (s.indexOf('first right') >= 0 || s === 'fror' || s === 'fr') return 'fror';
+            if (s === 'closed' || s === 'killed' || s === 'dead' || s === 'archive') return 'hidden';
+            return 'active';
           }
 
-          setMeta(deals.length + ' active deal' + (deals.length === 1 ? '' : 's'));
-          listEl.innerHTML = deals.map((d) => renderDealCard(d, today)).join('');
+          const all = rawRows.map((r) => {
+            const c = r.c || [];
+            const statusRaw = ix.status >= 0 ? parseGvizString(c[ix.status]) : '';
+            return {
+              address:       parseGvizString(c[ix.address]),
+              neighborhood:  parseGvizString(c[ix.neighborhood]),
+              askingPrice:   ix.asking >= 0 ? parseGvizNumber(c[ix.asking]) : 0,
+              contract:      parseGvizNumber(c[ix.contract]),
+              underContract: parseGvizDate(c[ix.underContract]),
+              ddEnd:         parseGvizDate(c[ix.ddEnd]),
+              closing:       parseGvizDate(c[ix.closing]),
+              firstContact:  ix.firstContact >= 0 ? parseGvizDate(c[ix.firstContact]) : null,
+              statusRaw:     statusRaw,
+              bucket:        bucketFor(statusRaw)
+            };
+          }).filter((d) => d.address); // need at least an address
+
+          // ---------- Bucket: ACTIVE (under contract) ----------
+          // Status = blank/active AND has under-contract date AND not closed.
+          const active = all
+            .filter((d) => d.bucket === 'active' && d.underContract instanceof Date)
+            .filter((d) => !d.closing || d.closing >= today)
+            .sort((a, b) => {
+              const ac = a.closing ? a.closing.getTime() : Infinity;
+              const bc = b.closing ? b.closing.getTime() : Infinity;
+              return ac - bc;
+            });
+
+          // ---------- Bucket: FIRST RIGHT OF REFUSAL ----------
+          const fror = all
+            .filter((d) => d.bucket === 'fror')
+            .sort((a, b) => (a.address || '').localeCompare(b.address || ''));
+
+          // ---------- Bucket: FELL OUT OF CONTRACT ----------
+          // Sort newest-out-first by most-recently-set date we have.
+          const fellout = all
+            .filter((d) => d.bucket === 'fellout')
+            .sort((a, b) => {
+              const ad = (a.closing || a.ddEnd || a.underContract || a.firstContact || new Date(0)).getTime();
+              const bd = (b.closing || b.ddEnd || b.underContract || b.firstContact || new Date(0)).getTime();
+              return bd - ad;
+            });
+
+          // ---------- Render ACTIVE ----------
+          if (active.length === 0) {
+            setMeta('0 active deals', 'active');
+            setEmpty('No deals currently under contract.', 'active');
+          } else {
+            setMeta(active.length + ' active deal' + (active.length === 1 ? '' : 's'), 'active');
+            SECTIONS.active.list.innerHTML = active.map((d) => renderDealCard(d, today)).join('');
+          }
+
+          // ---------- Render FRoR ----------
+          if (fror.length === 0) {
+            setMeta('0', 'fror');
+            setEmpty('No properties on first right of refusal.', 'fror');
+          } else {
+            setMeta(fror.length + ' propert' + (fror.length === 1 ? 'y' : 'ies'), 'fror');
+            SECTIONS.fror.list.innerHTML = fror.map((d) => renderSimpleCard(d, 'First right of refusal')).join('');
+          }
+
+          // ---------- Render FELL OUT ----------
+          if (fellout.length === 0) {
+            setMeta('0', 'fellout');
+            setEmpty('No deals have fallen out of contract.', 'fellout');
+          } else {
+            setMeta(fellout.length + ' deal' + (fellout.length === 1 ? '' : 's'), 'fellout');
+            SECTIONS.fellout.list.innerHTML = fellout.map((d) => {
+              const cap = d.underContract ? 'Was under contract ' + fmtDate(d.underContract) : 'Fell out of contract';
+              return renderSimpleCard(d, cap);
+            }).join('');
+          }
         } catch (err) {
           console.error('Land pipeline load failed:', err);
-          setMeta('Could not load');
-          setError('Could not load pipeline: ' + (err && err.message ? err.message : err));
+          setMeta('Could not load', 'active');
+          setError('Could not load pipeline: ' + (err && err.message ? err.message : err), 'active');
         }
       }
 
