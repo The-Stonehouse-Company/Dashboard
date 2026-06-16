@@ -28,7 +28,7 @@
       /* US Letter portrait at 96 DPI = 816 × 1056 */
       --page-w: 816px;
       --page-h: 1056px;
-      --page-pad: 64px;
+      --page-pad: 48px;
     }
     *, *::before, *::after { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; background: var(--bg); }
@@ -155,8 +155,8 @@
       color: var(--ink);
       padding: var(--page-pad);
       font-family: var(--font-body);
-      font-size: 13px;
-      line-height: 1.55;
+      font-size: 12px;
+      line-height: 1.42;
       box-shadow: 0 8px 30px rgba(0,0,0,.5);
       position: relative;
       overflow: hidden;
@@ -165,20 +165,20 @@
     /* ----- Head: logo + wordmark ----- */
     .page-head {
       text-align: center;
-      padding-bottom: 18px;
+      padding-bottom: 10px;
       border-bottom: 1px solid var(--rule);
-      margin-bottom: 24px;
+      margin-bottom: 14px;
     }
     .page-head .arch {
-      width: 54px; height: 54px;
+      width: 40px; height: 40px;
       background: var(--ink);
       -webkit-mask: url('assets/icon-arch-transparent.png') center/contain no-repeat;
               mask: url('assets/icon-arch-transparent.png') center/contain no-repeat;
-      margin: 0 auto 8px;
+      margin: 0 auto 4px;
     }
     .page-head .wm {
       font-family: var(--font-display);
-      font-size: 14px;
+      font-size: 12px;
       letter-spacing: .32em;
       color: var(--ink);
       text-transform: uppercase;
@@ -186,21 +186,21 @@
     .page-head .wm small {
       display: block;
       font-family: var(--font-body);
-      font-size: 8.5px;
+      font-size: 7.5px;
       letter-spacing: .25em;
       color: var(--accent);
-      margin-top: 5px;
+      margin-top: 3px;
       font-weight: 600;
     }
 
     /* ----- Title ----- */
     .doc-title {
       text-align: center;
-      margin: 6px 0 24px;
+      margin: 4px 0 14px;
     }
     .doc-title h1 {
       font-family: var(--font-display);
-      font-size: 28px;
+      font-size: 22px;
       letter-spacing: .04em;
       margin: 0;
       font-weight: 400;
@@ -209,27 +209,27 @@
     .doc-title .sub {
       font-family: var(--font-body);
       font-style: italic;
-      font-size: 13px;
+      font-size: 11px;
       color: var(--ink-muted);
-      margin-top: 6px;
+      margin-top: 3px;
     }
 
     /* ----- Body sections ----- */
-    .sec { margin-bottom: 14px; }
+    .sec { margin-bottom: 8px; }
     .sec h2 {
       font-family: var(--font-body);
-      font-size: 13.5px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--ink);
-      margin: 0 0 6px;
+      margin: 0 0 3px;
     }
-    .sec p { margin: 0 0 4px; }
+    .sec p { margin: 0 0 2px; }
     .sec .inline-label { font-weight: 700; }
     .sec ul {
-      list-style: none; padding: 0; margin: 4px 0 0 18px;
+      list-style: none; padding: 0; margin: 2px 0 0 14px;
     }
     .sec ul li {
-      position: relative; padding-left: 14px; margin-bottom: 3px;
+      position: relative; padding-left: 12px; margin-bottom: 1px;
     }
     .sec ul li::before {
       content: '•';
@@ -251,27 +251,27 @@
       gap: 14px;
       margin-top: 10px;
     }
-    .block { font-size: 12.5px; }
+    .block { font-size: 11.5px; line-height: 1.4; }
     .block h3 {
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
       color: var(--ink);
-      margin: 0 0 4px;
+      margin: 0 0 3px;
       text-transform: none;
       letter-spacing: 0;
     }
-    .block .line { color: var(--ink); margin-bottom: 2px; }
+    .block .line { color: var(--ink); margin-bottom: 1px; }
     .block .line .k { color: var(--ink-muted); margin-right: 4px; }
 
     /* ----- Footer rule + brand line ----- */
     .page-foot {
       position: absolute;
       left: var(--page-pad); right: var(--page-pad);
-      bottom: 36px;
+      bottom: 20px;
       border-top: 1px solid var(--rule);
-      padding-top: 10px;
+      padding-top: 6px;
       font-family: var(--font-body);
-      font-size: 9.5px;
+      font-size: 8.5px;
       color: var(--ink-muted);
       letter-spacing: .15em;
       text-transform: uppercase;
@@ -445,7 +445,7 @@
         company:  '',
         address:  '',
         contact:  '',
-        email:    '',
+        phone:    '',                // title contact phone
         days:     '5'                // earnest money days
       },
       // Editable "Information to Include in Contract" block.
@@ -609,7 +609,7 @@
         textRow('title.company', 'Title company'),
         textRow('title.address', 'Title company address'),
         textRow('title.contact', 'Title contact name'),
-        textRow('title.email', 'Title contact email'),
+        textRow('title.phone', 'Title contact phone'),
         textRow('title.days', 'Days to provide EM', { type: 'number', placeholder: '5' })
       ]));
       root.appendChild(section('Listing agent', [
@@ -703,7 +703,7 @@
         <div class="sec">
           <h2>Sellers' Title Company and Earnest Money to be provided within ${escapeHTML(state.title.days || '5')} days and held by:</h2>
           <p>${escapeHTML(state.title.company || '—')}${state.title.address ? ', ' + escapeHTML(state.title.address) : ''}</p>
-          ${state.title.contact || state.title.email ? `<p>Contact: ${escapeHTML(state.title.contact)}${state.title.email ? ' | <a class="email" href="mailto:' + escapeHTML(state.title.email) + '">' + escapeHTML(state.title.email) + '</a>' : ''}</p>` : ''}
+          ${state.title.contact || state.title.phone ? `<p>Contact: ${escapeHTML(state.title.contact)}${state.title.phone ? ' | ' + escapeHTML(state.title.phone) : ''}</p>` : ''}
         </div>
 
         <div class="page-foot">
@@ -753,7 +753,7 @@
         company: 'The Row Title & Escrow',
         address: '20 Music Square W #200, Nashville, TN 37203',
         contact: 'Jennifer Ghanem',
-        email:   'jennifer@rowtitle.com',
+        phone:   '(615) 555-0123',
         days:    '5'
       },
       agentId: AGENTS[0].id
