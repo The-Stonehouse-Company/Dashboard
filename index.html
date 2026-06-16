@@ -12589,35 +12589,14 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       }
     };
 
-    const BUILTIN_ROSTER = [
-      {
-        id:        "ryan",
-        name:      "Ryan Stonehouse",
-        title:     "Founder & Principal",
-        role:      "Founder",
-        active:    true,
-        email:     "ryan@stonehouserealtyco.com",
-        phone:     "(615) 812-0066",
-        photo:     "",
-        license:   "",
-        divisions: ["sales", "land", "customrep", "development"]
-      },
-      {
-        id:        "kneeland",
-        name:      "Kneeland Hibbett",
-        title:     "Land Acquisition Specialist",
-        role:      "Specialist",
-        active:    true,
-        email:     "",
-        phone:     "",
-        photo:     "",
-        license:   "",
-        divisions: ["land"]
-      }
-    ];
+    // No hardcoded roster — the Sheet is the single source of truth.
+    // On page load we start empty and show a Loading state until the
+    // gviz fetch returns. If the Sheet is unreachable or empty, the
+    // Team panel just shows the "+ Add Team Member" card.
+    const BUILTIN_ROSTER = [];
 
-    window.STONEHOUSE_TEAM = BUILTIN_ROSTER.slice();
-    window.STONEHOUSE_TEAM_STATUS = "fallback";
+    window.STONEHOUSE_TEAM = [];
+    window.STONEHOUSE_TEAM_STATUS = "loading";
 
     (function () {
       const DIVISION_LABEL = {
@@ -12694,9 +12673,16 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         const count = roster.length;
         const statusTxt = window.STONEHOUSE_TEAM_STATUS;
         let metaTxt = '';
-        if (statusTxt === 'live')     metaTxt = `${count} active member${count === 1 ? '' : 's'} · Synced from Team Roster sheet`;
-        else if (statusTxt === 'fallback') metaTxt = `${count} member${count === 1 ? '' : 's'} · Showing built-in fallback (set TEAM_CONFIG in index.html to enable sync)`;
-        else                          metaTxt = `${count} member${count === 1 ? '' : 's'}`;
+        if (statusTxt === 'live' && count > 0)
+          metaTxt = `${count} active member${count === 1 ? '' : 's'} · Synced from Team Roster sheet`;
+        else if (statusTxt === 'live' && count === 0)
+          metaTxt = `No team members yet — click "+ Add Team Member" to add the first one.`;
+        else if (statusTxt === 'unreachable')
+          metaTxt = `Team Roster sheet unreachable — check sharing settings (Anyone with link → Viewer).`;
+        else if (statusTxt === 'unconfigured')
+          metaTxt = `Team Roster not configured. Set TEAM_CONFIG.SHEET_ID in index.html to enable sync.`;
+        else
+          metaTxt = `Loading roster…`;
         if (meta) meta.textContent = metaTxt;
       }
 
@@ -12710,7 +12696,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       // -----------------------------------------------------------
       async function loadRoster() {
         if (!TEAM_CONFIG.SHEET_ID) {
-          window.STONEHOUSE_TEAM_STATUS = 'fallback';
+          window.STONEHOUSE_TEAM_STATUS = 'unconfigured';
           renderRoster();
           return;
         }
@@ -12764,15 +12750,13 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             })
             .filter(Boolean);
 
-          if (parsed.length > 0) {
-            window.STONEHOUSE_TEAM = parsed;
-            window.STONEHOUSE_TEAM_STATUS = 'live';
-          } else {
-            window.STONEHOUSE_TEAM_STATUS = 'fallback';
-          }
+          // Always assign — even if 0 rows, "live" + 0 means "Sheet is
+          // reachable but empty" which is a meaningful state for the UI.
+          window.STONEHOUSE_TEAM = parsed;
+          window.STONEHOUSE_TEAM_STATUS = 'live';
         } catch (err) {
-          console.warn('[TEAM] roster fetch failed, using fallback:', err);
-          window.STONEHOUSE_TEAM_STATUS = 'fallback';
+          console.warn('[TEAM] roster fetch failed:', err);
+          window.STONEHOUSE_TEAM_STATUS = 'unreachable';
         }
         renderRoster();
         document.dispatchEvent(new CustomEvent('stonehouse:team-loaded', { detail: window.STONEHOUSE_TEAM }));
