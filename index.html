@@ -3963,11 +3963,11 @@
           <div class="form-grid">
             <div>
               <label for="bd-price">Contract Price <span class="req">*</span></label>
-              <input id="bd-price" name="contract_price" type="number" step="1000" required placeholder="850000" />
+              <input id="bd-price" name="contract_price" type="number" step="any" min="0" required placeholder="850000" />
             </div>
             <div>
               <label for="bd-em">Earnest Money</label>
-              <input id="bd-em" name="earnest_money" type="number" step="500" placeholder="10000" />
+              <input id="bd-em" name="earnest_money" type="number" step="any" min="0" placeholder="10000" />
             </div>
           </div>
         </fieldset>
@@ -4078,7 +4078,7 @@
           <div class="form-grid">
             <div>
               <label for="ls-list-price">List Price <span class="req">*</span></label>
-              <input id="ls-list-price" name="list_price" type="number" step="1000" required placeholder="1250000" />
+              <input id="ls-list-price" name="list_price" type="number" step="any" min="0" required placeholder="1250000" />
             </div>
             <div>
               <label for="ls-list-date">List Date <span class="req">*</span></label>
@@ -4094,7 +4094,7 @@
             </div>
             <div>
               <label for="ls-sold">Sold Price (if closed)</label>
-              <input id="ls-sold" name="sold_price" type="number" step="1000" placeholder="1235000" />
+              <input id="ls-sold" name="sold_price" type="number" step="any" min="0" placeholder="1235000" />
             </div>
           </div>
         </fieldset>
