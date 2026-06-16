@@ -3613,6 +3613,29 @@
         </article>
       </div>
 
+      <div class="eyebrow" style="margin-top:48px;">Sales Snapshot</div>
+      <h2 style="font-family:var(--font-display); font-size:20px; letter-spacing:0.04em; text-transform:uppercase; margin: 8px 0 24px;">Pipeline Volume</h2>
+
+      <div class="home-grid">
+        <article class="home-card">
+          <span class="h-eyebrow">Listing Volume · Active</span>
+          <div class="h-stat" id="home-listing-volume">—</div>
+          <div class="h-label">Total list price of active listings</div>
+        </article>
+
+        <article class="home-card">
+          <span class="h-eyebrow">Active Pipeline</span>
+          <div class="h-stat" id="home-sales-pipeline-detail">—</div>
+          <div class="h-label">Buyer-side deals + active listings</div>
+        </article>
+
+        <article class="home-card">
+          <span class="h-eyebrow">Buyer Rep · Under Contract</span>
+          <div class="h-stat" id="home-buyer-volume">—</div>
+          <div class="h-label">Total contract value of active buyer deals</div>
+        </article>
+      </div>
+
     </section>
 
     <!-- ========================= TOOLS LIBRARY PANEL ========================= -->
@@ -13432,14 +13455,35 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    // Sales Home tile = buyer-side deals + listings combined. Each loader
-    // writes its count into window._salesCounts; this helper refreshes
-    // the tile whenever either side updates.
+    // Compact USD formatter: $1.2M / $850K / $0 — for the Home stat tiles
+    // where space is tight and big numbers shouldn't dominate the layout.
+    function _adFmtCompactUSD(n) {
+      if (!n || !isFinite(n)) return '$0';
+      const abs = Math.abs(n);
+      if (abs >= 1_000_000) {
+        const m = n / 1_000_000;
+        return '$' + (m >= 10 ? m.toFixed(1).replace(/\.0$/, '') : m.toFixed(2).replace(/\.?0+$/, '')) + 'M';
+      }
+      if (abs >= 1_000) {
+        return '$' + Math.round(n / 1_000) + 'K';
+      }
+      return '$' + Math.round(n);
+    }
+
+    // Sales Home tiles — both the count tile and the Sales Snapshot row.
+    // Each loader writes its sub-totals into window._salesCounts;
+    // this helper refreshes ALL Sales-related tiles whenever either side updates.
     function _adRefreshSalesHomeTile() {
-      const el = document.getElementById('home-sales-pipeline');
-      if (!el) return;
-      const c = window._salesCounts || { buyer: 0, listings: 0 };
-      el.textContent = String((c.buyer || 0) + (c.listings || 0));
+      const c = window._salesCounts || { buyer: 0, listings: 0, buyerVolume: 0, listingVolume: 0 };
+      const total = (c.buyer || 0) + (c.listings || 0);
+      const top = document.getElementById('home-sales-pipeline');
+      if (top) top.textContent = String(total);
+      const detail = document.getElementById('home-sales-pipeline-detail');
+      if (detail) detail.textContent = String(total);
+      const lv = document.getElementById('home-listing-volume');
+      if (lv) lv.textContent = _adFmtCompactUSD(c.listingVolume || 0);
+      const bv = document.getElementById('home-buyer-volume');
+      if (bv) bv.textContent = _adFmtCompactUSD(c.buyerVolume || 0);
     }
 
     // ----- Stage chip rendering (re-usable) -----
@@ -13597,9 +13641,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             const bc = b.closing ? b.closing.getTime() : Infinity;
             return ac - bc;
           });
-          // Track count for Home tile (combined Sales count = buyer + listings)
-          window._salesCounts = window._salesCounts || { buyer: 0, listings: 0 };
+          // Track count + volume for Home tiles
+          window._salesCounts = window._salesCounts || { buyer: 0, listings: 0, buyerVolume: 0, listingVolume: 0 };
           window._salesCounts.buyer = deals.length;
+          window._salesCounts.buyerVolume = deals.reduce((sum, d) => sum + (d.contractPrice || 0), 0);
           _adRefreshSalesHomeTile();
           if (deals.length === 0) {
             setMeta('0 active'); setEmpty('No buyer-side deals currently active.');
@@ -13680,9 +13725,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             const lb = b.listDate ? b.listDate.getTime() : 0;
             return lb - la;
           });
-          // Track count for Home tile (combined Sales count = buyer + listings)
-          window._salesCounts = window._salesCounts || { buyer: 0, listings: 0 };
+          // Track count + volume for Home tiles
+          window._salesCounts = window._salesCounts || { buyer: 0, listings: 0, buyerVolume: 0, listingVolume: 0 };
           window._salesCounts.listings = listings.length;
+          window._salesCounts.listingVolume = listings.reduce((sum, d) => sum + (d.listPrice || 0), 0);
           _adRefreshSalesHomeTile();
           if (listings.length === 0) {
             setMeta('0 active'); setEmpty('No active listings.');
