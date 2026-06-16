@@ -2400,6 +2400,101 @@
     }
 
     /* =========================================================
+       COMMISSIONS — Passcode lock screen
+       ========================================================= */
+    .commissions-lock {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      padding: 40px 20px;
+    }
+    .commissions-lock-card {
+      max-width: 460px;
+      width: 100%;
+      border: 1px solid var(--rule);
+      background: var(--bg-elev);
+      padding: 40px 36px;
+      text-align: center;
+    }
+    .commissions-lock-icon {
+      font-family: var(--font-display);
+      font-size: 36px;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      margin-bottom: 18px;
+    }
+    .commissions-lock-eyebrow {
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 14px;
+    }
+    .commissions-lock-title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text);
+      margin: 0 0 14px;
+    }
+    .commissions-lock-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0 0 28px;
+    }
+    .commissions-lock-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .commissions-lock-form input[type="password"] {
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      color: var(--text);
+      padding: 14px 16px;
+      font-family: var(--font-body);
+      font-size: 18px;
+      letter-spacing: 0.3em;
+      text-align: center;
+    }
+    .commissions-lock-form input[type="password"]:focus {
+      outline: none;
+      border-color: var(--text);
+    }
+    .commissions-lock-form button {
+      font-family: var(--font-body);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 12px;
+      background: var(--text);
+      color: #000;
+      border: 1px solid var(--text);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .commissions-lock-form button:hover { opacity: .85; }
+    .commissions-lock-status {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #d99;
+      min-height: 14px;
+      margin-top: 4px;
+    }
+    .commissions-lock-status.ok { color: #9ec39e; }
+    .commissions-lock-foot {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin: 24px 0 0;
+    }
+
+    /* =========================================================
        APP SHELL — Sidebar nav + main content area
        (Phase 1 of the structured-for-growth redesign)
        ========================================================= */
@@ -2917,6 +3012,24 @@
 
       <div class="subpanel" id="subpanel-sales-commissions" role="tabpanel" aria-hidden="true" tabindex="0">
 
+        <!-- ============= Passcode gate ============= -->
+        <div class="commissions-lock" id="commissions-lock" style="display:none;">
+          <div class="commissions-lock-card">
+            <div class="commissions-lock-icon" aria-hidden="true">⌗</div>
+            <div class="commissions-lock-eyebrow">Sales Division · Restricted</div>
+            <h2 class="commissions-lock-title">Commissions Locked</h2>
+            <p class="commissions-lock-sub">Enter the Commissions passcode to view division volume, agent earnings, and the commission submission form.</p>
+            <form class="commissions-lock-form" id="commissions-lock-form" autocomplete="off">
+              <input type="password" id="commissions-lock-input" inputmode="numeric" placeholder="Passcode" autocomplete="off" />
+              <button type="submit" class="btn">Unlock</button>
+              <div class="commissions-lock-status" id="commissions-lock-status"></div>
+            </form>
+            <p class="commissions-lock-foot">Unlocks for 24 hours on this device.</p>
+          </div>
+        </div>
+
+        <div id="commissions-content" style="display:none;">
+
         <!-- ============= Headline stats ============= -->
         <section class="stats-section" aria-labelledby="sales-stats-title">
           <div class="stats-section-head">
@@ -2966,6 +3079,8 @@
             <span class="action-arrow" aria-hidden="true">→</span>
           </button>
         </div>
+
+        </div><!-- /#commissions-content -->
       </div>
 
       <div class="subpanel" id="subpanel-sales-openhouse" role="tabpanel" aria-hidden="true" tabindex="0">
@@ -14257,6 +14372,81 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           fileEl.value = ''; // allow re-import of same file
         }
       });
+    })();
+
+    // ============================================================
+    // Commissions passcode gate
+    //
+    // The Commissions subtab is wrapped in a lock screen until the
+    // user enters COMMISSIONS_PASSCODE. Once entered, the unlock is
+    // remembered in localStorage with a 24-hour expiration.
+    //
+    // SECURITY NOTE: This is a client-side speed bump, not real auth.
+    // Anyone with DevTools can bypass it. It exists to keep teammates
+    // who casually browse the dashboard from seeing commission data.
+    //
+    // To change the passcode: edit COMMISSIONS_PASSCODE below.
+    // ============================================================
+    (function () {
+      const COMMISSIONS_PASSCODE = "3034";
+      const STORAGE_KEY = "stonehouse.commissions.unlockedUntil";
+      const UNLOCK_DURATION_MS = 24 * 60 * 60 * 1000;  // 24 hours
+
+      const lockEl    = document.getElementById('commissions-lock');
+      const contentEl = document.getElementById('commissions-content');
+      const formEl    = document.getElementById('commissions-lock-form');
+      const inputEl   = document.getElementById('commissions-lock-input');
+      const statusEl  = document.getElementById('commissions-lock-status');
+      if (!lockEl || !contentEl || !formEl) return;
+
+      function isUnlocked() {
+        const until = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+        return until && Date.now() < until;
+      }
+      function applyState() {
+        if (isUnlocked()) {
+          lockEl.style.display = 'none';
+          contentEl.style.display = 'block';
+        } else {
+          lockEl.style.display = 'flex';
+          contentEl.style.display = 'none';
+        }
+      }
+      function setStatus(kind, msg) {
+        if (!statusEl) return;
+        statusEl.className = 'commissions-lock-status' + (kind ? ' ' + kind : '');
+        statusEl.textContent = msg || '';
+      }
+
+      formEl.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const val = (inputEl.value || '').trim();
+        if (val === COMMISSIONS_PASSCODE) {
+          localStorage.setItem(STORAGE_KEY, String(Date.now() + UNLOCK_DURATION_MS));
+          setStatus('ok', '✓ Unlocked');
+          inputEl.value = '';
+          applyState();
+        } else {
+          setStatus('err', 'Incorrect passcode');
+          inputEl.select();
+        }
+      });
+
+      // Initial render
+      applyState();
+
+      // Re-check whenever the Commissions subtab becomes active (in case
+      // the timer expired while the user was on another tab).
+      const commsTabBtn = document.querySelector('[aria-controls="subpanel-sales-commissions"]');
+      if (commsTabBtn) {
+        commsTabBtn.addEventListener('click', () => {
+          applyState();
+          // Auto-focus the passcode input for fast unlock
+          if (!isUnlocked()) {
+            setTimeout(() => inputEl && inputEl.focus(), 50);
+          }
+        });
+      }
     })();
   </script>
 </body>
