@@ -2853,6 +2853,7 @@
 
       <nav class="subtabbar" role="tablist" aria-label="Sales sections" data-subtab-parent="sales">
         <button class="subtab" role="tab" aria-controls="subpanel-sales-overview"    aria-selected="true"  data-subkey="overview">Overview</button>
+        <button class="subtab" role="tab" aria-controls="subpanel-sales-deals"       aria-selected="false" data-subkey="deals">Active Deals</button>
         <button class="subtab" role="tab" aria-controls="subpanel-sales-commissions" aria-selected="false" data-subkey="commissions">Commissions</button>
         <button class="subtab" role="tab" aria-controls="subpanel-sales-marketing"   aria-selected="false" data-subkey="marketing">Marketing Templates</button>
         <button class="subtab" role="tab" aria-controls="subpanel-sales-openhouse"   aria-selected="false" data-subkey="openhouse">Open House</button>
@@ -2868,6 +2869,50 @@
           <h2>Sales overview snapshot</h2>
           <p>Pipeline value, MTD commissions, active listings, agent activity — pulled from the Commission Tracker sheet.</p>
         </div>
+      </div>
+
+      <!-- ACTIVE DEALS subtab: buyer-side + listing-side -->
+      <div class="subpanel" id="subpanel-sales-deals" role="tabpanel" aria-hidden="true" tabindex="0">
+        <p class="subpanel-intro">Track every deal in motion. Buyer-side deals under contract live in the top section; sell-side listings with their current stage live below.</p>
+
+        <div class="action-grid">
+          <button class="primary-action" type="button" id="open-buyerdeal-modal" aria-haspopup="dialog" aria-controls="buyerdeal-modal">
+            <span class="action-label">Log a Buyer-Side Deal</span>
+            <span class="action-sub">Capture a new buyer rep contract — client, price, dates, current stage</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="primary-action" type="button" id="open-listing-modal" aria-haspopup="dialog" aria-controls="listing-modal">
+            <span class="action-label">Log a Listing</span>
+            <span class="action-sub">Capture a new listing-side deal — seller, list price, stage</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <section class="pipeline-section" aria-labelledby="buyerdeal-title">
+          <header class="pipeline-head">
+            <div>
+              <div class="eyebrow" style="margin-bottom:8px;">Buyer Side · Active Pipeline</div>
+              <h2 class="pipeline-title" id="buyerdeal-title">Under Contract — Buyer Rep</h2>
+            </div>
+            <div class="pipeline-meta" id="buyerdeal-meta">Loading…</div>
+          </header>
+          <div class="deal-list" id="buyerdeal-list">
+            <div class="deal-empty">Loading deals…</div>
+          </div>
+        </section>
+
+        <section class="pipeline-section" aria-labelledby="listings-title">
+          <header class="pipeline-head">
+            <div>
+              <div class="eyebrow" style="margin-bottom:8px;">Sell Side · Active Pipeline</div>
+              <h2 class="pipeline-title" id="listings-title">Listings — Seller Rep</h2>
+            </div>
+            <div class="pipeline-meta" id="listings-meta">Loading…</div>
+          </header>
+          <div class="deal-list" id="listings-list">
+            <div class="deal-empty">Loading listings…</div>
+          </div>
+        </section>
       </div>
 
       <div class="subpanel" id="subpanel-sales-commissions" role="tabpanel" aria-hidden="true" tabindex="0">
@@ -3854,6 +3899,222 @@
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="cancel-team">Cancel</button>
         <button class="btn" type="submit" form="team-form" id="submit-team">Add Member</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========================= LOG A BUYER-SIDE DEAL MODAL ========================= -->
+  <div class="modal-overlay" id="buyerdeal-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="buyerdeal-modal-title" id="buyerdeal-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Sales · Buyer Rep</span>
+          <h2 class="modal-title" id="buyerdeal-modal-title">Log a Buyer-Side Deal</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-buyerdeal-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="buyerdeal-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Deal Identity</legend>
+          <div class="form-grid">
+            <div>
+              <label for="bd-agent">Stonehouse Agent <span class="req">*</span></label>
+              <select id="bd-agent" name="agent" required>
+                <option value="" disabled selected>Select agent…</option>
+                <option value="Ryan Stonehouse">Ryan Stonehouse</option>
+              </select>
+            </div>
+            <div>
+              <label for="bd-client">Buyer / Client Name(s) <span class="req">*</span></label>
+              <input id="bd-client" name="client" type="text" required placeholder="John & Jane Doe" />
+            </div>
+            <div class="full">
+              <label for="bd-address">Property Address <span class="req">*</span></label>
+              <input id="bd-address" name="property_address" type="text" required placeholder="123 Main St, Nashville, TN 37205" />
+            </div>
+            <div>
+              <label for="bd-stage">Current Stage <span class="req">*</span></label>
+              <select id="bd-stage" name="stage" required>
+                <option value="" disabled selected>Select stage…</option>
+                <option value="Under Contract">Under Contract</option>
+                <option value="Due Diligence">Due Diligence</option>
+                <option value="Inspections">Inspections</option>
+                <option value="Appraisal">Appraisal</option>
+                <option value="Financing">Financing</option>
+                <option value="Cleared to Close">Cleared to Close</option>
+                <option value="Closed">Closed</option>
+                <option value="Killed">Killed (Fell Out)</option>
+              </select>
+            </div>
+            <div>
+              <label for="bd-listing-agent">Listing Agent (other side)</label>
+              <input id="bd-listing-agent" name="listing_agent" type="text" placeholder="Agent name" />
+            </div>
+            <div class="full">
+              <label for="bd-listing-brokerage">Listing Brokerage</label>
+              <input id="bd-listing-brokerage" name="listing_brokerage" type="text" placeholder="Brokerage name" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Financials</legend>
+          <div class="form-grid">
+            <div>
+              <label for="bd-price">Contract Price <span class="req">*</span></label>
+              <input id="bd-price" name="contract_price" type="number" step="1000" required placeholder="850000" />
+            </div>
+            <div>
+              <label for="bd-em">Earnest Money</label>
+              <input id="bd-em" name="earnest_money" type="number" step="500" placeholder="10000" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Dates</legend>
+          <div class="form-grid">
+            <div>
+              <label for="bd-uc">Date Under Contract <span class="req">*</span></label>
+              <input id="bd-uc" name="date_under_contract" type="date" required />
+            </div>
+            <div>
+              <label for="bd-dd">Due Diligence End</label>
+              <input id="bd-dd" name="dd_end" type="date" />
+            </div>
+            <div>
+              <label for="bd-insp">Inspection Date</label>
+              <input id="bd-insp" name="inspection_date" type="date" />
+            </div>
+            <div>
+              <label for="bd-appr">Appraisal Date</label>
+              <input id="bd-appr" name="appraisal_date" type="date" />
+            </div>
+            <div>
+              <label for="bd-fin">Financing Contingency</label>
+              <input id="bd-fin" name="financing_contingency" type="date" />
+            </div>
+            <div>
+              <label for="bd-close">Closing Date</label>
+              <input id="bd-close" name="closing_date" type="date" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Notes</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="bd-notes">Notes (optional)</label>
+              <textarea id="bd-notes" name="notes" rows="3" placeholder="Anything noteworthy about this deal…"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="form-status" id="buyerdeal-form-status" aria-live="polite"></div>
+      </form>
+
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-buyerdeal">Cancel</button>
+        <button class="btn" type="submit" form="buyerdeal-form" id="submit-buyerdeal">Log Buyer Deal</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========================= LOG A LISTING MODAL ========================= -->
+  <div class="modal-overlay" id="listing-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="listing-modal-title" id="listing-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Sales · Seller Rep</span>
+          <h2 class="modal-title" id="listing-modal-title">Log a Listing</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-listing-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="listing-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Listing Identity</legend>
+          <div class="form-grid">
+            <div>
+              <label for="ls-agent">Listing Agent (Stonehouse) <span class="req">*</span></label>
+              <select id="ls-agent" name="agent" required>
+                <option value="" disabled selected>Select agent…</option>
+                <option value="Ryan Stonehouse">Ryan Stonehouse</option>
+              </select>
+            </div>
+            <div>
+              <label for="ls-seller">Seller Name(s) <span class="req">*</span></label>
+              <input id="ls-seller" name="seller" type="text" required placeholder="Seller LLC / John Doe" />
+            </div>
+            <div class="full">
+              <label for="ls-address">Property Address <span class="req">*</span></label>
+              <input id="ls-address" name="property_address" type="text" required placeholder="456 Belle Meade Blvd, Nashville, TN 37205" />
+            </div>
+            <div>
+              <label for="ls-stage">Current Stage <span class="req">*</span></label>
+              <select id="ls-stage" name="stage" required>
+                <option value="" disabled selected>Select stage…</option>
+                <option value="Coming Soon">Coming Soon</option>
+                <option value="Active">Active</option>
+                <option value="Showing">Showing</option>
+                <option value="Pending">Pending</option>
+                <option value="Under Contract">Under Contract</option>
+                <option value="Closed">Closed</option>
+                <option value="Withdrawn">Withdrawn</option>
+                <option value="Expired">Expired</option>
+              </select>
+            </div>
+            <div>
+              <label for="ls-buyer-agent">Buyer's Agent (if under contract)</label>
+              <input id="ls-buyer-agent" name="buyer_agent" type="text" placeholder="Other side rep" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Financials & Dates</legend>
+          <div class="form-grid">
+            <div>
+              <label for="ls-list-price">List Price <span class="req">*</span></label>
+              <input id="ls-list-price" name="list_price" type="number" step="1000" required placeholder="1250000" />
+            </div>
+            <div>
+              <label for="ls-list-date">List Date <span class="req">*</span></label>
+              <input id="ls-list-date" name="list_date" type="date" required />
+            </div>
+            <div>
+              <label for="ls-uc">Date Under Contract</label>
+              <input id="ls-uc" name="date_under_contract" type="date" />
+            </div>
+            <div>
+              <label for="ls-close">Closing Date</label>
+              <input id="ls-close" name="closing_date" type="date" />
+            </div>
+            <div>
+              <label for="ls-sold">Sold Price (if closed)</label>
+              <input id="ls-sold" name="sold_price" type="number" step="1000" placeholder="1235000" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Notes</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="ls-notes">Notes (optional)</label>
+              <textarea id="ls-notes" name="notes" rows="3" placeholder="Anything noteworthy about this listing…"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="form-status" id="listing-form-status" aria-live="polite"></div>
+      </form>
+
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-listing">Cancel</button>
+        <button class="btn" type="submit" form="listing-form" id="submit-listing">Log Listing</button>
       </footer>
     </div>
   </div>
@@ -6037,6 +6298,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       // Sales · Operations
       { id: 'open-house-signin',   name: 'Open House Sign-In',      division: 'sales',       category: 'intake',    href: 'open-house-signin.html', external: true, desc: 'iPad kiosk that captures attendee info into the per-agent Google Sheet.', status: 'live' },
       { id: 'commission-tracker',  name: 'Commission Tracker',      division: 'sales',       category: 'tracker',   href: '#sales',  external: false, desc: 'Log closed deals, track agent volume + commission. Form-driven Google Sheet.', status: 'live' },
+      { id: 'buyer-deal-log',      name: 'Log a Buyer-Side Deal',   division: 'sales',       category: 'intake',    href: '#sales',  external: false, desc: 'Track buyer rep deals in motion — under contract through closing, with DD/appraisal/financing milestones.', status: 'live' },
+      { id: 'listing-log',         name: 'Log a Listing',           division: 'sales',       category: 'intake',    href: '#sales',  external: false, desc: 'Track sell-side listings + current stage (Coming Soon, Active, Showing, Pending, Under Contract).', status: 'live' },
 
       // Development · Marketing
       { id: 'om-generator',        name: 'Offer Memorandum',        division: 'development', category: 'generator', href: 'om.html', external: true, desc: '14-page branded OM PDF — text, photos, auto-populated underwriting.', status: 'live' },
@@ -13014,6 +13277,474 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       renderRoster();
       loadRoster();
     })();
+
+    // ============================================================
+    // ACTIVE DEALS — Buyer-Side + Listings pipelines
+    //
+    // STORAGE: two Google Sheets ("Stonehouse Buyer Deals" and
+    // "Stonehouse Listings") with their own Google Forms. Same
+    // gviz-read / no-cors-POST pattern as Land Intake + Custom Rep.
+    //
+    // Until the sheets/forms are wired up, each section renders a
+    // friendly "Setup pending" prompt and the modals stay safe to open
+    // (they just warn that submission won't persist yet).
+    //
+    // To wire up: see docs/active-deals-setup.md.
+    // ============================================================
+    const BUYERDEAL_CONFIG = {
+      SHEET_ID:  "1dMRQ1mvvQMcD6E5HgFGUtDc5G7CHVhUac4wcC1zC14w",
+      SHEET_TAB: "Form Responses 1",
+      FORM_URL:  "https://docs.google.com/forms/d/e/1FAIpQLSdidxvfFKmuOnEp7RaVQTXp29wEeQ6WRBjLUnDTRf2JS2arHQ/formResponse",
+      FIELD_MAP: {
+        agent:                 "entry.1696481611",
+        client:                "entry.1466200575",
+        property_address:      "entry.1183878754",
+        listing_agent:         "entry.679959161",
+        listing_brokerage:     "entry.940986083",
+        contract_price:        "entry.1736223358",
+        earnest_money:         "entry.736364939",
+        date_under_contract:   "entry.791501097",
+        dd_end:                "entry.1911838705",
+        inspection_date:       "entry.547294873",
+        appraisal_date:        "entry.751987567",
+        financing_contingency: "entry.1750723978",
+        closing_date:          "entry.2076985824",
+        stage:                 "entry.1189355390",
+        notes:                 "entry.1813365625"
+      }
+    };
+
+    const LISTING_CONFIG = {
+      SHEET_ID:  "1skqaA9zcVJoSSj1tkG5gr7QiRJtgfMztk7-QvlFoA2U",
+      SHEET_TAB: "Form Responses 1",
+      FORM_URL:  "https://docs.google.com/forms/d/e/1FAIpQLScxyGBXXLzPWv_XMGAqZtcpG3bAwgYJOYzXVuOVUg2IZv0s1w/formResponse",
+      FIELD_MAP: {
+        agent:                "entry.251603968",
+        seller:               "entry.1734021521",
+        property_address:     "entry.143973978",
+        list_price:           "entry.1915684860",
+        list_date:            "entry.1895165848",
+        stage:                "entry.83480207",
+        date_under_contract:  "entry.260387748",
+        closing_date:         "entry.986148422",
+        sold_price:           "entry.1238483747",
+        buyer_agent:          "entry.613300627",
+        notes:                "entry.1813743443"
+      }
+    };
+
+    // ----- Shared helpers (parse gviz, format) -----
+    function _adGvizUrl(cfg) {
+      return "https://docs.google.com/spreadsheets/d/" + cfg.SHEET_ID
+           + "/gviz/tq?tqx=out:json&headers=1&sheet=" + encodeURIComponent(cfg.SHEET_TAB)
+           + "&t=" + Date.now();
+    }
+    function _adParseEnvelope(text) {
+      const m = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
+      if (!m) {
+        // Fall back: try to find a JSON object in the response
+        const obj = text.match(/\{[\s\S]*\}/);
+        if (obj) return JSON.parse(obj[0]).table || { cols: [], rows: [] };
+        throw new Error('gviz response in unexpected format');
+      }
+      const data = JSON.parse(m[1]);
+      if (data.status !== 'ok') {
+        const err = (data.errors && data.errors[0] && data.errors[0].detailed_message) || data.status;
+        throw new Error('gviz: ' + err);
+      }
+      return data.table || { cols: [], rows: [] };
+    }
+    function _adGvizDate(cell) {
+      if (!cell || cell.v == null) return null;
+      if (typeof cell.v === 'string') {
+        const m = cell.v.match(/^Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?\)$/);
+        if (m) return new Date(+m[1], +m[2], +m[3], +(m[4]||0), +(m[5]||0), +(m[6]||0));
+      }
+      if (cell.f) { const p = new Date(cell.f); if (!isNaN(p)) return p; }
+      return null;
+    }
+    function _adGvizNumber(cell) {
+      if (!cell || cell.v == null) return 0;
+      if (typeof cell.v === 'number') return cell.v;
+      const n = parseFloat(String(cell.v).replace(/[$,\s]/g, ''));
+      return isNaN(n) ? 0 : n;
+    }
+    function _adGvizString(cell) {
+      if (!cell) return '';
+      if (cell.f != null) return String(cell.f);
+      if (cell.v != null) return String(cell.v);
+      return '';
+    }
+    function _adFindCol(cols, ...candidates) {
+      const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+      const labels = cols.map(c => norm(c.label));
+      for (const cand of candidates) {
+        const t = norm(cand);
+        const idx = labels.findIndex(l => l === t);
+        if (idx >= 0) return idx;
+      }
+      for (const cand of candidates) {
+        const t = norm(cand);
+        const idx = labels.findIndex(l => l.indexOf(t) >= 0 || t.indexOf(l) >= 0);
+        if (idx >= 0) return idx;
+      }
+      return -1;
+    }
+    const _adUsd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    function _adFmtUSD(n) { return (!n || !isFinite(n)) ? '' : _adUsd.format(n); }
+    function _adFmtDate(d) {
+      return (d instanceof Date && !isNaN(d))
+        ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        : '';
+    }
+    function _adDaysBetween(a, b) {
+      const ms = b.getTime() - a.getTime();
+      return Math.round(ms / 86400000);
+    }
+    function _adEsc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // ----- Stage chip rendering (re-usable) -----
+    function _adStageChip(stage) {
+      const s = _adEsc(stage || '—');
+      // simple chip — neutral by default; could color-code per stage later
+      return '<span style="display:inline-block;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text);border:1px solid var(--rule-strong);padding:4px 9px;">' + s + '</span>';
+    }
+
+    // ----- Card renderers -----
+    function _adBuyerCard(d, today) {
+      const bars = [];
+      if (d.dateUC && d.ddEnd)   bars.push(_adProgressBar('Due Diligence', d.dateUC, d.ddEnd, today));
+      if (d.dateUC && d.closing) bars.push(_adProgressBar('Closing',       d.dateUC, d.closing, today));
+      return (
+        '<article class="deal-card">' +
+          '<header class="deal-head">' +
+            '<div>' +
+              '<h3 class="deal-address">' + _adEsc(d.address || 'Untitled property') + '</h3>' +
+              '<div class="deal-meta">' +
+                _adEsc(d.client || '') +
+                (d.listingAgent ? ' &nbsp;·&nbsp; <span style="color:var(--text-dim);">vs. ' + _adEsc(d.listingAgent) + '</span>' : '') +
+                ' &nbsp; ' + _adStageChip(d.stage) +
+              '</div>' +
+            '</div>' +
+            (d.contractPrice ? '<div class="deal-price">' + _adEsc(_adFmtUSD(d.contractPrice)) + '</div>' : '') +
+          '</header>' +
+          bars.join('') +
+        '</article>'
+      );
+    }
+    function _adListingCard(d, today) {
+      // Days on market: from list date to today (or closing if closed)
+      let dom = '';
+      if (d.listDate) {
+        const ref = (d.stage === 'Closed' && d.closing) ? d.closing : today;
+        const n = Math.max(0, _adDaysBetween(d.listDate, ref));
+        dom = n + ' day' + (n === 1 ? '' : 's') + ' on market';
+      }
+      const bars = [];
+      if (d.dateUC && d.closing) bars.push(_adProgressBar('Closing', d.dateUC, d.closing, today));
+      return (
+        '<article class="deal-card">' +
+          '<header class="deal-head">' +
+            '<div>' +
+              '<h3 class="deal-address">' + _adEsc(d.address || 'Untitled property') + '</h3>' +
+              '<div class="deal-meta">' +
+                _adEsc(d.seller || '') +
+                (dom ? ' &nbsp;·&nbsp; <span style="color:var(--text-dim);">' + _adEsc(dom) + '</span>' : '') +
+                ' &nbsp; ' + _adStageChip(d.stage) +
+              '</div>' +
+            '</div>' +
+            (d.listPrice ? '<div class="deal-price">' + _adEsc(_adFmtUSD(d.listPrice)) + '</div>' : '') +
+          '</header>' +
+          bars.join('') +
+        '</article>'
+      );
+    }
+    function _adProgressBar(label, start, end, today) {
+      if (!start || !end) {
+        return '<div class="deal-bar"><div class="bar-row">' +
+          '<div class="bar-label">' + _adEsc(label) + '</div>' +
+          '<div class="bar-track"></div>' +
+          '<div class="bar-status">Date missing</div>' +
+        '</div></div>';
+      }
+      const total     = Math.max(1, _adDaysBetween(start, end));
+      const elapsed   = Math.max(0, Math.min(total, _adDaysBetween(start, today)));
+      const remaining = _adDaysBetween(today, end);
+      const pct       = (elapsed / total) * 100;
+      let state = '';
+      if (remaining < 0) state = 'past';
+      else if (remaining <= 7) state = 'approaching';
+      else if (elapsed >= total) state = 'done';
+      const statusLabel =
+        remaining < 0   ? Math.abs(remaining) + ' day' + (Math.abs(remaining)===1?'':'s') + ' past' :
+        remaining === 0 ? 'Today' :
+                          remaining + ' day' + (remaining===1?'':'s') + ' left';
+      return '<div class="deal-bar ' + state + '">' +
+        '<div class="bar-row">' +
+          '<div class="bar-label">' + _adEsc(label) + '</div>' +
+          '<div class="bar-track"><div class="bar-fill" style="width:' + pct.toFixed(1) + '%"></div></div>' +
+          '<div class="bar-status">' + _adEsc(statusLabel) + '</div>' +
+        '</div>' +
+        '<div class="bar-dates">' + _adEsc(_adFmtDate(start)) + ' → ' + _adEsc(_adFmtDate(end)) + '</div>' +
+      '</div>';
+    }
+
+    // ============================================================
+    // BUYER-SIDE pipeline loader
+    // ============================================================
+    (function () {
+      const listEl = document.getElementById('buyerdeal-list');
+      const metaEl = document.getElementById('buyerdeal-meta');
+      if (!listEl) return;
+      function setMeta(t) { if (metaEl) metaEl.textContent = t; }
+      function setEmpty(m) { listEl.innerHTML = '<div class="deal-empty">' + _adEsc(m) + '</div>'; }
+      function setError(m) { listEl.innerHTML = '<div class="deal-error">' + _adEsc(m) + '</div>'; }
+
+      if (!BUYERDEAL_CONFIG.SHEET_ID) {
+        setMeta('Setup pending');
+        setEmpty('Buyer Deals sheet not yet connected. See docs/active-deals-setup.md to wire it up.');
+        return;
+      }
+
+      async function load() {
+        try {
+          setMeta('Loading…'); setEmpty('Loading deals…');
+          const res = await fetch(_adGvizUrl(BUYERDEAL_CONFIG), { cache: 'no-store' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const table = _adParseEnvelope(await res.text());
+          const cols = table.cols || [];
+          const ix = {
+            address:        _adFindCol(cols, 'Property Address'),
+            client:         _adFindCol(cols, 'Client', 'Buyer', 'Client Name'),
+            agent:          _adFindCol(cols, 'Agent', 'Stonehouse Agent'),
+            listingAgent:   _adFindCol(cols, 'Listing Agent'),
+            stage:          _adFindCol(cols, 'Stage', 'Current Stage'),
+            contractPrice:  _adFindCol(cols, 'Contract Price', 'Price'),
+            dateUC:         _adFindCol(cols, 'Date Under Contract', 'Under Contract'),
+            ddEnd:          _adFindCol(cols, 'Due Diligence End', 'DD End'),
+            closing:        _adFindCol(cols, 'Closing Date', 'Closing')
+          };
+          if (ix.address < 0) throw new Error('Sheet missing "Property Address" column.');
+          const today = new Date(); today.setHours(0, 0, 0, 0);
+          const deals = (table.rows || []).map(r => {
+            const c = r.c || [];
+            return {
+              address:       _adGvizString(c[ix.address]),
+              client:        ix.client >= 0 ? _adGvizString(c[ix.client]) : '',
+              agent:         ix.agent >= 0 ? _adGvizString(c[ix.agent]) : '',
+              listingAgent:  ix.listingAgent >= 0 ? _adGvizString(c[ix.listingAgent]) : '',
+              stage:         ix.stage >= 0 ? _adGvizString(c[ix.stage]) : '',
+              contractPrice: ix.contractPrice >= 0 ? _adGvizNumber(c[ix.contractPrice]) : 0,
+              dateUC:        ix.dateUC >= 0 ? _adGvizDate(c[ix.dateUC]) : null,
+              ddEnd:         ix.ddEnd >= 0 ? _adGvizDate(c[ix.ddEnd]) : null,
+              closing:       ix.closing >= 0 ? _adGvizDate(c[ix.closing]) : null
+            };
+          })
+            .filter(d => d.address)
+            .filter(d => !/^(closed|killed)$/i.test(d.stage)); // hide closed/killed from active pipeline
+          deals.sort((a, b) => {
+            const ac = a.closing ? a.closing.getTime() : Infinity;
+            const bc = b.closing ? b.closing.getTime() : Infinity;
+            return ac - bc;
+          });
+          if (deals.length === 0) {
+            setMeta('0 active'); setEmpty('No buyer-side deals currently active.');
+            return;
+          }
+          setMeta(deals.length + ' active deal' + (deals.length === 1 ? '' : 's'));
+          listEl.innerHTML = deals.map(d => _adBuyerCard(d, today)).join('');
+        } catch (err) {
+          console.error('[BUYER-DEALS] load failed:', err);
+          setMeta('Could not load'); setError('Could not load: ' + (err.message || err));
+        }
+      }
+      load();
+      const tabBtn = document.getElementById('tab-sales');
+      if (tabBtn) tabBtn.addEventListener('click', load);
+    })();
+
+    // ============================================================
+    // LISTINGS (sell-side) pipeline loader
+    // ============================================================
+    (function () {
+      const listEl = document.getElementById('listings-list');
+      const metaEl = document.getElementById('listings-meta');
+      if (!listEl) return;
+      function setMeta(t) { if (metaEl) metaEl.textContent = t; }
+      function setEmpty(m) { listEl.innerHTML = '<div class="deal-empty">' + _adEsc(m) + '</div>'; }
+      function setError(m) { listEl.innerHTML = '<div class="deal-error">' + _adEsc(m) + '</div>'; }
+
+      if (!LISTING_CONFIG.SHEET_ID) {
+        setMeta('Setup pending');
+        setEmpty('Listings sheet not yet connected. See docs/active-deals-setup.md to wire it up.');
+        return;
+      }
+
+      async function load() {
+        try {
+          setMeta('Loading…'); setEmpty('Loading listings…');
+          const res = await fetch(_adGvizUrl(LISTING_CONFIG), { cache: 'no-store' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const table = _adParseEnvelope(await res.text());
+          const cols = table.cols || [];
+          const ix = {
+            address:     _adFindCol(cols, 'Property Address'),
+            seller:      _adFindCol(cols, 'Seller', 'Seller Name'),
+            agent:       _adFindCol(cols, 'Agent', 'Listing Agent', 'Stonehouse Agent'),
+            stage:       _adFindCol(cols, 'Stage', 'Current Stage'),
+            listPrice:   _adFindCol(cols, 'List Price', 'Price'),
+            listDate:    _adFindCol(cols, 'List Date'),
+            dateUC:      _adFindCol(cols, 'Date Under Contract', 'Under Contract'),
+            closing:     _adFindCol(cols, 'Closing Date', 'Closing'),
+            soldPrice:   _adFindCol(cols, 'Sold Price')
+          };
+          if (ix.address < 0) throw new Error('Sheet missing "Property Address" column.');
+          const today = new Date(); today.setHours(0, 0, 0, 0);
+          const listings = (table.rows || []).map(r => {
+            const c = r.c || [];
+            return {
+              address:    _adGvizString(c[ix.address]),
+              seller:     ix.seller >= 0 ? _adGvizString(c[ix.seller]) : '',
+              agent:      ix.agent >= 0 ? _adGvizString(c[ix.agent]) : '',
+              stage:      ix.stage >= 0 ? _adGvizString(c[ix.stage]) : '',
+              listPrice:  ix.listPrice >= 0 ? _adGvizNumber(c[ix.listPrice]) : 0,
+              listDate:   ix.listDate >= 0 ? _adGvizDate(c[ix.listDate]) : null,
+              dateUC:     ix.dateUC >= 0 ? _adGvizDate(c[ix.dateUC]) : null,
+              closing:    ix.closing >= 0 ? _adGvizDate(c[ix.closing]) : null,
+              soldPrice:  ix.soldPrice >= 0 ? _adGvizNumber(c[ix.soldPrice]) : 0
+            };
+          })
+            .filter(d => d.address)
+            .filter(d => !/^(closed|withdrawn|expired)$/i.test(d.stage)); // hide archive states
+          // Sort by stage priority, then by list date desc
+          const stagePriority = { 'Coming Soon': 0, 'Active': 1, 'Showing': 2, 'Pending': 3, 'Under Contract': 4 };
+          listings.sort((a, b) => {
+            const pa = stagePriority[a.stage] ?? 99;
+            const pb = stagePriority[b.stage] ?? 99;
+            if (pa !== pb) return pa - pb;
+            const la = a.listDate ? a.listDate.getTime() : 0;
+            const lb = b.listDate ? b.listDate.getTime() : 0;
+            return lb - la;
+          });
+          if (listings.length === 0) {
+            setMeta('0 active'); setEmpty('No active listings.');
+            return;
+          }
+          setMeta(listings.length + ' listing' + (listings.length === 1 ? '' : 's'));
+          listEl.innerHTML = listings.map(d => _adListingCard(d, today)).join('');
+        } catch (err) {
+          console.error('[LISTINGS] load failed:', err);
+          setMeta('Could not load'); setError('Could not load: ' + (err.message || err));
+        }
+      }
+      load();
+      const tabBtn = document.getElementById('tab-sales');
+      if (tabBtn) tabBtn.addEventListener('click', load);
+    })();
+
+    // ============================================================
+    // BUYER-DEAL + LISTING modal controllers (open/close, submit via Form)
+    // ============================================================
+    function _adSetupModal(opts) {
+      const overlay   = document.getElementById(opts.overlayId);
+      const modal     = document.getElementById(opts.modalId);
+      const form      = document.getElementById(opts.formId);
+      const statusEl  = document.getElementById(opts.statusId);
+      const openBtn   = document.getElementById(opts.openId);
+      const closeBtn  = document.getElementById(opts.closeId);
+      const cancelBtn = document.getElementById(opts.cancelId);
+      const submitBtn = document.getElementById(opts.submitId);
+      if (!overlay || !form || !openBtn) return;
+      let lastFocus = null;
+      const focusables = () => modal.querySelectorAll(
+        'a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      function open() {
+        lastFocus = document.activeElement;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        clearStatus();
+        requestAnimationFrame(() => { const f = focusables()[0]; if (f) f.focus(); });
+      }
+      function close() {
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+      }
+      function setStatus(kind, msg) { statusEl.className = 'form-status show ' + kind; statusEl.textContent = msg; }
+      function clearStatus() { statusEl.className = 'form-status'; statusEl.textContent = ''; }
+      openBtn.addEventListener('click', open);
+      if (closeBtn)  closeBtn.addEventListener('click', close);
+      if (cancelBtn) cancelBtn.addEventListener('click', close);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+      document.addEventListener('keydown', (e) => {
+        if (overlay.getAttribute('aria-hidden') !== 'false') return;
+        if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+        if (e.key === 'Tab') {
+          const f = Array.from(focusables()); if (f.length === 0) return;
+          const first = f[0], last = f[f.length - 1];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      });
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearStatus();
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+        const cfg = opts.config;
+        if (!cfg.FORM_URL || !Object.values(cfg.FIELD_MAP).some(v => v)) {
+          setStatus('warn', "Sheet/Form isn't wired yet — see docs/active-deals-setup.md to enable submissions.");
+          return;
+        }
+        submitBtn.disabled = true;
+        const orig = submitBtn.textContent;
+        submitBtn.textContent = 'Submitting…';
+        try {
+          const fd = new FormData(form);
+          const body = new URLSearchParams();
+          for (const [k, v] of fd.entries()) {
+            const key = cfg.FIELD_MAP[k];
+            if (key) body.append(key, v);
+          }
+          await fetch(cfg.FORM_URL, { method: 'POST', mode: 'no-cors', body });
+          setStatus('ok', '✅ Logged. Refresh the page to see it in the pipeline.');
+          form.reset();
+          setTimeout(close, 1200);
+        } catch (err) {
+          setStatus('err', 'Network error: ' + (err && err.message ? err.message : err));
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = orig;
+        }
+      });
+    }
+
+    _adSetupModal({
+      overlayId: 'buyerdeal-modal-overlay',
+      modalId:   'buyerdeal-modal',
+      formId:    'buyerdeal-form',
+      statusId:  'buyerdeal-form-status',
+      openId:    'open-buyerdeal-modal',
+      closeId:   'close-buyerdeal-modal',
+      cancelId:  'cancel-buyerdeal',
+      submitId:  'submit-buyerdeal',
+      config:    BUYERDEAL_CONFIG
+    });
+    _adSetupModal({
+      overlayId: 'listing-modal-overlay',
+      modalId:   'listing-modal',
+      formId:    'listing-form',
+      statusId:  'listing-form-status',
+      openId:    'open-listing-modal',
+      closeId:   'close-listing-modal',
+      cancelId:  'cancel-listing',
+      submitId:  'submit-listing',
+      config:    LISTING_CONFIG
+    });
   </script>
 </body>
 </html>
