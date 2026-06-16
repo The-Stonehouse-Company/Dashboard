@@ -376,9 +376,44 @@
       grid-template-columns: 1fr 1fr;
     }
     .form-grid .full { grid-column: 1 / -1; }
-    @media (max-width: 600px) {
-      .form-grid { grid-template-columns: 1fr; }
+    .form-grid-checks { grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+    .check-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 0;
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 13px;
+      color: var(--text);
+      cursor: pointer;
     }
+    .check-row input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: var(--text);
+      flex-shrink: 0;
+    }
+    @media (max-width: 600px) {
+      .form-grid, .form-grid-checks { grid-template-columns: 1fr; }
+    }
+    /* ===== Team roster cards ===== */
+    .team-card-add {
+      border-style: dashed;
+      opacity: .7;
+      cursor: pointer;
+      transition: opacity .15s ease, border-color .15s ease;
+    }
+    .team-card-add:hover { opacity: 1; border-color: var(--text); }
+    .team-pill {
+      display: inline-block;
+      font-size: 8.5px;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border: 1px solid var(--rule-strong);
+      padding: 3px 7px;
+      margin: 0 4px 4px 0;
+    }
+    .team-pill.tier-founder { color: var(--text); border-color: var(--text); }
+    .team-pill.inactive { opacity: .4; }
 
     label {
       display: block;
@@ -3547,28 +3582,11 @@
     <section class="panel" id="panel-team" role="tabpanel" aria-labelledby="tab-team" aria-hidden="true" tabindex="0">
       <div class="eyebrow">Company</div>
       <h1>Team</h1>
-      <p class="sub">Roster of agents and staff. Each member's contact info auto-populates into the offer instructions, listing materials, and other generators when they're selected as the active agent.</p>
+      <p class="sub">Roster of agents and staff. Each member's contact info auto-populates into the Offer Instructions and other generators when they're selected as the active agent.</p>
 
-      <div class="home-grid">
-        <article class="home-card">
-          <span class="h-eyebrow">Founder &amp; Principal</span>
-          <div class="h-stat" style="font-size:22px; line-height:1.2;">Ryan Stonehouse</div>
-          <div class="h-label">ryan@stonehouserealtyco.com<br>(615) 812-0066</div>
-          <div class="h-label" style="margin-top:8px; color:var(--text-dim);">Divisions: All</div>
-        </article>
-
-        <article class="home-card">
-          <span class="h-eyebrow">Land Acquisition Specialist</span>
-          <div class="h-stat" style="font-size:22px; line-height:1.2;">Kneeland Hibbett</div>
-          <div class="h-label">Unlicensed · Land Acquisition only</div>
-          <div class="h-label" style="margin-top:8px; color:var(--text-dim);">Divisions: Land</div>
-        </article>
-
-        <article class="home-card" style="border-style:dashed; opacity:.6;">
-          <span class="h-eyebrow">+ Add Team Member</span>
-          <div class="h-stat" style="font-size:14px; line-height:1.2;">Coming soon</div>
-          <div class="h-label">Onboarding flow + license intake will live here.</div>
-        </article>
+      <div id="team-roster-meta" class="eyebrow" style="margin-bottom:14px;">Loading roster…</div>
+      <div class="home-grid" id="team-roster">
+        <!-- Cards rendered from window.STONEHOUSE_TEAM by the roster loader. -->
       </div>
     </section>
 
@@ -3718,6 +3736,98 @@
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="cancel-commission">Cancel</button>
         <button class="btn" type="submit" form="commission-form" id="submit-commission">Submit</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========================= ADD TEAM MEMBER MODAL ========================= -->
+  <div class="modal-overlay" id="team-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="team-modal-title" id="team-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Company · Team</span>
+          <h2 class="modal-title" id="team-modal-title">Add Team Member</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-team-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="team-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Identity</legend>
+          <div class="form-grid">
+            <div>
+              <label for="tf-name">Full Name <span class="req">*</span></label>
+              <input id="tf-name" name="name" type="text" required placeholder="Jane Doe" />
+            </div>
+            <div>
+              <label for="tf-title">Title</label>
+              <input id="tf-title" name="title" type="text" placeholder="Buyer's Agent" />
+            </div>
+            <div>
+              <label for="tf-role">Role Tier <span class="req">*</span></label>
+              <select id="tf-role" name="role" required>
+                <option value="" disabled selected>Select tier…</option>
+                <option value="Founder">Founder</option>
+                <option value="Agent">Agent</option>
+                <option value="Specialist">Specialist</option>
+                <option value="Admin">Admin</option>
+              </select>
+            </div>
+            <div>
+              <label for="tf-active">Status</label>
+              <select id="tf-active" name="active">
+                <option value="Yes" selected>Active</option>
+                <option value="No">Inactive</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Contact</legend>
+          <div class="form-grid">
+            <div>
+              <label for="tf-email">Email <span class="req">*</span></label>
+              <input id="tf-email" name="email" type="email" required placeholder="jane@stonehouserealtyco.com" />
+            </div>
+            <div>
+              <label for="tf-phone">Phone <span class="req">*</span></label>
+              <input id="tf-phone" name="phone" type="tel" required placeholder="(615) 555-0123" />
+            </div>
+            <div class="full">
+              <label for="tf-photo">Photo URL (optional)</label>
+              <input id="tf-photo" name="photo" type="url" placeholder="https://…/jane.jpg" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>License</legend>
+          <div class="form-grid">
+            <div>
+              <label for="tf-license">TN Real Estate License # (blank for unlicensed)</label>
+              <input id="tf-license" name="license" type="text" placeholder="000000" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Divisions</legend>
+          <p class="form-hint" style="margin-top:-4px; margin-bottom:10px;">Pick every division this person works in. Drives whether they appear in each division's agent picker. (Tick "All" for full coverage.)</p>
+          <div class="form-grid form-grid-checks">
+            <label class="check-row"><input type="checkbox" name="div_sales" /> <span>Sales</span></label>
+            <label class="check-row"><input type="checkbox" name="div_land" /> <span>Land Acquisition</span></label>
+            <label class="check-row"><input type="checkbox" name="div_customrep" /> <span>Custom Home Rep</span></label>
+            <label class="check-row"><input type="checkbox" name="div_development" /> <span>Development</span></label>
+          </div>
+        </fieldset>
+
+        <div class="form-status" id="team-form-status" aria-live="polite"></div>
+      </form>
+
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-team">Cancel</button>
+        <button class="btn" type="submit" form="team-form" id="submit-team">Add Member</button>
       </footer>
     </div>
   </div>
@@ -12445,6 +12555,358 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           submitBtn.textContent = originalLabel;
         }
       });
+    })();
+
+    // ============================================================
+    // TEAM ROSTER — central source of truth across all Stonehouse tools
+    //
+    // STORAGE: Google Sheet "Team Roster" (gviz JSON for reads) + Google
+    // Form (no-cors POST for adds). Same pattern as the Commissions
+    // Tracker, Open House Sign-Ins, and other form-driven tools.
+    //
+    // Until the Sheet + Form are created and TEAM_CONFIG is filled in,
+    // the dashboard falls back to BUILTIN_ROSTER so nothing breaks.
+    //
+    // To wire it up: see docs/team-setup.md.
+    // ============================================================
+    const TEAM_CONFIG = {
+      SHEET_ID:  "18TAk4nYhNACQao-X2VelyraVq-xWUIPeD12I2w3hF4Q",
+      SHEET_TAB: "Form Responses 1",
+      FORM_URL:  "https://docs.google.com/forms/d/e/1FAIpQLSdnO6IfSMMjcy19wM1SAVLmHDrQEJCEARJEwTIWP0m5kBvFhg/formResponse",
+      FIELD_MAP: {
+        name:            "entry.2094539824",
+        title:           "entry.1054453008",
+        role:            "entry.174528440",
+        active:          "entry.585398137",
+        email:           "entry.1800868288",
+        phone:           "entry.1806146703",
+        photo:           "entry.1093224950",
+        license:         "entry.1571714360",
+        div_sales:       "entry.1215128792",
+        div_land:        "entry.1719015844",
+        div_customrep:   "entry.976902181",
+        div_development: "entry.1889308194"
+      }
+    };
+
+    const BUILTIN_ROSTER = [
+      {
+        id:        "ryan",
+        name:      "Ryan Stonehouse",
+        title:     "Founder & Principal",
+        role:      "Founder",
+        active:    true,
+        email:     "ryan@stonehouserealtyco.com",
+        phone:     "(615) 812-0066",
+        photo:     "",
+        license:   "",
+        divisions: ["sales", "land", "customrep", "development"]
+      },
+      {
+        id:        "kneeland",
+        name:      "Kneeland Hibbett",
+        title:     "Land Acquisition Specialist",
+        role:      "Specialist",
+        active:    true,
+        email:     "",
+        phone:     "",
+        photo:     "",
+        license:   "",
+        divisions: ["land"]
+      }
+    ];
+
+    window.STONEHOUSE_TEAM = BUILTIN_ROSTER.slice();
+    window.STONEHOUSE_TEAM_STATUS = "fallback";
+
+    (function () {
+      const DIVISION_LABEL = {
+        sales:       "Sales",
+        land:        "Land Acquisition",
+        customrep:   "Custom Home Rep",
+        development: "Development"
+      };
+
+      // -----------------------------------------------------------
+      // Renderer — drives the Team panel
+      // -----------------------------------------------------------
+      function divisionPills(divs) {
+        if (!divs || divs.length === 0) return '<span class="team-pill" style="opacity:.5;">No divisions</span>';
+        const all = ["sales","land","customrep","development"];
+        if (all.every(d => divs.includes(d))) return '<span class="team-pill">All Divisions</span>';
+        return divs.map(d => `<span class="team-pill">${DIVISION_LABEL[d] || d}</span>`).join('');
+      }
+      function renderRoster() {
+        const grid = document.getElementById('team-roster');
+        const meta = document.getElementById('team-roster-meta');
+        if (!grid) return;
+        const roster = (window.STONEHOUSE_TEAM || []).slice()
+          .sort((a, b) => {
+            // Founders first, then by role tier, then name
+            const order = { Founder: 0, Admin: 1, Specialist: 2, Agent: 3 };
+            const ra = order[a.role] ?? 9;
+            const rb = order[b.role] ?? 9;
+            if (ra !== rb) return ra - rb;
+            return (a.name || '').localeCompare(b.name || '');
+          });
+        grid.innerHTML = '';
+
+        roster.forEach(m => {
+          const card = document.createElement('article');
+          card.className = 'home-card';
+          if (m.active === false) card.style.opacity = '.5';
+          const tierClass = (m.role || '').toLowerCase() === 'founder' ? 'tier-founder' : '';
+          card.innerHTML = `
+            <span class="h-eyebrow">${escape(m.role || 'Team')}${m.active === false ? ' · Inactive' : ''}</span>
+            <div class="h-stat" style="font-size:22px; line-height:1.2;">${escape(m.name)}</div>
+            <div class="h-label">${escape(m.title || '')}</div>
+            <div class="h-label" style="margin-top:8px;">
+              ${m.email ? `<a href="mailto:${escape(m.email)}" style="color:var(--text-muted); border-bottom:1px solid var(--rule-strong);">${escape(m.email)}</a>` : '<span style="color:var(--text-dim);">No email on file</span>'}
+              ${m.phone ? `<br>${escape(m.phone)}` : ''}
+              ${m.license ? `<br><span style="color:var(--text-dim); font-size:10px; letter-spacing:.12em; text-transform:uppercase;">License #${escape(m.license)}</span>` : ''}
+            </div>
+            <div style="margin-top:10px;">
+              <span class="team-pill ${tierClass}">${escape(m.role || 'Team')}</span>
+              ${divisionPills(m.divisions)}
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+        // "+ Add Team Member" tile
+        const addCard = document.createElement('article');
+        addCard.className = 'home-card team-card-add';
+        addCard.setAttribute('role', 'button');
+        addCard.setAttribute('tabindex', '0');
+        addCard.id = 'open-team-modal';
+        addCard.innerHTML = `
+          <span class="h-eyebrow">+ Add Team Member</span>
+          <div class="h-stat" style="font-size:18px; line-height:1.2;">Onboard an agent or staff</div>
+          <div class="h-label">Add their contact, license, role, and the divisions they work in. They'll auto-appear in every agent picker.</div>
+        `;
+        addCard.addEventListener('click', openTeamModal);
+        addCard.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTeamModal(); }
+        });
+        grid.appendChild(addCard);
+
+        // Status line
+        const count = roster.length;
+        const statusTxt = window.STONEHOUSE_TEAM_STATUS;
+        let metaTxt = '';
+        if (statusTxt === 'live')     metaTxt = `${count} active member${count === 1 ? '' : 's'} · Synced from Team Roster sheet`;
+        else if (statusTxt === 'fallback') metaTxt = `${count} member${count === 1 ? '' : 's'} · Showing built-in fallback (set TEAM_CONFIG in index.html to enable sync)`;
+        else                          metaTxt = `${count} member${count === 1 ? '' : 's'}`;
+        if (meta) meta.textContent = metaTxt;
+      }
+
+      function escape(s) {
+        if (s == null) return '';
+        return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+      }
+
+      // -----------------------------------------------------------
+      // Loader — fetches the sheet via gviz JSON
+      // -----------------------------------------------------------
+      async function loadRoster() {
+        if (!TEAM_CONFIG.SHEET_ID) {
+          window.STONEHOUSE_TEAM_STATUS = 'fallback';
+          renderRoster();
+          return;
+        }
+        const url = "https://docs.google.com/spreadsheets/d/" + TEAM_CONFIG.SHEET_ID
+                  + "/gviz/tq?tqx=out:json&headers=1&sheet=" + encodeURIComponent(TEAM_CONFIG.SHEET_TAB);
+        try {
+          const res = await fetch(url);
+          const txt = await res.text();
+          const json = JSON.parse(txt.replace(/^[^{]+/, '').replace(/[^}]+$/, ''));
+          const cols = (json.table.cols || []).map(c => (c.label || '').trim().toLowerCase());
+          const rows = (json.table.rows || []).map(r => (r.c || []).map(c => c == null ? '' : (c.f || c.v || '')));
+          const idx = (label) => cols.indexOf(label.toLowerCase());
+
+          const colIdx = {
+            name:       idx('name'),
+            title:      idx('title'),
+            role:       idx('role'),
+            active:     idx('active'),
+            email:      idx('email'),
+            phone:      idx('phone'),
+            photo:      idx('photo'),
+            license:    idx('license'),
+            sales:      idx('div_sales'),
+            land:       idx('div_land'),
+            customrep:  idx('div_customrep'),
+            development:idx('div_development')
+          };
+
+          const yes = (v) => /^(yes|y|true|1|x|✓)$/i.test(String(v || '').trim());
+          const parsed = rows
+            .map((r, i) => {
+              const name = colIdx.name >= 0 ? String(r[colIdx.name] || '').trim() : '';
+              if (!name) return null;
+              const divs = [];
+              if (colIdx.sales       >= 0 && yes(r[colIdx.sales]))       divs.push('sales');
+              if (colIdx.land        >= 0 && yes(r[colIdx.land]))        divs.push('land');
+              if (colIdx.customrep   >= 0 && yes(r[colIdx.customrep]))   divs.push('customrep');
+              if (colIdx.development >= 0 && yes(r[colIdx.development])) divs.push('development');
+              return {
+                id:        name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + i,
+                name:      name,
+                title:     colIdx.title >= 0 ? String(r[colIdx.title] || '').trim() : '',
+                role:      colIdx.role >= 0 ? String(r[colIdx.role] || '').trim() : 'Agent',
+                active:    colIdx.active >= 0 ? yes(r[colIdx.active]) : true,
+                email:     colIdx.email >= 0 ? String(r[colIdx.email] || '').trim() : '',
+                phone:     colIdx.phone >= 0 ? String(r[colIdx.phone] || '').trim() : '',
+                photo:     colIdx.photo >= 0 ? String(r[colIdx.photo] || '').trim() : '',
+                license:   colIdx.license >= 0 ? String(r[colIdx.license] || '').trim() : '',
+                divisions: divs
+              };
+            })
+            .filter(Boolean);
+
+          if (parsed.length > 0) {
+            window.STONEHOUSE_TEAM = parsed;
+            window.STONEHOUSE_TEAM_STATUS = 'live';
+          } else {
+            window.STONEHOUSE_TEAM_STATUS = 'fallback';
+          }
+        } catch (err) {
+          console.warn('[TEAM] roster fetch failed, using fallback:', err);
+          window.STONEHOUSE_TEAM_STATUS = 'fallback';
+        }
+        renderRoster();
+        document.dispatchEvent(new CustomEvent('stonehouse:team-loaded', { detail: window.STONEHOUSE_TEAM }));
+      }
+
+      // -----------------------------------------------------------
+      // Modal controller — Add Team Member
+      // -----------------------------------------------------------
+      const overlay   = document.getElementById('team-modal-overlay');
+      const modal     = document.getElementById('team-modal');
+      const form      = document.getElementById('team-form');
+      const statusEl  = document.getElementById('team-form-status');
+      const closeBtn  = document.getElementById('close-team-modal');
+      const cancelBtn = document.getElementById('cancel-team');
+      const submitBtn = document.getElementById('submit-team');
+      let lastFocus = null;
+
+      function focusables() {
+        return modal.querySelectorAll(
+          'a[href], input:not([disabled]), select:not([disabled]), ' +
+          'textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+      }
+      function openTeamModal() {
+        lastFocus = document.activeElement;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        clearStatus();
+        requestAnimationFrame(() => { const f = focusables()[0]; if (f) f.focus(); });
+      }
+      function closeTeamModal() {
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+      }
+      function setStatus(kind, msg) {
+        statusEl.className = 'form-status show ' + kind;
+        statusEl.textContent = msg;
+      }
+      function clearStatus() { statusEl.className = 'form-status'; statusEl.textContent = ''; }
+
+      if (closeBtn)  closeBtn.addEventListener('click', closeTeamModal);
+      if (cancelBtn) cancelBtn.addEventListener('click', closeTeamModal);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeTeamModal(); });
+      document.addEventListener('keydown', (e) => {
+        if (overlay.getAttribute('aria-hidden') !== 'false') return;
+        if (e.key === 'Escape') { e.preventDefault(); closeTeamModal(); return; }
+        if (e.key === 'Tab') {
+          const f = Array.from(focusables());
+          if (f.length === 0) return;
+          const first = f[0], last = f[f.length - 1];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearStatus();
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+
+        const fd = new FormData(form);
+        const checked = (n) => form.querySelector(`[name="${n}"]`).checked ? 'Yes' : 'No';
+        const payload = {
+          name:            fd.get('name') || '',
+          title:           fd.get('title') || '',
+          role:            fd.get('role') || '',
+          active:          fd.get('active') || 'Yes',
+          email:           fd.get('email') || '',
+          phone:           fd.get('phone') || '',
+          photo:           fd.get('photo') || '',
+          license:         fd.get('license') || '',
+          div_sales:       checked('div_sales'),
+          div_land:        checked('div_land'),
+          div_customrep:   checked('div_customrep'),
+          div_development: checked('div_development')
+        };
+
+        // Optimistic UI: append to the in-memory roster immediately so
+        // the new card shows even if the Sheet is unconfigured.
+        const divs = [];
+        if (payload.div_sales       === 'Yes') divs.push('sales');
+        if (payload.div_land        === 'Yes') divs.push('land');
+        if (payload.div_customrep   === 'Yes') divs.push('customrep');
+        if (payload.div_development === 'Yes') divs.push('development');
+        window.STONEHOUSE_TEAM = (window.STONEHOUSE_TEAM || []).concat([{
+          id:        (payload.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-local'),
+          name:      payload.name,
+          title:     payload.title,
+          role:      payload.role,
+          active:    payload.active === 'Yes',
+          email:     payload.email,
+          phone:     payload.phone,
+          photo:     payload.photo,
+          license:   payload.license,
+          divisions: divs,
+          _local:    true
+        }]);
+        renderRoster();
+
+        if (!TEAM_CONFIG.FORM_URL || !TEAM_CONFIG.FIELD_MAP.name) {
+          setStatus('warn', "Added to this session only — TEAM_CONFIG isn't wired to a Google Form yet. See docs/team-setup.md.");
+          setTimeout(closeTeamModal, 1400);
+          form.reset();
+          return;
+        }
+
+        submitBtn.disabled = true;
+        const orig = submitBtn.textContent;
+        submitBtn.textContent = 'Submitting…';
+        try {
+          const body = new URLSearchParams();
+          for (const k of Object.keys(payload)) {
+            const entryKey = TEAM_CONFIG.FIELD_MAP[k];
+            if (entryKey) body.append(entryKey, payload[k]);
+          }
+          await fetch(TEAM_CONFIG.FORM_URL, { method: 'POST', mode: 'no-cors', body });
+          setStatus('ok', '✅ Member added. The roster will refresh from the sheet on next reload.');
+          form.reset();
+          setTimeout(closeTeamModal, 1200);
+        } catch (err) {
+          setStatus('err', 'Network error: ' + (err && err.message ? err.message : err));
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = orig;
+        }
+      });
+
+      // Expose openTeamModal so the rendered "+ Add Team Member" card can call it
+      window.openTeamModal = openTeamModal;
+
+      // Fire on load — first render the fallback, then try to fetch.
+      renderRoster();
+      loadRoster();
     })();
   </script>
 </body>

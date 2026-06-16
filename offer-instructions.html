@@ -334,19 +334,75 @@
   <script>
     // ============================================================
     // AGENT ROSTER  -----------------------------------------------
-    // Today: only Ryan. To add a teammate later, just push another
-    // entry onto AGENTS — the picker auto-updates.
+    // Pulled from the central Team Roster Google Sheet (gviz JSON)
+    // so adding a teammate on the Dashboard auto-flows into this
+    // picker. Falls back to a Ryan-only baseline if the sheet isn't
+    // reachable (offline, sheet not yet configured, etc.).
+    //
+    // To wire the live sheet: set TEAM_CONFIG values to match the
+    // Dashboard's TEAM_CONFIG (Sheet ID + tab name). See docs/team-setup.md.
     // ============================================================
-    const AGENTS = [
+    const TEAM_CONFIG = {
+      SHEET_ID:  "18TAk4nYhNACQao-X2VelyraVq-xWUIPeD12I2w3hF4Q",
+      SHEET_TAB: "Form Responses 1"
+    };
+
+    let AGENTS = [
       {
-        id: 'ryan',
-        name: 'Ryan Stonehouse',
-        license: '',                 // ← fill once known
-        email: 'ryan@stonehouserealtyco.com',
-        phone: '(615) 812-0066'
+        id:      'ryan',
+        name:    'Ryan Stonehouse',
+        license: '',
+        email:   'ryan@stonehouserealtyco.com',
+        phone:   '(615) 812-0066',
+        divisions: ['sales','land','customrep','development']
       }
-      // Future: { id: 'agent-2', name: '…', license: '…', email: '…', phone: '…' }
     ];
+
+    async function loadAgentsFromSheet() {
+      if (!TEAM_CONFIG.SHEET_ID) return;
+      const url = "https://docs.google.com/spreadsheets/d/" + TEAM_CONFIG.SHEET_ID
+                + "/gviz/tq?tqx=out:json&headers=1&sheet=" + encodeURIComponent(TEAM_CONFIG.SHEET_TAB);
+      try {
+        const res = await fetch(url);
+        const txt = await res.text();
+        const json = JSON.parse(txt.replace(/^[^{]+/, '').replace(/[^}]+$/, ''));
+        const cols = (json.table.cols || []).map(c => (c.label || '').trim().toLowerCase());
+        const rows = (json.table.rows || []).map(r => (r.c || []).map(c => c == null ? '' : (c.f || c.v || '')));
+        const idx = (label) => cols.indexOf(label.toLowerCase());
+        const yes = (v) => /^(yes|y|true|1|x|✓)$/i.test(String(v || '').trim());
+        const fetched = rows.map((r, i) => {
+          const name = idx('name') >= 0 ? String(r[idx('name')] || '').trim() : '';
+          if (!name) return null;
+          // Skip inactive
+          if (idx('active') >= 0 && !yes(r[idx('active')])) return null;
+          // Only include agents in sales-related divisions (Offer Instructions is a sales/listing tool)
+          const inSales = idx('div_sales') < 0 || yes(r[idx('div_sales')]);
+          if (!inSales) return null;
+          const divs = [];
+          ['sales','land','customrep','development'].forEach(d => {
+            const ci = idx('div_' + d);
+            if (ci >= 0 && yes(r[ci])) divs.push(d);
+          });
+          return {
+            id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + i,
+            name: name,
+            license: idx('license') >= 0 ? String(r[idx('license')] || '').trim() : '',
+            email:   idx('email')   >= 0 ? String(r[idx('email')]   || '').trim() : '',
+            phone:   idx('phone')   >= 0 ? String(r[idx('phone')]   || '').trim() : '',
+            divisions: divs
+          };
+        }).filter(Boolean);
+
+        if (fetched.length > 0) {
+          AGENTS = fetched;
+          // Re-render the form to refresh the agent picker
+          if (typeof renderForm === 'function') renderForm();
+          if (typeof rerender === 'function')   rerender({ fast: true });
+        }
+      } catch (err) {
+        console.warn('[OFFER-INSTRUCTIONS] roster fetch failed, using fallback:', err);
+      }
+    }
 
     // Defaults that apply to ALL Stonehouse offers, agent-independent.
     const BROKERAGE = {
@@ -672,6 +728,8 @@
     document.addEventListener('DOMContentLoaded', () => {
       renderForm();
       rerender({ fast: true });
+      // Fire-and-forget: roster will refresh the picker once the sheet returns
+      loadAgentsFromSheet();
 
       document.getElementById('btn-print').addEventListener('click', () => {
         setStatus('Opening print dialog…', 'ok');
