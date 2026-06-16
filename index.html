@@ -3613,11 +3613,6 @@
         </article>
       </div>
 
-      <div class="eyebrow" style="margin-top:48px;">Quick Launch</div>
-      <h2 style="font-family:var(--font-display); font-size:20px; letter-spacing:0.04em; text-transform:uppercase; margin: 8px 0 24px;">Generators &amp; Tools</h2>
-      <div class="tools-library" id="home-quicklaunch">
-        <!-- Populated from TOOLS_REGISTRY at runtime -->
-      </div>
     </section>
 
     <!-- ========================= TOOLS LIBRARY PANEL ========================= -->
@@ -6397,12 +6392,6 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         catEl.addEventListener('change', applyFilters);
       }
 
-      // Home quick-launch — top 6 generators
-      const quick = document.getElementById('home-quicklaunch');
-      if (quick) {
-        const featured = TOOLS_REGISTRY.filter(t => t.category === 'generator').slice(0, 6);
-        renderTools(quick, featured);
-      }
     })();
 
     // ============================================================
@@ -7376,6 +7365,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             setMeta(active.length + ' active deal' + (active.length === 1 ? '' : 's'), 'active');
             SECTIONS.active.list.innerHTML = active.map((d) => renderDealCard(d, today)).join('');
           }
+          // Home tile: total active land deals (UC + FRoR are active pipeline)
+          const _homeLand = document.getElementById('home-land-pipeline');
+          if (_homeLand) _homeLand.textContent = String(active.length + fror.length);
 
           // ---------- Render FRoR ----------
           if (fror.length === 0) {
@@ -7761,6 +7753,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             setMeta(projects.length + ' active project' + (projects.length === 1 ? '' : 's'));
             listEl.innerHTML = projects.map((p) => renderProjectCard(p, today)).join('');
           }
+          // Home tile
+          const _homeCustom = document.getElementById('home-custom-pipeline');
+          if (_homeCustom) _homeCustom.textContent = String(projects.length);
 
           // --- Render completed list ---
           const completedListEl = document.getElementById('customrep-completed-list');
@@ -8167,6 +8162,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             setMeta(active.length + ' active project' + (active.length === 1 ? '' : 's'));
             listEl.innerHTML = active.map((p) => renderProjectCard(p, today)).join('');
           }
+          // Home tile
+          const _homeDev = document.getElementById('home-dev-pipeline');
+          if (_homeDev) _homeDev.textContent = String(active.length);
 
           // Sold
           if (compListEl) {
@@ -13434,6 +13432,16 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
+    // Sales Home tile = buyer-side deals + listings combined. Each loader
+    // writes its count into window._salesCounts; this helper refreshes
+    // the tile whenever either side updates.
+    function _adRefreshSalesHomeTile() {
+      const el = document.getElementById('home-sales-pipeline');
+      if (!el) return;
+      const c = window._salesCounts || { buyer: 0, listings: 0 };
+      el.textContent = String((c.buyer || 0) + (c.listings || 0));
+    }
+
     // ----- Stage chip rendering (re-usable) -----
     function _adStageChip(stage) {
       const s = _adEsc(stage || '—');
@@ -13589,6 +13597,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             const bc = b.closing ? b.closing.getTime() : Infinity;
             return ac - bc;
           });
+          // Track count for Home tile (combined Sales count = buyer + listings)
+          window._salesCounts = window._salesCounts || { buyer: 0, listings: 0 };
+          window._salesCounts.buyer = deals.length;
+          _adRefreshSalesHomeTile();
           if (deals.length === 0) {
             setMeta('0 active'); setEmpty('No buyer-side deals currently active.');
             return;
@@ -13668,6 +13680,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             const lb = b.listDate ? b.listDate.getTime() : 0;
             return lb - la;
           });
+          // Track count for Home tile (combined Sales count = buyer + listings)
+          window._salesCounts = window._salesCounts || { buyer: 0, listings: 0 };
+          window._salesCounts.listings = listings.length;
+          _adRefreshSalesHomeTile();
           if (listings.length === 0) {
             setMeta('0 active'); setEmpty('No active listings.');
             return;
