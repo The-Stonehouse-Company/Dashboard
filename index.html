@@ -3916,6 +3916,18 @@
 
       <form class="modal-body" id="buyerdeal-form" autocomplete="off" novalidate>
         <fieldset>
+          <legend>Quick Import (optional)</legend>
+          <p class="legend-hint">Skip typing — drop the executed TAR Purchase &amp; Sale Agreement PDF here and we'll prefill the fields below. You can still edit anything we got wrong before submitting.</p>
+          <div class="form-grid">
+            <div class="full">
+              <input type="file" id="bd-import-pdf" accept="application/pdf" style="display:none;" />
+              <button type="button" class="btn ghost" id="bd-import-btn">📄 Import from Contract PDF</button>
+              <span id="bd-import-status" class="form-status" style="display:inline-block; margin-left:12px;"></span>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
           <legend>Deal Identity</legend>
           <div class="form-grid">
             <div>
@@ -3973,27 +3985,35 @@
         </fieldset>
 
         <fieldset>
-          <legend>Dates</legend>
+          <legend>Dates &amp; Periods</legend>
           <div class="form-grid">
             <div>
               <label for="bd-uc">Date Under Contract <span class="req">*</span></label>
               <input id="bd-uc" name="date_under_contract" type="date" required />
             </div>
             <div>
+              <label for="bd-em-due">Earnest Money Due</label>
+              <input id="bd-em-due" name="earnest_money_due" type="date" />
+            </div>
+            <div>
               <label for="bd-dd">Due Diligence End</label>
               <input id="bd-dd" name="dd_end" type="date" />
             </div>
             <div>
-              <label for="bd-insp">Inspection Date</label>
-              <input id="bd-insp" name="inspection_date" type="date" />
+              <label for="bd-insp-end">Inspection Period Ends</label>
+              <input id="bd-insp-end" name="inspection_period_ends" type="date" />
             </div>
             <div>
-              <label for="bd-appr">Appraisal Date</label>
-              <input id="bd-appr" name="appraisal_date" type="date" />
+              <label for="bd-res-end">Resolution Period Ends</label>
+              <input id="bd-res-end" name="resolution_period_ends" type="date" />
             </div>
             <div>
-              <label for="bd-fin">Financing Contingency</label>
-              <input id="bd-fin" name="financing_contingency" type="date" />
+              <label for="bd-walk">Final Walk-Through</label>
+              <input id="bd-walk" name="final_walkthrough" type="date" />
+            </div>
+            <div>
+              <label for="bd-blue">Blue Tape Walk-Through (if any)</label>
+              <input id="bd-blue" name="blue_tape_walkthrough" type="date" />
             </div>
             <div>
               <label for="bd-close">Closing Date</label>
@@ -13296,21 +13316,28 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       SHEET_TAB: "Form Responses 1",
       FORM_URL:  "https://docs.google.com/forms/d/e/1FAIpQLSdidxvfFKmuOnEp7RaVQTXp29wEeQ6WRBjLUnDTRf2JS2arHQ/formResponse",
       FIELD_MAP: {
-        agent:                 "entry.1696481611",
-        client:                "entry.1466200575",
-        property_address:      "entry.1183878754",
-        listing_agent:         "entry.679959161",
-        listing_brokerage:     "entry.940986083",
-        contract_price:        "entry.1736223358",
-        earnest_money:         "entry.736364939",
-        date_under_contract:   "entry.791501097",
-        dd_end:                "entry.1911838705",
-        inspection_date:       "entry.547294873",
-        appraisal_date:        "entry.751987567",
-        financing_contingency: "entry.1750723978",
-        closing_date:          "entry.2076985824",
-        stage:                 "entry.1189355390",
-        notes:                 "entry.1813365625"
+        agent:                  "entry.1696481611",
+        client:                 "entry.1466200575",
+        property_address:       "entry.1183878754",
+        listing_agent:          "entry.679959161",
+        listing_brokerage:      "entry.940986083",
+        contract_price:         "entry.1736223358",
+        earnest_money:          "entry.736364939",
+        date_under_contract:    "entry.791501097",
+        dd_end:                 "entry.1911838705",
+        // closing_date now uses the entry ID formerly assigned to
+        // appraisal_date (you renamed that field rather than deleting
+        // it — the column was renamed too, so the dashboard's findCol
+        // by header label picks up the live one).
+        closing_date:           "entry.751987567",
+        stage:                  "entry.1189355390",
+        notes:                  "entry.1813365625",
+        // New fields
+        earnest_money_due:      "entry.282195797",
+        inspection_period_ends: "entry.547294873",
+        resolution_period_ends: "entry.112969510",
+        final_walkthrough:      "entry.1180216668",
+        blue_tape_walkthrough:  "entry.578157943"
       }
     };
 
@@ -13526,22 +13553,33 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             contractPrice:  _adFindCol(cols, 'Contract Price', 'Price'),
             dateUC:         _adFindCol(cols, 'Date Under Contract', 'Under Contract'),
             ddEnd:          _adFindCol(cols, 'Due Diligence End', 'DD End'),
-            closing:        _adFindCol(cols, 'Closing Date', 'Closing')
+            closing:        _adFindCol(cols, 'Closing Date', 'Closing'),
+            // New fields (added after form schema change) — optional
+            emDue:          _adFindCol(cols, 'Earnest Money Due'),
+            inspectionEnd:  _adFindCol(cols, 'Inspection Period Ends', 'Inspection End'),
+            resolutionEnd:  _adFindCol(cols, 'Resolution Period Ends', 'Resolution End'),
+            finalWalk:      _adFindCol(cols, 'Final Walkthrough', 'Final Walk Through', 'Final Walk-Through'),
+            blueTape:       _adFindCol(cols, 'Blue Tape Walkthrough', 'Blue Tape Walk Through', 'Blue Tape Walk-Through')
           };
           if (ix.address < 0) throw new Error('Sheet missing "Property Address" column.');
           const today = new Date(); today.setHours(0, 0, 0, 0);
           const deals = (table.rows || []).map(r => {
             const c = r.c || [];
             return {
-              address:       _adGvizString(c[ix.address]),
-              client:        ix.client >= 0 ? _adGvizString(c[ix.client]) : '',
-              agent:         ix.agent >= 0 ? _adGvizString(c[ix.agent]) : '',
-              listingAgent:  ix.listingAgent >= 0 ? _adGvizString(c[ix.listingAgent]) : '',
-              stage:         ix.stage >= 0 ? _adGvizString(c[ix.stage]) : '',
-              contractPrice: ix.contractPrice >= 0 ? _adGvizNumber(c[ix.contractPrice]) : 0,
-              dateUC:        ix.dateUC >= 0 ? _adGvizDate(c[ix.dateUC]) : null,
-              ddEnd:         ix.ddEnd >= 0 ? _adGvizDate(c[ix.ddEnd]) : null,
-              closing:       ix.closing >= 0 ? _adGvizDate(c[ix.closing]) : null
+              address:        _adGvizString(c[ix.address]),
+              client:         ix.client >= 0 ? _adGvizString(c[ix.client]) : '',
+              agent:          ix.agent >= 0 ? _adGvizString(c[ix.agent]) : '',
+              listingAgent:   ix.listingAgent >= 0 ? _adGvizString(c[ix.listingAgent]) : '',
+              stage:          ix.stage >= 0 ? _adGvizString(c[ix.stage]) : '',
+              contractPrice:  ix.contractPrice >= 0 ? _adGvizNumber(c[ix.contractPrice]) : 0,
+              dateUC:         ix.dateUC >= 0 ? _adGvizDate(c[ix.dateUC]) : null,
+              ddEnd:          ix.ddEnd >= 0 ? _adGvizDate(c[ix.ddEnd]) : null,
+              closing:        ix.closing >= 0 ? _adGvizDate(c[ix.closing]) : null,
+              emDue:          ix.emDue >= 0 ? _adGvizDate(c[ix.emDue]) : null,
+              inspectionEnd:  ix.inspectionEnd >= 0 ? _adGvizDate(c[ix.inspectionEnd]) : null,
+              resolutionEnd:  ix.resolutionEnd >= 0 ? _adGvizDate(c[ix.resolutionEnd]) : null,
+              finalWalk:      ix.finalWalk >= 0 ? _adGvizDate(c[ix.finalWalk]) : null,
+              blueTape:       ix.blueTape >= 0 ? _adGvizDate(c[ix.blueTape]) : null
             };
           })
             .filter(d => d.address)
@@ -13745,6 +13783,268 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       submitId:  'submit-listing',
       config:    LISTING_CONFIG
     });
+
+    // ============================================================
+    // TAR PSA → Buyer Deal modal — PDF importer (best-effort prefill)
+    //
+    // Loads pdf.js (lazy, reuses the CMA importer's library if already
+    // loaded), extracts text from every page, and runs a set of regex
+    // patterns tuned to the TAR Residential Purchase & Sale Agreement
+    // (RF401-style) wording. Fills whatever it can find into the
+    // modal's inputs; leaves the rest blank for the user to complete.
+    //
+    // We intentionally err on the side of NOT filling a field rather
+    // than filling it wrong. The user reviews everything before
+    // submitting.
+    // ============================================================
+    (function () {
+      const btn      = document.getElementById('bd-import-btn');
+      const fileEl   = document.getElementById('bd-import-pdf');
+      const statusEl = document.getElementById('bd-import-status');
+      if (!btn || !fileEl) return;
+
+      const PDFJS_URL    = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      const PDFJS_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+      function setStatus(level, msg) {
+        statusEl.textContent = msg || '';
+        statusEl.style.color =
+          level === 'err'  ? '#f4b9b9' :
+          level === 'ok'   ? '#b6e3c5' :
+          level === 'warn' ? '#e8d49a' :
+                             'var(--text-muted)';
+      }
+
+      function loadPdfJs() {
+        if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+        return new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = PDFJS_URL; s.async = true;
+          s.onload = () => {
+            if (!window.pdfjsLib) return reject(new Error('pdf.js loaded but pdfjsLib missing'));
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+            resolve(window.pdfjsLib);
+          };
+          s.onerror = () => reject(new Error('Failed to load pdf.js'));
+          document.head.appendChild(s);
+        });
+      }
+
+      // Extract text from PDF — flatten into one big string with spaces
+      // between items so we can run regex against it. Also build a
+      // line-grouped version (by Y coordinate) for spatial parsing.
+      async function extractText(arrayBuffer) {
+        const pdfjsLib = await loadPdfJs();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const lines = [];
+        for (let pn = 1; pn <= pdf.numPages; pn++) {
+          const page = await pdf.getPage(pn);
+          const tc = await page.getTextContent();
+          const buckets = new Map();
+          for (const item of tc.items) {
+            const y = Math.round(item.transform[5]);
+            const x = item.transform[4];
+            if (!buckets.has(y)) buckets.set(y, []);
+            buckets.get(y).push({ x: x, s: item.str });
+          }
+          const ys = Array.from(buckets.keys()).sort((a, b) => b - a);
+          for (const y of ys) {
+            const row = buckets.get(y).sort((a, b) => a.x - b.x);
+            lines.push(row.map(r => r.s).join(' '));
+          }
+        }
+        return { flat: lines.join('\n'), lines };
+      }
+
+      // ----- Field extractors -----
+      // Every extractor returns { value, confidence } or null.
+      // Confidence: "high" (specific anchor matched) | "low" (loose match).
+
+      function fmtDateISO(raw) {
+        // Accepts "06/15/2026", "6/15/26", "June 15, 2026" → "2026-06-15"
+        if (!raw) return null;
+        const s = String(raw).trim();
+        let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+        if (m) {
+          let yr = +m[3]; if (yr < 100) yr += 2000;
+          return yr.toString().padStart(4,'0') + '-' +
+                 (+m[1]).toString().padStart(2,'0') + '-' +
+                 (+m[2]).toString().padStart(2,'0');
+        }
+        // "June 15, 2026"
+        const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+        m = s.match(/^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})$/);
+        if (m) {
+          const mi = months.indexOf(m[1].toLowerCase());
+          if (mi >= 0) return m[3] + '-' + (mi+1).toString().padStart(2,'0') + '-' + (+m[2]).toString().padStart(2,'0');
+        }
+        return null;
+      }
+
+      function findDateNear(text, anchorRe) {
+        // Find an anchor, then scan forward up to ~300 chars for a date.
+        const m = anchorRe.exec(text);
+        if (!m) return null;
+        const slice = text.slice(m.index, m.index + 300);
+        const d1 = slice.match(/(\d{1,2}\/\d{1,2}\/\d{2,4})/);
+        if (d1) return fmtDateISO(d1[1]);
+        const d2 = slice.match(/([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})/);
+        if (d2) return fmtDateISO(d2[1]);
+        return null;
+      }
+
+      function findMoneyNear(text, anchorRe) {
+        const m = anchorRe.exec(text);
+        if (!m) return null;
+        const slice = text.slice(m.index, m.index + 200);
+        // Match "$1,234,567.89" or "$1,234,567" or just "1,234,567"
+        const dm = slice.match(/\$\s*([\d,]+(?:\.\d{1,2})?)/);
+        if (dm) return dm[1].replace(/,/g, '').replace(/\.\d+$/, '');
+        return null;
+      }
+
+      function parseTAR(text) {
+        const out = {};
+
+        // ----- Purchase Price -----
+        let price = findMoneyNear(text, /Purchase\s+Price/i);
+        if (!price) price = findMoneyNear(text, /Sales?\s+Price/i);
+        if (price) out.contract_price = price;
+
+        // ----- Earnest Money (amount) -----
+        let em = findMoneyNear(text, /Earnest\s+Money/i);
+        if (em) out.earnest_money = em;
+
+        // ----- Property Address -----
+        // TAR puts it after "Property" or "located at" or in a "Property Address:" field.
+        let addr = null;
+        const addrPatterns = [
+          /Property\s+Address\s*[:\.\-]?\s*([^\n]{8,80})/i,
+          /(?:Property\s+is\s+)?located\s+at\s*[:\.\-]?\s*([^\n]{8,80})/i
+        ];
+        for (const re of addrPatterns) {
+          const m = re.exec(text);
+          if (m) {
+            addr = m[1].replace(/\s+City:.*$/i, '').replace(/\s+,.*State:.*$/i, '').trim();
+            if (addr.length > 8) break; else addr = null;
+          }
+        }
+        if (addr) out.property_address = addr;
+
+        // ----- Closing Date -----
+        const closing = findDateNear(text, /Closing\s+(?:Date|shall\s+be|on\s+or\s+before)/i)
+                       || findDateNear(text, /Date\s+of\s+Closing/i);
+        if (closing) out.closing_date = closing;
+
+        // ----- Due Diligence End -----
+        const dd = findDateNear(text, /Due\s+Diligence(?:\s+Period)?\s+(?:shall\s+)?(?:end|expire)/i)
+                 || findDateNear(text, /Due\s+Diligence\s+End/i);
+        if (dd) out.dd_end = dd;
+
+        // ----- Inspection Period -----
+        const insp = findDateNear(text, /Inspection\s+Period\s+(?:shall\s+)?(?:end|expire)/i)
+                   || findDateNear(text, /Inspection\s+Period\s+Ends/i);
+        if (insp) out.inspection_period_ends = insp;
+
+        // ----- Resolution Period -----
+        const res = findDateNear(text, /Resolution\s+Period\s+(?:shall\s+)?(?:end|expire)/i)
+                  || findDateNear(text, /Resolution\s+Period\s+Ends/i);
+        if (res) out.resolution_period_ends = res;
+
+        // ----- Date Under Contract (Effective/Binding/Acceptance date) -----
+        const uc = findDateNear(text, /(?:Effective|Binding\s+Agreement|Acceptance|Execution)\s+Date/i)
+                 || findDateNear(text, /Date\s+of\s+Acceptance/i);
+        if (uc) out.date_under_contract = uc;
+
+        // ----- Earnest Money Due (often "due within X days") -----
+        // Try to find an explicit date first; otherwise leave blank.
+        const emDue = findDateNear(text, /Earnest\s+Money\s+(?:shall\s+be\s+)?(?:due|deposited|delivered)\s+(?:by|on)/i);
+        if (emDue) out.earnest_money_due = emDue;
+
+        // ----- Final Walk-Through -----
+        const fwt = findDateNear(text, /Final\s+(?:Walk[- ]?Through|Inspection)/i);
+        if (fwt) out.final_walkthrough = fwt;
+
+        // ----- Blue Tape Walk-Through -----
+        // Rare on TAR; usually a custom new-construction addendum.
+        const bt = findDateNear(text, /Blue\s+Tape/i);
+        if (bt) out.blue_tape_walkthrough = bt;
+
+        // ----- Buyer (Client) -----
+        // TAR has a "Buyer" or "Purchaser" line near the top.
+        const buyerM = /(?:Buyer|Purchaser)\(s\)?\s*[:\.\-]?\s*([^\n]{3,60})/i.exec(text);
+        if (buyerM) {
+          const v = buyerM[1].replace(/\s+(?:Seller|Address|Phone|Email).*$/i, '').trim();
+          if (v.length > 2) out.client = v;
+        }
+
+        // ----- Listing Brokerage + Agent (other side) -----
+        const lf = /Listing\s+(?:Firm|Brokerage|Company)\s*[:\.\-]?\s*([^\n]{3,80})/i.exec(text);
+        if (lf) out.listing_brokerage = lf[1].replace(/\s+(?:License|Address|Phone).*$/i, '').trim();
+
+        const lalt = /Listing\s+(?:Agent|Licensee|Broker)\s*[:\.\-]?\s*([^\n]{3,80})/i.exec(text);
+        if (lalt) out.listing_agent = lalt[1].replace(/\s+(?:License|Email|Phone).*$/i, '').trim();
+
+        return out;
+      }
+
+      // Apply parsed values to the modal inputs.
+      const FIELD_TO_INPUT = {
+        contract_price:         'bd-price',
+        earnest_money:          'bd-em',
+        property_address:       'bd-address',
+        client:                 'bd-client',
+        listing_agent:          'bd-listing-agent',
+        listing_brokerage:      'bd-listing-brokerage',
+        date_under_contract:    'bd-uc',
+        dd_end:                 'bd-dd',
+        earnest_money_due:      'bd-em-due',
+        inspection_period_ends: 'bd-insp-end',
+        resolution_period_ends: 'bd-res-end',
+        final_walkthrough:      'bd-walk',
+        blue_tape_walkthrough:  'bd-blue',
+        closing_date:           'bd-close'
+      };
+
+      function applyParsedToForm(parsed) {
+        const filled = [];
+        for (const [k, v] of Object.entries(parsed)) {
+          if (!v) continue;
+          const id = FIELD_TO_INPUT[k];
+          if (!id) continue;
+          const el = document.getElementById(id);
+          if (el) { el.value = v; filled.push(k); }
+        }
+        return filled;
+      }
+
+      btn.addEventListener('click', () => fileEl.click());
+      fileEl.addEventListener('change', async () => {
+        const file = fileEl.files && fileEl.files[0];
+        if (!file) return;
+        setStatus('', 'Reading contract…');
+        btn.disabled = true;
+        try {
+          const buf = await file.arrayBuffer();
+          const { flat } = await extractText(buf);
+          console.log('[TAR-IMPORT] extracted text length:', flat.length);
+          const parsed = parseTAR(flat);
+          console.log('[TAR-IMPORT] parsed:', parsed);
+          const filled = applyParsedToForm(parsed);
+          if (filled.length === 0) {
+            setStatus('warn', "Couldn't pull any fields automatically — fill manually.");
+          } else {
+            setStatus('ok', '✅ Prefilled ' + filled.length + ' field' + (filled.length === 1 ? '' : 's') + ' — review before submitting.');
+          }
+        } catch (err) {
+          console.error('[TAR-IMPORT] failed:', err);
+          setStatus('err', 'Could not read PDF: ' + (err && err.message ? err.message : err));
+        } finally {
+          btn.disabled = false;
+          fileEl.value = ''; // allow re-import of same file
+        }
+      });
+    })();
   </script>
 </body>
 </html>
