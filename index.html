@@ -3481,12 +3481,30 @@
 
       <div class="subpanel" id="subpanel-customrep-pipeline" role="tabpanel" aria-hidden="true" tabindex="0">
         <div class="action-grid">
+          <button class="primary-action" type="button" id="open-nurturing-modal" aria-haspopup="dialog" aria-controls="nurturing-modal">
+            <span class="action-label">Log a Nurturing Client</span>
+            <span class="action-sub">Prospect in conversation — track stage, last touch, next action</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
           <button class="primary-action" type="button" id="open-customrep-intake-modal" aria-haspopup="dialog" aria-controls="customrep-intake-modal">
             <span class="action-label">Log a New Project</span>
-            <span class="action-sub">Add a custom-rep client to the active pipeline</span>
+            <span class="action-sub">Promote a signed client to the active pipeline</span>
             <span class="action-arrow" aria-hidden="true">→</span>
           </button>
         </div>
+
+        <section class="pipeline-section" aria-labelledby="nurturing-title">
+          <header class="pipeline-head">
+            <div>
+              <div class="eyebrow" style="margin-bottom:8px;">Nurturing · Prospects</div>
+              <h2 class="pipeline-title" id="nurturing-title">In Conversation</h2>
+            </div>
+            <div class="pipeline-meta" id="nurturing-meta">Loading…</div>
+          </header>
+          <div class="deal-list" id="nurturing-list">
+            <div class="deal-empty">Loading prospects…</div>
+          </div>
+        </section>
 
         <section class="pipeline-section" aria-labelledby="customrep-pipeline-title">
           <header class="pipeline-head">
@@ -4270,6 +4288,111 @@
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="cancel-listing">Cancel</button>
         <button class="btn" type="submit" form="listing-form" id="submit-listing">Log Listing</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========================= LOG A NURTURING CLIENT MODAL ========================= -->
+  <div class="modal-overlay" id="nurturing-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="nurturing-modal-title" id="nurturing-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Custom Home Rep · Prospect</span>
+          <h2 class="modal-title" id="nurturing-modal-title">Log a Nurturing Client</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-nurturing-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="nurturing-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Prospect Identity</legend>
+          <div class="form-grid">
+            <div>
+              <label for="nu-agent">Stonehouse Agent <span class="req">*</span></label>
+              <select id="nu-agent" name="agent" required>
+                <option value="" disabled selected>Select agent…</option>
+                <option value="Ryan Stonehouse">Ryan Stonehouse</option>
+              </select>
+            </div>
+            <div>
+              <label for="nu-client">Client / Prospect Name <span class="req">*</span></label>
+              <input id="nu-client" name="client" type="text" required placeholder="John & Jane Doe" />
+            </div>
+            <div>
+              <label for="nu-stage">Current Stage <span class="req">*</span></label>
+              <select id="nu-stage" name="stage" required>
+                <option value="" disabled selected>Select stage…</option>
+                <option value="Inquiry">Inquiry</option>
+                <option value="Discovery Call">Discovery Call</option>
+                <option value="Proposal Sent">Proposal Sent</option>
+                <option value="Negotiating">Negotiating</option>
+                <option value="Signed">Signed (graduates to Active Pipeline)</option>
+                <option value="Lost">Lost</option>
+              </select>
+            </div>
+            <div>
+              <label for="nu-source">Source</label>
+              <select id="nu-source" name="source">
+                <option value="" selected>—</option>
+                <option value="Referral">Referral</option>
+                <option value="Website">Website</option>
+                <option value="Social">Social</option>
+                <option value="Broker">Broker / Realtor</option>
+                <option value="Past Client">Past Client</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="full">
+              <label for="nu-property">Property Address (if known)</label>
+              <input id="nu-property" name="property_address" type="text" placeholder="123 Main St, Nashville, TN 37205" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Pre-Qualifying</legend>
+          <div class="form-grid">
+            <div>
+              <label for="nu-budget">Budget Range</label>
+              <input id="nu-budget" name="budget_range" type="text" placeholder="$1.5M – $2M" />
+            </div>
+            <div>
+              <label for="nu-location">Target Location</label>
+              <input id="nu-location" name="target_location" type="text" placeholder="West Meade / Belle Meade" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Touchpoint</legend>
+          <div class="form-grid">
+            <div>
+              <label for="nu-touch">Last Touch Date</label>
+              <input id="nu-touch" name="last_touch" type="date" />
+            </div>
+            <div>
+              <label for="nu-next">Next Action</label>
+              <input id="nu-next" name="next_action" type="text" placeholder="Follow up on proposal Tuesday" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Notes</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="nu-notes">Notes (optional)</label>
+              <textarea id="nu-notes" name="notes" rows="3" placeholder="Context, decisions, anything they mentioned…"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="form-status" id="nurturing-form-status" aria-live="polite"></div>
+      </form>
+
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-nurturing">Cancel</button>
+        <button class="btn" type="submit" form="nurturing-form" id="submit-nurturing">Log Prospect</button>
       </footer>
     </div>
   </div>
@@ -6471,6 +6594,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
       // Custom Home Rep
       { id: 'customrep-intake',    name: 'Custom Home Rep Intake',  division: 'customrep',   category: 'intake',    href: '#customrep', external: false, desc: 'Log a new buyer/builder pairing into the custom-rep pipeline.', status: 'live' },
+      { id: 'nurturing-client',    name: 'Log a Nurturing Client',  division: 'customrep',   category: 'intake',    href: '#customrep', external: false, desc: 'Track prospects in conversation — stage, source, budget, last touch, next action.', status: 'live' },
 
       // Cross-division
       { id: 'engagement-letter',   name: 'Engagement Letter',       division: 'cross',       category: 'generator', href: 'engagement-letter.html', external: true, desc: 'Stonehouse-branded engagement letter — buyer/seller representation.', status: 'live' }
@@ -14448,6 +14572,160 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         });
       }
     })();
+
+    // ============================================================
+    // NURTURING CLIENTS — Custom Home Rep prospects
+    //
+    // STORAGE: Google Sheet "Stonehouse Nurturing Clients" + matching
+    // Google Form. Same gviz-read / no-cors-POST pattern as the other
+    // intake pipelines. Until wired, the section renders "Setup pending"
+    // and the modal warns submissions won't persist.
+    // ============================================================
+    const NURTURING_CONFIG = {
+      SHEET_ID:  "",
+      SHEET_TAB: "Form Responses 1",
+      FORM_URL:  "",
+      FIELD_MAP: {
+        agent:            "",
+        client:           "",
+        stage:            "",
+        source:           "",
+        property_address: "",
+        budget_range:     "",
+        target_location:  "",
+        last_touch:       "",
+        next_action:      "",
+        notes:            ""
+      }
+    };
+
+    // Pipeline loader
+    (function () {
+      const listEl = document.getElementById('nurturing-list');
+      const metaEl = document.getElementById('nurturing-meta');
+      if (!listEl) return;
+      function setMeta(t) { if (metaEl) metaEl.textContent = t; }
+      function setEmpty(m) { listEl.innerHTML = '<div class="deal-empty">' + _adEsc(m) + '</div>'; }
+      function setError(m) { listEl.innerHTML = '<div class="deal-error">' + _adEsc(m) + '</div>'; }
+
+      if (!NURTURING_CONFIG.SHEET_ID) {
+        setMeta('Setup pending');
+        setEmpty('Nurturing Clients sheet not yet connected. See docs/nurturing-setup.md.');
+        return;
+      }
+
+      function renderProspectCard(p, today) {
+        const lastTouchStr = p.lastTouch ? _adFmtDate(p.lastTouch) : '—';
+        let staleClass = '';
+        let staleNote = '';
+        if (p.lastTouch) {
+          const days = _adDaysBetween(p.lastTouch, today);
+          if (days > 14) {
+            staleClass = ' stale';
+            staleNote = ' &nbsp; <span style="color:#e8d49a; font-size:9px; letter-spacing:.18em; text-transform:uppercase;">' + days + ' days since last touch</span>';
+          }
+        }
+        return (
+          '<article class="deal-card' + staleClass + '">' +
+            '<header class="deal-head">' +
+              '<div>' +
+                '<h3 class="deal-address">' + _adEsc(p.client || 'Unnamed prospect') + '</h3>' +
+                '<div class="deal-meta">' +
+                  (p.propertyAddress ? _adEsc(p.propertyAddress) : '<span style="color:var(--text-dim);">No property yet</span>') +
+                  (p.source ? ' &nbsp;·&nbsp; <span style="color:var(--text-dim);">' + _adEsc(p.source) + '</span>' : '') +
+                  ' &nbsp; ' + _adStageChip(p.stage) +
+                '</div>' +
+              '</div>' +
+            '</header>' +
+            '<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; padding:14px 18px 4px; font-size:11px;">' +
+              (p.budgetRange ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Budget</div>' + _adEsc(p.budgetRange) + '</div>' : '') +
+              (p.targetLocation ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Target Location</div>' + _adEsc(p.targetLocation) + '</div>' : '') +
+              '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Last Touch</div>' + _adEsc(lastTouchStr) + staleNote + '</div>' +
+              (p.nextAction ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Next Action</div>' + _adEsc(p.nextAction) + '</div>' : '') +
+            '</div>' +
+            (p.notes ? '<div style="padding:0 18px 14px; font-size:11px; color:var(--text-muted); font-style:italic;">' + _adEsc(p.notes) + '</div>' : '') +
+          '</article>'
+        );
+      }
+
+      async function load() {
+        try {
+          setMeta('Loading…'); setEmpty('Loading prospects…');
+          const res = await fetch(_adGvizUrl(NURTURING_CONFIG), { cache: 'no-store' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const table = _adParseEnvelope(await res.text());
+          const cols = table.cols || [];
+          const ix = {
+            client:          _adFindCol(cols, 'Client', 'Client Name'),
+            agent:           _adFindCol(cols, 'Agent'),
+            stage:           _adFindCol(cols, 'Stage', 'Current Stage'),
+            source:          _adFindCol(cols, 'Source'),
+            propertyAddress: _adFindCol(cols, 'Property Address'),
+            budgetRange:     _adFindCol(cols, 'Budget Range', 'Budget'),
+            targetLocation:  _adFindCol(cols, 'Target Location', 'Location'),
+            lastTouch:       _adFindCol(cols, 'Last Touch', 'Last Touch Date'),
+            nextAction:      _adFindCol(cols, 'Next Action'),
+            notes:           _adFindCol(cols, 'Notes')
+          };
+          if (ix.client < 0) throw new Error('Sheet missing "Client" column.');
+          const today = new Date(); today.setHours(0, 0, 0, 0);
+          const prospects = (table.rows || []).map(r => {
+            const c = r.c || [];
+            return {
+              client:          _adGvizString(c[ix.client]),
+              agent:           ix.agent >= 0 ? _adGvizString(c[ix.agent]) : '',
+              stage:           ix.stage >= 0 ? _adGvizString(c[ix.stage]) : '',
+              source:          ix.source >= 0 ? _adGvizString(c[ix.source]) : '',
+              propertyAddress: ix.propertyAddress >= 0 ? _adGvizString(c[ix.propertyAddress]) : '',
+              budgetRange:     ix.budgetRange >= 0 ? _adGvizString(c[ix.budgetRange]) : '',
+              targetLocation:  ix.targetLocation >= 0 ? _adGvizString(c[ix.targetLocation]) : '',
+              lastTouch:       ix.lastTouch >= 0 ? _adGvizDate(c[ix.lastTouch]) : null,
+              nextAction:      ix.nextAction >= 0 ? _adGvizString(c[ix.nextAction]) : '',
+              notes:           ix.notes >= 0 ? _adGvizString(c[ix.notes]) : ''
+            };
+          })
+            .filter(p => p.client)
+            // Hide graduated (Signed) and Lost — they're no longer nurturing
+            .filter(p => !/^(signed|lost)$/i.test(p.stage));
+          // Sort: stale (longest since touch) first, then by stage priority
+          const stageOrder = { 'Inquiry':0, 'Discovery Call':1, 'Proposal Sent':2, 'Negotiating':3 };
+          prospects.sort((a, b) => {
+            const sa = stageOrder[a.stage] ?? 9;
+            const sb = stageOrder[b.stage] ?? 9;
+            if (sa !== sb) return sa - sb;
+            const ta = a.lastTouch ? a.lastTouch.getTime() : Infinity;
+            const tb = b.lastTouch ? b.lastTouch.getTime() : Infinity;
+            return ta - tb;
+          });
+
+          if (prospects.length === 0) {
+            setMeta('0 prospects'); setEmpty('No nurturing prospects yet — click "Log a Nurturing Client" to add the first.');
+            return;
+          }
+          setMeta(prospects.length + ' prospect' + (prospects.length === 1 ? '' : 's'));
+          listEl.innerHTML = prospects.map(p => renderProspectCard(p, today)).join('');
+        } catch (err) {
+          console.error('[NURTURING] load failed:', err);
+          setMeta('Could not load'); setError('Could not load: ' + (err.message || err));
+        }
+      }
+      load();
+      const tabBtn = document.getElementById('tab-customrep');
+      if (tabBtn) tabBtn.addEventListener('click', load);
+    })();
+
+    // Modal controller
+    _adSetupModal({
+      overlayId: 'nurturing-modal-overlay',
+      modalId:   'nurturing-modal',
+      formId:    'nurturing-form',
+      statusId:  'nurturing-form-status',
+      openId:    'open-nurturing-modal',
+      closeId:   'close-nurturing-modal',
+      cancelId:  'cancel-nurturing',
+      submitId:  'submit-nurturing',
+      config:    NURTURING_CONFIG
+    });
   </script>
 </body>
 </html>
