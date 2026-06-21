@@ -6719,8 +6719,15 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     //  - Deep-linkable via URL hash (#sales, #land, #customrep, #development)
     // ============================================================
     (function () {
-      const tabs   = Array.from(document.querySelectorAll('[role="tab"]'));
-      const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
+      // IMPORTANT: filter to TOP-level tabs (data-key) and TOP-level panels
+      // (id starts with "panel-"). The DOM also contains subtabs (data-subkey)
+      // and subpanels (id starts with "subpanel-") — those are managed by the
+      // subtab controller. Mixing them here used to hide every subpanel when
+      // a top-level nav was clicked, which made each division load blank.
+      const tabs   = Array.from(document.querySelectorAll('[role="tab"]'))
+        .filter(t => t.dataset.key && !t.dataset.subkey);
+      const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'))
+        .filter(p => (p.id || '').startsWith('panel-'));
 
       function activate(key, { focus = false, updateHash = true } = {}) {
         const tab   = tabs.find(t => t.dataset.key === key);
