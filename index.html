@@ -13259,7 +13259,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     //    work without re-init.
     // ============================================================
     (function () {
-      document.querySelectorAll('.subtabbar').forEach((bar) => {
+      // Match horizontal subtabbars in every division AND the new vertical
+      // Sales side-nav, which uses .sales-subnav instead of .subtabbar.
+      document.querySelectorAll('.subtabbar, .sales-subnav').forEach((bar) => {
         function tabs() { return Array.from(bar.querySelectorAll('.subtab')); }
 
         function activate(key) {
