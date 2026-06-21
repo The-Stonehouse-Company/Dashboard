@@ -2968,14 +2968,17 @@
 
        Triggered by window.showStonehouseIntro(); see the access-gate logic.
        ========================================================================= -->
-  <div id="stonehouse-intro" aria-hidden="true">
+  <div id="stonehouse-intro">
     <div class="intro-inner">
       <img class="intro-arch" src="assets/icon-arch-transparent.png" alt="" />
       <div class="intro-wordmark">The Stonehouse Company</div>
     </div>
   </div>
   <style>
-    /* Splash overlay — sits hidden, gets activated via .is-playing */
+    /* Splash overlay — defaults VISIBLE (opaque black) so it covers the
+       dashboard from the first paint. The arch + wordmark are individually
+       hidden and fade in only when .is-playing is added by JS. The whole
+       overlay fades away when .is-leaving is added, revealing the dashboard. */
     #stonehouse-intro {
       position: fixed;
       inset: 0;
@@ -2984,14 +2987,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 1.2s ease-in-out;
-    }
-    #stonehouse-intro.is-playing {
       opacity: 1;
       pointer-events: auto;
       cursor: pointer;
+      transition: opacity 1.2s ease-in-out;
     }
     #stonehouse-intro.is-leaving {
       opacity: 0;
