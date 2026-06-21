@@ -2438,8 +2438,8 @@
       padding: 9px 14px 9px 12px;
       color: var(--text-dim);
       font-family: var(--font-body);
-      font-weight: 300;
-      font-size: 12px;
+      font-weight: 400;
+      font-size: 13px;
       text-transform: uppercase;
       letter-spacing: 0.18em;
       cursor: pointer;
@@ -2455,26 +2455,28 @@
       background: rgba(255,255,255,0.05);
       border-left-color: var(--text);
     }
-    /* Top-level items (Overview / Settings) — slightly larger weight */
+    /* Top-level items (Overview / Clients / Settings) — bigger, more prominent */
     .sales-subnav > .subnav-item {
-      font-size: 12px;
+      font-size: 14px;
+      font-weight: 500;
       padding-left: 14px;
+      padding-top: 11px; padding-bottom: 11px;
     }
 
-    /* Group accordion (details/summary) */
+    /* Group accordion (details/summary) — group headers read big & strong */
     .sales-subnav details.subnav-group {
-      margin: 6px 0 4px;
+      margin: 8px 0 4px;
     }
     .sales-subnav details.subnav-group > summary {
       list-style: none;
       cursor: pointer;
-      padding: 10px 14px 8px;
+      padding: 11px 14px 9px;
       font-family: var(--font-body);
-      font-size: 9px;
+      font-size: 12.5px;
       font-weight: 500;
-      letter-spacing: 0.28em;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: var(--text-dim);
+      color: var(--text-muted);
       user-select: none;
       display: flex;
       align-items: center;
@@ -2494,11 +2496,13 @@
     .sales-subnav details.subnav-group > summary:hover {
       color: var(--text-muted);
     }
-    /* Children — slightly indented */
+    /* Children — slightly indented + smaller for clear hierarchy */
     .sales-subnav details.subnav-group > .subnav-item {
       padding-left: 24px;
-      font-size: 11.5px;
-      letter-spacing: 0.16em;
+      padding-top: 7px; padding-bottom: 7px;
+      font-size: 10.5px;
+      font-weight: 300;
+      letter-spacing: 0.18em;
     }
 
     /* Nested sub-group (e.g. Marketing > Documents, Marketing > Generators) */
@@ -2510,9 +2514,9 @@
       cursor: pointer;
       padding: 6px 10px;
       font-family: var(--font-body);
-      font-size: 9px;
-      font-weight: 400;
-      letter-spacing: 0.22em;
+      font-size: 8.5px;
+      font-weight: 500;
+      letter-spacing: 0.28em;
       text-transform: uppercase;
       color: var(--text-dim);
       display: flex; align-items: center; gap: 6px;
@@ -2541,13 +2545,13 @@
       background: transparent;
       border: 0;
       border-left: 2px solid transparent;
-      padding: 7px 14px 7px 28px;
+      padding: 6px 14px 6px 28px;
       color: var(--text-dim);
       font-family: var(--font-body);
       font-weight: 300;
-      font-size: 11px;
+      font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.16em;
+      letter-spacing: 0.18em;
       cursor: pointer;
       text-decoration: none;
       transition: color .15s ease, background .15s ease, border-left-color .15s ease;
@@ -3129,6 +3133,7 @@
       <div class="sales-shell">
         <aside class="sales-subnav" role="tablist" aria-label="Sales sections" data-subtab-parent="sales">
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-sales-overview"    aria-selected="true"  data-subkey="overview">Overview</button>
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-sales-clients"    aria-selected="false" data-subkey="clients">Clients</button>
 
           <details class="subnav-group" open>
             <summary>Marketing</summary>
@@ -3551,6 +3556,34 @@
           <div class="pr-list" id="pr-list">
             <div class="pr-empty">Loading properties…</div>
           </div>
+        </div>
+      </div>
+
+      <div class="subpanel" id="subpanel-sales-clients" role="tabpanel" aria-hidden="true" tabindex="0">
+        <p class="subpanel-intro">Client directory for the Sales division — past, current, and prospect clients across buyer + listing rep. Pulled from the deal pipelines and nurturing sheets. (Live aggregation wires up next pass.)</p>
+
+        <div class="home-grid" style="margin-top:24px;">
+          <article class="home-card">
+            <span class="h-eyebrow">Active Clients</span>
+            <div class="h-stat" id="clients-active">—</div>
+            <div class="h-label">Currently in an open transaction</div>
+          </article>
+          <article class="home-card">
+            <span class="h-eyebrow">Prospect Clients</span>
+            <div class="h-stat" id="clients-prospect">—</div>
+            <div class="h-label">In nurturing conversations</div>
+          </article>
+          <article class="home-card">
+            <span class="h-eyebrow">Past Clients</span>
+            <div class="h-stat" id="clients-past">—</div>
+            <div class="h-label">Closed deals · for re-engagement</div>
+          </article>
+        </div>
+
+        <div class="placeholder" style="margin-top:32px;">
+          <div class="mark">— Coming —</div>
+          <h2>Unified client list</h2>
+          <p>One searchable list combining buyer-rep clients, listing sellers, custom-rep prospects, and closed-deal alumni. Filter by stage, sort by last touch, export to CSV.</p>
         </div>
       </div>
 
