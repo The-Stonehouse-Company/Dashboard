@@ -1,11 +1,13 @@
 # Clients CRM — Setup
 
-The Sales → **Clients** subtab renders a searchable client database with category + status filters and a CSV export for Mailchimp / Constant Contact email blasts. Open House Sign-In visitors auto-merge in as read-only entries tagged "Open House Visitor".
+The Sales → **Clients** subtab renders a per-agent client book. Each teammate enters their own passcode → the workspace scopes to just their clients (table, stats, CSV export, Add Client modal). 24-hour unlock; "Switch agent" re-locks.
 
 Three things to wire up:
 1. **Stonehouse Clients** Google Sheet — where contact records live.
 2. **Add Client** Google Form — what the modal POSTs to.
 3. (Optional) **Open House master sheet ID** — auto-merge OH sign-ins.
+
+Plus: each agent needs a `passcode` in the **Team Roster** sheet (see Section 6).
 
 Plan ~20 minutes.
 
@@ -107,14 +109,50 @@ Refresh the dashboard after pasting → all 60 contacts appear in the Clients li
 
 ---
 
+---
+
+## 6 · Per-agent passcodes (REQUIRED — without this, no one can see the Clients page)
+
+The Clients page is locked behind an agent code. Each agent's code lives in the **Stonehouse Team Roster** sheet (the same one wired in `TEAM_CONFIG`).
+
+### Add the column
+
+1. Open the **Stonehouse Team Roster** sheet.
+2. Add a new column header to the right of the existing columns: `passcode` (lowercase, exact spelling).
+3. Fill in a 4-digit code for each agent. Suggestion: short, easy to remember, but not "1234" / "0000".
+   - **Ryan's default:** `3034` (same as Commissions — feel free to change).
+
+That's it for read-only access. Refresh the dashboard → enter your code → your client book appears.
+
+### Optional: add to the Add Team Member form
+
+Right now the Add Team Member modal does NOT post a passcode (the form question doesn't exist yet). To enable that flow:
+
+1. Open the **Add Team Member** Google Form (the one wired in `TEAM_CONFIG.FORM_URL`).
+2. Add a question: `passcode` · Short answer · not required.
+3. Get the pre-filled link, extract the new `entry.NNN`, paste into `TEAM_CONFIG.FIELD_MAP.passcode` in `index.html`.
+4. Update the Add Team Member modal markup to include a passcode input (`name="passcode"`).
+
+Until that's done, when you onboard a new agent, also drop their code directly into the sheet's `passcode` column.
+
+### Security disclaimer
+
+This is a **UX scoping mechanism, not real authentication**. The Stonehouse Clients sheet is publicly readable because Google Sheets gviz requires it. Anyone with DevTools can bypass the lock. Use it to keep agents from accidentally browsing each other's books — don't rely on it for confidentiality of sensitive client info.
+
+---
+
 ## How it behaves
 
-- **Add Client modal** → row appended to the sheet (next reload picks it up).
-- **Search box** → matches name / email / phone / city / neighborhood.
+- **Lock screen** → opening Clients prompts for a 4-digit agent code. Match against the Roster sheet → workspace unlocks scoped to that agent.
+- **24-hour unlock** → won't re-prompt until the timer expires or you click "Switch agent".
+- **Identity bar** → "Viewing as [Name] · Switch agent" sits at the top of the workspace so you always know whose book is on screen.
+- **Add Client modal** → row appended to the sheet, agent field locked to the unlocked agent. Next reload picks it up.
+- **Search box** → matches name / email / phone / city / neighborhood (scoped to current agent).
 - **Category filter** → dropdown of: Past / Active / Sphere / Open House Visitor / Prospect / Custom Home Rep.
 - **Status filter** → dropdown of: New / Nurture / Engaged / In Contract / Closed / Inactive.
-- **Export CSV** → downloads the currently-filtered list. Click it after filtering to Active Clients for example → you get just those rows ready to import into Mailchimp.
-- **Open House Visitors** show with a dashed pill and a left border accent to distinguish them from direct entries. They're read-only — edit at the source.
+- **Tile counts** → Total / Active / Past / OH Visitors all scoped to the current agent.
+- **Export CSV** → downloads the currently-filtered (and agent-scoped) list. Click it after filtering to Active Clients → just those rows for Mailchimp.
+- **Open House Visitors** show with a dashed pill and a left border accent to distinguish them from direct entries. They're read-only — edit at the source. OH visitors auto-scope by **Hosting Agent** column.
 
 ## Editing existing rows
 

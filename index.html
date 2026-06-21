@@ -2740,6 +2740,47 @@
     }
 
     /* =========================================================
+       CLIENTS — Per-agent identity bar
+       ========================================================= */
+    .clients-identity-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      border: 1px solid var(--rule);
+      background: var(--bg-elev);
+      margin: 0 0 18px;
+    }
+    .clients-identity-label {
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .clients-identity-name {
+      font-family: var(--font-display);
+      font-size: 18px;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      flex: 1;
+    }
+    .clients-switch-btn {
+      background: transparent;
+      border: 1px solid var(--rule);
+      color: var(--text-muted);
+      padding: 7px 14px;
+      font-family: var(--font-body);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .clients-switch-btn:hover {
+      color: var(--text);
+      border-color: var(--text);
+    }
+
+    /* =========================================================
        APP SHELL — Sidebar nav + main content area
        (Phase 1 of the structured-for-growth redesign)
        ========================================================= */
@@ -3621,7 +3662,33 @@
       </div>
 
       <div class="subpanel" id="subpanel-sales-clients" role="tabpanel" aria-hidden="true" tabindex="0">
+
+        <!-- Per-agent lock screen -->
+        <div class="commissions-lock" id="clients-lock" style="display:none;">
+          <div class="commissions-lock-card">
+            <div class="commissions-lock-icon" aria-hidden="true">⌗</div>
+            <div class="commissions-lock-eyebrow">Sales Division · Per-Agent Access</div>
+            <h2 class="commissions-lock-title">Enter Your Agent Code</h2>
+            <p class="commissions-lock-sub">Each agent has their own passcode set in the Team Roster sheet. Enter yours to see and manage your client book.</p>
+            <form class="commissions-lock-form" id="clients-lock-form" autocomplete="off">
+              <input type="password" id="clients-lock-input" inputmode="numeric" autocomplete="off" placeholder="••••" aria-label="Agent passcode" />
+              <button type="submit">Unlock my clients</button>
+              <div class="commissions-lock-status" id="clients-lock-status" role="status" aria-live="polite"></div>
+            </form>
+            <p class="commissions-lock-foot">24-hour unlock · Switch agents anytime</p>
+          </div>
+        </div>
+
+        <!-- Per-agent client workspace (revealed after unlock) -->
+        <div id="clients-content" style="display:none;">
         <p class="subpanel-intro">Client directory across Sales + Custom Home Rep. Add, search, filter, and export to CSV for Mailchimp / Constant Contact email blasts. Open House sign-ins merge in automatically (read-only).</p>
+
+        <!-- Identity bar — shows which agent is currently viewing + switch button -->
+        <div class="clients-identity-bar">
+          <span class="clients-identity-label">Viewing as</span>
+          <span class="clients-identity-name" id="clients-current-agent">—</span>
+          <button type="button" class="clients-switch-btn" id="clients-switch-agent">Switch agent</button>
+        </div>
 
         <div class="action-grid" style="margin-bottom:16px;">
           <button class="primary-action" type="button" id="open-client-modal" aria-haspopup="dialog" aria-controls="client-modal">
@@ -3709,6 +3776,7 @@
             </tbody>
           </table>
         </div>
+        </div><!-- /#clients-content -->
       </div>
 
       <div class="subpanel" id="subpanel-sales-website" role="tabpanel" aria-hidden="true" tabindex="0">
@@ -13998,6 +14066,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             phone:      idx('phone'),
             photo:      idx('photo'),
             license:    idx('license'),
+            passcode:   idx('passcode'),
             sales:      idx('div_sales'),
             land:       idx('div_land'),
             customrep:  idx('div_customrep'),
@@ -14024,6 +14093,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
                 phone:     colIdx.phone >= 0 ? String(r[colIdx.phone] || '').trim() : '',
                 photo:     colIdx.photo >= 0 ? String(r[colIdx.photo] || '').trim() : '',
                 license:   colIdx.license >= 0 ? String(r[colIdx.license] || '').trim() : '',
+                passcode:  colIdx.passcode >= 0 ? String(r[colIdx.passcode] || '').trim() : '',
                 divisions: divs
               };
             })
@@ -15550,9 +15620,11 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const q = (document.getElementById('client-search').value || '').toLowerCase().trim();
       const cat = document.getElementById('client-filter-category').value;
       const stt = document.getElementById('client-filter-status').value;
-      const agt = document.getElementById('client-filter-agent').value;
+      // Per-agent scoping: only show clients owned by the currently unlocked agent.
+      // window._clientsCurrentAgent is set by the lock controller; null if locked.
+      const currentAgent = (typeof window._clientsCurrentAgent === 'function') ? window._clientsCurrentAgent() : null;
       return _clientRows.filter(c => {
-        if (agt && c.agent !== agt) return false;
+        if (currentAgent && (c.agent || '').trim() !== currentAgent) return false;
         if (cat && !(c.categories || []).includes(cat)) return false;
         if (stt && c.status !== stt) return false;
         if (q) {
@@ -15563,25 +15635,44 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       });
     }
 
-    // Populate the Agent dropdowns (filter + modal) from the live Team Roster.
-    // Called when the team roster loads OR when clients reload (whichever fires).
+    // Populate the Agent dropdowns (filter + modal) based on lock state.
+    // When unlocked, the filter dropdown is HIDDEN (scope is enforced) and
+    // the modal dropdown is locked to the current agent (force-set so any
+    // submission uses that agent's name).
     function _populateClientAgentDropdowns() {
-      const roster = (window.STONEHOUSE_TEAM || []);
-      const agents = roster.map(m => m.name).filter(n => n && n.trim());
-      // Fallback to Ryan if roster is empty
-      const list = agents.length ? agents : ['Ryan Stonehouse'];
+      const currentAgent = (typeof window._clientsCurrentAgent === 'function') ? window._clientsCurrentAgent() : null;
 
+      // Filter dropdown — hidden when an agent is unlocked.
       const filterSel = document.getElementById('client-filter-agent');
       if (filterSel) {
-        const current = filterSel.value;
-        filterSel.innerHTML = '<option value="">All Agents</option>' +
-          list.map(n => '<option value="' + _clEsc(n) + '"' + (n === current ? ' selected' : '') + '>' + _clEsc(n) + '</option>').join('');
+        if (currentAgent) {
+          filterSel.style.display = 'none';
+          filterSel.innerHTML = '<option value="' + _clEsc(currentAgent) + '" selected>' + _clEsc(currentAgent) + '</option>';
+          filterSel.value = currentAgent;
+        } else {
+          filterSel.style.display = '';
+          filterSel.innerHTML = '<option value="" selected>—</option>';
+        }
       }
+      // Modal dropdown — single locked option matching the current agent.
+      // NOTE: do NOT set `disabled` on the <select> — disabled selects are
+      // excluded from FormData on submit, which would drop the agent name
+      // from the POST. With only one option, the user can't change it,
+      // and pointer-events:none on the wrapper visually conveys it's locked.
       const modalSel = document.getElementById('cl-agent');
       if (modalSel) {
-        const current = modalSel.value;
-        modalSel.innerHTML = '<option value="" disabled' + (current ? '' : ' selected') + '>Select agent…</option>' +
-          list.map(n => '<option value="' + _clEsc(n) + '"' + (n === current ? ' selected' : '') + '>' + _clEsc(n) + '</option>').join('');
+        if (currentAgent) {
+          modalSel.innerHTML = '<option value="' + _clEsc(currentAgent) + '" selected>' + _clEsc(currentAgent) + '</option>';
+          modalSel.value = currentAgent;
+          modalSel.disabled = false;
+          modalSel.style.opacity = '.7';
+          modalSel.style.cursor = 'not-allowed';
+          modalSel.title = 'Locked to your agent code. Switch agent on the Clients page to change.';
+        } else {
+          modalSel.innerHTML = '<option value="" disabled selected>Locked — enter agent code first</option>';
+          modalSel.disabled = false;
+          modalSel.style.opacity = '.7';
+        }
       }
     }
 
@@ -15591,11 +15682,16 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       if (!tbody) return;
       const list = _filteredClients();
 
-      // Tile counts (always use the FULL list, not filtered)
-      const total = _clientRows.length;
-      const oh    = _clientRows.filter(c => c.source_kind === 'oh').length;
-      const act   = _clientRows.filter(c => (c.categories || []).includes('Active Client')).length;
-      const past  = _clientRows.filter(c => (c.categories || []).includes('Past Client')).length;
+      // Tile counts — scoped to the currently unlocked agent. Each agent's
+      // landing page shows THEIR client universe, not the firm-wide total.
+      const currentAgent = (typeof window._clientsCurrentAgent === 'function') ? window._clientsCurrentAgent() : null;
+      const scopedRows = currentAgent
+        ? _clientRows.filter(c => (c.agent || '').trim() === currentAgent)
+        : _clientRows;
+      const total = scopedRows.length;
+      const oh    = scopedRows.filter(c => c.source_kind === 'oh').length;
+      const act   = scopedRows.filter(c => (c.categories || []).includes('Active Client')).length;
+      const past  = scopedRows.filter(c => (c.categories || []).includes('Past Client')).length;
       const setTxt = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = String(v); };
       setTxt('clients-total', total);
       setTxt('clients-active', act);
@@ -15704,6 +15800,137 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     loadClients();
     const clientsTab = document.querySelector('[aria-controls="subpanel-sales-clients"]');
     if (clientsTab) clientsTab.addEventListener('click', loadClients);
+
+    // ============================================================
+    // CLIENTS — Per-agent passcode gate
+    //
+    // Each agent has a 4-digit passcode stored in the Team Roster sheet
+    // under a "passcode" column. Entering a valid code unlocks the
+    // Clients workspace AS THAT AGENT — the table, tile counts, CSV
+    // export, and Add Client modal are all scoped to their book.
+    //
+    // Unlock persists 24h in localStorage. "Switch agent" re-locks.
+    //
+    // SECURITY NOTE: This is a UX scoping mechanism, not real auth.
+    // The Stonehouse Clients sheet is publicly readable (gviz needs
+    // that). Anyone with DevTools can bypass this. It exists so each
+    // agent sees their own book by default and isn't accidentally
+    // looking at someone else's clients.
+    // ============================================================
+    (function () {
+      const STORAGE_KEY = 'stonehouse.clients.unlockedAgent';
+      const UNLOCK_DURATION_MS = 24 * 60 * 60 * 1000;  // 24 hours
+
+      const lockEl    = document.getElementById('clients-lock');
+      const contentEl = document.getElementById('clients-content');
+      const formEl    = document.getElementById('clients-lock-form');
+      const inputEl   = document.getElementById('clients-lock-input');
+      const statusEl  = document.getElementById('clients-lock-status');
+      const nameEl    = document.getElementById('clients-current-agent');
+      const switchBtn = document.getElementById('clients-switch-agent');
+      if (!lockEl || !contentEl) return;
+
+      function getUnlock() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return null;
+          const obj = JSON.parse(raw);
+          if (obj && obj.agent && obj.until && Date.now() < obj.until) return obj;
+        } catch (e) { /* corrupt — fall through */ }
+        localStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+      function setUnlock(agent) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          agent: agent,
+          until: Date.now() + UNLOCK_DURATION_MS
+        }));
+      }
+      function clearUnlock() {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+
+      // Exposed for _filteredClients / _renderClients / _populateClientAgentDropdowns
+      window._clientsCurrentAgent = function () {
+        const u = getUnlock();
+        return u ? u.agent : null;
+      };
+
+      function setStatus(kind, msg) {
+        if (!statusEl) return;
+        statusEl.className = 'commissions-lock-status' + (kind ? ' ' + kind : '');
+        statusEl.textContent = msg || '';
+      }
+
+      function applyState() {
+        const u = getUnlock();
+        if (u) {
+          lockEl.style.display = 'none';
+          contentEl.style.display = '';
+          if (nameEl) nameEl.textContent = u.agent;
+          _populateClientAgentDropdowns();
+          if (typeof _renderClients === 'function') _renderClients();
+        } else {
+          lockEl.style.display = 'flex';
+          contentEl.style.display = 'none';
+          _populateClientAgentDropdowns();
+        }
+      }
+
+      function tryUnlock(code) {
+        const codeT = (code || '').trim();
+        if (!codeT) { setStatus('err', 'Enter your passcode'); return; }
+        const roster = window.STONEHOUSE_TEAM || [];
+        if (roster.length === 0) {
+          setStatus('err', 'Roster still loading — try again in a moment');
+          return;
+        }
+        const match = roster.find(m => String(m.passcode || '').trim() === codeT);
+        if (!match) {
+          setStatus('err', 'No agent matches that code');
+          if (inputEl) inputEl.select();
+          return;
+        }
+        if (match.active === false) {
+          setStatus('err', 'That agent is marked inactive');
+          return;
+        }
+        setUnlock(match.name);
+        setStatus('ok', '✓ Unlocked as ' + match.name);
+        if (inputEl) inputEl.value = '';
+        applyState();
+      }
+
+      if (formEl) {
+        formEl.addEventListener('submit', (e) => {
+          e.preventDefault();
+          tryUnlock(inputEl ? inputEl.value : '');
+        });
+      }
+      if (switchBtn) {
+        switchBtn.addEventListener('click', () => {
+          clearUnlock();
+          applyState();
+          setTimeout(() => { if (inputEl) inputEl.focus(); }, 50);
+        });
+      }
+
+      // Re-check whenever Clients subtab becomes active (expired timer, etc.)
+      const tabBtn = document.querySelector('[aria-controls="subpanel-sales-clients"]');
+      if (tabBtn) {
+        tabBtn.addEventListener('click', () => {
+          applyState();
+          if (!getUnlock()) setTimeout(() => { if (inputEl) inputEl.focus(); }, 50);
+        });
+      }
+
+      // Re-render once the team roster finishes loading (in case the
+      // user entered a code before the gviz fetch completed).
+      document.addEventListener('stonehouse:team-loaded', applyState);
+
+      // Initial render
+      applyState();
+    })();
   </script>
 </body>
 </html>
