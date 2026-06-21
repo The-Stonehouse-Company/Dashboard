@@ -4106,6 +4106,18 @@
             <a class="subnav-launcher" href="investor-deck.html" target="_blank" rel="noopener">Investor Deck</a>
           </details>
 
+          <details class="subnav-group" open>
+            <summary>Contacts</summary>
+            <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-contacts-investors"          aria-selected="false" data-subkey="contacts-investors">Investors</button>
+            <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-contacts-builders"           aria-selected="false" data-subkey="contacts-builders">Builders</button>
+            <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-contacts-architects"         aria-selected="false" data-subkey="contacts-architects">Architects</button>
+            <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-contacts-interior-designers" aria-selected="false" data-subkey="contacts-interior-designers">Interior Designers</button>
+            <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-contacts-surveyors"          aria-selected="false" data-subkey="contacts-surveyors">Surveyors</button>
+            <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-contacts-engineers"          aria-selected="false" data-subkey="contacts-engineers">Engineers</button>
+            <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-contacts-city-officials"     aria-selected="false" data-subkey="contacts-city-officials">City Officials</button>
+            <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-contacts-developers"         aria-selected="false" data-subkey="contacts-developers">Developers</button>
+          </details>
+
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-settings"  aria-selected="false" data-subkey="settings">Settings</button>
         </aside>
 
@@ -4199,6 +4211,18 @@
           <p>Property landing pages and listing-launch templates will live here next.</p>
         </div>
       </div>
+
+      <!-- ====== DEVELOPMENT · CONTACTS (8 subpanels, one per category) ======
+           All 8 are gated behind a single Ryan-only passcode. Lock and content
+           areas are templated by the contacts controller on subpanel show. -->
+      <div class="subpanel contacts-subpanel" id="subpanel-development-contacts-investors" role="tabpanel" aria-hidden="true" tabindex="0" data-contact-cat="Investors"></div>
+      <div class="subpanel contacts-subpanel" id="subpanel-development-contacts-builders" role="tabpanel" aria-hidden="true" tabindex="0" data-contact-cat="Builders"></div>
+      <div class="subpanel contacts-subpanel" id="subpanel-development-contacts-architects" role="tabpanel" aria-hidden="true" tabindex="0" data-contact-cat="Architects"></div>
+      <div class="subpanel contacts-subpanel" id="subpanel-development-contacts-interior-designers" role="tabpanel" aria-hidden="true" tabindex="0" data-contact-cat="Interior Designers"></div>
+      <div class="subpanel contacts-subpanel" id="subpanel-development-contacts-surveyors" role="tabpanel" aria-hidden="true" tabindex="0" data-contact-cat="Surveyors"></div>
+      <div class="subpanel contacts-subpanel" id="subpanel-development-contacts-engineers" role="tabpanel" aria-hidden="true" tabindex="0" data-contact-cat="Engineers"></div>
+      <div class="subpanel contacts-subpanel" id="subpanel-development-contacts-city-officials" role="tabpanel" aria-hidden="true" tabindex="0" data-contact-cat="City Officials"></div>
+      <div class="subpanel contacts-subpanel" id="subpanel-development-contacts-developers" role="tabpanel" aria-hidden="true" tabindex="0" data-contact-cat="Developers"></div>
 
       <div class="subpanel" id="subpanel-development-settings" role="tabpanel" aria-hidden="true" tabindex="0">
         <p class="subpanel-intro">Development-specific settings — underwriting defaults, investor portal config, capital sources.</p>
@@ -5452,6 +5476,105 @@
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="cancel-devintake">Cancel</button>
         <button class="btn" type="submit" form="devintake-form" id="submit-devintake">Log Development</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========================= ADD CONTACT MODAL ========================= -->
+  <div class="modal-overlay" id="contact-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="contact-modal-title" id="contact-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow" id="contact-modal-eyebrow">Development · Contacts</span>
+          <h2 class="modal-title" id="contact-modal-title">Add Contact</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-contact-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="contact-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Identity</legend>
+          <div class="form-grid">
+            <div>
+              <label for="ct-category">Category <span class="req">*</span></label>
+              <select id="ct-category" name="category" required>
+                <option value="Investors">Investors</option>
+                <option value="Builders">Builders</option>
+                <option value="Architects">Architects</option>
+                <option value="Interior Designers">Interior Designers</option>
+                <option value="Surveyors">Surveyors</option>
+                <option value="Engineers">Engineers</option>
+                <option value="City Officials">City Officials</option>
+                <option value="Developers">Developers</option>
+              </select>
+            </div>
+            <div>
+              <label for="ct-name">Full Name <span class="req">*</span></label>
+              <input id="ct-name" name="name" type="text" required placeholder="Jane Doe" />
+            </div>
+            <div>
+              <label for="ct-company">Company / Firm</label>
+              <input id="ct-company" name="company" type="text" placeholder="Acme Architects" />
+            </div>
+            <div>
+              <label for="ct-role">Role / Title</label>
+              <input id="ct-role" name="role" type="text" placeholder="Principal · Project Manager · Inspector" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Contact</legend>
+          <div class="form-grid">
+            <div>
+              <label for="ct-email">Email</label>
+              <input id="ct-email" name="email" type="email" placeholder="jane@firm.com" />
+            </div>
+            <div>
+              <label for="ct-phone">Phone</label>
+              <input id="ct-phone" name="phone" type="tel" placeholder="(615) 555-0100" />
+            </div>
+            <div class="full">
+              <label for="ct-address">Address</label>
+              <input id="ct-address" name="address" type="text" placeholder="Office address (optional)" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Profile</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="ct-specialties">Specialties / Focus</label>
+              <input id="ct-specialties" name="specialties" type="text" placeholder="Modern residential · Equity $500K-2M · Commercial inspections — free-text, varies by category" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Touchpoint</legend>
+          <div class="form-grid">
+            <div>
+              <label for="ct-last-touch">Last Touch</label>
+              <input id="ct-last-touch" name="last_touch" type="date" />
+            </div>
+            <div>
+              <label for="ct-next-action">Next Action</label>
+              <input id="ct-next-action" name="next_action" type="text" placeholder="Follow up on lot tour" />
+            </div>
+            <div class="full">
+              <label for="ct-notes">Notes</label>
+              <textarea id="ct-notes" name="notes" rows="3" placeholder="History, project context, preferences…"></textarea>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+
+      <div class="form-status" id="contact-form-status"></div>
+
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-contact">Cancel</button>
+        <button class="btn" type="submit" form="contact-form" id="submit-contact">Add Contact</button>
       </footer>
     </div>
   </div>
@@ -15931,6 +16054,441 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       // Initial render
       applyState();
     })();
+
+    // ============================================================
+    // DEVELOPMENT · CONTACTS
+    //
+    // Vendor / partner network for the Development division — Investors,
+    // Builders, Architects, Interior Designers, Surveyors, Engineers,
+    // City Officials, Developers.
+    //
+    // STORAGE: "Stonehouse Development Contacts" Google Sheet + Google
+    // Form. Single sheet, single form — `category` column slots each
+    // contact into one of the 8 buckets. Each subnav category renders
+    // the same table filtered to that category.
+    //
+    // ACCESS: Single passcode gate (Ryan-only by default — pulled from
+    // the Team Roster sheet, fallback "3034"). 24h unlock in
+    // localStorage. Once unlocked, ALL 8 categories are accessible.
+    //
+    // SETUP: see docs/contacts-setup.md.
+    // ============================================================
+    const CONTACTS_CONFIG = {
+      SHEET_ID:  "1wmXxSO0qF8OSkkx6iqmHuepX0QrxbQRb4Iw4-jybeww",
+      SHEET_TAB: "Form Responses 1",
+      FORM_URL:  "https://docs.google.com/forms/d/e/1FAIpQLScguDVIHGC_b1K-JHo_qZzrYJRKNJtmbIzooByGEXx2n8niTA/formResponse",
+      FIELD_MAP: {
+        category:    "entry.1213651901",
+        name:        "entry.340325298",
+        company:     "entry.1274623754",
+        role:        "entry.172706212",
+        email:       "entry.688067173",
+        phone:       "entry.1344298412",
+        address:     "entry.202724688",
+        specialties: "entry.1797401943",
+        last_touch:  "entry.1211424730",
+        next_action: "entry.329532814",
+        notes:       "entry.551488041"
+      }
+    };
+
+    const CONTACT_CATEGORIES = [
+      'Investors', 'Builders', 'Architects', 'Interior Designers',
+      'Surveyors', 'Engineers', 'City Officials', 'Developers'
+    ];
+
+    // Singular labels for the "+ Add" button / modal heading
+    const CONTACT_CATEGORY_SINGULAR = {
+      'Investors':           'Investor',
+      'Builders':             'Builder',
+      'Architects':           'Architect',
+      'Interior Designers':   'Interior Designer',
+      'Surveyors':            'Surveyor',
+      'Engineers':            'Engineer',
+      'City Officials':       'City Official',
+      'Developers':           'Developer'
+    };
+
+    let _contactRows = [];
+    let _contactsLoaded = false;
+    const _CONTACT_INTRO = {
+      'Investors':            'Capital partners backing Stonehouse Company developments. Equity, debt, JV, family office.',
+      'Builders':             'General contractors and builders we partner with on developments and custom-home projects.',
+      'Architects':           'Architects we work with on residential developments — modern, traditional, infill, ground-up.',
+      'Interior Designers':   'Interior designers and stagers for finish-out, model homes, and listing prep.',
+      'Surveyors':            'Land surveyors for boundary, topo, ALTA, and lot-split work.',
+      'Engineers':            'Civil, structural, MEP, and geotech engineers for design and permitting.',
+      'City Officials':       'City and county contacts — codes, planning, zoning, MWS, inspections.',
+      'Developers':           'Other developers — JV opportunities, lot trades, market intel, peer network.'
+    };
+
+    function _ctEsc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function _ctFmtDate(d) {
+      if (!(d instanceof Date) || isNaN(d)) return '';
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+    }
+
+    function _ctTemplate(category) {
+      const singular = CONTACT_CATEGORY_SINGULAR[category] || 'Contact';
+      const intro = _CONTACT_INTRO[category] || '';
+      return (
+        '<p class="subpanel-intro">' + _ctEsc(intro) + '</p>' +
+        // Lock screen (shown when locked)
+        '<div class="commissions-lock contacts-lock" data-cat="' + _ctEsc(category) + '" style="display:none;">' +
+          '<div class="commissions-lock-card">' +
+            '<div class="commissions-lock-icon" aria-hidden="true">⌗</div>' +
+            '<div class="commissions-lock-eyebrow">Development · Restricted</div>' +
+            '<h2 class="commissions-lock-title">Contacts Locked</h2>' +
+            '<p class="commissions-lock-sub">Enter the Development Contacts passcode to view Investors, Builders, Architects, and the rest of the firm\'s vendor network.</p>' +
+            '<form class="commissions-lock-form" autocomplete="off">' +
+              '<input type="password" class="contacts-lock-input" inputmode="numeric" autocomplete="off" placeholder="••••" aria-label="Contacts passcode" />' +
+              '<button type="submit">Unlock</button>' +
+              '<div class="commissions-lock-status" role="status" aria-live="polite"></div>' +
+            '</form>' +
+            '<p class="commissions-lock-foot">Unlocks all 8 contact categories · 24 hours</p>' +
+          '</div>' +
+        '</div>' +
+        // Unlocked content
+        '<div class="contacts-content" data-cat="' + _ctEsc(category) + '" style="display:none;">' +
+          '<div class="action-grid" style="margin-bottom:16px;">' +
+            '<button class="primary-action" type="button" data-action="open-contact-modal" data-cat="' + _ctEsc(category) + '">' +
+              '<span class="action-label">+ Add ' + _ctEsc(singular) + '</span>' +
+              '<span class="action-sub">Add a contact to the ' + _ctEsc(category) + ' list</span>' +
+              '<span class="action-arrow" aria-hidden="true">→</span>' +
+            '</button>' +
+            '<button class="primary-action" type="button" data-action="export-contacts" data-cat="' + _ctEsc(category) + '">' +
+              '<span class="action-label">Export CSV</span>' +
+              '<span class="action-sub">Download the filtered ' + _ctEsc(category) + ' list</span>' +
+              '<span class="action-arrow" aria-hidden="true">↓</span>' +
+            '</button>' +
+          '</div>' +
+          '<div class="client-filter-bar">' +
+            '<input type="search" class="contact-search" data-cat="' + _ctEsc(category) + '" placeholder="Search name, company, email, phone, specialties…" />' +
+            '<span class="client-count-meta contact-count-meta" data-cat="' + _ctEsc(category) + '">—</span>' +
+          '</div>' +
+          '<div class="client-table-wrap">' +
+            '<table class="client-table">' +
+              '<thead><tr>' +
+                '<th>Name</th><th>Company</th><th>Role</th><th>Email</th><th>Phone</th><th>Specialties</th><th>Last Touch</th>' +
+              '</tr></thead>' +
+              '<tbody class="contact-table-body" data-cat="' + _ctEsc(category) + '">' +
+                '<tr><td colspan="7" class="client-empty">Loading…</td></tr>' +
+              '</tbody>' +
+            '</table>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    // Insert the lock + content template into every contacts subpanel (idempotent).
+    function _ctEnsureSubpanels() {
+      document.querySelectorAll('.contacts-subpanel').forEach(panel => {
+        const cat = panel.getAttribute('data-contact-cat');
+        if (!cat) return;
+        if (!panel.firstElementChild) {
+          panel.innerHTML = _ctTemplate(cat);
+        }
+      });
+    }
+
+    function _parseContactSheet(table) {
+      const cols = table.cols || [];
+      const ix = {
+        category:    _adFindCol(cols, 'category', 'Category'),
+        name:        _adFindCol(cols, 'name', 'Full Name', 'Name'),
+        company:     _adFindCol(cols, 'company', 'Company', 'Firm'),
+        role:        _adFindCol(cols, 'role', 'Role', 'Title'),
+        email:       _adFindCol(cols, 'email', 'Email'),
+        phone:       _adFindCol(cols, 'phone', 'Phone'),
+        address:     _adFindCol(cols, 'address', 'Address'),
+        specialties: _adFindCol(cols, 'specialties', 'Specialties', 'Focus'),
+        last_touch:  _adFindCol(cols, 'last_touch', 'Last Touch'),
+        next_action: _adFindCol(cols, 'next_action', 'Next Action'),
+        notes:       _adFindCol(cols, 'notes', 'Notes')
+      };
+      return (table.rows || []).map(r => {
+        const c = r.c || [];
+        return {
+          category:    ix.category >= 0 ? _adGvizString(c[ix.category]) : '',
+          name:        ix.name >= 0 ? _adGvizString(c[ix.name]) : '',
+          company:     ix.company >= 0 ? _adGvizString(c[ix.company]) : '',
+          role:        ix.role >= 0 ? _adGvizString(c[ix.role]) : '',
+          email:       ix.email >= 0 ? _adGvizString(c[ix.email]) : '',
+          phone:       ix.phone >= 0 ? _adGvizString(c[ix.phone]) : '',
+          address:     ix.address >= 0 ? _adGvizString(c[ix.address]) : '',
+          specialties: ix.specialties >= 0 ? _adGvizString(c[ix.specialties]) : '',
+          last_touch:  ix.last_touch >= 0 ? _adGvizDate(c[ix.last_touch]) : null,
+          next_action: ix.next_action >= 0 ? _adGvizString(c[ix.next_action]) : '',
+          notes:       ix.notes >= 0 ? _adGvizString(c[ix.notes]) : ''
+        };
+      }).filter(c => c.name);
+    }
+
+    function _ctLoad() {
+      if (!CONTACTS_CONFIG.SHEET_ID) {
+        _contactRows = [];
+        _contactsLoaded = true;
+        _ctRenderAll();
+        return Promise.resolve();
+      }
+      return fetch(_adGvizUrl(CONTACTS_CONFIG), { cache: 'no-store' })
+        .then(r => r.text())
+        .then(t => _adParseEnvelope(t))
+        .then(table => { _contactRows = _parseContactSheet(table); _contactsLoaded = true; _ctRenderAll(); })
+        .catch(err => { console.warn('[CONTACTS] sheet failed:', err); _contactRows = []; _contactsLoaded = true; _ctRenderAll(); });
+    }
+
+    function _ctSearchFor(category) {
+      const el = document.querySelector('.contact-search[data-cat="' + (window.CSS && CSS.escape ? CSS.escape(category) : category) + '"]');
+      return ((el && el.value) || '').toLowerCase().trim();
+    }
+
+    function _ctFilteredFor(category) {
+      const q = _ctSearchFor(category);
+      return _contactRows.filter(c => {
+        if ((c.category || '').trim() !== category) return false;
+        if (q) {
+          const blob = [c.name, c.company, c.role, c.email, c.phone, c.specialties, c.notes].join(' ').toLowerCase();
+          if (blob.indexOf(q) === -1) return false;
+        }
+        return true;
+      });
+    }
+
+    function _ctRenderCategory(category) {
+      const sel = (window.CSS && CSS.escape) ? CSS.escape(category) : category;
+      const tbody = document.querySelector('.contact-table-body[data-cat="' + sel + '"]');
+      const meta = document.querySelector('.contact-count-meta[data-cat="' + sel + '"]');
+      if (!tbody) return;
+      const list = _ctFilteredFor(category);
+      const total = _contactRows.filter(c => (c.category || '').trim() === category).length;
+      if (meta) meta.textContent = list.length + ' of ' + total;
+      if (list.length === 0) {
+        const msg = !CONTACTS_CONFIG.SHEET_ID
+          ? 'Contacts sheet not connected yet. See docs/contacts-setup.md to wire it up.'
+          : (total === 0
+              ? 'No ' + category + ' yet — click "+ Add" above to create the first.'
+              : 'No ' + category + ' match the search.');
+        tbody.innerHTML = '<tr><td colspan="7" class="client-empty">' + _ctEsc(msg) + '</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(c => (
+        '<tr>' +
+          '<td class="client-name">' + _ctEsc(c.name) + '</td>' +
+          '<td>' + _ctEsc(c.company || '') + '</td>' +
+          '<td style="font-size:11px; color:var(--text-muted);">' + _ctEsc(c.role || '') + '</td>' +
+          '<td>' + (c.email ? '<a href="mailto:' + _ctEsc(c.email) + '" style="color:var(--text); border-bottom:1px solid var(--rule);">' + _ctEsc(c.email) + '</a>' : '') + '</td>' +
+          '<td>' + _ctEsc(c.phone || '') + '</td>' +
+          '<td style="font-size:11px;">' + _ctEsc(c.specialties || '') + '</td>' +
+          '<td>' + (c.last_touch ? _ctFmtDate(c.last_touch) : '') + '</td>' +
+        '</tr>'
+      )).join('');
+    }
+
+    function _ctRenderAll() {
+      CONTACT_CATEGORIES.forEach(_ctRenderCategory);
+    }
+
+    function _ctExportCSV(category) {
+      const list = _ctFilteredFor(category);
+      if (list.length === 0) { alert('No contacts to export in ' + category + '.'); return; }
+      const cols = ['Category', 'Name', 'Company', 'Role', 'Email', 'Phone', 'Address', 'Specialties', 'Last Touch', 'Next Action', 'Notes'];
+      const esc = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const dStr = (d) => (d instanceof Date && !isNaN(d)) ? d.toISOString().slice(0, 10) : '';
+      const lines = [cols.join(',')];
+      list.forEach(c => lines.push([
+        c.category, c.name, c.company, c.role, c.email, c.phone, c.address,
+        c.specialties, dStr(c.last_touch), c.next_action, c.notes
+      ].map(esc).join(',')));
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const ts = new Date().toISOString().slice(0, 10);
+      a.href = url; a.download = 'stonehouse-contacts-' + category.toLowerCase().replace(/\s+/g, '-') + '-' + ts + '.csv';
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+    }
+
+    // ----- Lock state -----
+    const CONTACTS_LOCK_KEY = 'stonehouse.devcontacts.unlockedUntil';
+    const CONTACTS_UNLOCK_MS = 24 * 60 * 60 * 1000;
+
+    function _ctIsUnlocked() {
+      const until = parseInt(localStorage.getItem(CONTACTS_LOCK_KEY) || '0', 10);
+      return until && Date.now() < until;
+    }
+    function _ctSetUnlocked() {
+      localStorage.setItem(CONTACTS_LOCK_KEY, String(Date.now() + CONTACTS_UNLOCK_MS));
+    }
+    function _ctClearUnlocked() {
+      localStorage.removeItem(CONTACTS_LOCK_KEY);
+    }
+    // What passcode unlocks the section? Default: Ryan's roster passcode,
+    // fallback to "3034" if his row hasn't loaded yet / he has no code set.
+    function _ctExpectedCode() {
+      const roster = window.STONEHOUSE_TEAM || [];
+      const ryan = roster.find(m => /ryan/i.test(m.name || '') && /stonehouse/i.test(m.name || ''));
+      const code = ryan && String(ryan.passcode || '').trim();
+      return code || '3034';
+    }
+
+    function _ctApplyLockState() {
+      _ctEnsureSubpanels();
+      const unlocked = _ctIsUnlocked();
+      document.querySelectorAll('.contacts-lock').forEach(el => { el.style.display = unlocked ? 'none' : 'flex'; });
+      document.querySelectorAll('.contacts-content').forEach(el => { el.style.display = unlocked ? '' : 'none'; });
+      if (unlocked) _ctRenderAll();
+    }
+
+    function _ctWireLockForms() {
+      document.querySelectorAll('.contacts-lock form').forEach(form => {
+        if (form.dataset.wired === '1') return;
+        form.dataset.wired = '1';
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const input = form.querySelector('.contacts-lock-input');
+          const status = form.querySelector('.commissions-lock-status');
+          const val = input ? (input.value || '').trim() : '';
+          if (val === _ctExpectedCode()) {
+            _ctSetUnlocked();
+            if (status) { status.className = 'commissions-lock-status ok'; status.textContent = '✓ Unlocked'; }
+            if (input) input.value = '';
+            _ctApplyLockState();
+          } else {
+            if (status) { status.className = 'commissions-lock-status'; status.textContent = 'Incorrect passcode'; }
+            if (input) input.select();
+          }
+        });
+      });
+    }
+
+    // ----- Wire delegated handlers (table search, action buttons) -----
+    document.addEventListener('input', (e) => {
+      if (e.target.classList && e.target.classList.contains('contact-search')) {
+        const cat = e.target.getAttribute('data-cat');
+        if (cat) _ctRenderCategory(cat);
+      }
+    });
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      const action = btn.getAttribute('data-action');
+      const cat = btn.getAttribute('data-cat');
+      if (!action) return;
+      if (action === 'open-contact-modal' && cat) {
+        // Pre-select category in the Add Contact modal
+        const sel = document.getElementById('ct-category');
+        const eyebrow = document.getElementById('contact-modal-eyebrow');
+        const title = document.getElementById('contact-modal-title');
+        if (sel) sel.value = cat;
+        if (eyebrow) eyebrow.textContent = 'Development · ' + cat;
+        if (title) title.textContent = 'Add ' + (CONTACT_CATEGORY_SINGULAR[cat] || 'Contact');
+        // Trigger underlying open via the shared modal helper
+        const overlay = document.getElementById('contact-modal-overlay');
+        if (overlay) overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        const status = document.getElementById('contact-form-status');
+        if (status) { status.className = 'form-status'; status.textContent = ''; }
+      }
+      if (action === 'export-contacts' && cat) {
+        _ctExportCSV(cat);
+      }
+    });
+
+    // ----- Wire Add Contact modal (form POST + close/cancel) -----
+    (function () {
+      const overlay = document.getElementById('contact-modal-overlay');
+      const form    = document.getElementById('contact-form');
+      const status  = document.getElementById('contact-form-status');
+      const closeBtn = document.getElementById('close-contact-modal');
+      const cancelBtn = document.getElementById('cancel-contact');
+      if (!overlay || !form) return;
+      function closeModal() {
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+      }
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', (e) => {
+        if (overlay.getAttribute('aria-hidden') !== 'false') return;
+        if (e.key === 'Escape') { e.preventDefault(); closeModal(); }
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (status) { status.className = 'form-status'; status.textContent = ''; }
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+
+        if (!CONTACTS_CONFIG.FORM_URL || !CONTACTS_CONFIG.FIELD_MAP.name) {
+          if (status) { status.className = 'form-status show warn'; status.textContent = 'Added to this session only — CONTACTS_CONFIG isn\'t wired to a Google Form yet. See docs/contacts-setup.md.'; }
+          // Optimistic in-memory add so the UI updates
+          const fd = new FormData(form);
+          _contactRows.push({
+            category: fd.get('category') || '',
+            name: fd.get('name') || '',
+            company: fd.get('company') || '',
+            role: fd.get('role') || '',
+            email: fd.get('email') || '',
+            phone: fd.get('phone') || '',
+            address: fd.get('address') || '',
+            specialties: fd.get('specialties') || '',
+            last_touch: fd.get('last_touch') ? new Date(fd.get('last_touch')) : null,
+            next_action: fd.get('next_action') || '',
+            notes: fd.get('notes') || ''
+          });
+          _ctRenderAll();
+          form.reset();
+          setTimeout(closeModal, 1200);
+          return;
+        }
+
+        const fd = new FormData(form);
+        const body = new FormData();
+        Object.keys(CONTACTS_CONFIG.FIELD_MAP).forEach(k => {
+          const entryKey = CONTACTS_CONFIG.FIELD_MAP[k];
+          if (!entryKey) return;
+          const v = fd.get(k);
+          if (v != null) body.append(entryKey, String(v));
+        });
+        try {
+          await fetch(CONTACTS_CONFIG.FORM_URL, { method: 'POST', mode: 'no-cors', body });
+          if (status) { status.className = 'form-status show ok'; status.textContent = '✓ Contact added. Refreshing list…'; }
+          form.reset();
+          setTimeout(() => { _ctLoad(); closeModal(); }, 900);
+        } catch (err) {
+          console.error('[CONTACTS] submit failed:', err);
+          if (status) { status.className = 'form-status show err'; status.textContent = 'Submit failed: ' + (err.message || err); }
+        }
+      });
+    })();
+
+    // ----- Init: build subpanels, apply lock, wire lock forms, load data when unlocked -----
+    _ctEnsureSubpanels();
+    _ctApplyLockState();
+    _ctWireLockForms();
+
+    // When the user clicks any contacts subtab, ensure subpanels are built,
+    // re-apply lock state, and load the sheet on first unlock.
+    document.querySelectorAll('[aria-controls^="subpanel-development-contacts-"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        _ctEnsureSubpanels();
+        _ctApplyLockState();
+        _ctWireLockForms();
+        if (_ctIsUnlocked() && !_contactsLoaded) _ctLoad();
+      });
+    });
+
+    // If already unlocked at page load, fetch data eagerly so it's ready
+    if (_ctIsUnlocked()) _ctLoad();
+
+    // Re-evaluate code when team roster finishes loading (Ryan's passcode
+    // may not have been available on first render).
+    document.addEventListener('stonehouse:team-loaded', () => { /* no-op; _ctExpectedCode reads live */ });
   </script>
 </body>
 </html>
