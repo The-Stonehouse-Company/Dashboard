@@ -2961,6 +2961,107 @@
 <body>
 
   <!-- =========================================================================
+       STONEHOUSE INTRO SPLASH
+       Brand reveal that plays after the access gate passes and before the
+       dashboard is revealed. Arch icon scales in, wordmark fades, subtitle
+       fades, hold ~700ms, then fade away. Total ~2.4s. Click to dismiss.
+
+       Triggered by window.showStonehouseIntro(); see the access-gate logic.
+       ========================================================================= -->
+  <div id="stonehouse-intro" aria-hidden="true">
+    <div class="intro-inner">
+      <img class="intro-arch" src="assets/icon-arch-transparent.png" alt="" />
+      <div class="intro-wordmark">The Stonehouse Company</div>
+      <div class="intro-sub">Internal Dashboard</div>
+    </div>
+  </div>
+  <style>
+    /* Splash overlay — sits hidden, gets activated via .is-playing */
+    #stonehouse-intro {
+      position: fixed;
+      inset: 0;
+      z-index: 99998;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .55s ease-out;
+    }
+    #stonehouse-intro.is-playing {
+      opacity: 1;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    #stonehouse-intro.is-leaving {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .intro-inner {
+      text-align: center;
+      transform: translateY(-2vh);
+    }
+    .intro-arch {
+      width: 110px;
+      height: auto;
+      display: block;
+      margin: 0 auto 28px;
+      opacity: 0;
+      transform: scale(.88);
+      filter: drop-shadow(0 0 32px rgba(217, 200, 163, 0.08));
+    }
+    #stonehouse-intro.is-playing .intro-arch {
+      animation: introArchIn 1.0s cubic-bezier(.16, .85, .30, 1) forwards;
+    }
+    .intro-wordmark {
+      font-family: 'Aboreto', 'EB Garamond', Georgia, serif;
+      color: #ffffff;
+      font-size: 32px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      margin: 0 0 14px;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    #stonehouse-intro.is-playing .intro-wordmark {
+      animation: introFadeUp .75s ease-out .45s forwards;
+    }
+    .intro-sub {
+      font-family: 'Mulish', 'Inter', Helvetica, Arial, sans-serif;
+      color: rgba(217, 200, 163, 0.72);
+      font-size: 10px;
+      letter-spacing: .42em;
+      text-transform: uppercase;
+      opacity: 0;
+    }
+    #stonehouse-intro.is-playing .intro-sub {
+      animation: introFadeIn .6s ease-out .85s forwards;
+    }
+    @keyframes introArchIn {
+      0%   { opacity: 0; transform: scale(.88); }
+      100% { opacity: 1; transform: scale(1.00); }
+    }
+    @keyframes introFadeUp {
+      0%   { opacity: 0; transform: translateY(8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes introFadeIn {
+      0%   { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #stonehouse-intro.is-playing .intro-arch,
+      #stonehouse-intro.is-playing .intro-wordmark,
+      #stonehouse-intro.is-playing .intro-sub {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+    }
+  </style>
+
+  <!-- =========================================================================
        EMPLOYEE ACCESS GATE
        Friction barrier only — NOT real authentication. Anyone who knows to
        look at the page source can read the code. Keeps casual visitors and
@@ -3028,6 +3129,28 @@
       const STORAGE_KEY    = 'stonehouse-employee-gate';
       const VALID_MS       = 30 * 24 * 60 * 60 * 1000; // 30 days
 
+      // Stonehouse intro splash — brand reveal that runs between the
+      // access gate and the dashboard. Plays every load. Click to dismiss.
+      window.showStonehouseIntro = function () {
+        const splash = document.getElementById('stonehouse-intro');
+        if (!splash) return;
+        splash.setAttribute('aria-hidden', 'false');
+        splash.classList.add('is-playing');
+        const HOLD_MS = 2400;  // total time on screen before fade
+        let dismissed = false;
+        function dismiss() {
+          if (dismissed) return;
+          dismissed = true;
+          splash.classList.add('is-leaving');
+          // Remove after the CSS fade-out completes (.55s)
+          setTimeout(() => {
+            if (splash.parentNode) splash.parentNode.removeChild(splash);
+          }, 600);
+        }
+        splash.addEventListener('click', dismiss);
+        setTimeout(dismiss, HOLD_MS);
+      };
+
       // If a saved token is still valid AND the version matches, skip the gate.
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
@@ -3036,6 +3159,7 @@
           if (t && t.v === ACCESS_VERSION && t.ts && (Date.now() - t.ts) < VALID_MS) {
             const gate = document.getElementById('employee-gate');
             if (gate && gate.parentNode) gate.parentNode.removeChild(gate);
+            window.showStonehouseIntro();
             return;
           }
         }
@@ -3104,6 +3228,7 @@
           document.documentElement.style.overflow = '';
           document.body.style.overflow = '';
           if (gate.parentNode) gate.parentNode.removeChild(gate);
+          if (typeof window.showStonehouseIntro === 'function') window.showStonehouseIntro();
         } else {
           errEl.textContent = 'Incorrect code. Try again.';
           clearAll();
