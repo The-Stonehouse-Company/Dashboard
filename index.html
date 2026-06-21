@@ -2464,7 +2464,7 @@
        SALES side nav — vertical, collapsible groups
        Replaces the horizontal subtabbar inside the Sales panel.
        ========================================================= */
-    #panel-sales .sales-shell {
+    .panel .division-shell {
       display: grid;
       grid-template-columns: 240px 1fr;
       gap: 32px;
@@ -2473,9 +2473,9 @@
     }
     /* Hide the old subtabbar styles for Sales (other divisions still
        use horizontal subtabs). Done via the new wrapper presence. */
-    #panel-sales > .subtabbar { display: none; }
+    .panel:has(.division-shell) > .subtabbar { display: none; }
 
-    .sales-subnav {
+    .division-subnav {
       position: sticky;
       top: 90px;
       align-self: start;
@@ -2485,11 +2485,11 @@
       border-right: 1px solid var(--rule);
       padding-bottom: 24px;
     }
-    .sales-subnav::-webkit-scrollbar { width: 4px; }
-    .sales-subnav::-webkit-scrollbar-thumb { background: #1f1f1f; }
-    .sales-subnav::-webkit-scrollbar-track { background: transparent; }
+    .division-subnav::-webkit-scrollbar { width: 4px; }
+    .division-subnav::-webkit-scrollbar-thumb { background: #1f1f1f; }
+    .division-subnav::-webkit-scrollbar-track { background: transparent; }
 
-    .sales-subnav .subnav-item {
+    .division-subnav .subnav-item {
       display: block;
       width: 100%;
       text-align: left;
@@ -2507,17 +2507,17 @@
       margin-bottom: 1px;
       transition: color .15s ease, background .15s ease, border-left-color .15s ease;
     }
-    .sales-subnav .subnav-item:hover {
+    .division-subnav .subnav-item:hover {
       color: var(--text-muted);
       background: rgba(255,255,255,0.02);
     }
-    .sales-subnav .subnav-item[aria-selected="true"] {
+    .division-subnav .subnav-item[aria-selected="true"] {
       color: var(--text);
       background: rgba(255,255,255,0.05);
       border-left-color: var(--text);
     }
     /* Top-level items (Overview / Clients / Settings) — bigger, more prominent */
-    .sales-subnav > .subnav-item {
+    .division-subnav > .subnav-item {
       font-size: 14px;
       font-weight: 500;
       padding-left: 14px;
@@ -2525,10 +2525,10 @@
     }
 
     /* Group accordion (details/summary) — group headers read big & strong */
-    .sales-subnav details.subnav-group {
+    .division-subnav details.subnav-group {
       margin: 8px 0 4px;
     }
-    .sales-subnav details.subnav-group > summary {
+    .division-subnav details.subnav-group > summary {
       list-style: none;
       cursor: pointer;
       padding: 11px 14px 9px;
@@ -2543,22 +2543,22 @@
       align-items: center;
       gap: 8px;
     }
-    .sales-subnav details.subnav-group > summary::-webkit-details-marker { display: none; }
-    .sales-subnav details.subnav-group > summary::before {
+    .division-subnav details.subnav-group > summary::-webkit-details-marker { display: none; }
+    .division-subnav details.subnav-group > summary::before {
       content: '▸';
       font-size: 8px;
       color: var(--text-dim);
       transition: transform .15s ease;
       display: inline-block;
     }
-    .sales-subnav details.subnav-group[open] > summary::before {
+    .division-subnav details.subnav-group[open] > summary::before {
       transform: rotate(90deg);
     }
-    .sales-subnav details.subnav-group > summary:hover {
+    .division-subnav details.subnav-group > summary:hover {
       color: var(--text-muted);
     }
     /* Children — slightly indented + smaller for clear hierarchy */
-    .sales-subnav details.subnav-group > .subnav-item {
+    .division-subnav details.subnav-group > .subnav-item {
       padding-left: 24px;
       padding-top: 7px; padding-bottom: 7px;
       font-size: 10.5px;
@@ -2567,10 +2567,10 @@
     }
 
     /* Nested sub-group (e.g. Marketing > Documents, Marketing > Generators) */
-    .sales-subnav details.subnav-subgroup {
+    .division-subnav details.subnav-subgroup {
       margin: 4px 0 4px 14px;
     }
-    .sales-subnav details.subnav-subgroup > summary {
+    .division-subnav details.subnav-subgroup > summary {
       list-style: none;
       cursor: pointer;
       padding: 6px 10px;
@@ -2583,23 +2583,23 @@
       display: flex; align-items: center; gap: 6px;
       user-select: none;
     }
-    .sales-subnav details.subnav-subgroup > summary::-webkit-details-marker { display: none; }
-    .sales-subnav details.subnav-subgroup > summary::before {
+    .division-subnav details.subnav-subgroup > summary::-webkit-details-marker { display: none; }
+    .division-subnav details.subnav-subgroup > summary::before {
       content: '▸';
       font-size: 7px;
       color: var(--text-dim);
       transition: transform .15s ease;
       display: inline-block;
     }
-    .sales-subnav details.subnav-subgroup[open] > summary::before {
+    .division-subnav details.subnav-subgroup[open] > summary::before {
       transform: rotate(90deg);
     }
-    .sales-subnav details.subnav-subgroup > summary:hover { color: var(--text-muted); }
+    .division-subnav details.subnav-subgroup > summary:hover { color: var(--text-muted); }
 
     /* Launcher items — direct action (open modal / download / external link),
        not panel switchers. Visually similar to subnav-item but with a
        trailing ↗ to indicate "launches". */
-    .sales-subnav .subnav-launcher {
+    .division-subnav .subnav-launcher {
       display: block;
       width: 100%;
       text-align: left;
@@ -2617,7 +2617,7 @@
       text-decoration: none;
       transition: color .15s ease, background .15s ease, border-left-color .15s ease;
     }
-    .sales-subnav .subnav-launcher::after {
+    .division-subnav .subnav-launcher::after {
       content: ' ↗';
       color: var(--text-dim);
       font-size: 9px;
@@ -2625,19 +2625,19 @@
       opacity: 0;
       transition: opacity .15s ease;
     }
-    .sales-subnav .subnav-launcher:hover {
+    .division-subnav .subnav-launcher:hover {
       color: var(--text);
       background: rgba(255,255,255,0.03);
     }
-    .sales-subnav .subnav-launcher:hover::after { opacity: 1; }
+    .division-subnav .subnav-launcher:hover::after { opacity: 1; }
 
     /* Content column */
-    #panel-sales .sales-content { min-width: 0; }
+    .panel .division-content { min-width: 0; }
 
     /* Mobile collapse — stack the side nav above the content */
     @media (max-width: 900px) {
-      #panel-sales .sales-shell { grid-template-columns: 1fr; gap: 16px; }
-      .sales-subnav {
+      .panel .division-shell { grid-template-columns: 1fr; gap: 16px; }
+      .division-subnav {
         position: static; max-height: none; overflow: visible;
         border-right: 0; border-bottom: 1px solid var(--rule);
         padding-right: 0; padding-bottom: 12px;
@@ -3191,8 +3191,8 @@
       <div class="eyebrow">Division 01</div>
       <h1>Sales</h1>
 
-      <div class="sales-shell">
-        <aside class="sales-subnav" role="tablist" aria-label="Sales sections" data-subtab-parent="sales">
+      <div class="division-shell">
+        <aside class="division-subnav" role="tablist" aria-label="Sales sections" data-subtab-parent="sales">
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-sales-overview"    aria-selected="true"  data-subkey="overview">Overview</button>
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-sales-clients"    aria-selected="false" data-subkey="clients">Clients</button>
 
@@ -3237,7 +3237,7 @@
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-sales-settings"    aria-selected="false" data-subkey="settings">Settings</button>
         </aside>
 
-        <div class="sales-content">
+        <div class="division-content">
 
       <div class="subpanel" id="subpanel-sales-overview" role="tabpanel" aria-hidden="false" tabindex="0">
         <p class="subpanel-intro">Snapshot of the Sales division — your active pipeline, recent commissions, and the most-used tools. (Live tiles wire up next pass.)</p>
@@ -3715,20 +3715,36 @@
         </div>
       </div>
 
-        </div><!-- /.sales-content -->
-      </div><!-- /.sales-shell -->
+        </div><!-- /.division-content -->
+      </div><!-- /.division-shell -->
     </section>
 
     <section class="panel" id="panel-land" role="tabpanel" aria-labelledby="tab-land" aria-hidden="true" tabindex="0">
       <div class="eyebrow">Division 02</div>
       <h1>Land Acquisition</h1>
 
-      <nav class="subtabbar" role="tablist" aria-label="Land Acquisition sections" data-subtab-parent="land">
-        <button class="subtab" role="tab" aria-controls="subpanel-land-overview" aria-selected="true"  data-subkey="overview">Overview</button>
-        <button class="subtab" role="tab" aria-controls="subpanel-land-pipeline" aria-selected="false" data-subkey="pipeline">Pipeline</button>
-        <button class="subtab" role="tab" aria-controls="subpanel-land-files"    aria-selected="false" data-subkey="files">Files</button>
-        <button class="subtab" role="tab" aria-controls="subpanel-land-settings" aria-selected="false" data-subkey="settings">Settings</button>
-      </nav>
+      <div class="division-shell">
+        <aside class="division-subnav" role="tablist" aria-label="Land Acquisition sections" data-subtab-parent="land">
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-land-overview" aria-selected="true"  data-subkey="overview">Overview</button>
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-land-pipeline" aria-selected="false" data-subkey="pipeline">Pipeline</button>
+
+          <details class="subnav-group" open>
+            <summary>Tools</summary>
+            <button class="subnav-launcher" type="button" data-launches="open-feecalc-modal">Fee Calculator</button>
+            <button class="subnav-launcher" type="button" data-launches="open-intake-modal">Submit Property Intake</button>
+            <button class="subnav-launcher" type="button" data-launches="open-land-onepager-modal">Generate One-Pager</button>
+          </details>
+
+          <details class="subnav-group" open>
+            <summary>Files</summary>
+            <a class="subnav-launcher" href="assets/land-files/assignment-form.pdf" download="Stonehouse-Assignment-Form.pdf" target="_blank" rel="noopener">Assignment Form</a>
+            <a class="subnav-launcher" href="assets/land-files/commission-one-pager.pdf" download="Stonehouse-Land-Acquisition-Commission-One-Pager.pdf" target="_blank" rel="noopener">Commission One Pager</a>
+          </details>
+
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-land-settings" aria-selected="false" data-subkey="settings">Settings</button>
+        </aside>
+
+        <div class="division-content">
 
       <div class="subpanel" id="subpanel-land-overview" role="tabpanel" aria-hidden="false" tabindex="0">
         <p class="subpanel-intro">Snapshot of Land Acquisition — deals in pipeline, recent submissions, key stages.</p>
@@ -3837,18 +3853,37 @@
           <p>MRC class definitions, commission schedule defaults, intake sheet ID.</p>
         </div>
       </div>
+
+        </div><!-- /.division-content -->
+      </div><!-- /.division-shell -->
     </section>
 
     <section class="panel" id="panel-customrep" role="tabpanel" aria-labelledby="tab-customrep" aria-hidden="true" tabindex="0">
       <div class="eyebrow">Division 03</div>
       <h1>Custom Home Owners Representation</h1>
 
-      <nav class="subtabbar" role="tablist" aria-label="Custom Home Rep sections" data-subtab-parent="customrep">
-        <button class="subtab" role="tab" aria-controls="subpanel-customrep-overview" aria-selected="true"  data-subkey="overview">Overview</button>
-        <button class="subtab" role="tab" aria-controls="subpanel-customrep-pipeline" aria-selected="false" data-subkey="pipeline">Pipeline</button>
-        <button class="subtab" role="tab" aria-controls="subpanel-customrep-files"    aria-selected="false" data-subkey="files">Files</button>
-        <button class="subtab" role="tab" aria-controls="subpanel-customrep-settings" aria-selected="false" data-subkey="settings">Settings</button>
-      </nav>
+      <div class="division-shell">
+        <aside class="division-subnav" role="tablist" aria-label="Custom Home Rep sections" data-subtab-parent="customrep">
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-customrep-overview" aria-selected="true"  data-subkey="overview">Overview</button>
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-customrep-pipeline" aria-selected="false" data-subkey="pipeline">Pipeline</button>
+
+          <details class="subnav-group" open>
+            <summary>Generators</summary>
+            <button class="subnav-launcher" type="button" data-launches="open-nurturing-modal">Log a Nurturing Client</button>
+            <button class="subnav-launcher" type="button" data-launches="open-customrep-intake-modal">Log a New Project</button>
+            <a class="subnav-launcher" href="engagement-letter.html" target="_blank" rel="noopener">Engagement Letter</a>
+          </details>
+
+          <details class="subnav-group" open>
+            <summary>Files</summary>
+            <a class="subnav-launcher" href="assets/customrep-files/scope-of-services.pdf" download="Stonehouse-Scope-of-Services.pdf" target="_blank" rel="noopener">Scope of Services</a>
+            <a class="subnav-launcher" href="assets/customrep-files/Stonehouse-Engagement-Letter.docx" download="Stonehouse-Engagement-Letter-Template.docx">Engagement Letter (Word)</a>
+          </details>
+
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-customrep-settings" aria-selected="false" data-subkey="settings">Settings</button>
+        </aside>
+
+        <div class="division-content">
 
       <div class="subpanel" id="subpanel-customrep-overview" role="tabpanel" aria-hidden="false" tabindex="0">
         <p class="subpanel-intro">Snapshot of Custom Home Rep — clients in active stage, recent intakes.</p>
@@ -3970,18 +4005,38 @@
           <p>Intake sheet ID, builder partnership defaults, stage labels.</p>
         </div>
       </div>
+
+        </div><!-- /.division-content -->
+      </div><!-- /.division-shell -->
     </section>
 
     <section class="panel" id="panel-development" role="tabpanel" aria-labelledby="tab-development" aria-hidden="true" tabindex="0">
       <div class="eyebrow">Division 04</div>
       <h1>Development</h1>
 
-      <nav class="subtabbar" role="tablist" aria-label="Development sections" data-subtab-parent="development">
-        <button class="subtab" role="tab" aria-controls="subpanel-development-overview"  aria-selected="true"  data-subkey="overview">Overview</button>
-        <button class="subtab" role="tab" aria-controls="subpanel-development-deals"     aria-selected="false" data-subkey="deals">Deals</button>
-        <button class="subtab" role="tab" aria-controls="subpanel-development-marketing" aria-selected="false" data-subkey="marketing">Marketing</button>
-        <button class="subtab" role="tab" aria-controls="subpanel-development-settings"  aria-selected="false" data-subkey="settings">Settings</button>
-      </nav>
+      <div class="division-shell">
+        <aside class="division-subnav" role="tablist" aria-label="Development sections" data-subtab-parent="development">
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-overview"  aria-selected="true"  data-subkey="overview">Overview</button>
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-deals"     aria-selected="false" data-subkey="deals">Pipeline</button>
+
+          <details class="subnav-group" open>
+            <summary>Tools</summary>
+            <button class="subnav-launcher" type="button" data-launches="open-uw-modal">Underwriting Model</button>
+            <button class="subnav-launcher" type="button" data-launches="open-devintake-modal">Log a New Development</button>
+          </details>
+
+          <details class="subnav-group" open>
+            <summary>Marketing</summary>
+            <button class="subnav-launcher" type="button" data-launches="open-om-modal">Offer Memorandum</button>
+            <button class="subnav-launcher" type="button" data-launches="open-cma-modal">Comparatives Presentation</button>
+            <button class="subnav-launcher" type="button" data-launches="open-loi-modal">Letter of Intent</button>
+            <a class="subnav-launcher" href="investor-deck.html" target="_blank" rel="noopener">Investor Deck</a>
+          </details>
+
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-settings"  aria-selected="false" data-subkey="settings">Settings</button>
+        </aside>
+
+        <div class="division-content">
 
       <div class="subpanel" id="subpanel-development-overview" role="tabpanel" aria-hidden="false" tabindex="0">
         <p class="subpanel-intro">Snapshot of Development — active projects, capital deployed, recent investor activity.</p>
@@ -4080,6 +4135,9 @@
           <p>Default IRR targets, draw schedule template, equity vs. debt split defaults.</p>
         </div>
       </div>
+
+        </div><!-- /.division-content -->
+      </div><!-- /.division-shell -->
     </section>
 
     <!-- ========================= HOME PANEL ========================= -->
@@ -13572,8 +13630,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     // ============================================================
     (function () {
       // Match horizontal subtabbars in every division AND the new vertical
-      // Sales side-nav, which uses .sales-subnav instead of .subtabbar.
-      document.querySelectorAll('.subtabbar, .sales-subnav').forEach((bar) => {
+      // Sales side-nav, which uses .division-subnav instead of .subtabbar.
+      document.querySelectorAll('.subtabbar, .division-subnav').forEach((bar) => {
         function tabs() { return Array.from(bar.querySelectorAll('.subtab')); }
 
         function activate(key) {
@@ -15274,7 +15332,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     // programmatically click the underlying modal opener so the
     // nav item directly fires the action (no panel switch needed).
     // ============================================================
-    document.querySelectorAll('.sales-subnav .subnav-launcher[data-launches]').forEach(btn => {
+    document.querySelectorAll('.division-subnav .subnav-launcher[data-launches]').forEach(btn => {
       btn.addEventListener('click', () => {
         const targetId = btn.getAttribute('data-launches');
         const target = document.getElementById(targetId);
