@@ -2400,6 +2400,186 @@
     }
 
     /* =========================================================
+       SALES side nav — vertical, collapsible groups
+       Replaces the horizontal subtabbar inside the Sales panel.
+       ========================================================= */
+    #panel-sales .sales-shell {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 32px;
+      margin-top: -12px;   /* tighten gap below the Sales h1 */
+      align-items: start;
+    }
+    /* Hide the old subtabbar styles for Sales (other divisions still
+       use horizontal subtabs). Done via the new wrapper presence. */
+    #panel-sales > .subtabbar { display: none; }
+
+    .sales-subnav {
+      position: sticky;
+      top: 90px;
+      align-self: start;
+      max-height: calc(100vh - 110px);
+      overflow-y: auto;
+      padding-right: 6px;
+      border-right: 1px solid var(--rule);
+      padding-bottom: 24px;
+    }
+    .sales-subnav::-webkit-scrollbar { width: 4px; }
+    .sales-subnav::-webkit-scrollbar-thumb { background: #1f1f1f; }
+    .sales-subnav::-webkit-scrollbar-track { background: transparent; }
+
+    .sales-subnav .subnav-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: 0;
+      border-left: 2px solid transparent;
+      padding: 9px 14px 9px 12px;
+      color: var(--text-dim);
+      font-family: var(--font-body);
+      font-weight: 300;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      cursor: pointer;
+      margin-bottom: 1px;
+      transition: color .15s ease, background .15s ease, border-left-color .15s ease;
+    }
+    .sales-subnav .subnav-item:hover {
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.02);
+    }
+    .sales-subnav .subnav-item[aria-selected="true"] {
+      color: var(--text);
+      background: rgba(255,255,255,0.05);
+      border-left-color: var(--text);
+    }
+    /* Top-level items (Overview / Settings) — slightly larger weight */
+    .sales-subnav > .subnav-item {
+      font-size: 12px;
+      padding-left: 14px;
+    }
+
+    /* Group accordion (details/summary) */
+    .sales-subnav details.subnav-group {
+      margin: 6px 0 4px;
+    }
+    .sales-subnav details.subnav-group > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 10px 14px 8px;
+      font-family: var(--font-body);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sales-subnav details.subnav-group > summary::-webkit-details-marker { display: none; }
+    .sales-subnav details.subnav-group > summary::before {
+      content: '▸';
+      font-size: 8px;
+      color: var(--text-dim);
+      transition: transform .15s ease;
+      display: inline-block;
+    }
+    .sales-subnav details.subnav-group[open] > summary::before {
+      transform: rotate(90deg);
+    }
+    .sales-subnav details.subnav-group > summary:hover {
+      color: var(--text-muted);
+    }
+    /* Children — slightly indented */
+    .sales-subnav details.subnav-group > .subnav-item {
+      padding-left: 24px;
+      font-size: 11.5px;
+      letter-spacing: 0.16em;
+    }
+
+    /* Nested sub-group (e.g. Marketing > Documents, Marketing > Generators) */
+    .sales-subnav details.subnav-subgroup {
+      margin: 4px 0 4px 14px;
+    }
+    .sales-subnav details.subnav-subgroup > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 6px 10px;
+      font-family: var(--font-body);
+      font-size: 9px;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      display: flex; align-items: center; gap: 6px;
+      user-select: none;
+    }
+    .sales-subnav details.subnav-subgroup > summary::-webkit-details-marker { display: none; }
+    .sales-subnav details.subnav-subgroup > summary::before {
+      content: '▸';
+      font-size: 7px;
+      color: var(--text-dim);
+      transition: transform .15s ease;
+      display: inline-block;
+    }
+    .sales-subnav details.subnav-subgroup[open] > summary::before {
+      transform: rotate(90deg);
+    }
+    .sales-subnav details.subnav-subgroup > summary:hover { color: var(--text-muted); }
+
+    /* Launcher items — direct action (open modal / download / external link),
+       not panel switchers. Visually similar to subnav-item but with a
+       trailing ↗ to indicate "launches". */
+    .sales-subnav .subnav-launcher {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: 0;
+      border-left: 2px solid transparent;
+      padding: 7px 14px 7px 28px;
+      color: var(--text-dim);
+      font-family: var(--font-body);
+      font-weight: 300;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color .15s ease, background .15s ease, border-left-color .15s ease;
+    }
+    .sales-subnav .subnav-launcher::after {
+      content: ' ↗';
+      color: var(--text-dim);
+      font-size: 9px;
+      margin-left: 4px;
+      opacity: 0;
+      transition: opacity .15s ease;
+    }
+    .sales-subnav .subnav-launcher:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.03);
+    }
+    .sales-subnav .subnav-launcher:hover::after { opacity: 1; }
+
+    /* Content column */
+    #panel-sales .sales-content { min-width: 0; }
+
+    /* Mobile collapse — stack the side nav above the content */
+    @media (max-width: 900px) {
+      #panel-sales .sales-shell { grid-template-columns: 1fr; gap: 16px; }
+      .sales-subnav {
+        position: static; max-height: none; overflow: visible;
+        border-right: 0; border-bottom: 1px solid var(--rule);
+        padding-right: 0; padding-bottom: 12px;
+      }
+    }
+
+    /* =========================================================
        COMMISSIONS — Passcode lock screen
        ========================================================= */
     .commissions-lock {
@@ -2946,16 +3126,52 @@
       <div class="eyebrow">Division 01</div>
       <h1>Sales</h1>
 
-      <nav class="subtabbar" role="tablist" aria-label="Sales sections" data-subtab-parent="sales">
-        <button class="subtab" role="tab" aria-controls="subpanel-sales-overview"    aria-selected="true"  data-subkey="overview">Overview</button>
-        <button class="subtab" role="tab" aria-controls="subpanel-sales-deals"       aria-selected="false" data-subkey="deals">Active Deals</button>
-        <button class="subtab" role="tab" aria-controls="subpanel-sales-commissions" aria-selected="false" data-subkey="commissions">Commissions</button>
-        <button class="subtab" role="tab" aria-controls="subpanel-sales-marketing"   aria-selected="false" data-subkey="marketing">Marketing Templates</button>
-        <button class="subtab" role="tab" aria-controls="subpanel-sales-openhouse"   aria-selected="false" data-subkey="openhouse">Open House</button>
-        <button class="subtab" role="tab" aria-controls="subpanel-sales-listings"    aria-selected="false" data-subkey="listings">New Construction Listings</button>
-        <button class="subtab" role="tab" aria-controls="subpanel-sales-platinum"    aria-selected="false" data-subkey="platinum">Platinum Reserve</button>
-        <button class="subtab" role="tab" aria-controls="subpanel-sales-settings"    aria-selected="false" data-subkey="settings">Settings</button>
-      </nav>
+      <div class="sales-shell">
+        <aside class="sales-subnav" role="tablist" aria-label="Sales sections" data-subtab-parent="sales">
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-sales-overview"    aria-selected="true"  data-subkey="overview">Overview</button>
+
+          <details class="subnav-group" open>
+            <summary>Marketing</summary>
+
+            <details class="subnav-subgroup" open>
+              <summary>Documents</summary>
+              <a class="subnav-launcher" href="assets/marketing-templates/strategic-marketing-plan-new-construction.pdf" download="Stonehouse-Strategic-Marketing-Plan-New-Construction.pdf" target="_blank" rel="noopener">Marketing Plan</a>
+            </details>
+
+            <details class="subnav-subgroup" open>
+              <summary>Generators</summary>
+              <button class="subnav-launcher" type="button" data-launches="open-cma-sales-modal">CMA Generator</button>
+              <button class="subnav-launcher" type="button" data-launches="open-onepager-modal">Property One Pager</button>
+              <a class="subnav-launcher" href="offer-instructions.html" target="_blank" rel="noopener">Offer Instructions</a>
+            </details>
+          </details>
+
+          <details class="subnav-group" open>
+            <summary>Listings</summary>
+            <button class="subtab subnav-item" role="tab" aria-controls="subpanel-sales-deals"       aria-selected="false" data-subkey="deals">Active Pipeline</button>
+            <button class="subtab subnav-item" role="tab" aria-controls="subpanel-sales-listings"    aria-selected="false" data-subkey="listings">New Construction</button>
+          </details>
+
+          <details class="subnav-group" open>
+            <summary>Client Acquisition</summary>
+            <button class="subtab subnav-item" role="tab" aria-controls="subpanel-sales-openhouse"   aria-selected="false" data-subkey="openhouse">Open House Sign-Ins</button>
+          </details>
+
+          <details class="subnav-group" open>
+            <summary>Performance</summary>
+            <button class="subtab subnav-item" role="tab" aria-controls="subpanel-sales-commissions" aria-selected="false" data-subkey="commissions">Commissions · The Tape</button>
+          </details>
+
+          <details class="subnav-group">
+            <summary>Website</summary>
+            <button class="subtab subnav-item" role="tab" aria-controls="subpanel-sales-platinum"    aria-selected="false" data-subkey="platinum">Platinum Reserve</button>
+            <button class="subtab subnav-item" role="tab" aria-controls="subpanel-sales-website"     aria-selected="false" data-subkey="website">Site Tools</button>
+          </details>
+
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-sales-settings"    aria-selected="false" data-subkey="settings">Settings</button>
+        </aside>
+
+        <div class="sales-content">
 
       <div class="subpanel" id="subpanel-sales-overview" role="tabpanel" aria-hidden="false" tabindex="0">
         <p class="subpanel-intro">Snapshot of the Sales division — your active pipeline, recent commissions, and the most-used tools. (Live tiles wire up next pass.)</p>
@@ -3337,6 +3553,18 @@
           </div>
         </div>
       </div>
+
+      <div class="subpanel" id="subpanel-sales-website" role="tabpanel" aria-hidden="true" tabindex="0">
+        <p class="subpanel-intro">Website tools for the Stonehouse Company public site — content updates, listing syncs, analytics. (Placeholder — features wire up next.)</p>
+        <div class="placeholder">
+          <div class="mark">— Coming —</div>
+          <h2>Website management</h2>
+          <p>Listing publisher, blog/news editor, photo asset manager, basic analytics. Quick link to the live site: <a href="https://www.thestonehouseco.com" target="_blank" rel="noopener" style="color:var(--text); border-bottom:1px solid var(--rule-strong);">thestonehouseco.com</a></p>
+        </div>
+      </div>
+
+        </div><!-- /.sales-content -->
+      </div><!-- /.sales-shell -->
     </section>
 
     <section class="panel" id="panel-land" role="tabpanel" aria-labelledby="tab-land" aria-hidden="true" tabindex="0">
@@ -14725,6 +14953,19 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       cancelId:  'cancel-nurturing',
       submitId:  'submit-nurturing',
       config:    NURTURING_CONFIG
+    });
+
+    // ============================================================
+    // Sales side-nav launchers — buttons with data-launches="<id>"
+    // programmatically click the underlying modal opener so the
+    // nav item directly fires the action (no panel switch needed).
+    // ============================================================
+    document.querySelectorAll('.sales-subnav .subnav-launcher[data-launches]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-launches');
+        const target = document.getElementById(targetId);
+        if (target) target.click();
+      });
     });
   </script>
 </body>
