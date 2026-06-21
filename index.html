@@ -2972,7 +2972,6 @@
     <div class="intro-inner">
       <img class="intro-arch" src="assets/icon-arch-transparent.png" alt="" />
       <div class="intro-wordmark">The Stonehouse Company</div>
-      <div class="intro-sub">Internal Dashboard</div>
     </div>
   </div>
   <style>
@@ -2987,7 +2986,7 @@
       justify-content: center;
       opacity: 0;
       pointer-events: none;
-      transition: opacity .55s ease-out;
+      transition: opacity 1.2s ease-in-out;
     }
     #stonehouse-intro.is-playing {
       opacity: 1;
@@ -3003,16 +3002,16 @@
       transform: translateY(-2vh);
     }
     .intro-arch {
-      width: 110px;
+      width: 120px;
       height: auto;
       display: block;
-      margin: 0 auto 28px;
+      margin: 0 auto 32px;
       opacity: 0;
-      transform: scale(.88);
-      filter: drop-shadow(0 0 32px rgba(217, 200, 163, 0.08));
+      transform: scale(.92);
+      filter: drop-shadow(0 0 36px rgba(217, 200, 163, 0.10));
     }
     #stonehouse-intro.is-playing .intro-arch {
-      animation: introArchIn 1.0s cubic-bezier(.16, .85, .30, 1) forwards;
+      animation: introArchIn 2.4s cubic-bezier(.22, .61, .36, 1) forwards;
     }
     .intro-wordmark {
       font-family: 'Aboreto', 'EB Garamond', Georgia, serif;
@@ -3020,40 +3019,24 @@
       font-size: 32px;
       letter-spacing: .18em;
       text-transform: uppercase;
-      margin: 0 0 14px;
+      margin: 0;
       opacity: 0;
       transform: translateY(8px);
     }
     #stonehouse-intro.is-playing .intro-wordmark {
-      animation: introFadeUp .75s ease-out .45s forwards;
-    }
-    .intro-sub {
-      font-family: 'Mulish', 'Inter', Helvetica, Arial, sans-serif;
-      color: rgba(217, 200, 163, 0.72);
-      font-size: 10px;
-      letter-spacing: .42em;
-      text-transform: uppercase;
-      opacity: 0;
-    }
-    #stonehouse-intro.is-playing .intro-sub {
-      animation: introFadeIn .6s ease-out .85s forwards;
+      animation: introFadeUp 2.0s cubic-bezier(.22, .61, .36, 1) 1.1s forwards;
     }
     @keyframes introArchIn {
-      0%   { opacity: 0; transform: scale(.88); }
+      0%   { opacity: 0; transform: scale(.92); }
       100% { opacity: 1; transform: scale(1.00); }
     }
     @keyframes introFadeUp {
       0%   { opacity: 0; transform: translateY(8px); }
       100% { opacity: 1; transform: translateY(0); }
     }
-    @keyframes introFadeIn {
-      0%   { opacity: 0; }
-      100% { opacity: 1; }
-    }
     @media (prefers-reduced-motion: reduce) {
       #stonehouse-intro.is-playing .intro-arch,
-      #stonehouse-intro.is-playing .intro-wordmark,
-      #stonehouse-intro.is-playing .intro-sub {
+      #stonehouse-intro.is-playing .intro-wordmark {
         animation: none;
         opacity: 1;
         transform: none;
@@ -3136,16 +3119,18 @@
         if (!splash) return;
         splash.setAttribute('aria-hidden', 'false');
         splash.classList.add('is-playing');
-        const HOLD_MS = 2400;  // total time on screen before fade
+        // Sequence: arch fades in 0–2.4s, wordmark fades in 1.1–3.1s.
+        // Hold a beat past the wordmark settling, then fade to dashboard.
+        const HOLD_MS = 4300;
         let dismissed = false;
         function dismiss() {
           if (dismissed) return;
           dismissed = true;
           splash.classList.add('is-leaving');
-          // Remove after the CSS fade-out completes (.55s)
+          // Remove after the CSS fade-out completes (1.2s)
           setTimeout(() => {
             if (splash.parentNode) splash.parentNode.removeChild(splash);
-          }, 600);
+          }, 1250);
         }
         splash.addEventListener('click', dismiss);
         setTimeout(dismiss, HOLD_MS);
