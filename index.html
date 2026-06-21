@@ -3663,6 +3663,10 @@
         <!-- Filter bar -->
         <div class="client-filter-bar">
           <input type="search" id="client-search" placeholder="Search name, email, phone, neighborhood…" />
+          <select id="client-filter-agent">
+            <option value="">All Agents</option>
+            <option value="Ryan Stonehouse">Ryan Stonehouse</option>
+          </select>
           <select id="client-filter-category">
             <option value="">All Categories</option>
             <option value="Past Client">Past Client</option>
@@ -3690,6 +3694,7 @@
             <thead>
               <tr>
                 <th>Name</th>
+                <th>Agent</th>
                 <th>Category</th>
                 <th>Status</th>
                 <th>Email</th>
@@ -3700,7 +3705,7 @@
               </tr>
             </thead>
             <tbody id="client-table-body">
-              <tr><td colspan="8" class="client-empty">Loading clients…</td></tr>
+              <tr><td colspan="9" class="client-empty">Loading clients…</td></tr>
             </tbody>
           </table>
         </div>
@@ -4747,16 +4752,11 @@
           <legend>Identity</legend>
           <div class="form-grid">
             <div>
-              <label for="cl-first">First Name <span class="req">*</span></label>
-              <input id="cl-first" name="first_name" type="text" required placeholder="John" />
-            </div>
-            <div>
-              <label for="cl-last">Last Name <span class="req">*</span></label>
-              <input id="cl-last" name="last_name" type="text" required placeholder="Doe" />
-            </div>
-            <div>
-              <label for="cl-spouse">Spouse / Partner</label>
-              <input id="cl-spouse" name="spouse" type="text" placeholder="Jane Doe" />
+              <label for="cl-agent">Owning Agent <span class="req">*</span></label>
+              <select id="cl-agent" name="agent" required>
+                <option value="" disabled selected>Select agent…</option>
+                <option value="Ryan Stonehouse">Ryan Stonehouse</option>
+              </select>
             </div>
             <div>
               <label for="cl-status">Status</label>
@@ -4769,6 +4769,18 @@
                 <option value="Closed">Closed</option>
                 <option value="Inactive">Inactive</option>
               </select>
+            </div>
+            <div>
+              <label for="cl-first">First Name <span class="req">*</span></label>
+              <input id="cl-first" name="first_name" type="text" required placeholder="John" />
+            </div>
+            <div>
+              <label for="cl-last">Last Name <span class="req">*</span></label>
+              <input id="cl-last" name="last_name" type="text" required placeholder="Doe" />
+            </div>
+            <div class="full">
+              <label for="cl-spouse">Spouse / Partner</label>
+              <input id="cl-spouse" name="spouse" type="text" placeholder="Jane Doe" />
             </div>
           </div>
         </fieldset>
@@ -15356,6 +15368,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       SHEET_TAB: "Form Responses 1",
       FORM_URL:  "https://docs.google.com/forms/d/e/1FAIpQLSeSG1gUc5SXCBbx1JgcnSx5uE4s_FAiNop4ywT3KpHEg_EudA/formResponse",
       FIELD_MAP: {
+        agent:          "entry.1708383998",
         first_name:     "entry.1771021344",
         last_name:      "entry.199535312",
         spouse:         "entry.121026207",
@@ -15438,6 +15451,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     function _parseClientSheet(table) {
       const cols = table.cols || [];
       const ix = {
+        agent:      _adFindCol(cols, 'agent', 'Owning Agent', 'Agent'),
         first:      _adFindCol(cols, 'first_name', 'First Name'),
         last:       _adFindCol(cols, 'last_name', 'Last Name'),
         spouse:     _adFindCol(cols, 'spouse', 'Spouse'),
@@ -15473,6 +15487,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         if (ix.catCustom  >= 0 && yes(c[ix.catCustom]  && (c[ix.catCustom].v))) cats.push('Custom Home Rep');
         return {
           source_kind: 'client',
+          agent:    ix.agent >= 0 ? _adGvizString(c[ix.agent]) : '',
           first:    ix.first >= 0 ? _adGvizString(c[ix.first]) : '',
           last:     ix.last >= 0 ? _adGvizString(c[ix.last]) : '',
           spouse:   ix.spouse >= 0 ? _adGvizString(c[ix.spouse]) : '',
@@ -15503,7 +15518,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         name:    _adFindCol(cols, 'Full Name', 'Name'),
         email:   _adFindCol(cols, 'Email'),
         phone:   _adFindCol(cols, 'Phone'),
-        property:_adFindCol(cols, 'Property', 'Property Address')
+        property:_adFindCol(cols, 'Property', 'Property Address'),
+        host:    _adFindCol(cols, 'Hosting Agent', 'Host Agent', 'Agent')
       };
       if (ix.name < 0) return [];
       return (table.rows || []).map(r => {
@@ -15512,6 +15528,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         const parts = full.trim().split(/\s+/);
         return {
           source_kind: 'oh',
+          agent:    ix.host >= 0 ? _adGvizString(c[ix.host]) : '',
           first:    parts[0] || '',
           last:     parts.slice(1).join(' '),
           spouse:   '',
@@ -15533,15 +15550,39 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const q = (document.getElementById('client-search').value || '').toLowerCase().trim();
       const cat = document.getElementById('client-filter-category').value;
       const stt = document.getElementById('client-filter-status').value;
+      const agt = document.getElementById('client-filter-agent').value;
       return _clientRows.filter(c => {
+        if (agt && c.agent !== agt) return false;
         if (cat && !(c.categories || []).includes(cat)) return false;
         if (stt && c.status !== stt) return false;
         if (q) {
-          const blob = [c.first, c.last, c.email, c.phone, c.city, c.neigh].join(' ').toLowerCase();
+          const blob = [c.first, c.last, c.email, c.phone, c.city, c.neigh, c.agent].join(' ').toLowerCase();
           if (blob.indexOf(q) === -1) return false;
         }
         return true;
       });
+    }
+
+    // Populate the Agent dropdowns (filter + modal) from the live Team Roster.
+    // Called when the team roster loads OR when clients reload (whichever fires).
+    function _populateClientAgentDropdowns() {
+      const roster = (window.STONEHOUSE_TEAM || []);
+      const agents = roster.map(m => m.name).filter(n => n && n.trim());
+      // Fallback to Ryan if roster is empty
+      const list = agents.length ? agents : ['Ryan Stonehouse'];
+
+      const filterSel = document.getElementById('client-filter-agent');
+      if (filterSel) {
+        const current = filterSel.value;
+        filterSel.innerHTML = '<option value="">All Agents</option>' +
+          list.map(n => '<option value="' + _clEsc(n) + '"' + (n === current ? ' selected' : '') + '>' + _clEsc(n) + '</option>').join('');
+      }
+      const modalSel = document.getElementById('cl-agent');
+      if (modalSel) {
+        const current = modalSel.value;
+        modalSel.innerHTML = '<option value="" disabled' + (current ? '' : ' selected') + '>Select agent…</option>' +
+          list.map(n => '<option value="' + _clEsc(n) + '"' + (n === current ? ' selected' : '') + '>' + _clEsc(n) + '</option>').join('');
+      }
     }
 
     function _renderClients() {
@@ -15565,7 +15606,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
       if (list.length === 0) {
         meta.textContent = '0 of ' + total;
-        tbody.innerHTML = '<tr><td colspan="8" class="client-empty">' +
+        tbody.innerHTML = '<tr><td colspan="9" class="client-empty">' +
           (total === 0
             ? 'No clients yet. Click "+ Add Client" to add the first — or set up the Stonehouse Clients sheet (see docs/clients-setup.md).'
             : 'No clients match the current filters.') +
@@ -15579,8 +15620,15 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         const cats = (c.categories || []).map(cat =>
           '<span class="client-cat-pill' + (c.source_kind === 'oh' ? ' is-oh' : '') + '">' + _clEsc(cat) + '</span>'
         ).join('');
+        // Compact agent display — first initial + last name when long, e.g. "R. Stonehouse"
+        const agentDisplay = (() => {
+          const a = (c.agent || '').trim();
+          if (!a) return '<span style="color:var(--text-dim);">—</span>';
+          return _clEsc(a);
+        })();
         return '<tr' + (c.source_kind === 'oh' ? ' class="is-oh"' : '') + '>' +
           '<td class="client-name">' + _clEsc(name) + (c.spouse ? '<div style="font-size:10px; color:var(--text-dim);">&amp; ' + _clEsc(c.spouse) + '</div>' : '') + '</td>' +
+          '<td style="font-size:11px; color:var(--text-muted);">' + agentDisplay + '</td>' +
           '<td>' + (cats || '<span style="color:var(--text-dim);">—</span>') + '</td>' +
           '<td class="client-status">' + _clEsc(c.status || '') + '</td>' +
           '<td>' + (c.email ? '<a href="mailto:' + _clEsc(c.email) + '" style="color:var(--text); border-bottom:1px solid var(--rule);">' + _clEsc(c.email) + '</a>' : '') + '</td>' +
@@ -15596,7 +15644,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const list = _filteredClients();
       if (list.length === 0) { alert('No clients to export. Adjust your filters.'); return; }
       const cols = [
-        'First Name', 'Last Name', 'Spouse', 'Email', 'Phone',
+        'Agent', 'First Name', 'Last Name', 'Spouse', 'Email', 'Phone',
         'Categories', 'Status', 'Source',
         'Address Line 1', 'Address Line 2', 'City', 'State', 'Zip', 'Neighborhood',
         'Birthday', 'Closing Date', 'Last Touch', 'Next Action', 'Notes'
@@ -15609,7 +15657,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const lines = [cols.join(',')];
       list.forEach(c => {
         lines.push([
-          c.first, c.last, c.spouse, c.email, c.phone,
+          c.agent, c.first, c.last, c.spouse, c.email, c.phone,
           (c.categories || []).join('; '),
           c.status, c.source,
           c.addr1, c.addr2, c.city, c.state, c.zip, c.neigh,
@@ -15640,12 +15688,17 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     });
 
     // Wire filter inputs + export
-    ['client-search', 'client-filter-category', 'client-filter-status'].forEach(id => {
+    ['client-search', 'client-filter-agent', 'client-filter-category', 'client-filter-status'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', _renderClients);
     });
     const exportBtn = document.getElementById('export-clients-csv');
     if (exportBtn) exportBtn.addEventListener('click', _exportClientsCSV);
+
+    // Populate agent dropdowns from Team Roster — once now, then again
+    // whenever the live roster finishes loading.
+    _populateClientAgentDropdowns();
+    document.addEventListener('stonehouse:team-loaded', _populateClientAgentDropdowns);
 
     // Load on page mount + when the Clients subtab is clicked
     loadClients();
