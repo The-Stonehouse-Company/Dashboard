@@ -2400,6 +2400,67 @@
     }
 
     /* =========================================================
+       CLIENTS CRM — filter bar + table
+       ========================================================= */
+    .client-filter-bar {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      align-items: center; margin: 14px 0 14px;
+    }
+    .client-filter-bar input[type="search"] {
+      flex: 1; min-width: 220px;
+      background: var(--bg-elev); border: 1px solid var(--rule);
+      color: var(--text); padding: 10px 14px;
+      font: inherit; font-size: 12px;
+    }
+    .client-filter-bar select {
+      background: var(--bg-elev); border: 1px solid var(--rule);
+      color: var(--text); padding: 10px 14px;
+      font: inherit; font-size: 12px;
+    }
+    .client-count-meta {
+      font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--text-dim); margin-left: 8px;
+    }
+    .client-table-wrap {
+      border: 1px solid var(--rule); background: var(--bg-elev);
+      overflow-x: auto;
+    }
+    .client-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .client-table thead th {
+      text-align: left; padding: 12px 14px;
+      font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--text-dim); border-bottom: 1px solid var(--rule);
+      font-weight: 500; background: rgba(0,0,0,0.4);
+      white-space: nowrap;
+    }
+    .client-table tbody td {
+      padding: 11px 14px; border-bottom: 1px solid #1f1f1f;
+      color: var(--text);
+    }
+    .client-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+    .client-table tbody tr.is-oh td { border-left: 2px solid var(--text-dim); }
+    .client-table .client-name {
+      font-weight: 500;
+    }
+    .client-table .client-cat-pill {
+      display: inline-block; font-size: 8.5px;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--text); border: 1px solid var(--rule-strong);
+      padding: 3px 7px; margin: 0 3px 3px 0; white-space: nowrap;
+    }
+    .client-table .client-cat-pill.is-oh {
+      color: var(--text-dim); border-style: dashed;
+    }
+    .client-table .client-status {
+      font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .client-table .client-empty {
+      text-align: center; padding: 32px;
+      color: var(--text-dim); font-style: italic;
+    }
+
+    /* =========================================================
        SALES side nav — vertical, collapsible groups
        Replaces the horizontal subtabbar inside the Sales panel.
        ========================================================= */
@@ -3560,30 +3621,88 @@
       </div>
 
       <div class="subpanel" id="subpanel-sales-clients" role="tabpanel" aria-hidden="true" tabindex="0">
-        <p class="subpanel-intro">Client directory for the Sales division — past, current, and prospect clients across buyer + listing rep. Pulled from the deal pipelines and nurturing sheets. (Live aggregation wires up next pass.)</p>
+        <p class="subpanel-intro">Client directory across Sales + Custom Home Rep. Add, search, filter, and export to CSV for Mailchimp / Constant Contact email blasts. Open House sign-ins merge in automatically (read-only).</p>
 
-        <div class="home-grid" style="margin-top:24px;">
+        <div class="action-grid" style="margin-bottom:16px;">
+          <button class="primary-action" type="button" id="open-client-modal" aria-haspopup="dialog" aria-controls="client-modal">
+            <span class="action-label">+ Add Client</span>
+            <span class="action-sub">Add a contact to the client database</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="primary-action" type="button" id="export-clients-csv">
+            <span class="action-label">Export CSV</span>
+            <span class="action-sub">Download filtered list for Mailchimp / mail merge</span>
+            <span class="action-arrow" aria-hidden="true">↓</span>
+          </button>
+        </div>
+
+        <!-- Headline tiles -->
+        <div class="home-grid" style="margin-bottom:18px;">
           <article class="home-card">
-            <span class="h-eyebrow">Active Clients</span>
+            <span class="h-eyebrow">Total Clients</span>
+            <div class="h-stat" id="clients-total">—</div>
+            <div class="h-label" id="clients-total-sub">Loading…</div>
+          </article>
+          <article class="home-card">
+            <span class="h-eyebrow">Active</span>
             <div class="h-stat" id="clients-active">—</div>
-            <div class="h-label">Currently in an open transaction</div>
+            <div class="h-label">In an open transaction</div>
           </article>
           <article class="home-card">
-            <span class="h-eyebrow">Prospect Clients</span>
-            <div class="h-stat" id="clients-prospect">—</div>
-            <div class="h-label">In nurturing conversations</div>
-          </article>
-          <article class="home-card">
-            <span class="h-eyebrow">Past Clients</span>
+            <span class="h-eyebrow">Past</span>
             <div class="h-stat" id="clients-past">—</div>
-            <div class="h-label">Closed deals · for re-engagement</div>
+            <div class="h-label">Closed-deal alumni</div>
+          </article>
+          <article class="home-card">
+            <span class="h-eyebrow">Open House Visitors</span>
+            <div class="h-stat" id="clients-oh">—</div>
+            <div class="h-label">From sign-in sheets</div>
           </article>
         </div>
 
-        <div class="placeholder" style="margin-top:32px;">
-          <div class="mark">— Coming —</div>
-          <h2>Unified client list</h2>
-          <p>One searchable list combining buyer-rep clients, listing sellers, custom-rep prospects, and closed-deal alumni. Filter by stage, sort by last touch, export to CSV.</p>
+        <!-- Filter bar -->
+        <div class="client-filter-bar">
+          <input type="search" id="client-search" placeholder="Search name, email, phone, neighborhood…" />
+          <select id="client-filter-category">
+            <option value="">All Categories</option>
+            <option value="Past Client">Past Client</option>
+            <option value="Active Client">Active Client</option>
+            <option value="Sphere of Influence">Sphere of Influence</option>
+            <option value="Open House Visitor">Open House Visitor</option>
+            <option value="Prospect">Prospect</option>
+            <option value="Custom Home Rep">Custom Home Rep</option>
+          </select>
+          <select id="client-filter-status">
+            <option value="">All Statuses</option>
+            <option value="New">New</option>
+            <option value="Nurture">Nurture</option>
+            <option value="Engaged">Engaged</option>
+            <option value="In Contract">In Contract</option>
+            <option value="Closed">Closed</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+          <span id="client-count-meta" class="client-count-meta">—</span>
+        </div>
+
+        <!-- Client table -->
+        <div class="client-table-wrap">
+          <table class="client-table" id="client-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>City</th>
+                <th>Last Touch</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody id="client-table-body">
+              <tr><td colspan="8" class="client-empty">Loading clients…</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -4554,6 +4673,159 @@
   </div>
 
   <!-- ========================= LOG A NURTURING CLIENT MODAL ========================= -->
+  <!-- ========================= ADD CLIENT MODAL ========================= -->
+  <div class="modal-overlay" id="client-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="client-modal-title" id="client-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Sales · Clients</span>
+          <h2 class="modal-title" id="client-modal-title">Add Client</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-client-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="client-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Identity</legend>
+          <div class="form-grid">
+            <div>
+              <label for="cl-first">First Name <span class="req">*</span></label>
+              <input id="cl-first" name="first_name" type="text" required placeholder="John" />
+            </div>
+            <div>
+              <label for="cl-last">Last Name <span class="req">*</span></label>
+              <input id="cl-last" name="last_name" type="text" required placeholder="Doe" />
+            </div>
+            <div>
+              <label for="cl-spouse">Spouse / Partner</label>
+              <input id="cl-spouse" name="spouse" type="text" placeholder="Jane Doe" />
+            </div>
+            <div>
+              <label for="cl-status">Status</label>
+              <select id="cl-status" name="status">
+                <option value="">—</option>
+                <option value="New">New</option>
+                <option value="Nurture">Nurture</option>
+                <option value="Engaged">Engaged</option>
+                <option value="In Contract">In Contract</option>
+                <option value="Closed">Closed</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Category</legend>
+          <p class="form-hint" style="margin-top:-4px; margin-bottom:8px;">Tick every category that applies. A client can be both Active and Sphere, for example.</p>
+          <div class="form-grid form-grid-checks">
+            <label class="check-row"><input type="checkbox" name="cat_past" /> <span>Past Client</span></label>
+            <label class="check-row"><input type="checkbox" name="cat_active" /> <span>Active Client</span></label>
+            <label class="check-row"><input type="checkbox" name="cat_sphere" /> <span>Sphere of Influence</span></label>
+            <label class="check-row"><input type="checkbox" name="cat_prospect" /> <span>Prospect</span></label>
+            <label class="check-row"><input type="checkbox" name="cat_customrep" /> <span>Custom Home Rep</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Contact</legend>
+          <div class="form-grid">
+            <div>
+              <label for="cl-email">Email</label>
+              <input id="cl-email" name="email" type="email" placeholder="john@example.com" />
+            </div>
+            <div>
+              <label for="cl-phone">Phone</label>
+              <input id="cl-phone" name="phone" type="tel" placeholder="(615) 555-0123" />
+            </div>
+            <div>
+              <label for="cl-source">Source</label>
+              <select id="cl-source" name="source">
+                <option value="">—</option>
+                <option value="Referral">Referral</option>
+                <option value="Website">Website</option>
+                <option value="Open House">Open House</option>
+                <option value="Social">Social</option>
+                <option value="Past Client">Past Client</option>
+                <option value="Sphere">Sphere</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Mailing Address</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="cl-addr1">Address Line 1</label>
+              <input id="cl-addr1" name="address_line_1" type="text" placeholder="123 Main St" />
+            </div>
+            <div class="full">
+              <label for="cl-addr2">Address Line 2</label>
+              <input id="cl-addr2" name="address_line_2" type="text" placeholder="Apt 4B" />
+            </div>
+            <div>
+              <label for="cl-city">City</label>
+              <input id="cl-city" name="city" type="text" placeholder="Nashville" />
+            </div>
+            <div>
+              <label for="cl-state">State</label>
+              <input id="cl-state" name="state" type="text" placeholder="TN" maxlength="2" />
+            </div>
+            <div>
+              <label for="cl-zip">Zip</label>
+              <input id="cl-zip" name="zip" type="text" placeholder="37205" />
+            </div>
+            <div>
+              <label for="cl-neigh">Neighborhood</label>
+              <input id="cl-neigh" name="neighborhood" type="text" placeholder="West Meade" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Dates &amp; Touch</legend>
+          <div class="form-grid">
+            <div>
+              <label for="cl-birthday">Birthday</label>
+              <input id="cl-birthday" name="birthday" type="date" />
+            </div>
+            <div>
+              <label for="cl-closing">Closing Date (past clients)</label>
+              <input id="cl-closing" name="closing_date" type="date" />
+            </div>
+            <div>
+              <label for="cl-last-touch">Last Touch</label>
+              <input id="cl-last-touch" name="last_touch" type="date" />
+            </div>
+            <div>
+              <label for="cl-next">Next Action</label>
+              <input id="cl-next" name="next_action" type="text" placeholder="Call next Tuesday" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Notes</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="cl-notes">Notes (optional)</label>
+              <textarea id="cl-notes" name="notes" rows="3" placeholder="Context, kids' names, preferences, anything worth remembering…"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="form-status" id="client-form-status" aria-live="polite"></div>
+      </form>
+
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-client">Cancel</button>
+        <button class="btn" type="submit" form="client-form" id="submit-client">Add Client</button>
+      </footer>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="nurturing-modal-overlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="nurturing-modal-title" id="nurturing-modal">
       <header class="modal-head">
@@ -15009,6 +15281,318 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         if (target) target.click();
       });
     });
+
+    // ============================================================
+    // CLIENTS CRM
+    //
+    // STORAGE: "Stonehouse Clients" Google Sheet + Form for adds.
+    // Open House Sign-In sheet (if separately configured) merges in
+    // as read-only entries tagged "Open House Visitor".
+    //
+    // EXPORT: filtered client list → CSV download for Mailchimp etc.
+    //
+    // SETUP: see docs/clients-setup.md.
+    // ============================================================
+    const CLIENTS_CONFIG = {
+      SHEET_ID:  "1ekSnODkv22ItEL9LMBHximWUvs4FZMrnaSCHwxQ3WDc",
+      SHEET_TAB: "Form Responses 1",
+      FORM_URL:  "https://docs.google.com/forms/d/e/1FAIpQLSeSG1gUc5SXCBbx1JgcnSx5uE4s_FAiNop4ywT3KpHEg_EudA/formResponse",
+      FIELD_MAP: {
+        first_name:     "entry.1771021344",
+        last_name:      "entry.199535312",
+        spouse:         "entry.121026207",
+        status:         "entry.1358198079",
+        cat_past:       "entry.1497118875",
+        cat_active:     "entry.1409808597",
+        cat_sphere:     "entry.1091615847",
+        cat_prospect:   "entry.110617044",
+        cat_customrep:  "entry.787853170",
+        email:          "entry.2076235843",
+        phone:          "entry.1748547291",
+        source:         "entry.1474188743",
+        address_line_1: "entry.387186907",
+        address_line_2: "entry.713480361",
+        city:           "entry.1066380119",
+        state:          "entry.1782915332",
+        zip:            "entry.1226722476",
+        neighborhood:   "entry.57185317",
+        birthday:       "entry.462853162",
+        closing_date:   "entry.242521755",
+        last_touch:     "entry.337040520",
+        next_action:    "entry.1854730650",
+        notes:          "entry.1302980854"
+      },
+      // Pulls Open House sign-ins into the Clients list, read-only,
+      // tagged "Open House Visitor".
+      OPEN_HOUSE_SHEET_ID: "1dBDE1yuNzu7EeFK9kISmy8KA6axAmwZcqK6m1LS5Tbw",
+      OPEN_HOUSE_TAB:      "Form Responses 1"
+    };
+
+    // ----- State -----
+    let _clientRows = [];
+
+    function _clEsc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function _clFmtDate(d) {
+      if (!(d instanceof Date) || isNaN(d)) return '';
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+    }
+    // Reuse the _ad* helpers (gviz fetch + parse + cell helpers) from earlier
+    // — those are defined globally in the Active Deals section.
+
+    function loadClients() {
+      const meta = document.getElementById('clients-total-sub');
+      const tbody = document.getElementById('client-table-body');
+      if (!tbody) return;
+
+      const tasks = [];
+      // 1) Stonehouse Clients sheet
+      if (CLIENTS_CONFIG.SHEET_ID) {
+        tasks.push(fetch(_adGvizUrl(CLIENTS_CONFIG), { cache: 'no-store' })
+          .then(r => r.text())
+          .then(t => _parseClientSheet(_adParseEnvelope(t)))
+          .catch(err => { console.warn('[CLIENTS] sheet failed:', err); return []; })
+        );
+      } else {
+        tasks.push(Promise.resolve([]));
+      }
+      // 2) Open House sign-ins (read-only, tagged as Open House Visitor)
+      if (CLIENTS_CONFIG.OPEN_HOUSE_SHEET_ID) {
+        const ohCfg = { SHEET_ID: CLIENTS_CONFIG.OPEN_HOUSE_SHEET_ID, SHEET_TAB: CLIENTS_CONFIG.OPEN_HOUSE_TAB };
+        tasks.push(fetch(_adGvizUrl(ohCfg), { cache: 'no-store' })
+          .then(r => r.text())
+          .then(t => _parseOHSheet(_adParseEnvelope(t)))
+          .catch(err => { console.warn('[CLIENTS] OH failed:', err); return []; })
+        );
+      } else {
+        tasks.push(Promise.resolve([]));
+      }
+
+      Promise.all(tasks).then(([clients, ohVisitors]) => {
+        _clientRows = clients.concat(ohVisitors);
+        _renderClients();
+      });
+    }
+
+    function _parseClientSheet(table) {
+      const cols = table.cols || [];
+      const ix = {
+        first:      _adFindCol(cols, 'first_name', 'First Name'),
+        last:       _adFindCol(cols, 'last_name', 'Last Name'),
+        spouse:     _adFindCol(cols, 'spouse', 'Spouse'),
+        status:     _adFindCol(cols, 'status', 'Status'),
+        email:      _adFindCol(cols, 'email', 'Email'),
+        phone:      _adFindCol(cols, 'phone', 'Phone'),
+        source:     _adFindCol(cols, 'source', 'Source'),
+        addr1:      _adFindCol(cols, 'address_line_1', 'Address Line 1'),
+        addr2:      _adFindCol(cols, 'address_line_2', 'Address Line 2'),
+        city:       _adFindCol(cols, 'city', 'City'),
+        state:      _adFindCol(cols, 'state', 'State'),
+        zip:        _adFindCol(cols, 'zip', 'Zip'),
+        neigh:      _adFindCol(cols, 'neighborhood', 'Neighborhood'),
+        birthday:   _adFindCol(cols, 'birthday', 'Birthday'),
+        closing:    _adFindCol(cols, 'closing_date', 'Closing Date'),
+        lastTouch:  _adFindCol(cols, 'last_touch', 'Last Touch'),
+        nextAction: _adFindCol(cols, 'next_action', 'Next Action'),
+        notes:      _adFindCol(cols, 'notes', 'Notes'),
+        catPast:    _adFindCol(cols, 'cat_past', 'Past Client'),
+        catActive:  _adFindCol(cols, 'cat_active', 'Active Client'),
+        catSphere:  _adFindCol(cols, 'cat_sphere', 'Sphere'),
+        catProspect:_adFindCol(cols, 'cat_prospect', 'Prospect'),
+        catCustom:  _adFindCol(cols, 'cat_customrep', 'Custom Home Rep')
+      };
+      const yes = (v) => /^(yes|y|true|1|x|✓)$/i.test(String(v || '').trim());
+      return (table.rows || []).map(r => {
+        const c = r.c || [];
+        const cats = [];
+        if (ix.catPast    >= 0 && yes(c[ix.catPast]    && (c[ix.catPast].v))) cats.push('Past Client');
+        if (ix.catActive  >= 0 && yes(c[ix.catActive]  && (c[ix.catActive].v))) cats.push('Active Client');
+        if (ix.catSphere  >= 0 && yes(c[ix.catSphere]  && (c[ix.catSphere].v))) cats.push('Sphere of Influence');
+        if (ix.catProspect>= 0 && yes(c[ix.catProspect] && (c[ix.catProspect].v))) cats.push('Prospect');
+        if (ix.catCustom  >= 0 && yes(c[ix.catCustom]  && (c[ix.catCustom].v))) cats.push('Custom Home Rep');
+        return {
+          source_kind: 'client',
+          first:    ix.first >= 0 ? _adGvizString(c[ix.first]) : '',
+          last:     ix.last >= 0 ? _adGvizString(c[ix.last]) : '',
+          spouse:   ix.spouse >= 0 ? _adGvizString(c[ix.spouse]) : '',
+          email:    ix.email >= 0 ? _adGvizString(c[ix.email]) : '',
+          phone:    ix.phone >= 0 ? _adGvizString(c[ix.phone]) : '',
+          status:   ix.status >= 0 ? _adGvizString(c[ix.status]) : '',
+          source:   ix.source >= 0 ? _adGvizString(c[ix.source]) : '',
+          addr1:    ix.addr1 >= 0 ? _adGvizString(c[ix.addr1]) : '',
+          addr2:    ix.addr2 >= 0 ? _adGvizString(c[ix.addr2]) : '',
+          city:     ix.city >= 0 ? _adGvizString(c[ix.city]) : '',
+          state:    ix.state >= 0 ? _adGvizString(c[ix.state]) : '',
+          zip:      ix.zip >= 0 ? _adGvizString(c[ix.zip]) : '',
+          neigh:    ix.neigh >= 0 ? _adGvizString(c[ix.neigh]) : '',
+          birthday: ix.birthday >= 0 ? _adGvizDate(c[ix.birthday]) : null,
+          closing:  ix.closing >= 0 ? _adGvizDate(c[ix.closing]) : null,
+          lastTouch:ix.lastTouch >= 0 ? _adGvizDate(c[ix.lastTouch]) : null,
+          nextAction: ix.nextAction >= 0 ? _adGvizString(c[ix.nextAction]) : '',
+          notes:    ix.notes >= 0 ? _adGvizString(c[ix.notes]) : '',
+          categories: cats
+        };
+      }).filter(c => c.first || c.last);
+    }
+
+    function _parseOHSheet(table) {
+      const cols = table.cols || [];
+      // Open House Sign-In sheets often vary by agent. Use fuzzy column matches.
+      const ix = {
+        name:    _adFindCol(cols, 'Full Name', 'Name'),
+        email:   _adFindCol(cols, 'Email'),
+        phone:   _adFindCol(cols, 'Phone'),
+        property:_adFindCol(cols, 'Property', 'Property Address')
+      };
+      if (ix.name < 0) return [];
+      return (table.rows || []).map(r => {
+        const c = r.c || [];
+        const full = _adGvizString(c[ix.name]) || '';
+        const parts = full.trim().split(/\s+/);
+        return {
+          source_kind: 'oh',
+          first:    parts[0] || '',
+          last:     parts.slice(1).join(' '),
+          spouse:   '',
+          email:    ix.email >= 0 ? _adGvizString(c[ix.email]) : '',
+          phone:    ix.phone >= 0 ? _adGvizString(c[ix.phone]) : '',
+          status:   'New',
+          source:   'Open House',
+          addr1: '', addr2: '', city: '', state: '', zip: '', neigh: '',
+          birthday: null, closing: null,
+          lastTouch: null,
+          nextAction: '',
+          notes:    ix.property >= 0 ? ('Open House: ' + _adGvizString(c[ix.property])) : '',
+          categories: ['Open House Visitor']
+        };
+      }).filter(c => c.first || c.last);
+    }
+
+    function _filteredClients() {
+      const q = (document.getElementById('client-search').value || '').toLowerCase().trim();
+      const cat = document.getElementById('client-filter-category').value;
+      const stt = document.getElementById('client-filter-status').value;
+      return _clientRows.filter(c => {
+        if (cat && !(c.categories || []).includes(cat)) return false;
+        if (stt && c.status !== stt) return false;
+        if (q) {
+          const blob = [c.first, c.last, c.email, c.phone, c.city, c.neigh].join(' ').toLowerCase();
+          if (blob.indexOf(q) === -1) return false;
+        }
+        return true;
+      });
+    }
+
+    function _renderClients() {
+      const tbody = document.getElementById('client-table-body');
+      const meta = document.getElementById('client-count-meta');
+      if (!tbody) return;
+      const list = _filteredClients();
+
+      // Tile counts (always use the FULL list, not filtered)
+      const total = _clientRows.length;
+      const oh    = _clientRows.filter(c => c.source_kind === 'oh').length;
+      const act   = _clientRows.filter(c => (c.categories || []).includes('Active Client')).length;
+      const past  = _clientRows.filter(c => (c.categories || []).includes('Past Client')).length;
+      const setTxt = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = String(v); };
+      setTxt('clients-total', total);
+      setTxt('clients-active', act);
+      setTxt('clients-past', past);
+      setTxt('clients-oh', oh);
+      const totalSub = document.getElementById('clients-total-sub');
+      if (totalSub) totalSub.textContent = (total === 0) ? 'Sheet not connected' : (oh + ' from OH · ' + (total - oh) + ' direct');
+
+      if (list.length === 0) {
+        meta.textContent = '0 of ' + total;
+        tbody.innerHTML = '<tr><td colspan="8" class="client-empty">' +
+          (total === 0
+            ? 'No clients yet. Click "+ Add Client" to add the first — or set up the Stonehouse Clients sheet (see docs/clients-setup.md).'
+            : 'No clients match the current filters.') +
+          '</td></tr>';
+        return;
+      }
+
+      meta.textContent = list.length + ' of ' + total;
+      tbody.innerHTML = list.map(c => {
+        const name = ((c.first || '') + ' ' + (c.last || '')).trim() || '(no name)';
+        const cats = (c.categories || []).map(cat =>
+          '<span class="client-cat-pill' + (c.source_kind === 'oh' ? ' is-oh' : '') + '">' + _clEsc(cat) + '</span>'
+        ).join('');
+        return '<tr' + (c.source_kind === 'oh' ? ' class="is-oh"' : '') + '>' +
+          '<td class="client-name">' + _clEsc(name) + (c.spouse ? '<div style="font-size:10px; color:var(--text-dim);">&amp; ' + _clEsc(c.spouse) + '</div>' : '') + '</td>' +
+          '<td>' + (cats || '<span style="color:var(--text-dim);">—</span>') + '</td>' +
+          '<td class="client-status">' + _clEsc(c.status || '') + '</td>' +
+          '<td>' + (c.email ? '<a href="mailto:' + _clEsc(c.email) + '" style="color:var(--text); border-bottom:1px solid var(--rule);">' + _clEsc(c.email) + '</a>' : '') + '</td>' +
+          '<td>' + _clEsc(c.phone || '') + '</td>' +
+          '<td>' + _clEsc(c.city || '') + (c.neigh ? ' <span style="color:var(--text-dim);">· ' + _clEsc(c.neigh) + '</span>' : '') + '</td>' +
+          '<td>' + (c.lastTouch ? _clFmtDate(c.lastTouch) : '') + '</td>' +
+          '<td>' + _clEsc(c.source || '') + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function _exportClientsCSV() {
+      const list = _filteredClients();
+      if (list.length === 0) { alert('No clients to export. Adjust your filters.'); return; }
+      const cols = [
+        'First Name', 'Last Name', 'Spouse', 'Email', 'Phone',
+        'Categories', 'Status', 'Source',
+        'Address Line 1', 'Address Line 2', 'City', 'State', 'Zip', 'Neighborhood',
+        'Birthday', 'Closing Date', 'Last Touch', 'Next Action', 'Notes'
+      ];
+      const esc = (v) => {
+        const s = (v == null) ? '' : String(v);
+        return '"' + s.replace(/"/g, '""') + '"';
+      };
+      const dStr = (d) => (d instanceof Date && !isNaN(d)) ? d.toISOString().slice(0, 10) : '';
+      const lines = [cols.join(',')];
+      list.forEach(c => {
+        lines.push([
+          c.first, c.last, c.spouse, c.email, c.phone,
+          (c.categories || []).join('; '),
+          c.status, c.source,
+          c.addr1, c.addr2, c.city, c.state, c.zip, c.neigh,
+          dStr(c.birthday), dStr(c.closing), dStr(c.lastTouch),
+          c.nextAction, c.notes
+        ].map(esc).join(','));
+      });
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const ts = new Date().toISOString().slice(0, 10);
+      a.href = url; a.download = 'stonehouse-clients-' + ts + '.csv';
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+    }
+
+    // Modal controller (re-uses _adSetupModal helper)
+    _adSetupModal({
+      overlayId: 'client-modal-overlay',
+      modalId:   'client-modal',
+      formId:    'client-form',
+      statusId:  'client-form-status',
+      openId:    'open-client-modal',
+      closeId:   'close-client-modal',
+      cancelId:  'cancel-client',
+      submitId:  'submit-client',
+      config:    CLIENTS_CONFIG
+    });
+
+    // Wire filter inputs + export
+    ['client-search', 'client-filter-category', 'client-filter-status'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', _renderClients);
+    });
+    const exportBtn = document.getElementById('export-clients-csv');
+    if (exportBtn) exportBtn.addEventListener('click', _exportClientsCSV);
+
+    // Load on page mount + when the Clients subtab is clicked
+    loadClients();
+    const clientsTab = document.querySelector('[aria-controls="subpanel-sales-clients"]');
+    if (clientsTab) clientsTab.addEventListener('click', loadClients);
   </script>
 </body>
 </html>
