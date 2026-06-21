@@ -3371,6 +3371,7 @@
           <details class="subnav-group" open>
             <summary>Client Acquisition</summary>
             <button class="subtab subnav-item" role="tab" aria-controls="subpanel-sales-openhouse"   aria-selected="false" data-subkey="openhouse">Open House Sign-Ins</button>
+            <button class="subtab subnav-item" role="tab" aria-controls="subpanel-sales-newsletter"  aria-selected="false" data-subkey="newsletter">Newsletter</button>
           </details>
 
           <details class="subnav-group" open>
@@ -3645,6 +3646,89 @@
           </section>
         </div>
 
+      </div>
+
+      <!-- ====== NEWSLETTER: audience export + Brevo onboarding ====== -->
+      <div class="subpanel" id="subpanel-sales-newsletter" role="tabpanel" aria-hidden="true" tabindex="0">
+        <p class="subpanel-intro">
+          Monthly client newsletter. The dashboard owns the audience list — click <strong>Export Audience CSV</strong> to download every Past / Active / Sphere client plus Open House visitors, deduplicated by email and formatted for Brevo import. Compose and send the actual email from your Brevo account.
+        </p>
+
+        <!-- Audience stats -->
+        <div class="home-grid" style="margin-bottom:18px;">
+          <article class="home-card">
+            <span class="h-eyebrow">Audience Size</span>
+            <div class="h-stat" id="nl-audience-count">—</div>
+            <div class="h-label" id="nl-audience-sub">Unique deliverable emails across all selected categories</div>
+          </article>
+          <article class="home-card">
+            <span class="h-eyebrow">From Clients</span>
+            <div class="h-stat" id="nl-from-clients">—</div>
+            <div class="h-label">Past · Active · Sphere</div>
+          </article>
+          <article class="home-card">
+            <span class="h-eyebrow">From Open House</span>
+            <div class="h-stat" id="nl-from-oh">—</div>
+            <div class="h-label">OH sign-ins with email on file</div>
+          </article>
+          <article class="home-card">
+            <span class="h-eyebrow">Missing Email</span>
+            <div class="h-stat" id="nl-missing-email">—</div>
+            <div class="h-label">Contacts excluded — add email in sheet to include</div>
+          </article>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="client-filter-bar" style="margin-bottom:18px;">
+          <label style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="nl-include-past" checked /> Past Clients
+          </label>
+          <label style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="nl-include-active" checked /> Active Clients
+          </label>
+          <label style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="nl-include-sphere" checked /> Sphere
+          </label>
+          <label style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="nl-include-oh" checked /> Open House Visitors
+          </label>
+          <label style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="nl-include-prospect" /> Prospects
+          </label>
+        </div>
+
+        <div class="action-grid" style="margin-bottom:24px;">
+          <button class="primary-action" type="button" id="nl-export-csv">
+            <span class="action-label">Export Audience CSV</span>
+            <span class="action-sub">Download Brevo-ready CSV: EMAIL · FIRSTNAME · LASTNAME · SMS · CATEGORIES · CITY · NEIGHBORHOOD · LAST_TOUCH</span>
+            <span class="action-arrow" aria-hidden="true">↓</span>
+          </button>
+          <a class="primary-action" href="https://app.brevo.com/contact/list-listing" target="_blank" rel="noopener">
+            <span class="action-label">Open Brevo Contacts →</span>
+            <span class="action-sub">Sign in to Brevo and import the CSV under Contacts → Import contacts → Upload CSV</span>
+            <span class="action-arrow" aria-hidden="true">↗</span>
+          </a>
+        </div>
+
+        <!-- Setup state -->
+        <div class="placeholder" style="text-align:left; padding:32px;">
+          <div class="mark">— Setup —</div>
+          <h2>First time? Set up Brevo before your first send</h2>
+          <p style="font-size:13px; color:var(--text-muted); margin:12px 0 16px; max-width:680px;">
+            1. <strong>Create a free Brevo account</strong> at <a href="https://www.brevo.com" target="_blank" rel="noopener" style="color:var(--text); border-bottom:1px solid var(--rule-strong);">brevo.com</a> (free up to 300/day, unlimited contacts).<br>
+            2. <strong>Verify your sender</strong> — Senders → Add a sender → <code>ryan@stonehouserealtyco.com</code> → click the verification link.<br>
+            3. <strong>Authenticate your domain</strong> — Senders → Domains → Add <code>stonehouserealtyco.com</code> → copy the 3 DNS records Brevo gives you and paste them into your domain registrar (~15 min, one-time).<br>
+            4. <strong>Import this audience CSV</strong> using the button above.<br>
+            5. <strong>Compose your email</strong> in Brevo's editor and schedule the send.
+          </p>
+          <p style="font-size:12px; color:var(--text-dim); margin:0;">Full walkthrough → <a href="docs/newsletter-setup.md" target="_blank" rel="noopener" style="color:var(--text-muted); border-bottom:1px solid var(--rule);">docs/newsletter-setup.md</a></p>
+        </div>
+
+        <div class="placeholder" style="margin-top:18px;">
+          <div class="mark">— Coming Phase 2 —</div>
+          <h2>Stonehouse-branded composer</h2>
+          <p>Form-based builder that generates a Stonehouse-styled HTML email (Aboreto headlines, arch icon, auto-pulled listings). Paste into Brevo, send. You'll spec the sections in a later session — for now, build the email inside Brevo using their editor.</p>
+        </div>
       </div>
 
       <div class="subpanel" id="subpanel-sales-marketing" role="tabpanel" aria-hidden="true" tabindex="0">
@@ -16032,6 +16116,137 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     loadClients();
     const clientsTab = document.querySelector('[aria-controls="subpanel-sales-clients"]');
     if (clientsTab) clientsTab.addEventListener('click', loadClients);
+
+    // ============================================================
+    // NEWSLETTER — Audience export for Brevo
+    //
+    // Pulls Past + Active + Sphere clients + OH visitors (toggle via
+    // checkboxes), dedupes by email (case-insensitive), and downloads
+    // a CSV in Brevo's import format (EMAIL, FIRSTNAME, LASTNAME,
+    // SMS, CATEGORIES, CITY, NEIGHBORHOOD, LAST_TOUCH).
+    //
+    // Why categories as a column: Brevo lets you segment campaigns by
+    // attribute. Importing CATEGORIES means you can later send a
+    // "Past Clients only" or "Sphere only" campaign without re-exporting.
+    // ============================================================
+    (function () {
+      const includeMap = {
+        'Past Client':         'nl-include-past',
+        'Active Client':       'nl-include-active',
+        'Sphere of Influence': 'nl-include-sphere',
+        'Open House Visitor':  'nl-include-oh',
+        'Prospect':            'nl-include-prospect'
+      };
+
+      function _nlMatchedCats(c) {
+        return (c.categories || []).filter(cat => {
+          const id = includeMap[cat];
+          if (!id) return false;
+          const cb = document.getElementById(id);
+          return cb && cb.checked;
+        });
+      }
+
+      function _nlBuildAudience() {
+        // Source rows: ALL _clientRows (the Clients page is per-agent
+        // filtered, but the newsletter audience is firm-wide.)
+        const rows = _clientRows || [];
+        const byEmail = new Map();   // emailLower -> merged contact
+        let missingEmail = 0;
+        rows.forEach(c => {
+          const matched = _nlMatchedCats(c);
+          if (matched.length === 0) return;  // not in any selected bucket
+          const email = (c.email || '').trim();
+          if (!email) { missingEmail++; return; }
+          const key = email.toLowerCase();
+          const existing = byEmail.get(key);
+          if (existing) {
+            // Merge categories from another source for the same email
+            matched.forEach(m => { if (!existing.categories.includes(m)) existing.categories.push(m); });
+            // Preserve the most recent lastTouch
+            if (c.lastTouch && (!existing.lastTouch || c.lastTouch > existing.lastTouch)) existing.lastTouch = c.lastTouch;
+            // Fill in any missing fields from this row
+            if (!existing.phone && c.phone) existing.phone = c.phone;
+            if (!existing.city && c.city)   existing.city  = c.city;
+            if (!existing.neigh && c.neigh) existing.neigh = c.neigh;
+            return;
+          }
+          byEmail.set(key, {
+            email:     email,
+            first:     c.first || '',
+            last:      c.last || '',
+            phone:     c.phone || '',
+            city:      c.city || '',
+            neigh:     c.neigh || '',
+            lastTouch: c.lastTouch || null,
+            categories: matched.slice()
+          });
+        });
+        return { contacts: Array.from(byEmail.values()), missingEmail };
+      }
+
+      function _nlRenderStats() {
+        const { contacts, missingEmail } = _nlBuildAudience();
+        const fromClients = contacts.filter(c =>
+          c.categories.some(cat => ['Past Client','Active Client','Sphere of Influence','Prospect'].includes(cat))
+        ).length;
+        const fromOH = contacts.filter(c => c.categories.includes('Open House Visitor')).length;
+        const setTxt = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = String(v); };
+        setTxt('nl-audience-count', contacts.length);
+        setTxt('nl-from-clients', fromClients);
+        setTxt('nl-from-oh', fromOH);
+        setTxt('nl-missing-email', missingEmail);
+        const sub = document.getElementById('nl-audience-sub');
+        if (sub) {
+          const cats = Object.entries(includeMap)
+            .filter(([cat, id]) => { const cb = document.getElementById(id); return cb && cb.checked; })
+            .map(([cat]) => cat).join(' · ');
+          sub.textContent = cats ? cats : 'No category selected — pick at least one above';
+        }
+      }
+
+      function _nlExportCSV() {
+        const { contacts } = _nlBuildAudience();
+        if (contacts.length === 0) { alert('No contacts in the selected categories. Tick a category checkbox first.'); return; }
+        // Brevo CSV columns (their standard attributes uppercase):
+        const cols = ['EMAIL', 'FIRSTNAME', 'LASTNAME', 'SMS', 'CATEGORIES', 'CITY', 'NEIGHBORHOOD', 'LAST_TOUCH'];
+        const esc = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+        const dStr = (d) => (d instanceof Date && !isNaN(d)) ? d.toISOString().slice(0, 10) : '';
+        const lines = [cols.join(',')];
+        contacts.forEach(c => lines.push([
+          c.email, c.first, c.last, c.phone,
+          c.categories.join('; '),
+          c.city, c.neigh, dStr(c.lastTouch)
+        ].map(esc).join(',')));
+        const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const ts = new Date().toISOString().slice(0, 10);
+        a.href = url;
+        a.download = 'stonehouse-newsletter-audience-' + ts + '.csv';
+        document.body.appendChild(a); a.click();
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+      }
+
+      // Wire checkboxes
+      Object.values(includeMap).forEach(id => {
+        const cb = document.getElementById(id);
+        if (cb) cb.addEventListener('change', _nlRenderStats);
+      });
+
+      // Wire export
+      const exportBtn = document.getElementById('nl-export-csv');
+      if (exportBtn) exportBtn.addEventListener('click', _nlExportCSV);
+
+      // Initial render — and whenever the user opens the Newsletter subtab,
+      // OR when the clients data finishes loading (it's async).
+      const newsletterTab = document.querySelector('[aria-controls="subpanel-sales-newsletter"]');
+      if (newsletterTab) newsletterTab.addEventListener('click', _nlRenderStats);
+      // Re-render whenever clients reload (the loader doesn't fire an event,
+      // so poll briefly after page load to catch the async fetch.)
+      setTimeout(_nlRenderStats, 1500);
+      setTimeout(_nlRenderStats, 4000);
+    })();
 
     // ============================================================
     // CLIENTS — Per-agent passcode gate
