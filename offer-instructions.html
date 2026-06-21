@@ -10,13 +10,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Mulish:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --paper:        #ffffff;
-      --paper-tint:   #faf7ef;
-      --ink:          #111111;
-      --ink-muted:    #555;
-      --rule:         #d6cdb1;
-      --accent:       #8a7a4b;
-      --accent-soft:  #c8b87a;
+      /* Paper is now pure black; arch logo (mask-based) renders in --ink white.
+         Gold accent is gone — replaced with white + neutral greys. */
+      --paper:        #000000;
+      --paper-tint:   #0a0a0a;
+      --ink:          #ffffff;
+      --ink-muted:    #b8b8b8;
+      --rule:         #3a3a3a;
+      --accent:       #ffffff;
+      --accent-soft:  #6a6a6a;
       --bg:           #1a1a1a;
       --panel:        #0f0f0f;
       --panel-edge:   #2a2a2a;
@@ -282,12 +284,15 @@
     }
 
     /* ===== Print stylesheet ===== */
+    /* Force background colors to print — otherwise Chrome strips the
+       black paper. -webkit and standard property both included. */
+    .page, .page * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     @page { size: letter portrait; margin: 0; }
     @media print {
-      html, body { background: #fff; }
+      html, body { background: #000; }
       .toolbar, .editor { display: none !important; }
       .layout { grid-template-columns: 1fr; padding-top: 0; }
-      .preview { padding: 0; background: #fff; }
+      .preview { padding: 0; background: #000; }
       .page {
         box-shadow: none !important;
         width: 8.5in !important;
