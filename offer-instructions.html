@@ -172,11 +172,13 @@
       margin-bottom: 14px;
     }
     .page-head .arch {
+      display: block;
       width: 40px; height: 40px;
-      background: var(--ink);
-      -webkit-mask: url('assets/icon-arch-transparent.png') center/contain no-repeat;
-              mask: url('assets/icon-arch-transparent.png') center/contain no-repeat;
       margin: 0 auto 4px;
+      /* Direct img — PNG already has a white arch on transparent bg.
+         This prints reliably; the prior CSS-mask approach was being
+         stripped by Chrome's print pipeline and showing a white box. */
+      object-fit: contain;
     }
     .page-head .wm {
       font-family: var(--font-display);
@@ -651,7 +653,7 @@
       const sub = state.property.instructionLine || '';
       return `
         <div class="page-head">
-          <div class="arch" aria-hidden="true"></div>
+          <img class="arch" src="assets/icon-arch-transparent.png" alt="" aria-hidden="true" />
           <div class="wm">The Stonehouse Company<small>Real Estate · Development · Land</small></div>
         </div>
 
