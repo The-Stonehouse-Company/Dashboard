@@ -15,26 +15,6 @@
     "priceMin": 7300000
   },
   {
-    "slug": "610-westboro-dr",
-    "title": "610 Westboro Dr",
-    "fullAddress": "610 Westboro Dr, Nashville, TN 37209",
-    "specs": "4 BD | 4.5 BA | 3,500+ SF | .31 AC",
-    "price": "$1.375M – Spring 2026",
-    "builder": "MCH Construction",
-    "area": "Charlotte Park",
-    "image": "https://the-stonehouse-company.github.io/platinum-reserve/610_Westboro_Dr.jpg",
-    "photoComingSoon": false,
-    "links": [
-      {
-        "label": "Building Plans",
-        "url": "https://the-stonehouse-company.github.io/platinum-reserve/BUILDING_PLANS_610_Westboro_Dr.pdf"
-      }
-    ],
-    "beds": 4,
-    "sqft": 3500,
-    "priceMin": 1375000
-  },
-  {
     "slug": "750-templeton-dr",
     "title": "750 Templeton Dr",
     "fullAddress": "750 Templeton Dr, Nashville, TN",
