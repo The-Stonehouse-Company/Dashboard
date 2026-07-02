@@ -395,6 +395,149 @@
       .form-grid, .form-grid-checks { grid-template-columns: 1fr; }
     }
     /* ===== Team roster cards ===== */
+    /* ============== FOLLOW-UPS MODAL ============== */
+    .followups-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .fu-stat {
+      border: 1px solid var(--rule);
+      background: var(--bg-elev);
+      padding: 14px;
+      text-align: center;
+    }
+    .fu-stat-num {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 26px;
+      color: var(--text);
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .fu-stat-label {
+      display: block;
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .fu-section { margin-bottom: 24px; }
+    .fu-section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--rule-strong);
+      padding-bottom: 6px;
+      margin-bottom: 10px;
+    }
+    .fu-section-head h3 {
+      font-family: var(--font-display);
+      font-size: 15px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin: 0;
+      color: var(--text);
+      font-weight: 400;
+    }
+    .fu-section-meta {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .fu-list { display: flex; flex-direction: column; gap: 6px; }
+    .fu-row {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 0.7fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 10px 14px;
+      border: 1px solid var(--rule);
+      background: var(--bg-elev);
+      font-size: 12px;
+    }
+    .fu-row.is-urgent { border-left: 3px solid #d99; }
+    .fu-row .fu-name {
+      font-weight: 500;
+      color: var(--text);
+    }
+    .fu-row .fu-name .fu-cats {
+      display: block;
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+    .fu-row .fu-action {
+      color: var(--text-muted);
+      font-size: 11px;
+      font-style: italic;
+    }
+    .fu-row .fu-days {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .fu-row .fu-days.urgent { color: #d99; }
+    .fu-row .fu-contact-links {
+      display: flex; gap: 10px; align-items: center;
+      font-size: 11px;
+    }
+    .fu-row .fu-contact-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 1px;
+    }
+    .fu-row .fu-contact-links a:hover { color: var(--text); }
+    .fu-empty {
+      padding: 18px;
+      text-align: center;
+      color: var(--text-dim);
+      font-style: italic;
+      font-size: 12px;
+    }
+    .fu-locked { padding: 60px 24px; text-align: center; }
+    .fu-locked-card {
+      max-width: 480px; margin: 0 auto;
+      border: 1px solid var(--rule);
+      padding: 40px 32px;
+      background: var(--bg-elev);
+    }
+    .fu-locked-cta {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 12px 26px;
+      background: var(--text);
+      color: #000;
+      text-decoration: none;
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    /* "View Follow-Ups" link inside a team card */
+    .team-card-followups-btn {
+      display: inline-block;
+      margin-top: 12px;
+      font-family: var(--font-body);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: transparent;
+      border: 1px solid var(--rule-strong);
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+    .team-card-followups-btn:hover { color: var(--text); border-color: var(--text); }
+
     .team-card-add {
       border-style: dashed;
       opacity: .7;
@@ -5022,6 +5165,75 @@
         <button class="btn ghost" type="button" id="cancel-listing">Cancel</button>
         <button class="btn" type="submit" form="listing-form" id="submit-listing">Log Listing</button>
       </footer>
+    </div>
+  </div>
+
+  <!-- ========================= FOLLOW-UPS MODAL ========================= -->
+  <div class="modal-overlay is-wide" id="followups-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="followups-modal-title" id="followups-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow" id="followups-modal-eyebrow">Follow-Ups</span>
+          <h2 class="modal-title" id="followups-modal-title">My Follow-Ups</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-followups-modal" aria-label="Close">×</button>
+      </header>
+
+      <div class="modal-body" id="followups-body">
+        <div id="followups-content" style="display:none;">
+          <div class="followups-stats">
+            <article class="fu-stat">
+              <span class="fu-stat-num" id="fu-overdue-count">—</span>
+              <span class="fu-stat-label">Overdue (30+ days)</span>
+            </article>
+            <article class="fu-stat">
+              <span class="fu-stat-num" id="fu-action-count">—</span>
+              <span class="fu-stat-label">Action Items</span>
+            </article>
+            <article class="fu-stat">
+              <span class="fu-stat-num" id="fu-week-count">—</span>
+              <span class="fu-stat-label">This Week</span>
+            </article>
+            <article class="fu-stat">
+              <span class="fu-stat-num" id="fu-total-count">—</span>
+              <span class="fu-stat-label">Total Clients</span>
+            </article>
+          </div>
+
+          <section class="fu-section" id="fu-section-overdue">
+            <header class="fu-section-head">
+              <h3>Overdue — Reach Out</h3>
+              <span class="fu-section-meta" id="fu-overdue-meta">—</span>
+            </header>
+            <div class="fu-list" id="fu-list-overdue"></div>
+          </section>
+
+          <section class="fu-section" id="fu-section-action">
+            <header class="fu-section-head">
+              <h3>Action Items</h3>
+              <span class="fu-section-meta" id="fu-action-meta">—</span>
+            </header>
+            <div class="fu-list" id="fu-list-action"></div>
+          </section>
+
+          <section class="fu-section" id="fu-section-week">
+            <header class="fu-section-head">
+              <h3>This Week — Birthdays &amp; Closings</h3>
+              <span class="fu-section-meta" id="fu-week-meta">—</span>
+            </header>
+            <div class="fu-list" id="fu-list-week"></div>
+          </section>
+        </div>
+
+        <!-- Locked state shown when no agent passcode is unlocked -->
+        <div id="followups-locked" class="fu-locked" style="display:none;">
+          <div class="fu-locked-card">
+            <div style="font-family:var(--font-display); font-size:28px; letter-spacing:.06em; margin-bottom:14px;">Locked</div>
+            <p style="font-size:13px; color:var(--text-muted); line-height:1.6; max-width:380px; margin:0 auto;">Follow-ups are scoped to your client book. Unlock the Clients page first (Sales → Clients → enter your agent code), then come back here.</p>
+            <a href="#sales" class="fu-locked-cta" id="fu-locked-go-clients">Go to Clients →</a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -14316,6 +14528,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               <span class="team-pill ${tierClass}">${escape(m.role || 'Team')}</span>
               ${divisionPills(m.divisions)}
             </div>
+            <button type="button" class="team-card-followups-btn" data-followups-for="${escape(m.name)}">View Follow-Ups →</button>
           `;
           grid.appendChild(card);
         });
@@ -14561,6 +14774,234 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       // Fire on load — first render the fallback, then try to fetch.
       renderRoster();
       loadRoster();
+    })();
+
+    // ============================================================
+    // FOLLOW-UPS MODAL — Per-agent client follow-up dashboard
+    //
+    // Click any team card's "View Follow-Ups" button → opens this
+    // modal scoped to the agent whose card was clicked. Pulls from
+    // the existing _clientRows (Clients sheet + OH visitors) and
+    // surfaces three sections:
+    //   1. Overdue — last_touch > 30 days ago (or never)
+    //   2. Action Items — next_action populated
+    //   3. This Week — birthdays in next 7d + closings in next 30d
+    //
+    // Scoped to the requested agent. If no unlock is active and the
+    // requested agent isn't Ryan-loaded, shows a "go unlock first"
+    // prompt linking back to Clients.
+    // ============================================================
+    (function () {
+      const overlay  = document.getElementById('followups-modal-overlay');
+      const closeBtn = document.getElementById('close-followups-modal');
+      if (!overlay) return;
+
+      const contentEl = document.getElementById('followups-content');
+      const lockedEl  = document.getElementById('followups-locked');
+      const titleEl   = document.getElementById('followups-modal-title');
+      const eyebrowEl = document.getElementById('followups-modal-eyebrow');
+
+      function openModal() {
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+      }
+      function closeModal() {
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+      }
+
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', (e) => {
+        if (overlay.getAttribute('aria-hidden') === 'false' && e.key === 'Escape') {
+          e.preventDefault(); closeModal();
+        }
+      });
+
+      // ===== HELPERS =====
+      function daysBetween(a, b) {
+        const ms = b.getTime() - a.getTime();
+        return Math.floor(ms / (1000 * 60 * 60 * 24));
+      }
+      function fmtDate(d) {
+        if (!(d instanceof Date) || isNaN(d)) return '';
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+      }
+      function esc(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+      // Parse a string into Date if it looks date-like; supports "2026-07-15", "7/15/2026", "Jul 15"
+      function tryParseDate(s) {
+        if (!s) return null;
+        if (s instanceof Date) return isNaN(s) ? null : s;
+        const t = String(s).trim();
+        if (!t) return null;
+        const d = new Date(t);
+        return isNaN(d) ? null : d;
+      }
+
+      function buildFollowUps(agentName) {
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const all = (window._clientRows || []).filter(c =>
+          (c.agent || '').trim() === agentName
+        );
+        const overdueDays = 30;
+        const overdue = [];
+        const action  = [];
+        const week    = [];
+        const weekHorizon = new Date(today); weekHorizon.setDate(today.getDate() + 7);
+        const closingHorizon = new Date(today); closingHorizon.setDate(today.getDate() + 30);
+        const oneYear = 365 * 24 * 60 * 60 * 1000;
+
+        all.forEach(c => {
+          // Skip OH visitors from overdue (cold leads, different cadence)
+          if (c.source_kind !== 'oh') {
+            const lt = c.lastTouch;
+            const days = lt ? daysBetween(lt, today) : 9999;
+            if (days >= overdueDays) {
+              overdue.push({ ...c, daysSince: days, lastTouchStr: lt ? fmtDate(lt) : 'Never' });
+            }
+          }
+          if ((c.nextAction || '').trim()) {
+            action.push(c);
+          }
+          // Birthdays in next 7 days (year-agnostic)
+          if (c.birthday) {
+            const b = c.birthday;
+            const thisYear = new Date(today.getFullYear(), b.getMonth(), b.getDate());
+            const target = thisYear < today ? new Date(today.getFullYear() + 1, b.getMonth(), b.getDate()) : thisYear;
+            if (target <= weekHorizon) {
+              week.push({ ...c, weekKind: 'Birthday', weekDate: target });
+            }
+          }
+          // Closings in next 30 days
+          if (c.closing) {
+            const cl = c.closing;
+            if (cl >= today && cl <= closingHorizon) {
+              week.push({ ...c, weekKind: 'Closing', weekDate: cl });
+            }
+          }
+        });
+
+        // Sort
+        overdue.sort((a, b) => b.daysSince - a.daysSince);
+        action.sort((a, b) => (a.last || '').localeCompare(b.last || ''));
+        week.sort((a, b) => a.weekDate - b.weekDate);
+
+        return { all, overdue, action, week };
+      }
+
+      function rowHtml(c, opts) {
+        opts = opts || {};
+        const name = ((c.first || '') + ' ' + (c.last || '')).trim() || '(no name)';
+        const cats = (c.categories || []).join(' · ');
+        const phone = c.phone ? `<a href="tel:${esc(c.phone)}">${esc(c.phone)}</a>` : '';
+        const email = c.email ? `<a href="mailto:${esc(c.email)}">Email</a>` : '';
+        let daysCell = '';
+        let urgentClass = '';
+        if (opts.kind === 'overdue') {
+          const d = c.daysSince;
+          daysCell = d === 9999 ? 'Never' : (d + ' days');
+          urgentClass = d >= 60 ? ' urgent' : '';
+        } else if (opts.kind === 'week') {
+          daysCell = (c.weekKind || '') + ' · ' + fmtDate(c.weekDate);
+        } else if (opts.kind === 'action') {
+          daysCell = c.lastTouch ? fmtDate(c.lastTouch) : '—';
+        }
+        const isUrgent = opts.kind === 'overdue' && c.daysSince >= 60;
+        const actionTxt = (c.nextAction || '').trim() || (opts.kind === 'overdue' ? '(no action set)' : '—');
+        return (
+          '<div class="fu-row' + (isUrgent ? ' is-urgent' : '') + '">' +
+            '<div class="fu-name">' + esc(name) +
+              (cats ? '<span class="fu-cats">' + esc(cats) + '</span>' : '') +
+            '</div>' +
+            '<div class="fu-action">' + esc(actionTxt) + '</div>' +
+            '<div class="fu-days' + urgentClass + '">' + esc(daysCell) + '</div>' +
+            '<div class="fu-contact-links">' + phone + (phone && email ? ' · ' : '') + email + '</div>' +
+          '</div>'
+        );
+      }
+
+      function renderInto(elId, items, opts, emptyMsg) {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        if (items.length === 0) {
+          el.innerHTML = '<div class="fu-empty">' + esc(emptyMsg) + '</div>';
+        } else {
+          el.innerHTML = items.map(c => rowHtml(c, opts)).join('');
+        }
+      }
+      function setMeta(elId, count, suffix) {
+        const el = document.getElementById(elId);
+        if (el) el.textContent = count + ' ' + suffix;
+      }
+
+      function open(agentName) {
+        openModal();
+        titleEl.textContent = (agentName ? agentName + " — Follow-Ups" : "My Follow-Ups");
+        eyebrowEl.textContent = "Follow-Ups";
+
+        // Ensure clients are loaded. If _clientRows is empty, trigger loadClients() first.
+        const hasData = Array.isArray(window._clientRows) && window._clientRows.length > 0;
+        if (!hasData && typeof loadClients === 'function') {
+          loadClients();
+          // poll briefly for data
+          let tries = 0;
+          const t = setInterval(() => {
+            tries++;
+            if ((window._clientRows || []).length > 0 || tries > 30) {
+              clearInterval(t);
+              render(agentName);
+            }
+          }, 250);
+        } else {
+          render(agentName);
+        }
+      }
+
+      function render(agentName) {
+        // Filter to this agent's rows
+        const data = buildFollowUps(agentName);
+
+        if (data.all.length === 0) {
+          // Agent has no clients OR locked
+          contentEl.style.display = 'none';
+          lockedEl.style.display = '';
+          return;
+        }
+        lockedEl.style.display = 'none';
+        contentEl.style.display = '';
+
+        // Tile counts
+        document.getElementById('fu-overdue-count').textContent = data.overdue.length;
+        document.getElementById('fu-action-count').textContent  = data.action.length;
+        document.getElementById('fu-week-count').textContent    = data.week.length;
+        document.getElementById('fu-total-count').textContent   = data.all.length;
+
+        // Lists
+        renderInto('fu-list-overdue', data.overdue, { kind: 'overdue' },
+          'No overdue contacts. Inbox zero — nice work.');
+        setMeta('fu-overdue-meta', data.overdue.length, data.overdue.length === 1 ? 'contact' : 'contacts');
+
+        renderInto('fu-list-action', data.action, { kind: 'action' },
+          'No action items set. Add a "Next Action" to clients in the sheet to surface them here.');
+        setMeta('fu-action-meta', data.action.length, data.action.length === 1 ? 'item' : 'items');
+
+        renderInto('fu-list-week', data.week, { kind: 'week' },
+          'Nothing on the calendar this week. Birthdays and closings within 7–30 days will show here.');
+        setMeta('fu-week-meta', data.week.length, data.week.length === 1 ? 'event' : 'events');
+      }
+
+      // Delegated click handler: any "View Follow-Ups" button on any team card
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-followups-for]');
+        if (!btn) return;
+        e.preventDefault();
+        const agent = btn.getAttribute('data-followups-for');
+        open(agent);
+      });
     })();
 
     // ============================================================
