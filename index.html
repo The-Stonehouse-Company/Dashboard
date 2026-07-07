@@ -4768,19 +4768,11 @@
 
             <!-- Filters -->
             <div class="client-filter-bar">
-              <input type="search" id="ledger-search" placeholder="Search property, category, notes…" />
+              <input type="search" id="ledger-search" placeholder="Search property or notes…" />
               <select id="ledger-filter-property">
                 <option value="">All Properties</option>
               </select>
               <input type="month" id="ledger-filter-month" title="Month (leave blank for all)" />
-              <select id="ledger-filter-category">
-                <option value="">All Categories</option>
-                <option value="Rent">Rent</option>
-                <option value="Water">Water</option>
-                <option value="Electric">Electric</option>
-                <option value="Gas">Gas</option>
-                <option value="Internet">Internet</option>
-              </select>
               <span id="ledger-count-meta" class="client-count-meta">—</span>
             </div>
 
@@ -4822,15 +4814,18 @@
               <table class="client-table" id="ledger-table">
                 <thead>
                   <tr>
-                    <th>Date</th>
+                    <th>Month</th>
                     <th>Property</th>
-                    <th>Category</th>
-                    <th>Amount</th>
-                    <th>Notes</th>
+                    <th>Rent</th>
+                    <th>Water</th>
+                    <th>Electric</th>
+                    <th>Gas</th>
+                    <th>Internet</th>
+                    <th>Total</th>
                   </tr>
                 </thead>
                 <tbody id="ledger-table-body">
-                  <tr><td colspan="5" class="client-empty">Loading ledger…</td></tr>
+                  <tr><td colspan="8" class="client-empty">Loading ledger…</td></tr>
                 </tbody>
               </table>
             </div>
@@ -6437,47 +6432,65 @@
     </div>
   </div>
 
-  <!-- ========================= LOG LEDGER ENTRY MODAL ========================= -->
+  <!-- ========================= LOG MONTHLY LEDGER MODAL ========================= -->
   <div class="modal-overlay" id="ledger-modal-overlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ledger-modal-title" id="ledger-modal">
       <header class="modal-head">
         <div class="modal-title-group">
           <span class="modal-eyebrow">Property Management · Ledger</span>
-          <h2 class="modal-title" id="ledger-modal-title">Log Entry</h2>
+          <h2 class="modal-title" id="ledger-modal-title">Log Monthly Ledger</h2>
         </div>
         <button class="modal-close" type="button" id="close-ledger-modal" aria-label="Close">×</button>
       </header>
       <form class="modal-body" id="ledger-form" autocomplete="off" novalidate>
         <fieldset>
-          <legend>Entry</legend>
+          <legend>Month &amp; Property</legend>
           <div class="form-grid">
             <div>
-              <label for="lf-date">Date <span class="req">*</span></label>
-              <input id="lf-date" name="entry_date" type="date" required />
-            </div>
-            <div>
-              <label for="lf-category">Category <span class="req">*</span></label>
-              <select id="lf-category" name="category" required>
-                <option value="" disabled selected>Select…</option>
-                <option value="Rent">Rent</option>
-                <option value="Water">Water</option>
-                <option value="Electric">Electric</option>
-                <option value="Gas">Gas</option>
-                <option value="Internet">Internet</option>
-              </select>
+              <label for="lf-month">Month <span class="req">*</span></label>
+              <input id="lf-month" name="month" type="date" required />
+              <span style="display:block; font-size:10px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase; margin-top:4px;">Pick the 1st of the month</span>
             </div>
             <div class="full">
               <label for="lf-property">Property Address <span class="req">*</span></label>
               <input id="lf-property" name="property_address" type="text" required list="lf-property-list" placeholder="Type / pick a property" />
               <datalist id="lf-property-list"></datalist>
             </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Rent &amp; Utilities (leave blank if not applicable)</legend>
+          <div class="form-grid">
             <div>
-              <label for="lf-amount">Amount <span class="req">*</span></label>
-              <input id="lf-amount" name="amount" type="number" step="any" min="0" required placeholder="2500" />
+              <label for="lf-rent">Rent</label>
+              <input id="lf-rent" name="rent" type="number" step="any" min="0" placeholder="2500" />
             </div>
+            <div>
+              <label for="lf-water">Water</label>
+              <input id="lf-water" name="water" type="number" step="any" min="0" placeholder="85" />
+            </div>
+            <div>
+              <label for="lf-electric">Electric</label>
+              <input id="lf-electric" name="electric" type="number" step="any" min="0" placeholder="120" />
+            </div>
+            <div>
+              <label for="lf-gas">Gas</label>
+              <input id="lf-gas" name="gas" type="number" step="any" min="0" placeholder="60" />
+            </div>
+            <div>
+              <label for="lf-internet">Internet</label>
+              <input id="lf-internet" name="internet" type="number" step="any" min="0" placeholder="70" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Notes</legend>
+          <div class="form-grid">
             <div class="full">
               <label for="lf-notes">Notes (optional)</label>
-              <textarea id="lf-notes" name="notes" rows="3" placeholder="Payment method, bill period, meter reading, etc."></textarea>
+              <textarea id="lf-notes" name="notes" rows="3" placeholder="Anything worth noting for the owner &amp; tenant statement…"></textarea>
             </div>
           </div>
         </fieldset>
@@ -6485,7 +6498,7 @@
       <div class="form-status" id="ledger-form-status"></div>
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="cancel-ledger">Cancel</button>
-        <button class="btn" type="submit" form="ledger-form" id="submit-ledger">Log Entry</button>
+        <button class="btn" type="submit" form="ledger-form" id="submit-ledger">Log Month</button>
       </footer>
     </div>
   </div>
@@ -17490,10 +17503,13 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       SHEET_TAB: "Form Responses 1",
       FORM_URL:  "https://docs.google.com/forms/d/e/1FAIpQLSf6c2FIn7bnyuTnAvtSXrZepUJOcnEWfvH_cxilM3OBligDhg/formResponse",
       FIELD_MAP: {
-        entry_date:       "entry.1264687357",
+        month:            "entry.1264687357",
         property_address: "entry.539997566",
-        category:         "entry.117427914",
-        amount:           "entry.386492749",
+        rent:             "entry.117427914",
+        water:            "entry.1195437201",
+        electric:         "entry.2048209632",
+        gas:              "entry.417458696",
+        internet:         "entry.683257258",
         notes:            "entry.341875220"
       }
     };
@@ -17806,26 +17822,53 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
     }
 
-    // ================= LEDGER =================
+    // ================= LEDGER (monthly aggregate — one row per property per month) =================
     function _pmParseLedger(table) {
       const cols = table.cols || [];
       const ix = {
-        date:     _adFindCol(cols, 'entry_date', 'Date'),
+        month:    _adFindCol(cols, 'month', 'Entry Month', 'entry_date', 'Date'),
         property: _adFindCol(cols, 'property_address', 'Property Address', 'Property'),
-        category: _adFindCol(cols, 'category', 'Category'),
-        amount:   _adFindCol(cols, 'amount', 'Amount'),
+        rent:     _adFindCol(cols, 'rent', 'Rent'),
+        water:    _adFindCol(cols, 'water', 'Water'),
+        electric: _adFindCol(cols, 'electric', 'Electric'),
+        gas:      _adFindCol(cols, 'gas', 'Gas'),
+        internet: _adFindCol(cols, 'internet', 'Internet'),
+        // Legacy columns (from the old per-entry schema) — kept so existing
+        // rows still surface. When both new + old columns are present, new
+        // columns win.
+        legacyCategory: _adFindCol(cols, 'category'),
+        legacyAmount:   _adFindCol(cols, 'amount'),
         notes:    _adFindCol(cols, 'notes', 'Notes')
       };
       return (table.rows || []).map(r => {
         const c = r.c || [];
-        return {
-          date:     ix.date >= 0 ? _adGvizDate(c[ix.date]) : null,
+        const row = {
+          month:    ix.month >= 0 ? _adGvizDate(c[ix.month]) : null,
           property: ix.property >= 0 ? _adGvizString(c[ix.property]) : '',
-          category: ix.category >= 0 ? _adGvizString(c[ix.category]) : '',
-          amount:   ix.amount >= 0 ? _adGvizNumber(c[ix.amount]) : 0,
+          rent:     ix.rent     >= 0 ? _adGvizNumber(c[ix.rent])     : 0,
+          water:    ix.water    >= 0 ? _adGvizNumber(c[ix.water])    : 0,
+          electric: ix.electric >= 0 ? _adGvizNumber(c[ix.electric]) : 0,
+          gas:      ix.gas      >= 0 ? _adGvizNumber(c[ix.gas])      : 0,
+          internet: ix.internet >= 0 ? _adGvizNumber(c[ix.internet]) : 0,
           notes:    ix.notes >= 0 ? _adGvizString(c[ix.notes]) : ''
         };
-      }).filter(e => e.property && e.category);
+        // Legacy fallback: if only the old category/amount columns exist, spread
+        // the single amount into the matching monthly column.
+        if (ix.rent < 0 && ix.legacyCategory >= 0 && ix.legacyAmount >= 0) {
+          const cat = _adGvizString(c[ix.legacyCategory]);
+          const amt = _adGvizNumber(c[ix.legacyAmount]);
+          if (cat === 'Rent')     row.rent     = amt;
+          if (cat === 'Water')    row.water    = amt;
+          if (cat === 'Electric') row.electric = amt;
+          if (cat === 'Gas')      row.gas      = amt;
+          if (cat === 'Internet') row.internet = amt;
+        }
+        row.total = row.rent + row.water + row.electric + row.gas + row.internet;
+        row.monthKey = row.month
+          ? row.month.getFullYear() + '-' + String(row.month.getMonth() + 1).padStart(2, '0')
+          : '';
+        return row;
+      }).filter(e => e.property);
     }
     function _pmLoadLedger() {
       if (!LEDGER_CONFIG.SHEET_ID) { _pmRenderLedger(); return Promise.resolve(); }
@@ -17838,18 +17881,11 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const q     = (document.getElementById('ledger-search').value || '').toLowerCase().trim();
       const prop  = document.getElementById('ledger-filter-property').value;
       const month = document.getElementById('ledger-filter-month').value;  // "2026-07" or ""
-      const cat   = document.getElementById('ledger-filter-category').value;
       return (window._pmLedger || []).filter(e => {
         if (prop && e.property !== prop) return false;
-        if (cat && e.category !== cat) return false;
-        if (month && e.date) {
-          const em = e.date.getFullYear() + '-' + String(e.date.getMonth() + 1).padStart(2, '0');
-          if (em !== month) return false;
-        } else if (month && !e.date) {
-          return false;
-        }
+        if (month && e.monthKey !== month) return false;
         if (q) {
-          const blob = [e.property, e.category, e.notes].join(' ').toLowerCase();
+          const blob = [e.property, e.notes].join(' ').toLowerCase();
           if (blob.indexOf(q) === -1) return false;
         }
         return true;
@@ -17863,9 +17899,15 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const total = (window._pmLedger || []).length;
       if (meta) meta.textContent = list.length + ' of ' + total;
 
-      // Category totals for the filtered set
+      // Category totals for the filtered set (sum across all rows in view)
       const totals = { Rent: 0, Water: 0, Electric: 0, Gas: 0, Internet: 0 };
-      list.forEach(e => { if (totals[e.category] != null) totals[e.category] += e.amount; });
+      list.forEach(e => {
+        totals.Rent     += e.rent;
+        totals.Water    += e.water;
+        totals.Electric += e.electric;
+        totals.Gas      += e.gas;
+        totals.Internet += e.internet;
+      });
       const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
       setTxt('ledger-total-rent',     _pmFmtMoney(totals.Rent));
       setTxt('ledger-total-water',    _pmFmtMoney(totals.Water));
@@ -17875,22 +17917,31 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       setTxt('ledger-total-count',    list.length);
 
       if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="client-empty">' +
+        tbody.innerHTML = '<tr><td colspan="8" class="client-empty">' +
           (total === 0
-            ? (LEDGER_CONFIG.SHEET_ID ? 'No entries yet. Click "+ Log Entry" to record the first one.' : 'Ledger sheet not connected yet. See docs/propmgmt-setup.md.')
-            : 'No entries match filters.') +
+            ? (LEDGER_CONFIG.SHEET_ID ? 'No months logged yet. Click "+ Log Monthly Ledger" to record the first month.' : 'Ledger sheet not connected yet. See docs/propmgmt-setup.md.')
+            : 'No rows match filters.') +
           '</td></tr>';
         return;
       }
-      // Sort by date desc (newest first)
-      list.sort((a, b) => (b.date ? b.date.getTime() : 0) - (a.date ? a.date.getTime() : 0));
+      // Sort by month desc (newest first), then property
+      list.sort((a, b) => {
+        const bm = b.month ? b.month.getTime() : 0;
+        const am = a.month ? a.month.getTime() : 0;
+        if (bm !== am) return bm - am;
+        return (a.property || '').localeCompare(b.property || '');
+      });
+      const monthName = d => d ? d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) : '—';
       tbody.innerHTML = list.map(e => (
         '<tr>' +
-          '<td style="font-size:11px;">' + (e.date ? _pmFmtDate(e.date) : '—') + '</td>' +
+          '<td style="font-size:11px;">' + monthName(e.month) + '</td>' +
           '<td class="client-name">' + _pmEsc(e.property) + '</td>' +
-          '<td><span class="client-cat-pill">' + _pmEsc(e.category) + '</span></td>' +
-          '<td>' + _pmFmtMoney(e.amount) + '</td>' +
-          '<td style="font-size:11px; color:var(--text-muted); font-style:italic;">' + _pmEsc(e.notes || '') + '</td>' +
+          '<td>' + _pmFmtMoney(e.rent)     + '</td>' +
+          '<td>' + _pmFmtMoney(e.water)    + '</td>' +
+          '<td>' + _pmFmtMoney(e.electric) + '</td>' +
+          '<td>' + _pmFmtMoney(e.gas)      + '</td>' +
+          '<td>' + _pmFmtMoney(e.internet) + '</td>' +
+          '<td style="font-weight:600;">' + _pmFmtMoney(e.total) + '</td>' +
         '</tr>'
       )).join('');
     }
@@ -17907,12 +17958,13 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     }
     function _pmExportLedgerCSV() {
       const list = _pmFilteredLedger();
-      if (list.length === 0) { alert('No ledger entries to export. Adjust filters.'); return; }
-      const cols = ['Date', 'Property', 'Category', 'Amount', 'Notes'];
+      if (list.length === 0) { alert('No ledger rows to export. Adjust filters.'); return; }
+      const cols = ['Month', 'Property', 'Rent', 'Water', 'Electric', 'Gas', 'Internet', 'Total', 'Notes'];
       const esc = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
-      const d = x => (x instanceof Date && !isNaN(x)) ? x.toISOString().slice(0, 10) : '';
       const lines = [cols.join(',')];
-      list.forEach(e => lines.push([d(e.date), e.property, e.category, e.amount, e.notes].map(esc).join(',')));
+      list.forEach(e => lines.push([
+        e.monthKey, e.property, e.rent, e.water, e.electric, e.gas, e.internet, e.total, e.notes
+      ].map(esc).join(',')));
       const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -17941,12 +17993,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     });
 
     // Wire ledger filters + buttons
-    ['ledger-search', 'ledger-filter-property', 'ledger-filter-month', 'ledger-filter-category'].forEach(id => {
+    ['ledger-search', 'ledger-filter-property', 'ledger-filter-month'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', _pmRenderLedger);
-      if (el && (id === 'ledger-filter-property' || id === 'ledger-filter-category')) {
-        el.addEventListener('change', _pmRenderLedger);
-      }
+      if (el && id === 'ledger-filter-property') el.addEventListener('change', _pmRenderLedger);
     });
     const pmExpLedger = document.getElementById('export-ledger-csv');
     if (pmExpLedger) pmExpLedger.addEventListener('click', _pmExportLedgerCSV);

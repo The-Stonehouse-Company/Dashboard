@@ -567,34 +567,46 @@
 
     const lCols = ledTable.cols || [];
     const lIx = {
-      date:     findCol(lCols, 'entry_date', 'Date'),
+      month:    findCol(lCols, 'month', 'Entry Month', 'entry_date', 'Date'),
       addr:     findCol(lCols, 'property_address', 'Property Address', 'Property'),
+      rent:     findCol(lCols, 'rent'),
+      water:    findCol(lCols, 'water'),
+      electric: findCol(lCols, 'electric'),
+      gas:      findCol(lCols, 'gas'),
+      internet: findCol(lCols, 'internet'),
+      // Legacy columns fallback
       category: findCol(lCols, 'category'),
       amount:   findCol(lCols, 'amount'),
       notes:    findCol(lCols, 'notes')
     };
-    const entries = (ledTable.rows || []).map(r => {
-      const c = r.c || [];
-      return {
-        date:     lIx.date     >= 0 ? gvizDate(c[lIx.date])         : null,
-        property: lIx.addr     >= 0 ? gvizString(c[lIx.addr])       : '',
-        category: lIx.category >= 0 ? gvizString(c[lIx.category])   : '',
-        amount:   lIx.amount   >= 0 ? gvizNumber(c[lIx.amount])     : 0,
-        notes:    lIx.notes    >= 0 ? gvizString(c[lIx.notes])      : ''
-      };
-    }).filter(e => {
-      if ((e.property || '').trim().toLowerCase() !== PROPERTY.toLowerCase()) return false;
-      if (!e.date) return false;
-      const em = e.date.getFullYear() + '-' + String(e.date.getMonth() + 1).padStart(2, '0');
+    // Find the row for this property + this month
+    const rowMatch = (ledTable.rows || []).map(r => r.c || []).find(c => {
+      const addr = lIx.addr >= 0 ? gvizString(c[lIx.addr]).trim() : '';
+      if (addr.toLowerCase() !== PROPERTY.toLowerCase()) return false;
+      const d = lIx.month >= 0 ? gvizDate(c[lIx.month]) : null;
+      if (!d) return false;
+      const em = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
       return em === MONTH;
     });
 
-    // Sort ascending by date for readability on the statement
-    entries.sort((a, b) => a.date.getTime() - b.date.getTime());
-
-    // Totals
+    // Extract amounts from the row (new schema first, legacy fallback)
     const totals = { Rent: 0, Water: 0, Electric: 0, Gas: 0, Internet: 0 };
-    entries.forEach(e => { if (totals[e.category] != null) totals[e.category] += e.amount; });
+    let notesText = '';
+    if (rowMatch) {
+      if (lIx.rent     >= 0) totals.Rent     = gvizNumber(rowMatch[lIx.rent]);
+      if (lIx.water    >= 0) totals.Water    = gvizNumber(rowMatch[lIx.water]);
+      if (lIx.electric >= 0) totals.Electric = gvizNumber(rowMatch[lIx.electric]);
+      if (lIx.gas      >= 0) totals.Gas      = gvizNumber(rowMatch[lIx.gas]);
+      if (lIx.internet >= 0) totals.Internet = gvizNumber(rowMatch[lIx.internet]);
+      if (lIx.notes    >= 0) notesText       = gvizString(rowMatch[lIx.notes]);
+      // Legacy fallback: only category+amount columns present, single row = single line item
+      if (lIx.rent < 0 && lIx.category >= 0 && lIx.amount >= 0) {
+        const cat = gvizString(rowMatch[lIx.category]);
+        const amt = gvizNumber(rowMatch[lIx.amount]);
+        if (totals[cat] != null) totals[cat] = amt;
+      }
+    }
+
     document.getElementById('t-rent').textContent     = money(totals.Rent);
     document.getElementById('t-water').textContent    = money(totals.Water);
     document.getElementById('t-electric').textContent = money(totals.Electric);
@@ -605,25 +617,36 @@
     document.getElementById('foot-rent').textContent      = money(totals.Rent);
     document.getElementById('foot-total').textContent     = money(totals.Rent + utilitiesSum);
 
-    // Render entries
+    // Render the itemized table — one row per category (Rent + 4 utilities), skipping zeros
     const body = document.getElementById('entries-body');
     const foot = document.getElementById('entries-foot');
-    if (entries.length === 0) {
-      body.innerHTML = '<tr><td colspan="4" class="empty-msg">No ledger entries logged for this property in ' + monthLabel(MONTH) + '.</td></tr>';
+    const items = [
+      { label: 'Rent',     amount: totals.Rent },
+      { label: 'Water',    amount: totals.Water },
+      { label: 'Electric', amount: totals.Electric },
+      { label: 'Gas',      amount: totals.Gas },
+      { label: 'Internet', amount: totals.Internet }
+    ].filter(i => i.amount > 0);
+
+    if (!rowMatch) {
+      body.innerHTML = '<tr><td colspan="4" class="empty-msg">No ledger entry found for this property in ' + monthLabel(MONTH) + '. Log the month\'s totals on the Ledger tab.</td></tr>';
+      foot.hidden = true;
+    } else if (items.length === 0) {
+      body.innerHTML = '<tr><td colspan="4" class="empty-msg">Row exists but all amounts are zero.</td></tr>';
       foot.hidden = true;
     } else {
-      body.innerHTML = entries.map(e =>
+      body.innerHTML = items.map(it =>
         '<tr>' +
-          '<td>' + esc(fmtDate(e.date)) + '</td>' +
-          '<td><span class="cat-pill">' + esc(e.category) + '</span></td>' +
-          '<td>' + esc(e.notes || '') + '</td>' +
-          '<td class="amount">' + esc(money(e.amount)) + '</td>' +
+          '<td>' + esc(monthLabel(MONTH)) + '</td>' +
+          '<td><span class="cat-pill">' + esc(it.label) + '</span></td>' +
+          '<td>' + esc(notesText || '') + '</td>' +
+          '<td class="amount">' + esc(money(it.amount)) + '</td>' +
         '</tr>'
       ).join('');
       foot.hidden = false;
     }
 
-    setStatus(entries.length + ' entries · Ready to print');
+    setStatus(rowMatch ? 'Ready to print' : 'No ledger row for this month');
   }
 
   document.getElementById('btn-print').addEventListener('click', () => window.print());
