@@ -3459,6 +3459,9 @@
         <button class="nav-item" role="tab" id="tab-development" aria-controls="panel-development" aria-selected="false" data-key="development">
           <span class="num">04</span> Development
         </button>
+        <button class="nav-item" role="tab" id="tab-propmgmt" aria-controls="panel-propmgmt" aria-selected="false" data-key="propmgmt">
+          <span class="num">05</span> Property Management
+        </button>
       </div>
 
       <div class="nav-divider"></div>
@@ -4578,6 +4581,299 @@
       </div><!-- /.division-shell -->
     </section>
 
+    <!-- ========================= PROPERTY MANAGEMENT DIVISION ========================= -->
+    <section class="panel" id="panel-propmgmt" role="tabpanel" aria-labelledby="tab-propmgmt" aria-hidden="true" tabindex="0">
+      <div class="eyebrow">Division 05</div>
+      <h1>Property Management</h1>
+
+      <div class="division-shell">
+        <aside class="division-subnav" role="tablist" aria-label="Property Management sections" data-subtab-parent="propmgmt">
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-overview"     aria-selected="true"  data-subkey="overview">Overview</button>
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-properties"   aria-selected="false" data-subkey="properties">Properties</button>
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-tenants"      aria-selected="false" data-subkey="tenants">Tenants</button>
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-workorders"   aria-selected="false" data-subkey="workorders">Work Orders</button>
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-reports"      aria-selected="false" data-subkey="reports">Owner Reports</button>
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-files"        aria-selected="false" data-subkey="files">Files</button>
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-settings"     aria-selected="false" data-subkey="settings">Settings</button>
+        </aside>
+
+        <div class="division-content">
+
+          <!-- ============= OVERVIEW ============= -->
+          <div class="subpanel" id="subpanel-propmgmt-overview" role="tabpanel" aria-hidden="false" tabindex="0">
+            <p class="subpanel-intro">Snapshot of the Property Management division — active properties, tenants, open work orders, and month-to-date rent roll.</p>
+            <div class="home-grid" style="margin-bottom:18px;">
+              <article class="home-card">
+                <span class="h-eyebrow">Properties Under Mgmt</span>
+                <div class="h-stat" id="pm-properties-count">—</div>
+                <div class="h-label" id="pm-properties-sub">Loading…</div>
+              </article>
+              <article class="home-card">
+                <span class="h-eyebrow">Occupied Units</span>
+                <div class="h-stat" id="pm-occupied-count">—</div>
+                <div class="h-label" id="pm-occupied-sub">Vacant vs occupied</div>
+              </article>
+              <article class="home-card">
+                <span class="h-eyebrow">Active Tenants</span>
+                <div class="h-stat" id="pm-tenants-count">—</div>
+                <div class="h-label">Current leases only</div>
+              </article>
+              <article class="home-card">
+                <span class="h-eyebrow">Open Work Orders</span>
+                <div class="h-stat" id="pm-workorders-count">—</div>
+                <div class="h-label" id="pm-workorders-sub">Reported · Scheduled · In Progress</div>
+              </article>
+            </div>
+
+            <div class="home-grid">
+              <article class="home-card">
+                <span class="h-eyebrow">Monthly Rent Roll</span>
+                <div class="h-stat" id="pm-rent-roll">—</div>
+                <div class="h-label">Sum of monthly rent across occupied units</div>
+              </article>
+              <article class="home-card">
+                <span class="h-eyebrow">Monthly Mgmt Fees</span>
+                <div class="h-stat" id="pm-mgmt-fees">—</div>
+                <div class="h-label">Stonehouse's monthly management fee income</div>
+              </article>
+              <article class="home-card">
+                <span class="h-eyebrow">Leases Ending Soon</span>
+                <div class="h-stat" id="pm-leases-ending">—</div>
+                <div class="h-label">Within the next 90 days</div>
+              </article>
+              <article class="home-card">
+                <span class="h-eyebrow">Emergency WOs</span>
+                <div class="h-stat" id="pm-emergency-wo">—</div>
+                <div class="h-label">Priority=Emergency, not yet complete</div>
+              </article>
+            </div>
+          </div>
+
+          <!-- ============= PROPERTIES ============= -->
+          <div class="subpanel" id="subpanel-propmgmt-properties" role="tabpanel" aria-hidden="true" tabindex="0">
+            <p class="subpanel-intro">Every property under management. Add, search, filter by occupancy, export owner rent-roll CSVs.</p>
+
+            <div class="action-grid" style="margin-bottom:16px;">
+              <button class="primary-action" type="button" id="open-property-modal" aria-haspopup="dialog" aria-controls="property-modal">
+                <span class="action-label">+ Add Property</span>
+                <span class="action-sub">Onboard a new property under management</span>
+                <span class="action-arrow" aria-hidden="true">→</span>
+              </button>
+              <button class="primary-action" type="button" id="export-properties-csv">
+                <span class="action-label">Export CSV</span>
+                <span class="action-sub">Download filtered property list</span>
+                <span class="action-arrow" aria-hidden="true">↓</span>
+              </button>
+            </div>
+
+            <div class="client-filter-bar">
+              <input type="search" id="property-search" placeholder="Search address, owner, tenant, neighborhood…" />
+              <select id="property-filter-occupied">
+                <option value="">All Occupancy</option>
+                <option value="Yes">Occupied</option>
+                <option value="No">Vacant</option>
+              </select>
+              <select id="property-filter-type">
+                <option value="">All Types</option>
+                <option value="Single Family">Single Family</option>
+                <option value="Condo">Condo</option>
+                <option value="Multi-Family">Multi-Family</option>
+                <option value="Townhome">Townhome</option>
+                <option value="Other">Other</option>
+              </select>
+              <span id="property-count-meta" class="client-count-meta">—</span>
+            </div>
+
+            <div class="client-table-wrap">
+              <table class="client-table" id="property-table">
+                <thead>
+                  <tr>
+                    <th>Address</th>
+                    <th>Type</th>
+                    <th>Owner</th>
+                    <th>Tenant</th>
+                    <th>Rent</th>
+                    <th>Mgmt Fee</th>
+                    <th>Lease Ends</th>
+                    <th>Occ.</th>
+                  </tr>
+                </thead>
+                <tbody id="property-table-body">
+                  <tr><td colspan="8" class="client-empty">Loading properties…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ============= TENANTS ============= -->
+          <div class="subpanel" id="subpanel-propmgmt-tenants" role="tabpanel" aria-hidden="true" tabindex="0">
+            <p class="subpanel-intro">Tenant contacts and lease details across all managed properties.</p>
+
+            <div class="action-grid" style="margin-bottom:16px;">
+              <button class="primary-action" type="button" id="open-tenant-modal" aria-haspopup="dialog" aria-controls="tenant-modal">
+                <span class="action-label">+ Add Tenant</span>
+                <span class="action-sub">Add a new tenant with lease details</span>
+                <span class="action-arrow" aria-hidden="true">→</span>
+              </button>
+              <button class="primary-action" type="button" id="export-tenants-csv">
+                <span class="action-label">Export CSV</span>
+                <span class="action-sub">Download filtered tenant list</span>
+                <span class="action-arrow" aria-hidden="true">↓</span>
+              </button>
+            </div>
+
+            <div class="client-filter-bar">
+              <input type="search" id="tenant-search" placeholder="Search name, email, phone, property…" />
+              <select id="tenant-filter-status">
+                <option value="">All Statuses</option>
+                <option value="Active">Active</option>
+                <option value="Notice Given">Notice Given</option>
+                <option value="Late">Late</option>
+                <option value="Past">Past</option>
+              </select>
+              <span id="tenant-count-meta" class="client-count-meta">—</span>
+            </div>
+
+            <div class="client-table-wrap">
+              <table class="client-table" id="tenant-table">
+                <thead>
+                  <tr>
+                    <th>Tenant</th>
+                    <th>Property · Unit</th>
+                    <th>Rent</th>
+                    <th>Lease</th>
+                    <th>Status</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                  </tr>
+                </thead>
+                <tbody id="tenant-table-body">
+                  <tr><td colspan="7" class="client-empty">Loading tenants…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ============= WORK ORDERS ============= -->
+          <div class="subpanel" id="subpanel-propmgmt-workorders" role="tabpanel" aria-hidden="true" tabindex="0">
+            <p class="subpanel-intro">Maintenance requests and repairs. Track from reported through completion.</p>
+
+            <div class="action-grid" style="margin-bottom:16px;">
+              <button class="primary-action" type="button" id="open-workorder-modal" aria-haspopup="dialog" aria-controls="workorder-modal">
+                <span class="action-label">+ Log Work Order</span>
+                <span class="action-sub">Report a new maintenance issue</span>
+                <span class="action-arrow" aria-hidden="true">→</span>
+              </button>
+            </div>
+
+            <section class="pipeline-section" aria-labelledby="wo-reported-title">
+              <header class="pipeline-head">
+                <div>
+                  <div class="eyebrow" style="margin-bottom:8px;">Just In</div>
+                  <h2 class="pipeline-title" id="wo-reported-title">Reported</h2>
+                </div>
+                <div class="pipeline-meta" id="wo-reported-meta">Loading…</div>
+              </header>
+              <div class="deal-list" id="wo-reported-list"><div class="deal-empty">Loading work orders…</div></div>
+            </section>
+
+            <section class="pipeline-section" aria-labelledby="wo-scheduled-title">
+              <header class="pipeline-head">
+                <div>
+                  <div class="eyebrow" style="margin-bottom:8px;">Booked</div>
+                  <h2 class="pipeline-title" id="wo-scheduled-title">Scheduled</h2>
+                </div>
+                <div class="pipeline-meta" id="wo-scheduled-meta">—</div>
+              </header>
+              <div class="deal-list" id="wo-scheduled-list"><div class="deal-empty">No scheduled work orders.</div></div>
+            </section>
+
+            <section class="pipeline-section" aria-labelledby="wo-inprogress-title">
+              <header class="pipeline-head">
+                <div>
+                  <div class="eyebrow" style="margin-bottom:8px;">On Site</div>
+                  <h2 class="pipeline-title" id="wo-inprogress-title">In Progress</h2>
+                </div>
+                <div class="pipeline-meta" id="wo-inprogress-meta">—</div>
+              </header>
+              <div class="deal-list" id="wo-inprogress-list"><div class="deal-empty">No work orders in progress.</div></div>
+            </section>
+
+            <section class="pipeline-section" aria-labelledby="wo-complete-title">
+              <header class="pipeline-head">
+                <div>
+                  <div class="eyebrow" style="margin-bottom:8px;">Archive · Last 30 days</div>
+                  <h2 class="pipeline-title" id="wo-complete-title">Complete</h2>
+                </div>
+                <div class="pipeline-meta" id="wo-complete-meta">—</div>
+              </header>
+              <div class="deal-list completed-list" id="wo-complete-list"><div class="deal-empty">No recently completed work orders.</div></div>
+            </section>
+          </div>
+
+          <!-- ============= OWNER REPORTS ============= -->
+          <div class="subpanel" id="subpanel-propmgmt-reports" role="tabpanel" aria-hidden="true" tabindex="0">
+            <p class="subpanel-intro">Owner statements and per-property P&amp;L. Aggregates rent income, expenses, and management fees into a monthly statement per owner.</p>
+            <div class="placeholder">
+              <div class="mark">— Phase 2 —</div>
+              <h2>Owner Reports generator</h2>
+              <p>Once you've been running Properties + Work Orders for a few months and have real income/expense data flowing, we'll build a monthly statement generator that pulls rent collected, mgmt fee deducted, work order costs, and delivers a per-owner P&amp;L PDF. Say the word when you're ready to spec it.</p>
+            </div>
+          </div>
+
+          <!-- ============= FILES ============= -->
+          <div class="subpanel" id="subpanel-propmgmt-files" role="tabpanel" aria-hidden="true" tabindex="0">
+            <p class="subpanel-intro">Templates and documents for the Property Management division. Drop new PDFs into <code>Dashboard/assets/propmgmt-files/</code> and add cards below.</p>
+            <div class="template-grid">
+              <article class="template-card">
+                <div class="template-card-head">
+                  <span class="template-kind">Agreement · Template</span>
+                  <span class="template-status">Coming Soon</span>
+                </div>
+                <h3>Property Management Agreement</h3>
+                <p>The owner engagement letter — scope of services, management fee (typically 8–10% of gross rents), term, termination, insurance requirements, and dispute resolution.</p>
+              </article>
+              <article class="template-card">
+                <div class="template-card-head">
+                  <span class="template-kind">Onboarding · Template</span>
+                  <span class="template-status">Coming Soon</span>
+                </div>
+                <h3>Owner Onboarding Kit</h3>
+                <p>Welcome doc + checklist for new owners: property details form, banking info for rent disbursement, insurance confirmation, tax W-9.</p>
+              </article>
+              <article class="template-card">
+                <div class="template-card-head">
+                  <span class="template-kind">Form · Template</span>
+                  <span class="template-status">Coming Soon</span>
+                </div>
+                <h3>Tenant Application</h3>
+                <p>Rental application for prospective tenants — background, credit, income, references, screening consent.</p>
+              </article>
+              <article class="template-card">
+                <div class="template-card-head">
+                  <span class="template-kind">Lease · Template</span>
+                  <span class="template-status">Coming Soon</span>
+                </div>
+                <h3>Residential Lease Agreement</h3>
+                <p>Stonehouse-branded residential lease template — 12-month default term, security deposit, rent escalation, maintenance responsibilities, house rules.</p>
+              </article>
+            </div>
+          </div>
+
+          <!-- ============= SETTINGS ============= -->
+          <div class="subpanel" id="subpanel-propmgmt-settings" role="tabpanel" aria-hidden="true" tabindex="0">
+            <p class="subpanel-intro">Property Management-specific settings — default management fees, tenant screening criteria, maintenance vendor list.</p>
+            <div class="placeholder">
+              <div class="mark">— Coming —</div>
+              <h2>Property Management settings</h2>
+              <p>Default mgmt fee %, late-fee schedule, preferred vendors by trade (plumbing, HVAC, electrical, landscaping), and lease template defaults will live here.</p>
+            </div>
+          </div>
+
+        </div><!-- /.division-content -->
+      </div><!-- /.division-shell -->
+    </section>
+
     <!-- ========================= HOME PANEL ========================= -->
     <section class="panel" id="panel-home" role="tabpanel" aria-labelledby="tab-home" aria-hidden="false" tabindex="0">
       <div class="eyebrow">Workspace</div>
@@ -4663,6 +4959,7 @@
           <option value="land">Land Acquisition</option>
           <option value="customrep">Custom Home Rep</option>
           <option value="development">Development</option>
+          <option value="propmgmt">Property Management</option>
           <option value="cross">Cross-division</option>
         </select>
         <select id="tools-category-filter">
@@ -4919,6 +5216,7 @@
             <label class="check-row"><input type="checkbox" name="div_land" /> <span>Land Acquisition</span></label>
             <label class="check-row"><input type="checkbox" name="div_customrep" /> <span>Custom Home Rep</span></label>
             <label class="check-row"><input type="checkbox" name="div_development" /> <span>Development</span></label>
+            <label class="check-row"><input type="checkbox" name="div_propmgmt" /> <span>Property Management</span></label>
           </div>
         </fieldset>
 
@@ -5886,6 +6184,344 @@
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="cancel-devintake">Cancel</button>
         <button class="btn" type="submit" form="devintake-form" id="submit-devintake">Log Development</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========================= ADD PROPERTY MODAL ========================= -->
+  <div class="modal-overlay" id="property-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="property-modal-title" id="property-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Property Management · Properties</span>
+          <h2 class="modal-title" id="property-modal-title">Add Property</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-property-modal" aria-label="Close">×</button>
+      </header>
+      <form class="modal-body" id="property-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Property</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="pf-address">Property Address <span class="req">*</span></label>
+              <input id="pf-address" name="property_address" type="text" required placeholder="1234 Sample St, Nashville TN 37207" />
+            </div>
+            <div>
+              <label for="pf-type">Property Type</label>
+              <select id="pf-type" name="property_type">
+                <option value="">—</option>
+                <option value="Single Family">Single Family</option>
+                <option value="Condo">Condo</option>
+                <option value="Multi-Family">Multi-Family</option>
+                <option value="Townhome">Townhome</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label for="pf-units">Unit Count</label>
+              <input id="pf-units" name="unit_count" type="number" min="1" step="1" placeholder="1" />
+            </div>
+            <div>
+              <label for="pf-beds">Bedrooms</label>
+              <input id="pf-beds" name="bedrooms" type="number" min="0" step="1" placeholder="3" />
+            </div>
+            <div>
+              <label for="pf-baths">Bathrooms</label>
+              <input id="pf-baths" name="bathrooms" type="number" min="0" step="0.5" placeholder="2" />
+            </div>
+            <div>
+              <label for="pf-neighborhood">Neighborhood</label>
+              <input id="pf-neighborhood" name="neighborhood" type="text" placeholder="Belle Meade" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Owner</legend>
+          <div class="form-grid">
+            <div>
+              <label for="pf-owner-name">Owner Name <span class="req">*</span></label>
+              <input id="pf-owner-name" name="owner_name" type="text" required />
+            </div>
+            <div>
+              <label for="pf-owner-email">Owner Email</label>
+              <input id="pf-owner-email" name="owner_email" type="email" />
+            </div>
+            <div>
+              <label for="pf-owner-phone">Owner Phone</label>
+              <input id="pf-owner-phone" name="owner_phone" type="tel" />
+            </div>
+            <div class="full">
+              <label for="pf-owner-mailing">Owner Mailing Address (for statements)</label>
+              <input id="pf-owner-mailing" name="owner_mailing" type="text" placeholder="If different from property address" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Rent &amp; Management</legend>
+          <div class="form-grid">
+            <div>
+              <label for="pf-rent">Monthly Rent</label>
+              <input id="pf-rent" name="monthly_rent" type="number" step="any" min="0" placeholder="2500" />
+            </div>
+            <div>
+              <label for="pf-mgmt-fee">Mgmt Fee %</label>
+              <input id="pf-mgmt-fee" name="mgmt_fee_pct" type="number" step="0.1" min="0" max="100" placeholder="10" />
+            </div>
+            <div>
+              <label for="pf-lease-start">Lease Start</label>
+              <input id="pf-lease-start" name="lease_start" type="date" />
+            </div>
+            <div>
+              <label for="pf-lease-end">Lease End</label>
+              <input id="pf-lease-end" name="lease_end" type="date" />
+            </div>
+            <div>
+              <label for="pf-occupied">Currently Occupied?</label>
+              <select id="pf-occupied" name="occupied">
+                <option value="No">No — Vacant</option>
+                <option value="Yes" selected>Yes — Occupied</option>
+              </select>
+            </div>
+            <div>
+              <label for="pf-tenant-name">Current Tenant (name)</label>
+              <input id="pf-tenant-name" name="tenant_name" type="text" placeholder="Optional — track more detail on Tenants tab" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Notes</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="pf-notes">Notes (optional)</label>
+              <textarea id="pf-notes" name="notes" rows="3" placeholder="Insurance policy, HOA info, key location, quirks…"></textarea>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+      <div class="form-status" id="property-form-status"></div>
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-property">Cancel</button>
+        <button class="btn" type="submit" form="property-form" id="submit-property">Add Property</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========================= ADD TENANT MODAL ========================= -->
+  <div class="modal-overlay" id="tenant-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tenant-modal-title" id="tenant-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Property Management · Tenants</span>
+          <h2 class="modal-title" id="tenant-modal-title">Add Tenant</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-tenant-modal" aria-label="Close">×</button>
+      </header>
+      <form class="modal-body" id="tenant-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Identity</legend>
+          <div class="form-grid">
+            <div>
+              <label for="tf-first">First Name <span class="req">*</span></label>
+              <input id="tf-first" name="first_name" type="text" required />
+            </div>
+            <div>
+              <label for="tf-last">Last Name <span class="req">*</span></label>
+              <input id="tf-last" name="last_name" type="text" required />
+            </div>
+            <div>
+              <label for="tf-email">Email</label>
+              <input id="tf-email" name="email" type="email" />
+            </div>
+            <div>
+              <label for="tf-phone">Phone</label>
+              <input id="tf-phone" name="phone" type="tel" />
+            </div>
+            <div>
+              <label for="tf-emergency">Emergency Contact</label>
+              <input id="tf-emergency" name="emergency_contact" type="text" placeholder="Name + phone" />
+            </div>
+            <div>
+              <label for="tf-status">Status</label>
+              <select id="tf-status" name="status">
+                <option value="Active" selected>Active</option>
+                <option value="Notice Given">Notice Given</option>
+                <option value="Late">Late</option>
+                <option value="Past">Past</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Property &amp; Lease</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="tf-property">Property Address <span class="req">*</span></label>
+              <input id="tf-property" name="property_address" type="text" required placeholder="Type the property address (should match Properties tab)" list="tf-property-list" />
+              <datalist id="tf-property-list"></datalist>
+            </div>
+            <div>
+              <label for="tf-unit">Unit #</label>
+              <input id="tf-unit" name="unit" type="text" placeholder="For multi-family" />
+            </div>
+            <div>
+              <label for="tf-rent">Monthly Rent</label>
+              <input id="tf-rent" name="monthly_rent" type="number" step="any" min="0" />
+            </div>
+            <div>
+              <label for="tf-deposit">Security Deposit</label>
+              <input id="tf-deposit" name="deposit" type="number" step="any" min="0" />
+            </div>
+            <div>
+              <label for="tf-lease-start">Lease Start <span class="req">*</span></label>
+              <input id="tf-lease-start" name="lease_start" type="date" required />
+            </div>
+            <div>
+              <label for="tf-lease-end">Lease End <span class="req">*</span></label>
+              <input id="tf-lease-end" name="lease_end" type="date" required />
+            </div>
+            <div>
+              <label for="tf-move-in">Move-In Date</label>
+              <input id="tf-move-in" name="move_in" type="date" />
+            </div>
+            <div>
+              <label for="tf-pet-fee">Pet / Other Fees</label>
+              <input id="tf-pet-fee" name="pet_fees" type="text" placeholder="e.g. $50/mo pet rent · 1 dog" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Notes</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="tf-notes">Notes (optional)</label>
+              <textarea id="tf-notes" name="notes" rows="3" placeholder="Payment history, screening notes, etc."></textarea>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+      <div class="form-status" id="tenant-form-status"></div>
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-tenant">Cancel</button>
+        <button class="btn" type="submit" form="tenant-form" id="submit-tenant">Add Tenant</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========================= LOG WORK ORDER MODAL ========================= -->
+  <div class="modal-overlay" id="workorder-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="workorder-modal-title" id="workorder-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Property Management · Work Orders</span>
+          <h2 class="modal-title" id="workorder-modal-title">Log Work Order</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-workorder-modal" aria-label="Close">×</button>
+      </header>
+      <form class="modal-body" id="workorder-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>What &amp; Where</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="wof-property">Property Address <span class="req">*</span></label>
+              <input id="wof-property" name="property_address" type="text" required list="wof-property-list" />
+              <datalist id="wof-property-list"></datalist>
+            </div>
+            <div>
+              <label for="wof-unit">Unit #</label>
+              <input id="wof-unit" name="unit" type="text" placeholder="For multi-family" />
+            </div>
+            <div>
+              <label for="wof-tenant">Tenant Name (if applicable)</label>
+              <input id="wof-tenant" name="tenant_name" type="text" />
+            </div>
+            <div>
+              <label for="wof-category">Category <span class="req">*</span></label>
+              <select id="wof-category" name="category" required>
+                <option value="" disabled selected>Select…</option>
+                <option value="Plumbing">Plumbing</option>
+                <option value="Electrical">Electrical</option>
+                <option value="HVAC">HVAC</option>
+                <option value="Appliance">Appliance</option>
+                <option value="Roof">Roof</option>
+                <option value="Landscaping">Landscaping</option>
+                <option value="Pest Control">Pest Control</option>
+                <option value="General Repair">General Repair</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label for="wof-priority">Priority <span class="req">*</span></label>
+              <select id="wof-priority" name="priority" required>
+                <option value="Medium" selected>Medium</option>
+                <option value="Emergency">Emergency</option>
+                <option value="High">High</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+            <div class="full">
+              <label for="wof-description">Description <span class="req">*</span></label>
+              <textarea id="wof-description" name="description" rows="3" required placeholder="What's broken, when it was noticed, any access notes…"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Vendor &amp; Cost</legend>
+          <div class="form-grid">
+            <div>
+              <label for="wof-reported">Reported Date</label>
+              <input id="wof-reported" name="reported_date" type="date" />
+            </div>
+            <div>
+              <label for="wof-scheduled">Scheduled Date</label>
+              <input id="wof-scheduled" name="scheduled_date" type="date" />
+            </div>
+            <div>
+              <label for="wof-vendor">Assigned Vendor</label>
+              <input id="wof-vendor" name="vendor" type="text" placeholder="Company or contractor name" />
+            </div>
+            <div>
+              <label for="wof-vendor-phone">Vendor Phone</label>
+              <input id="wof-vendor-phone" name="vendor_phone" type="tel" />
+            </div>
+            <div>
+              <label for="wof-est-cost">Estimated Cost</label>
+              <input id="wof-est-cost" name="estimated_cost" type="number" step="any" min="0" />
+            </div>
+            <div>
+              <label for="wof-actual-cost">Actual Cost</label>
+              <input id="wof-actual-cost" name="actual_cost" type="number" step="any" min="0" placeholder="Fill after completion" />
+            </div>
+            <div>
+              <label for="wof-status">Status <span class="req">*</span></label>
+              <select id="wof-status" name="status" required>
+                <option value="Reported" selected>Reported</option>
+                <option value="Scheduled">Scheduled</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Complete">Complete</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div>
+              <label for="wof-completed">Completed Date</label>
+              <input id="wof-completed" name="completed_date" type="date" />
+            </div>
+            <div class="full">
+              <label for="wof-notes">Notes</label>
+              <textarea id="wof-notes" name="notes" rows="2" placeholder="Parts used, follow-up needed, tenant communication…"></textarea>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+      <div class="form-status" id="workorder-form-status"></div>
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-workorder">Cancel</button>
+        <button class="btn" type="submit" form="workorder-form" id="submit-workorder">Log Work Order</button>
       </footer>
     </div>
   </div>
@@ -14465,7 +15101,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         div_sales:       "entry.1215128792",
         div_land:        "entry.1719015844",
         div_customrep:   "entry.976902181",
-        div_development: "entry.1889308194"
+        div_development: "entry.1889308194",
+        div_propmgmt:    ""    // ← paste entry ID after adding "div_propmgmt" question to the Team Roster Google Form
       }
     };
 
@@ -14483,7 +15120,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         sales:       "Sales",
         land:        "Land Acquisition",
         customrep:   "Custom Home Rep",
-        development: "Development"
+        development: "Development",
+        propmgmt:    "Property Management"
       };
 
       // -----------------------------------------------------------
@@ -14604,7 +15242,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             sales:      idx('div_sales'),
             land:       idx('div_land'),
             customrep:  idx('div_customrep'),
-            development:idx('div_development')
+            development:idx('div_development'),
+            propmgmt:   idx('div_propmgmt')
           };
 
           const yes = (v) => /^(yes|y|true|1|x|✓)$/i.test(String(v || '').trim());
@@ -14617,6 +15256,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               if (colIdx.land        >= 0 && yes(r[colIdx.land]))        divs.push('land');
               if (colIdx.customrep   >= 0 && yes(r[colIdx.customrep]))   divs.push('customrep');
               if (colIdx.development >= 0 && yes(r[colIdx.development])) divs.push('development');
+              if (colIdx.propmgmt    >= 0 && yes(r[colIdx.propmgmt]))    divs.push('propmgmt');
               return {
                 id:        name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + i,
                 name:      name,
@@ -14715,7 +15355,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           div_sales:       checked('div_sales'),
           div_land:        checked('div_land'),
           div_customrep:   checked('div_customrep'),
-          div_development: checked('div_development')
+          div_development: checked('div_development'),
+          div_propmgmt:    checked('div_propmgmt')
         };
 
         // Optimistic UI: append to the in-memory roster immediately so
@@ -14725,6 +15366,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         if (payload.div_land        === 'Yes') divs.push('land');
         if (payload.div_customrep   === 'Yes') divs.push('customrep');
         if (payload.div_development === 'Yes') divs.push('development');
+        if (payload.div_propmgmt    === 'Yes') divs.push('propmgmt');
         window.STONEHOUSE_TEAM = (window.STONEHOUSE_TEAM || []).concat([{
           id:        (payload.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-local'),
           name:      payload.name,
@@ -16824,6 +17466,507 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       // Initial render
       applyState();
     })();
+
+    // ============================================================
+    // PROPERTY MANAGEMENT — Properties, Tenants, Work Orders
+    //
+    // Three Google Sheets, three Google Forms, one Overview tile grid.
+    // Same gviz-read / no-cors-POST pattern as the Sales side.
+    //
+    // SETUP: see docs/propmgmt-setup.md.
+    // ============================================================
+    const PROPERTIES_CONFIG = {
+      SHEET_ID:  "",
+      SHEET_TAB: "Form Responses 1",
+      FORM_URL:  "",
+      FIELD_MAP: {
+        property_address: "", property_type: "", unit_count: "", bedrooms: "", bathrooms: "",
+        neighborhood: "", owner_name: "", owner_email: "", owner_phone: "", owner_mailing: "",
+        monthly_rent: "", mgmt_fee_pct: "", lease_start: "", lease_end: "", occupied: "",
+        tenant_name: "", notes: ""
+      }
+    };
+    const TENANTS_CONFIG = {
+      SHEET_ID:  "",
+      SHEET_TAB: "Form Responses 1",
+      FORM_URL:  "",
+      FIELD_MAP: {
+        first_name: "", last_name: "", email: "", phone: "", emergency_contact: "", status: "",
+        property_address: "", unit: "", monthly_rent: "", deposit: "",
+        lease_start: "", lease_end: "", move_in: "", pet_fees: "", notes: ""
+      }
+    };
+    const WORKORDERS_CONFIG = {
+      SHEET_ID:  "",
+      SHEET_TAB: "Form Responses 1",
+      FORM_URL:  "",
+      FIELD_MAP: {
+        property_address: "", unit: "", tenant_name: "", category: "", priority: "",
+        description: "", reported_date: "", scheduled_date: "", vendor: "", vendor_phone: "",
+        estimated_cost: "", actual_cost: "", status: "", completed_date: "", notes: ""
+      }
+    };
+
+    window._pmProperties = [];
+    window._pmTenants    = [];
+    window._pmWorkOrders = [];
+
+    function _pmEsc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function _pmFmtDate(d) {
+      if (!(d instanceof Date) || isNaN(d)) return '';
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+    }
+    function _pmFmtMoney(n) {
+      const v = parseFloat(n);
+      if (isNaN(v) || v === 0) return '—';
+      if (v >= 1000000) return '$' + (v / 1000000).toFixed(2) + 'M';
+      if (v >= 1000)    return '$' + (v / 1000).toFixed(1) + 'k';
+      return '$' + v.toFixed(0);
+    }
+    function _pmYes(v) { return /^(yes|y|true|1|x|✓)$/i.test(String(v || '').trim()); }
+
+    // ================= PROPERTIES =================
+    function _pmParseProperties(table) {
+      const cols = table.cols || [];
+      const ix = {
+        address:    _adFindCol(cols, 'property_address', 'Property Address'),
+        type:       _adFindCol(cols, 'property_type', 'Type'),
+        units:      _adFindCol(cols, 'unit_count', 'Units'),
+        beds:       _adFindCol(cols, 'bedrooms', 'Beds'),
+        baths:      _adFindCol(cols, 'bathrooms', 'Baths'),
+        neigh:      _adFindCol(cols, 'neighborhood', 'Neighborhood'),
+        ownerName:  _adFindCol(cols, 'owner_name', 'Owner Name', 'Owner'),
+        ownerEmail: _adFindCol(cols, 'owner_email', 'Owner Email'),
+        ownerPhone: _adFindCol(cols, 'owner_phone', 'Owner Phone'),
+        ownerMail:  _adFindCol(cols, 'owner_mailing', 'Owner Mailing'),
+        rent:       _adFindCol(cols, 'monthly_rent', 'Rent', 'Monthly Rent'),
+        mgmtPct:    _adFindCol(cols, 'mgmt_fee_pct', 'Mgmt Fee %', 'Mgmt Fee'),
+        leaseStart: _adFindCol(cols, 'lease_start', 'Lease Start'),
+        leaseEnd:   _adFindCol(cols, 'lease_end', 'Lease End'),
+        occupied:   _adFindCol(cols, 'occupied', 'Occupied'),
+        tenant:     _adFindCol(cols, 'tenant_name', 'Tenant', 'Current Tenant'),
+        notes:      _adFindCol(cols, 'notes', 'Notes')
+      };
+      return (table.rows || []).map(r => {
+        const c = r.c || [];
+        return {
+          address:    ix.address >= 0 ? _adGvizString(c[ix.address]) : '',
+          type:       ix.type >= 0 ? _adGvizString(c[ix.type]) : '',
+          units:      ix.units >= 0 ? _adGvizNumber(c[ix.units]) : 0,
+          beds:       ix.beds >= 0 ? _adGvizNumber(c[ix.beds]) : 0,
+          baths:      ix.baths >= 0 ? _adGvizNumber(c[ix.baths]) : 0,
+          neigh:      ix.neigh >= 0 ? _adGvizString(c[ix.neigh]) : '',
+          ownerName:  ix.ownerName >= 0 ? _adGvizString(c[ix.ownerName]) : '',
+          ownerEmail: ix.ownerEmail >= 0 ? _adGvizString(c[ix.ownerEmail]) : '',
+          ownerPhone: ix.ownerPhone >= 0 ? _adGvizString(c[ix.ownerPhone]) : '',
+          ownerMail:  ix.ownerMail >= 0 ? _adGvizString(c[ix.ownerMail]) : '',
+          rent:       ix.rent >= 0 ? _adGvizNumber(c[ix.rent]) : 0,
+          mgmtPct:    ix.mgmtPct >= 0 ? _adGvizNumber(c[ix.mgmtPct]) : 0,
+          leaseStart: ix.leaseStart >= 0 ? _adGvizDate(c[ix.leaseStart]) : null,
+          leaseEnd:   ix.leaseEnd >= 0 ? _adGvizDate(c[ix.leaseEnd]) : null,
+          occupied:   ix.occupied >= 0 ? _pmYes(_adGvizString(c[ix.occupied])) : false,
+          tenant:     ix.tenant >= 0 ? _adGvizString(c[ix.tenant]) : '',
+          notes:      ix.notes >= 0 ? _adGvizString(c[ix.notes]) : ''
+        };
+      }).filter(p => p.address);
+    }
+    function _pmLoadProperties() {
+      if (!PROPERTIES_CONFIG.SHEET_ID) { _pmRenderProperties(); _pmRenderOverview(); return Promise.resolve(); }
+      return fetch(_adGvizUrl(PROPERTIES_CONFIG), { cache: 'no-store' })
+        .then(r => r.text())
+        .then(t => { window._pmProperties = _pmParseProperties(_adParseEnvelope(t)); _pmRenderProperties(); _pmRenderOverview(); _pmPopulatePropertyDatalists(); })
+        .catch(err => { console.warn('[PM] properties load failed:', err); _pmRenderProperties(); });
+    }
+    function _pmFilteredProperties() {
+      const q  = (document.getElementById('property-search').value || '').toLowerCase().trim();
+      const oc = document.getElementById('property-filter-occupied').value;
+      const tp = document.getElementById('property-filter-type').value;
+      return (window._pmProperties || []).filter(p => {
+        if (oc === 'Yes' && !p.occupied) return false;
+        if (oc === 'No'  &&  p.occupied) return false;
+        if (tp && p.type !== tp) return false;
+        if (q) {
+          const blob = [p.address, p.ownerName, p.tenant, p.neigh, p.notes].join(' ').toLowerCase();
+          if (blob.indexOf(q) === -1) return false;
+        }
+        return true;
+      });
+    }
+    function _pmRenderProperties() {
+      const tbody = document.getElementById('property-table-body');
+      const meta  = document.getElementById('property-count-meta');
+      if (!tbody) return;
+      const list  = _pmFilteredProperties();
+      const total = (window._pmProperties || []).length;
+      if (meta) meta.textContent = list.length + ' of ' + total;
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="client-empty">' +
+          (total === 0
+            ? (PROPERTIES_CONFIG.SHEET_ID ? 'No properties yet. Click "+ Add Property" to onboard the first.' : 'Properties sheet not connected yet. See docs/propmgmt-setup.md.')
+            : 'No properties match filters.') +
+          '</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(p => (
+        '<tr>' +
+          '<td class="client-name">' + _pmEsc(p.address) + (p.neigh ? '<div style="font-size:10px; color:var(--text-dim);">' + _pmEsc(p.neigh) + '</div>' : '') + '</td>' +
+          '<td style="font-size:11px;">' + _pmEsc(p.type || '—') + (p.units > 1 ? ' · ' + p.units + 'u' : '') + '</td>' +
+          '<td style="font-size:11px;">' + _pmEsc(p.ownerName || '—') + '</td>' +
+          '<td style="font-size:11px;">' + _pmEsc(p.tenant || '<span style="color:var(--text-dim);">—</span>') + '</td>' +
+          '<td>' + _pmFmtMoney(p.rent) + '</td>' +
+          '<td style="font-size:11px;">' + (p.mgmtPct > 0 ? p.mgmtPct + '%' : '—') + '</td>' +
+          '<td style="font-size:11px;">' + (p.leaseEnd ? _pmFmtDate(p.leaseEnd) : '—') + '</td>' +
+          '<td>' + (p.occupied ? '<span style="color:#9ec39e;">✓</span>' : '<span style="color:var(--text-dim);">Vacant</span>') + '</td>' +
+        '</tr>'
+      )).join('');
+    }
+
+    // ================= TENANTS =================
+    function _pmParseTenants(table) {
+      const cols = table.cols || [];
+      const ix = {
+        first:       _adFindCol(cols, 'first_name', 'First Name'),
+        last:        _adFindCol(cols, 'last_name', 'Last Name'),
+        email:       _adFindCol(cols, 'email', 'Email'),
+        phone:       _adFindCol(cols, 'phone', 'Phone'),
+        emergency:   _adFindCol(cols, 'emergency_contact', 'Emergency Contact'),
+        status:      _adFindCol(cols, 'status', 'Status'),
+        property:    _adFindCol(cols, 'property_address', 'Property Address', 'Property'),
+        unit:        _adFindCol(cols, 'unit', 'Unit'),
+        rent:        _adFindCol(cols, 'monthly_rent', 'Rent', 'Monthly Rent'),
+        deposit:     _adFindCol(cols, 'deposit', 'Deposit', 'Security Deposit'),
+        leaseStart:  _adFindCol(cols, 'lease_start', 'Lease Start'),
+        leaseEnd:    _adFindCol(cols, 'lease_end', 'Lease End'),
+        moveIn:      _adFindCol(cols, 'move_in', 'Move In', 'Move-In Date'),
+        petFees:     _adFindCol(cols, 'pet_fees', 'Pet Fees'),
+        notes:       _adFindCol(cols, 'notes', 'Notes')
+      };
+      return (table.rows || []).map(r => {
+        const c = r.c || [];
+        return {
+          first:      ix.first >= 0 ? _adGvizString(c[ix.first]) : '',
+          last:       ix.last >= 0 ? _adGvizString(c[ix.last]) : '',
+          email:      ix.email >= 0 ? _adGvizString(c[ix.email]) : '',
+          phone:      ix.phone >= 0 ? _adGvizString(c[ix.phone]) : '',
+          emergency:  ix.emergency >= 0 ? _adGvizString(c[ix.emergency]) : '',
+          status:     ix.status >= 0 ? _adGvizString(c[ix.status]) : '',
+          property:   ix.property >= 0 ? _adGvizString(c[ix.property]) : '',
+          unit:       ix.unit >= 0 ? _adGvizString(c[ix.unit]) : '',
+          rent:       ix.rent >= 0 ? _adGvizNumber(c[ix.rent]) : 0,
+          deposit:    ix.deposit >= 0 ? _adGvizNumber(c[ix.deposit]) : 0,
+          leaseStart: ix.leaseStart >= 0 ? _adGvizDate(c[ix.leaseStart]) : null,
+          leaseEnd:   ix.leaseEnd >= 0 ? _adGvizDate(c[ix.leaseEnd]) : null,
+          moveIn:     ix.moveIn >= 0 ? _adGvizDate(c[ix.moveIn]) : null,
+          petFees:    ix.petFees >= 0 ? _adGvizString(c[ix.petFees]) : '',
+          notes:      ix.notes >= 0 ? _adGvizString(c[ix.notes]) : ''
+        };
+      }).filter(t => t.first || t.last);
+    }
+    function _pmLoadTenants() {
+      if (!TENANTS_CONFIG.SHEET_ID) { _pmRenderTenants(); _pmRenderOverview(); return Promise.resolve(); }
+      return fetch(_adGvizUrl(TENANTS_CONFIG), { cache: 'no-store' })
+        .then(r => r.text())
+        .then(t => { window._pmTenants = _pmParseTenants(_adParseEnvelope(t)); _pmRenderTenants(); _pmRenderOverview(); })
+        .catch(err => { console.warn('[PM] tenants load failed:', err); _pmRenderTenants(); });
+    }
+    function _pmFilteredTenants() {
+      const q  = (document.getElementById('tenant-search').value || '').toLowerCase().trim();
+      const st = document.getElementById('tenant-filter-status').value;
+      return (window._pmTenants || []).filter(t => {
+        if (st && t.status !== st) return false;
+        if (q) {
+          const name = (t.first + ' ' + t.last).toLowerCase();
+          const blob = [name, t.email, t.phone, t.property, t.unit].join(' ').toLowerCase();
+          if (blob.indexOf(q) === -1) return false;
+        }
+        return true;
+      });
+    }
+    function _pmRenderTenants() {
+      const tbody = document.getElementById('tenant-table-body');
+      const meta  = document.getElementById('tenant-count-meta');
+      if (!tbody) return;
+      const list  = _pmFilteredTenants();
+      const total = (window._pmTenants || []).length;
+      if (meta) meta.textContent = list.length + ' of ' + total;
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="client-empty">' +
+          (total === 0
+            ? (TENANTS_CONFIG.SHEET_ID ? 'No tenants yet. Click "+ Add Tenant" to add the first.' : 'Tenants sheet not connected yet. See docs/propmgmt-setup.md.')
+            : 'No tenants match filters.') +
+          '</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(t => {
+        const name = ((t.first || '') + ' ' + (t.last || '')).trim() || '(no name)';
+        const propUnit = _pmEsc(t.property) + (t.unit ? ' · #' + _pmEsc(t.unit) : '');
+        const leaseWindow = (t.leaseStart ? _pmFmtDate(t.leaseStart) : '?') + ' → ' + (t.leaseEnd ? _pmFmtDate(t.leaseEnd) : '?');
+        return '<tr>' +
+          '<td class="client-name">' + _pmEsc(name) + '</td>' +
+          '<td style="font-size:11px;">' + propUnit + '</td>' +
+          '<td>' + _pmFmtMoney(t.rent) + '</td>' +
+          '<td style="font-size:10px;">' + leaseWindow + '</td>' +
+          '<td class="client-status">' + _pmEsc(t.status || '') + '</td>' +
+          '<td>' + (t.email ? '<a href="mailto:' + _pmEsc(t.email) + '" style="color:var(--text); border-bottom:1px solid var(--rule);">' + _pmEsc(t.email) + '</a>' : '') + '</td>' +
+          '<td>' + (t.phone ? '<a href="tel:' + _pmEsc(t.phone) + '" style="color:var(--text-muted);">' + _pmEsc(t.phone) + '</a>' : '') + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    // ================= WORK ORDERS =================
+    function _pmParseWorkOrders(table) {
+      const cols = table.cols || [];
+      const ix = {
+        property:    _adFindCol(cols, 'property_address', 'Property Address', 'Property'),
+        unit:        _adFindCol(cols, 'unit', 'Unit'),
+        tenant:      _adFindCol(cols, 'tenant_name', 'Tenant'),
+        category:    _adFindCol(cols, 'category', 'Category'),
+        priority:    _adFindCol(cols, 'priority', 'Priority'),
+        description: _adFindCol(cols, 'description', 'Description'),
+        reported:    _adFindCol(cols, 'reported_date', 'Reported', 'Reported Date'),
+        scheduled:   _adFindCol(cols, 'scheduled_date', 'Scheduled', 'Scheduled Date'),
+        vendor:      _adFindCol(cols, 'vendor', 'Vendor'),
+        vendorPh:    _adFindCol(cols, 'vendor_phone', 'Vendor Phone'),
+        estCost:     _adFindCol(cols, 'estimated_cost', 'Estimated Cost'),
+        actCost:     _adFindCol(cols, 'actual_cost', 'Actual Cost'),
+        status:      _adFindCol(cols, 'status', 'Status'),
+        completed:   _adFindCol(cols, 'completed_date', 'Completed', 'Completed Date'),
+        notes:       _adFindCol(cols, 'notes', 'Notes')
+      };
+      return (table.rows || []).map(r => {
+        const c = r.c || [];
+        return {
+          property:    ix.property >= 0 ? _adGvizString(c[ix.property]) : '',
+          unit:        ix.unit >= 0 ? _adGvizString(c[ix.unit]) : '',
+          tenant:      ix.tenant >= 0 ? _adGvizString(c[ix.tenant]) : '',
+          category:    ix.category >= 0 ? _adGvizString(c[ix.category]) : '',
+          priority:    ix.priority >= 0 ? _adGvizString(c[ix.priority]) : '',
+          description: ix.description >= 0 ? _adGvizString(c[ix.description]) : '',
+          reported:    ix.reported >= 0 ? _adGvizDate(c[ix.reported]) : null,
+          scheduled:   ix.scheduled >= 0 ? _adGvizDate(c[ix.scheduled]) : null,
+          vendor:      ix.vendor >= 0 ? _adGvizString(c[ix.vendor]) : '',
+          vendorPh:    ix.vendorPh >= 0 ? _adGvizString(c[ix.vendorPh]) : '',
+          estCost:     ix.estCost >= 0 ? _adGvizNumber(c[ix.estCost]) : 0,
+          actCost:     ix.actCost >= 0 ? _adGvizNumber(c[ix.actCost]) : 0,
+          status:      ix.status >= 0 ? _adGvizString(c[ix.status]) : '',
+          completed:   ix.completed >= 0 ? _adGvizDate(c[ix.completed]) : null,
+          notes:       ix.notes >= 0 ? _adGvizString(c[ix.notes]) : ''
+        };
+      }).filter(w => w.property || w.description);
+    }
+    function _pmLoadWorkOrders() {
+      if (!WORKORDERS_CONFIG.SHEET_ID) { _pmRenderWorkOrders(); _pmRenderOverview(); return Promise.resolve(); }
+      return fetch(_adGvizUrl(WORKORDERS_CONFIG), { cache: 'no-store' })
+        .then(r => r.text())
+        .then(t => { window._pmWorkOrders = _pmParseWorkOrders(_adParseEnvelope(t)); _pmRenderWorkOrders(); _pmRenderOverview(); })
+        .catch(err => { console.warn('[PM] work orders load failed:', err); _pmRenderWorkOrders(); });
+    }
+    function _pmWorkOrderCard(w) {
+      const priBadge = w.priority ? ('<span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; padding:2px 8px; border:1px solid ' + (w.priority === 'Emergency' ? '#d99' : 'var(--rule-strong)') + '; color:' + (w.priority === 'Emergency' ? '#d99' : 'var(--text-muted)') + ';">' + _pmEsc(w.priority) + '</span>') : '';
+      const catBadge = w.category ? ('<span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); margin-left:8px;">' + _pmEsc(w.category) + '</span>') : '';
+      return (
+        '<article class="deal-card">' +
+          '<header class="deal-head">' +
+            '<div>' +
+              '<h3 class="deal-address">' + _pmEsc(w.property || 'No address') + (w.unit ? ' · #' + _pmEsc(w.unit) : '') + '</h3>' +
+              '<div class="deal-meta">' + priBadge + catBadge + '</div>' +
+            '</div>' +
+          '</header>' +
+          '<div style="padding:12px 18px 4px; font-size:12px; color:var(--text);">' + _pmEsc(w.description || '') + '</div>' +
+          '<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; padding:14px 18px; font-size:11px;">' +
+            (w.tenant ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Tenant</div>' + _pmEsc(w.tenant) + '</div>' : '') +
+            (w.reported ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Reported</div>' + _pmFmtDate(w.reported) + '</div>' : '') +
+            (w.scheduled ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Scheduled</div>' + _pmFmtDate(w.scheduled) + '</div>' : '') +
+            (w.vendor ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Vendor</div>' + _pmEsc(w.vendor) + (w.vendorPh ? '<br><span style="color:var(--text-dim);">' + _pmEsc(w.vendorPh) + '</span>' : '') + '</div>' : '') +
+            (w.estCost > 0 ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Est.</div>' + _pmFmtMoney(w.estCost) + '</div>' : '') +
+            (w.actCost > 0 ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Actual</div>' + _pmFmtMoney(w.actCost) + '</div>' : '') +
+            (w.completed ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Completed</div>' + _pmFmtDate(w.completed) + '</div>' : '') +
+          '</div>' +
+        '</article>'
+      );
+    }
+    function _pmRenderWorkOrders() {
+      const all = window._pmWorkOrders || [];
+      const buckets = { 'Reported': [], 'Scheduled': [], 'In Progress': [], 'Complete': [] };
+      const now = Date.now();
+      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+      all.forEach(w => {
+        const s = (w.status || 'Reported').trim();
+        if (s === 'Cancelled') return;
+        if (s === 'Complete') {
+          // only last 30 days in Complete list
+          if (!w.completed || w.completed.getTime() >= thirtyDaysAgo) buckets['Complete'].push(w);
+        } else if (buckets[s]) {
+          buckets[s].push(w);
+        } else {
+          buckets['Reported'].push(w);
+        }
+      });
+      // Priority sort: Emergency first, then by reported date
+      const prio = { 'Emergency': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
+      const sortByPri = (a, b) => {
+        const pa = prio[a.priority] ?? 9, pb = prio[b.priority] ?? 9;
+        if (pa !== pb) return pa - pb;
+        const ra = a.reported ? a.reported.getTime() : 0;
+        const rb = b.reported ? b.reported.getTime() : 0;
+        return rb - ra;
+      };
+      Object.keys(buckets).forEach(k => buckets[k].sort(sortByPri));
+
+      function renderBucket(elId, metaId, arr, emptyMsg) {
+        const el   = document.getElementById(elId);
+        const meta = document.getElementById(metaId);
+        if (!el) return;
+        if (meta) meta.textContent = arr.length + ' item' + (arr.length === 1 ? '' : 's');
+        el.innerHTML = arr.length === 0
+          ? '<div class="deal-empty">' + _pmEsc(emptyMsg) + '</div>'
+          : arr.map(_pmWorkOrderCard).join('');
+      }
+      renderBucket('wo-reported-list',   'wo-reported-meta',   buckets['Reported'],
+        WORKORDERS_CONFIG.SHEET_ID ? 'No newly-reported work orders.' : 'Work Orders sheet not connected yet. See docs/propmgmt-setup.md.');
+      renderBucket('wo-scheduled-list',  'wo-scheduled-meta',  buckets['Scheduled'],  'No scheduled work orders.');
+      renderBucket('wo-inprogress-list', 'wo-inprogress-meta', buckets['In Progress'], 'No work orders in progress.');
+      renderBucket('wo-complete-list',   'wo-complete-meta',   buckets['Complete'],   'No work orders completed in the last 30 days.');
+    }
+
+    // ================= OVERVIEW TILES =================
+    function _pmRenderOverview() {
+      const props = window._pmProperties || [];
+      const ten   = window._pmTenants || [];
+      const wo    = window._pmWorkOrders || [];
+      const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = String(v); };
+
+      const total    = props.length;
+      const occupied = props.filter(p => p.occupied).length;
+      const vacant   = total - occupied;
+      set('pm-properties-count', total);
+      const sub = document.getElementById('pm-properties-sub');
+      if (sub) sub.textContent = PROPERTIES_CONFIG.SHEET_ID ? (total + ' active · ' + vacant + ' vacant') : 'Sheet not connected';
+      set('pm-occupied-count', occupied + ' / ' + total);
+      const osub = document.getElementById('pm-occupied-sub');
+      if (osub) osub.textContent = vacant + ' vacant · ' + occupied + ' occupied';
+
+      const activeTenants = ten.filter(t => t.status === 'Active').length;
+      set('pm-tenants-count', activeTenants);
+
+      const openWO = wo.filter(w => ['Reported','Scheduled','In Progress'].includes(w.status || 'Reported')).length;
+      set('pm-workorders-count', openWO);
+
+      const rentRoll = props.filter(p => p.occupied).reduce((s, p) => s + (p.rent || 0), 0);
+      set('pm-rent-roll', _pmFmtMoney(rentRoll));
+
+      const mgmtFees = props.filter(p => p.occupied).reduce((s, p) => s + (p.rent || 0) * ((p.mgmtPct || 0) / 100), 0);
+      set('pm-mgmt-fees', _pmFmtMoney(mgmtFees));
+
+      // Leases ending in next 90 days
+      const now = Date.now();
+      const in90 = now + 90 * 24 * 60 * 60 * 1000;
+      const endingSoon = ten.filter(t => t.leaseEnd && t.leaseEnd.getTime() >= now && t.leaseEnd.getTime() <= in90).length;
+      set('pm-leases-ending', endingSoon);
+
+      const emergency = wo.filter(w => w.priority === 'Emergency' && ['Reported','Scheduled','In Progress'].includes(w.status)).length;
+      set('pm-emergency-wo', emergency);
+    }
+
+    // ================= AUTOCOMPLETE (property lists for tenant + WO forms) =================
+    function _pmPopulatePropertyDatalists() {
+      const addrs = Array.from(new Set((window._pmProperties || []).map(p => p.address).filter(Boolean))).sort();
+      ['tf-property-list', 'wof-property-list'].forEach(id => {
+        const dl = document.getElementById(id);
+        if (!dl) return;
+        dl.innerHTML = addrs.map(a => '<option value="' + _pmEsc(a) + '"></option>').join('');
+      });
+    }
+
+    // ================= MODALS =================
+    _adSetupModal({
+      overlayId: 'property-modal-overlay',  modalId: 'property-modal',
+      formId:    'property-form',           statusId: 'property-form-status',
+      openId:    'open-property-modal',     closeId:  'close-property-modal',
+      cancelId:  'cancel-property',         submitId: 'submit-property',
+      config:    PROPERTIES_CONFIG
+    });
+    _adSetupModal({
+      overlayId: 'tenant-modal-overlay',    modalId: 'tenant-modal',
+      formId:    'tenant-form',             statusId: 'tenant-form-status',
+      openId:    'open-tenant-modal',       closeId:  'close-tenant-modal',
+      cancelId:  'cancel-tenant',           submitId: 'submit-tenant',
+      config:    TENANTS_CONFIG
+    });
+    _adSetupModal({
+      overlayId: 'workorder-modal-overlay', modalId: 'workorder-modal',
+      formId:    'workorder-form',          statusId: 'workorder-form-status',
+      openId:    'open-workorder-modal',    closeId:  'close-workorder-modal',
+      cancelId:  'cancel-workorder',        submitId: 'submit-workorder',
+      config:    WORKORDERS_CONFIG
+    });
+
+    // ================= CSV EXPORTS =================
+    function _pmExportPropertiesCSV() {
+      const list = _pmFilteredProperties();
+      if (list.length === 0) { alert('No properties to export. Adjust filters.'); return; }
+      const cols = ['Address','Type','Units','Bedrooms','Bathrooms','Neighborhood','Owner','Owner Email','Owner Phone','Rent','Mgmt Fee %','Lease Start','Lease End','Occupied','Tenant','Notes'];
+      const esc = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const d = x => (x instanceof Date && !isNaN(x)) ? x.toISOString().slice(0, 10) : '';
+      const lines = [cols.join(',')];
+      list.forEach(p => lines.push([
+        p.address, p.type, p.units, p.beds, p.baths, p.neigh,
+        p.ownerName, p.ownerEmail, p.ownerPhone, p.rent, p.mgmtPct,
+        d(p.leaseStart), d(p.leaseEnd), p.occupied ? 'Yes' : 'No', p.tenant, p.notes
+      ].map(esc).join(',')));
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'stonehouse-properties-' + new Date().toISOString().slice(0,10) + '.csv';
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+    }
+    function _pmExportTenantsCSV() {
+      const list = _pmFilteredTenants();
+      if (list.length === 0) { alert('No tenants to export. Adjust filters.'); return; }
+      const cols = ['First Name','Last Name','Email','Phone','Emergency Contact','Status','Property','Unit','Rent','Deposit','Lease Start','Lease End','Move-In','Pet Fees','Notes'];
+      const esc = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const d = x => (x instanceof Date && !isNaN(x)) ? x.toISOString().slice(0, 10) : '';
+      const lines = [cols.join(',')];
+      list.forEach(t => lines.push([
+        t.first, t.last, t.email, t.phone, t.emergency, t.status,
+        t.property, t.unit, t.rent, t.deposit, d(t.leaseStart), d(t.leaseEnd),
+        d(t.moveIn), t.petFees, t.notes
+      ].map(esc).join(',')));
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'stonehouse-tenants-' + new Date().toISOString().slice(0,10) + '.csv';
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+    }
+
+    // ================= WIRE FILTERS + LOADERS =================
+    ['property-search', 'property-filter-occupied', 'property-filter-type'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', _pmRenderProperties);
+    });
+    ['tenant-search', 'tenant-filter-status'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', _pmRenderTenants);
+    });
+    const pmExpProp = document.getElementById('export-properties-csv');
+    if (pmExpProp) pmExpProp.addEventListener('click', _pmExportPropertiesCSV);
+    const pmExpTen = document.getElementById('export-tenants-csv');
+    if (pmExpTen) pmExpTen.addEventListener('click', _pmExportTenantsCSV);
+
+    // Load on page mount + when Property Management tab is clicked
+    _pmLoadProperties();
+    _pmLoadTenants();
+    _pmLoadWorkOrders();
+    const pmTab = document.getElementById('tab-propmgmt');
+    if (pmTab) pmTab.addEventListener('click', () => {
+      _pmLoadProperties(); _pmLoadTenants(); _pmLoadWorkOrders();
+    });
 
     // ============================================================
     // DEVELOPMENT · CONTACTS
