@@ -1,12 +1,12 @@
 # Property Management — Setup
 
-The Property Management division has 5 subtabs — Overview, **Properties**, **Tenants**, Owner Reports (phase 2), and Files. The two data-driven subtabs each need their own Google Sheet + Google Form (same pattern as Clients, Buyer Deals, etc.).
+The Property Management division has 6 subtabs — Overview, **Properties**, **Tenants**, **Ledger**, Owner Reports (phase 2), and Files. The three data-driven subtabs each need their own Google Sheet + Google Form.
 
-Plan ~20 minutes total: 2 Sheets, 2 Forms, 2 sets of entry IDs to paste.
+Plan ~30 minutes total: 3 Sheets, 3 Forms, 3 sets of entry IDs to paste.
 
 ---
 
-## 1 · Create the two Sheets
+## 1 · Create the three Sheets
 
 Log into Google as `thestonehousecompanyadmin@gmail.com`.
 
@@ -16,12 +16,13 @@ For each, go to [sheets.new](https://sheets.new) and rename:
 |---|---|
 | **Stonehouse Properties** | Every property under management |
 | **Stonehouse Tenants** | Tenant contacts + lease info |
+| **Stonehouse Ledger** | Rent + utility log per property |
 
 Share → Anyone with the link → Viewer for each.
 
 ---
 
-## 2 · Create the two Forms
+## 2 · Create the three Forms
 
 ### 2a · Properties form
 
@@ -73,6 +74,20 @@ Name it **Add Tenant**. Fields:
 
 Link to **Stonehouse Tenants** sheet.
 
+### 2c · Ledger form
+
+Name it **Log Ledger Entry**. Fields:
+
+| # | Label | Type |
+|---|---|---|
+| 1 | entry_date | Date · required |
+| 2 | property_address | Short answer · required |
+| 3 | category | Dropdown: Rent / Water / Electric / Gas / Internet · required |
+| 4 | amount | Short answer (number) · required |
+| 5 | notes | Paragraph |
+
+Link to **Stonehouse Ledger** sheet.
+
 ---
 
 ## 3 · Get the formResponse URLs and entry IDs
@@ -87,14 +102,15 @@ For each form:
 
 ## 4 · Wire the CONFIGs in `index.html`
 
-Find these two blocks near the "PROPERTY MANAGEMENT" section header and fill in:
+Find these three blocks near the "PROPERTY MANAGEMENT" section header and fill in:
 
 ```js
 const PROPERTIES_CONFIG = { SHEET_ID: "…", SHEET_TAB: "Form Responses 1", FORM_URL: "…", FIELD_MAP: { /* 17 entry IDs */ } };
 const TENANTS_CONFIG    = { SHEET_ID: "…", SHEET_TAB: "Form Responses 1", FORM_URL: "…", FIELD_MAP: { /* 15 entry IDs */ } };
+const LEDGER_CONFIG     = { SHEET_ID: "…", SHEET_TAB: "Form Responses 1", FORM_URL: "…", FIELD_MAP: { /* 5 entry IDs */ } };
 ```
 
-The order of fields in `FIELD_MAP` matches the modal HTML in the Add Property / Add Tenant modals.
+The order of fields in `FIELD_MAP` matches the modal HTML in the Add Property / Add Tenant / Log Entry modals.
 
 ---
 
@@ -109,15 +125,31 @@ Once both CONFIGs are filled in, commit and push. GitHub Pages picks up within a
 - **Overview** → auto-calculates 6 tiles from the two sheets: Properties Under Management, Occupied Units, Active Tenants, Leases Ending Soon, Monthly Rent Roll, Monthly Mgmt Fees
 - **Properties** → list with search + filter (occupied/type) + CSV export
 - **Tenants** → list with search + status filter + CSV export
-- **Owner Reports** → placeholder (phase 2 — build when you have income/expense data)
+- **Ledger** → filter by property + month + category. Six tile totals (Rent + 4 utilities + count). Log a new entry with the modal. Export filtered CSV. Generate a Monthly Statement PDF for one property + one month → opens `monthly-statement.html?property=…&month=YYYY-MM` in a new tab.
+- **Owner Reports** → placeholder for quarterly + YTD rollups (phase 2)
 - **Files** → static PDF cards (currently placeholders for the 4 templates: Management Agreement, Owner Onboarding, Tenant Application, Lease Template)
 
-**Autocomplete**: When adding a tenant, the property address field auto-suggests from the loaded Properties list. Type the first few characters and pick — keeps addresses spelled consistently across sheets.
+**Autocomplete**: When adding a tenant or ledger entry, the property address field auto-suggests from the loaded Properties list. Type the first few characters and pick — keeps addresses spelled consistently across sheets.
 
-**Cross-sheet linking**: Tenants reference properties by `property_address` (free text). Keep the address spelling identical to what's in the Properties sheet so tiles and filters work correctly.
+**Cross-sheet linking**: Tenants + Ledger reference properties by `property_address` (free text). Keep the address spelling identical to what's in the Properties sheet so tiles, filters, and the monthly statement report work correctly.
+
+## Monthly Statement PDF
+
+The monthly statement is a Stonehouse-branded one-page PDF that both tenant and landlord receive. It shows:
+
+- Header: Stonehouse arch + Property Management, month label
+- Property address (title)
+- Two parties block: Landlord + Tenant contact info (pulled from Properties + Tenants sheets)
+- Category totals (Rent, Water, Electric, Gas, Internet)
+- Full activity table: date, category, notes, amount for each ledger entry in that month
+- Subtotals: Utilities, Rent, Total Activity
+
+To generate: on the Ledger tab, filter to one property + one month, then click **Generate Monthly Statement**. Browser opens `monthly-statement.html` in a new tab → click **Print / Save PDF** → save. Email to both parties.
 
 ---
 
 ## Editing existing rows
 
-Forms only ADD. To update a property's rent, occupancy, or notes — edit the row directly in the Google Sheet. Same for tenants. Next dashboard load reflects it.
+Forms only ADD. To update a property's rent, occupancy, or notes — edit the row directly in the Google Sheet. Same for tenants and ledger entries. Next dashboard load reflects it.
+
+To fix a wrong ledger amount: edit the row directly in the Stonehouse Ledger sheet. To reverse a mistake without deleting: log an offsetting entry with a Notes explanation (better audit trail).

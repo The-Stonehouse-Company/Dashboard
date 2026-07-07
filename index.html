@@ -4591,6 +4591,7 @@
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-overview"     aria-selected="true"  data-subkey="overview">Overview</button>
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-properties"   aria-selected="false" data-subkey="properties">Properties</button>
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-tenants"      aria-selected="false" data-subkey="tenants">Tenants</button>
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-ledger"       aria-selected="false" data-subkey="ledger">Ledger</button>
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-reports"      aria-selected="false" data-subkey="reports">Owner Reports</button>
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-files"        aria-selected="false" data-subkey="files">Files</button>
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-settings"     aria-selected="false" data-subkey="settings">Settings</button>
@@ -4743,13 +4744,105 @@
             </div>
           </div>
 
+          <!-- ============= LEDGER (rent + utilities log) ============= -->
+          <div class="subpanel" id="subpanel-propmgmt-ledger" role="tabpanel" aria-hidden="true" tabindex="0">
+            <p class="subpanel-intro">Rent + utilities ledger. Log each payment or bill for a property. Generate a monthly statement PDF and send to both tenant and landlord.</p>
+
+            <div class="action-grid" style="margin-bottom:16px;">
+              <button class="primary-action" type="button" id="open-ledger-modal" aria-haspopup="dialog" aria-controls="ledger-modal">
+                <span class="action-label">+ Log Entry</span>
+                <span class="action-sub">Rent, water, electric, gas, or internet</span>
+                <span class="action-arrow" aria-hidden="true">→</span>
+              </button>
+              <button class="primary-action" type="button" id="ledger-statement-btn">
+                <span class="action-label">Generate Monthly Statement</span>
+                <span class="action-sub">Stonehouse-branded PDF for tenant + landlord based on the filters below</span>
+                <span class="action-arrow" aria-hidden="true">↗</span>
+              </button>
+              <button class="primary-action" type="button" id="export-ledger-csv">
+                <span class="action-label">Export CSV</span>
+                <span class="action-sub">Download filtered ledger rows</span>
+                <span class="action-arrow" aria-hidden="true">↓</span>
+              </button>
+            </div>
+
+            <!-- Filters -->
+            <div class="client-filter-bar">
+              <input type="search" id="ledger-search" placeholder="Search property, category, notes…" />
+              <select id="ledger-filter-property">
+                <option value="">All Properties</option>
+              </select>
+              <input type="month" id="ledger-filter-month" title="Month (leave blank for all)" />
+              <select id="ledger-filter-category">
+                <option value="">All Categories</option>
+                <option value="Rent">Rent</option>
+                <option value="Water">Water</option>
+                <option value="Electric">Electric</option>
+                <option value="Gas">Gas</option>
+                <option value="Internet">Internet</option>
+              </select>
+              <span id="ledger-count-meta" class="client-count-meta">—</span>
+            </div>
+
+            <!-- Category totals for current filter -->
+            <div class="home-grid" style="margin-bottom:18px;">
+              <article class="home-card">
+                <span class="h-eyebrow">Rent</span>
+                <div class="h-stat" id="ledger-total-rent">—</div>
+                <div class="h-label">Income · filtered</div>
+              </article>
+              <article class="home-card">
+                <span class="h-eyebrow">Water</span>
+                <div class="h-stat" id="ledger-total-water">—</div>
+                <div class="h-label">Utility · filtered</div>
+              </article>
+              <article class="home-card">
+                <span class="h-eyebrow">Electric</span>
+                <div class="h-stat" id="ledger-total-electric">—</div>
+                <div class="h-label">Utility · filtered</div>
+              </article>
+              <article class="home-card">
+                <span class="h-eyebrow">Gas</span>
+                <div class="h-stat" id="ledger-total-gas">—</div>
+                <div class="h-label">Utility · filtered</div>
+              </article>
+              <article class="home-card">
+                <span class="h-eyebrow">Internet</span>
+                <div class="h-stat" id="ledger-total-internet">—</div>
+                <div class="h-label">Utility · filtered</div>
+              </article>
+              <article class="home-card">
+                <span class="h-eyebrow">Total Entries</span>
+                <div class="h-stat" id="ledger-total-count">—</div>
+                <div class="h-label">Rows in current filter</div>
+              </article>
+            </div>
+
+            <div class="client-table-wrap">
+              <table class="client-table" id="ledger-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Property</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody id="ledger-table-body">
+                  <tr><td colspan="5" class="client-empty">Loading ledger…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <!-- ============= OWNER REPORTS ============= -->
           <div class="subpanel" id="subpanel-propmgmt-reports" role="tabpanel" aria-hidden="true" tabindex="0">
-            <p class="subpanel-intro">Owner statements and per-property P&amp;L. Aggregates rent income, expenses, and management fees into a monthly statement per owner.</p>
+            <p class="subpanel-intro">Owner-facing P&amp;L reports (larger-scale summaries beyond the monthly statements you generate on the Ledger tab).</p>
             <div class="placeholder">
               <div class="mark">— Phase 2 —</div>
-              <h2>Owner Reports generator</h2>
-              <p>Once you've been running Properties + Tenants for a few months and have real income/expense data flowing, we'll build a monthly statement generator that pulls rent collected, mgmt fee deducted, and other expenses to deliver a per-owner P&amp;L PDF. Say the word when you're ready to spec it.</p>
+              <h2>Quarterly + YTD owner reports</h2>
+              <p>The monthly tenant-and-landlord statement lives on the <strong>Ledger</strong> tab (rent + utilities activity for one property in one month). Owner Reports here will be the higher-level rollups — quarterly P&amp;L, YTD summary across all properties for one owner, year-end tax package. Say the word when you're ready to spec it.</p>
             </div>
           </div>
 
@@ -6344,6 +6437,58 @@
     </div>
   </div>
 
+  <!-- ========================= LOG LEDGER ENTRY MODAL ========================= -->
+  <div class="modal-overlay" id="ledger-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ledger-modal-title" id="ledger-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Property Management · Ledger</span>
+          <h2 class="modal-title" id="ledger-modal-title">Log Entry</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-ledger-modal" aria-label="Close">×</button>
+      </header>
+      <form class="modal-body" id="ledger-form" autocomplete="off" novalidate>
+        <fieldset>
+          <legend>Entry</legend>
+          <div class="form-grid">
+            <div>
+              <label for="lf-date">Date <span class="req">*</span></label>
+              <input id="lf-date" name="entry_date" type="date" required />
+            </div>
+            <div>
+              <label for="lf-category">Category <span class="req">*</span></label>
+              <select id="lf-category" name="category" required>
+                <option value="" disabled selected>Select…</option>
+                <option value="Rent">Rent</option>
+                <option value="Water">Water</option>
+                <option value="Electric">Electric</option>
+                <option value="Gas">Gas</option>
+                <option value="Internet">Internet</option>
+              </select>
+            </div>
+            <div class="full">
+              <label for="lf-property">Property Address <span class="req">*</span></label>
+              <input id="lf-property" name="property_address" type="text" required list="lf-property-list" placeholder="Type / pick a property" />
+              <datalist id="lf-property-list"></datalist>
+            </div>
+            <div>
+              <label for="lf-amount">Amount <span class="req">*</span></label>
+              <input id="lf-amount" name="amount" type="number" step="any" min="0" required placeholder="2500" />
+            </div>
+            <div class="full">
+              <label for="lf-notes">Notes (optional)</label>
+              <textarea id="lf-notes" name="notes" rows="3" placeholder="Payment method, bill period, meter reading, etc."></textarea>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+      <div class="form-status" id="ledger-form-status"></div>
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-ledger">Cancel</button>
+        <button class="btn" type="submit" form="ledger-form" id="submit-ledger">Log Entry</button>
+      </footer>
+    </div>
+  </div>
 
   <!-- ========================= ADD CONTACT MODAL ========================= -->
   <div class="modal-overlay" id="contact-modal-overlay" aria-hidden="true">
@@ -17340,8 +17485,22 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         notes:             "entry.463433102"
       }
     };
+    const LEDGER_CONFIG = {
+      SHEET_ID:  "1HNxAkVLP0okZyOgTKQpH0iZyo-k2gjAX8vpPWQ39FqU",
+      SHEET_TAB: "Form Responses 1",
+      FORM_URL:  "https://docs.google.com/forms/d/e/1FAIpQLSf6c2FIn7bnyuTnAvtSXrZepUJOcnEWfvH_cxilM3OBligDhg/formResponse",
+      FIELD_MAP: {
+        entry_date:       "entry.1264687357",
+        property_address: "entry.539997566",
+        category:         "entry.117427914",
+        amount:           "entry.386492749",
+        notes:            "entry.341875220"
+      }
+    };
+
     window._pmProperties = [];
     window._pmTenants    = [];
+    window._pmLedger     = [];
 
     function _pmEsc(s) {
       return String(s == null ? '' : s)
@@ -17582,11 +17741,13 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       set('pm-leases-ending', endingSoon);
     }
 
-    // ================= AUTOCOMPLETE (property list for tenant form) =================
+    // ================= AUTOCOMPLETE (property list for tenant + ledger forms + ledger filter) =================
     function _pmPopulatePropertyDatalists() {
       const addrs = Array.from(new Set((window._pmProperties || []).map(p => p.address).filter(Boolean))).sort();
       const dl = document.getElementById('tf-property-list');
       if (dl) dl.innerHTML = addrs.map(a => '<option value="' + _pmEsc(a) + '"></option>').join('');
+      // Also propagate to the ledger tab
+      if (typeof _pmPopulateLedgerPropertyFilter === 'function') _pmPopulateLedgerPropertyFilter();
     }
 
     // ================= MODALS =================
@@ -17645,6 +17806,153 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
     }
 
+    // ================= LEDGER =================
+    function _pmParseLedger(table) {
+      const cols = table.cols || [];
+      const ix = {
+        date:     _adFindCol(cols, 'entry_date', 'Date'),
+        property: _adFindCol(cols, 'property_address', 'Property Address', 'Property'),
+        category: _adFindCol(cols, 'category', 'Category'),
+        amount:   _adFindCol(cols, 'amount', 'Amount'),
+        notes:    _adFindCol(cols, 'notes', 'Notes')
+      };
+      return (table.rows || []).map(r => {
+        const c = r.c || [];
+        return {
+          date:     ix.date >= 0 ? _adGvizDate(c[ix.date]) : null,
+          property: ix.property >= 0 ? _adGvizString(c[ix.property]) : '',
+          category: ix.category >= 0 ? _adGvizString(c[ix.category]) : '',
+          amount:   ix.amount >= 0 ? _adGvizNumber(c[ix.amount]) : 0,
+          notes:    ix.notes >= 0 ? _adGvizString(c[ix.notes]) : ''
+        };
+      }).filter(e => e.property && e.category);
+    }
+    function _pmLoadLedger() {
+      if (!LEDGER_CONFIG.SHEET_ID) { _pmRenderLedger(); return Promise.resolve(); }
+      return fetch(_adGvizUrl(LEDGER_CONFIG), { cache: 'no-store' })
+        .then(r => r.text())
+        .then(t => { window._pmLedger = _pmParseLedger(_adParseEnvelope(t)); _pmRenderLedger(); })
+        .catch(err => { console.warn('[PM] ledger load failed:', err); _pmRenderLedger(); });
+    }
+    function _pmFilteredLedger() {
+      const q     = (document.getElementById('ledger-search').value || '').toLowerCase().trim();
+      const prop  = document.getElementById('ledger-filter-property').value;
+      const month = document.getElementById('ledger-filter-month').value;  // "2026-07" or ""
+      const cat   = document.getElementById('ledger-filter-category').value;
+      return (window._pmLedger || []).filter(e => {
+        if (prop && e.property !== prop) return false;
+        if (cat && e.category !== cat) return false;
+        if (month && e.date) {
+          const em = e.date.getFullYear() + '-' + String(e.date.getMonth() + 1).padStart(2, '0');
+          if (em !== month) return false;
+        } else if (month && !e.date) {
+          return false;
+        }
+        if (q) {
+          const blob = [e.property, e.category, e.notes].join(' ').toLowerCase();
+          if (blob.indexOf(q) === -1) return false;
+        }
+        return true;
+      });
+    }
+    function _pmRenderLedger() {
+      const tbody = document.getElementById('ledger-table-body');
+      const meta  = document.getElementById('ledger-count-meta');
+      if (!tbody) return;
+      const list  = _pmFilteredLedger();
+      const total = (window._pmLedger || []).length;
+      if (meta) meta.textContent = list.length + ' of ' + total;
+
+      // Category totals for the filtered set
+      const totals = { Rent: 0, Water: 0, Electric: 0, Gas: 0, Internet: 0 };
+      list.forEach(e => { if (totals[e.category] != null) totals[e.category] += e.amount; });
+      const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      setTxt('ledger-total-rent',     _pmFmtMoney(totals.Rent));
+      setTxt('ledger-total-water',    _pmFmtMoney(totals.Water));
+      setTxt('ledger-total-electric', _pmFmtMoney(totals.Electric));
+      setTxt('ledger-total-gas',      _pmFmtMoney(totals.Gas));
+      setTxt('ledger-total-internet', _pmFmtMoney(totals.Internet));
+      setTxt('ledger-total-count',    list.length);
+
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="client-empty">' +
+          (total === 0
+            ? (LEDGER_CONFIG.SHEET_ID ? 'No entries yet. Click "+ Log Entry" to record the first one.' : 'Ledger sheet not connected yet. See docs/propmgmt-setup.md.')
+            : 'No entries match filters.') +
+          '</td></tr>';
+        return;
+      }
+      // Sort by date desc (newest first)
+      list.sort((a, b) => (b.date ? b.date.getTime() : 0) - (a.date ? a.date.getTime() : 0));
+      tbody.innerHTML = list.map(e => (
+        '<tr>' +
+          '<td style="font-size:11px;">' + (e.date ? _pmFmtDate(e.date) : '—') + '</td>' +
+          '<td class="client-name">' + _pmEsc(e.property) + '</td>' +
+          '<td><span class="client-cat-pill">' + _pmEsc(e.category) + '</span></td>' +
+          '<td>' + _pmFmtMoney(e.amount) + '</td>' +
+          '<td style="font-size:11px; color:var(--text-muted); font-style:italic;">' + _pmEsc(e.notes || '') + '</td>' +
+        '</tr>'
+      )).join('');
+    }
+    function _pmPopulateLedgerPropertyFilter() {
+      const addrs = Array.from(new Set((window._pmProperties || []).map(p => p.address).filter(Boolean))).sort();
+      const sel = document.getElementById('ledger-filter-property');
+      if (!sel) return;
+      const current = sel.value;
+      sel.innerHTML = '<option value="">All Properties</option>' +
+        addrs.map(a => '<option value="' + _pmEsc(a) + '"' + (a === current ? ' selected' : '') + '>' + _pmEsc(a) + '</option>').join('');
+      // Also populate the modal's datalist
+      const dl = document.getElementById('lf-property-list');
+      if (dl) dl.innerHTML = addrs.map(a => '<option value="' + _pmEsc(a) + '"></option>').join('');
+    }
+    function _pmExportLedgerCSV() {
+      const list = _pmFilteredLedger();
+      if (list.length === 0) { alert('No ledger entries to export. Adjust filters.'); return; }
+      const cols = ['Date', 'Property', 'Category', 'Amount', 'Notes'];
+      const esc = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const d = x => (x instanceof Date && !isNaN(x)) ? x.toISOString().slice(0, 10) : '';
+      const lines = [cols.join(',')];
+      list.forEach(e => lines.push([d(e.date), e.property, e.category, e.amount, e.notes].map(esc).join(',')));
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'stonehouse-ledger-' + new Date().toISOString().slice(0,10) + '.csv';
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+    }
+    function _pmOpenMonthlyStatement() {
+      const prop  = document.getElementById('ledger-filter-property').value;
+      const month = document.getElementById('ledger-filter-month').value;
+      if (!prop || !month) {
+        alert('Pick a specific Property AND Month in the filters above, then click Generate Monthly Statement again.');
+        return;
+      }
+      const url = 'monthly-statement.html?property=' + encodeURIComponent(prop) + '&month=' + encodeURIComponent(month);
+      window.open(url, '_blank');
+    }
+
+    // Wire the Ledger modal (reuses _adSetupModal — same pattern as Add Property / Add Tenant)
+    _adSetupModal({
+      overlayId: 'ledger-modal-overlay', modalId: 'ledger-modal',
+      formId:    'ledger-form',          statusId: 'ledger-form-status',
+      openId:    'open-ledger-modal',    closeId:  'close-ledger-modal',
+      cancelId:  'cancel-ledger',        submitId: 'submit-ledger',
+      config:    LEDGER_CONFIG
+    });
+
+    // Wire ledger filters + buttons
+    ['ledger-search', 'ledger-filter-property', 'ledger-filter-month', 'ledger-filter-category'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', _pmRenderLedger);
+      if (el && (id === 'ledger-filter-property' || id === 'ledger-filter-category')) {
+        el.addEventListener('change', _pmRenderLedger);
+      }
+    });
+    const pmExpLedger = document.getElementById('export-ledger-csv');
+    if (pmExpLedger) pmExpLedger.addEventListener('click', _pmExportLedgerCSV);
+    const pmStatement = document.getElementById('ledger-statement-btn');
+    if (pmStatement) pmStatement.addEventListener('click', _pmOpenMonthlyStatement);
+
     // ================= WIRE FILTERS + LOADERS =================
     ['property-search', 'property-filter-occupied', 'property-filter-type'].forEach(id => {
       const el = document.getElementById(id);
@@ -17662,9 +17970,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     // Load on page mount + when Property Management tab is clicked
     _pmLoadProperties();
     _pmLoadTenants();
+    _pmLoadLedger();
     const pmTab = document.getElementById('tab-propmgmt');
     if (pmTab) pmTab.addEventListener('click', () => {
-      _pmLoadProperties(); _pmLoadTenants();
+      _pmLoadProperties(); _pmLoadTenants(); _pmLoadLedger();
     });
 
     // ============================================================
