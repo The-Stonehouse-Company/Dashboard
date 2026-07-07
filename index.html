@@ -4748,18 +4748,13 @@
 
           <!-- ============= LEDGER (rent + utilities log) ============= -->
           <div class="subpanel" id="subpanel-propmgmt-ledger" role="tabpanel" aria-hidden="true" tabindex="0">
-            <p class="subpanel-intro">Rent + utilities ledger. Log each payment or bill for a property. Generate a monthly statement PDF and send to both tenant and landlord.</p>
+            <p class="subpanel-intro">Rent + utilities log. One row per property per month. When you're ready to send the tenant + landlord their statement, just click that row in the table below — the branded PDF opens in a new tab, ready to text or email.</p>
 
             <div class="action-grid" style="margin-bottom:16px;">
               <button class="primary-action" type="button" id="open-ledger-modal" aria-haspopup="dialog" aria-controls="ledger-modal">
-                <span class="action-label">+ Log Entry</span>
-                <span class="action-sub">Rent, water, electric, gas, or internet</span>
+                <span class="action-label">+ Log Monthly Ledger</span>
+                <span class="action-sub">One row: month + property + rent, water, electric, gas, internet</span>
                 <span class="action-arrow" aria-hidden="true">→</span>
-              </button>
-              <button class="primary-action" type="button" id="ledger-statement-btn">
-                <span class="action-label">Monthly Statement PDF</span>
-                <span class="action-sub">Or click any row in the table below — each row is a one-click PDF</span>
-                <span class="action-arrow" aria-hidden="true">↗</span>
               </button>
               <button class="primary-action" type="button" id="export-ledger-csv">
                 <span class="action-label">Export CSV</span>
@@ -17994,33 +17989,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       document.body.appendChild(a); a.click();
       setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
     }
-    function _pmOpenMonthlyStatement() {
-      const prop  = document.getElementById('ledger-filter-property').value;
-      const month = document.getElementById('ledger-filter-month').value;
-      // Visible in-page status (fall back to alert if the button subtitle is somehow missing)
-      const btn = document.getElementById('ledger-statement-btn');
-      const subEl = btn && btn.querySelector('.action-sub');
-      function warn(msg) {
-        if (subEl) {
-          const orig = subEl.getAttribute('data-orig') || subEl.textContent;
-          if (!subEl.getAttribute('data-orig')) subEl.setAttribute('data-orig', orig);
-          subEl.textContent = msg;
-          subEl.style.color = '#d99';
-          setTimeout(() => { subEl.textContent = orig; subEl.style.color = ''; }, 5000);
-        } else {
-          alert(msg);
-        }
-      }
-      if (!prop) { warn('⚠ Pick a Property in the filter bar first'); return; }
-      if (!month) { warn('⚠ Pick a Month in the filter bar first'); return; }
-      const url = 'monthly-statement.html?property=' + encodeURIComponent(prop) + '&month=' + encodeURIComponent(month);
-      const win = window.open(url, '_blank');
-      if (!win) {
-        // Popup blocked — fall back to same-tab navigation
-        warn('Popup blocked — opening in this tab instead');
-        setTimeout(() => { window.location.href = url; }, 400);
-      }
-    }
+    // (Old top-level "Generate Monthly Statement" button removed — now
+    // every ledger row is clickable to open its own statement PDF.)
 
     // Wire the Ledger modal (reuses _adSetupModal — same pattern as Add Property / Add Tenant)
     _adSetupModal({
@@ -18039,8 +18009,6 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     });
     const pmExpLedger = document.getElementById('export-ledger-csv');
     if (pmExpLedger) pmExpLedger.addEventListener('click', _pmExportLedgerCSV);
-    const pmStatement = document.getElementById('ledger-statement-btn');
-    if (pmStatement) pmStatement.addEventListener('click', _pmOpenMonthlyStatement);
 
     // ================= WIRE FILTERS + LOADERS =================
     ['property-search', 'property-filter-occupied', 'property-filter-type'].forEach(id => {
