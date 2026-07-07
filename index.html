@@ -4591,7 +4591,6 @@
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-overview"     aria-selected="true"  data-subkey="overview">Overview</button>
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-properties"   aria-selected="false" data-subkey="properties">Properties</button>
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-tenants"      aria-selected="false" data-subkey="tenants">Tenants</button>
-          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-workorders"   aria-selected="false" data-subkey="workorders">Work Orders</button>
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-reports"      aria-selected="false" data-subkey="reports">Owner Reports</button>
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-files"        aria-selected="false" data-subkey="files">Files</button>
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-propmgmt-settings"     aria-selected="false" data-subkey="settings">Settings</button>
@@ -4601,7 +4600,7 @@
 
           <!-- ============= OVERVIEW ============= -->
           <div class="subpanel" id="subpanel-propmgmt-overview" role="tabpanel" aria-hidden="false" tabindex="0">
-            <p class="subpanel-intro">Snapshot of the Property Management division — active properties, tenants, open work orders, and month-to-date rent roll.</p>
+            <p class="subpanel-intro">Snapshot of the Property Management division — active properties, tenants, leases ending soon, and month-to-date rent roll.</p>
             <div class="home-grid" style="margin-bottom:18px;">
               <article class="home-card">
                 <span class="h-eyebrow">Properties Under Mgmt</span>
@@ -4619,9 +4618,9 @@
                 <div class="h-label">Current leases only</div>
               </article>
               <article class="home-card">
-                <span class="h-eyebrow">Open Work Orders</span>
-                <div class="h-stat" id="pm-workorders-count">—</div>
-                <div class="h-label" id="pm-workorders-sub">Reported · Scheduled · In Progress</div>
+                <span class="h-eyebrow">Leases Ending Soon</span>
+                <div class="h-stat" id="pm-leases-ending">—</div>
+                <div class="h-label">Within the next 90 days</div>
               </article>
             </div>
 
@@ -4635,16 +4634,6 @@
                 <span class="h-eyebrow">Monthly Mgmt Fees</span>
                 <div class="h-stat" id="pm-mgmt-fees">—</div>
                 <div class="h-label">Stonehouse's monthly management fee income</div>
-              </article>
-              <article class="home-card">
-                <span class="h-eyebrow">Leases Ending Soon</span>
-                <div class="h-stat" id="pm-leases-ending">—</div>
-                <div class="h-label">Within the next 90 days</div>
-              </article>
-              <article class="home-card">
-                <span class="h-eyebrow">Emergency WOs</span>
-                <div class="h-stat" id="pm-emergency-wo">—</div>
-                <div class="h-label">Priority=Emergency, not yet complete</div>
               </article>
             </div>
           </div>
@@ -4754,70 +4743,13 @@
             </div>
           </div>
 
-          <!-- ============= WORK ORDERS ============= -->
-          <div class="subpanel" id="subpanel-propmgmt-workorders" role="tabpanel" aria-hidden="true" tabindex="0">
-            <p class="subpanel-intro">Maintenance requests and repairs. Track from reported through completion.</p>
-
-            <div class="action-grid" style="margin-bottom:16px;">
-              <button class="primary-action" type="button" id="open-workorder-modal" aria-haspopup="dialog" aria-controls="workorder-modal">
-                <span class="action-label">+ Log Work Order</span>
-                <span class="action-sub">Report a new maintenance issue</span>
-                <span class="action-arrow" aria-hidden="true">→</span>
-              </button>
-            </div>
-
-            <section class="pipeline-section" aria-labelledby="wo-reported-title">
-              <header class="pipeline-head">
-                <div>
-                  <div class="eyebrow" style="margin-bottom:8px;">Just In</div>
-                  <h2 class="pipeline-title" id="wo-reported-title">Reported</h2>
-                </div>
-                <div class="pipeline-meta" id="wo-reported-meta">Loading…</div>
-              </header>
-              <div class="deal-list" id="wo-reported-list"><div class="deal-empty">Loading work orders…</div></div>
-            </section>
-
-            <section class="pipeline-section" aria-labelledby="wo-scheduled-title">
-              <header class="pipeline-head">
-                <div>
-                  <div class="eyebrow" style="margin-bottom:8px;">Booked</div>
-                  <h2 class="pipeline-title" id="wo-scheduled-title">Scheduled</h2>
-                </div>
-                <div class="pipeline-meta" id="wo-scheduled-meta">—</div>
-              </header>
-              <div class="deal-list" id="wo-scheduled-list"><div class="deal-empty">No scheduled work orders.</div></div>
-            </section>
-
-            <section class="pipeline-section" aria-labelledby="wo-inprogress-title">
-              <header class="pipeline-head">
-                <div>
-                  <div class="eyebrow" style="margin-bottom:8px;">On Site</div>
-                  <h2 class="pipeline-title" id="wo-inprogress-title">In Progress</h2>
-                </div>
-                <div class="pipeline-meta" id="wo-inprogress-meta">—</div>
-              </header>
-              <div class="deal-list" id="wo-inprogress-list"><div class="deal-empty">No work orders in progress.</div></div>
-            </section>
-
-            <section class="pipeline-section" aria-labelledby="wo-complete-title">
-              <header class="pipeline-head">
-                <div>
-                  <div class="eyebrow" style="margin-bottom:8px;">Archive · Last 30 days</div>
-                  <h2 class="pipeline-title" id="wo-complete-title">Complete</h2>
-                </div>
-                <div class="pipeline-meta" id="wo-complete-meta">—</div>
-              </header>
-              <div class="deal-list completed-list" id="wo-complete-list"><div class="deal-empty">No recently completed work orders.</div></div>
-            </section>
-          </div>
-
           <!-- ============= OWNER REPORTS ============= -->
           <div class="subpanel" id="subpanel-propmgmt-reports" role="tabpanel" aria-hidden="true" tabindex="0">
             <p class="subpanel-intro">Owner statements and per-property P&amp;L. Aggregates rent income, expenses, and management fees into a monthly statement per owner.</p>
             <div class="placeholder">
               <div class="mark">— Phase 2 —</div>
               <h2>Owner Reports generator</h2>
-              <p>Once you've been running Properties + Work Orders for a few months and have real income/expense data flowing, we'll build a monthly statement generator that pulls rent collected, mgmt fee deducted, work order costs, and delivers a per-owner P&amp;L PDF. Say the word when you're ready to spec it.</p>
+              <p>Once you've been running Properties + Tenants for a few months and have real income/expense data flowing, we'll build a monthly statement generator that pulls rent collected, mgmt fee deducted, and other expenses to deliver a per-owner P&amp;L PDF. Say the word when you're ready to spec it.</p>
             </div>
           </div>
 
@@ -6412,119 +6344,6 @@
     </div>
   </div>
 
-  <!-- ========================= LOG WORK ORDER MODAL ========================= -->
-  <div class="modal-overlay" id="workorder-modal-overlay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="workorder-modal-title" id="workorder-modal">
-      <header class="modal-head">
-        <div class="modal-title-group">
-          <span class="modal-eyebrow">Property Management · Work Orders</span>
-          <h2 class="modal-title" id="workorder-modal-title">Log Work Order</h2>
-        </div>
-        <button class="modal-close" type="button" id="close-workorder-modal" aria-label="Close">×</button>
-      </header>
-      <form class="modal-body" id="workorder-form" autocomplete="off" novalidate>
-        <fieldset>
-          <legend>What &amp; Where</legend>
-          <div class="form-grid">
-            <div class="full">
-              <label for="wof-property">Property Address <span class="req">*</span></label>
-              <input id="wof-property" name="property_address" type="text" required list="wof-property-list" />
-              <datalist id="wof-property-list"></datalist>
-            </div>
-            <div>
-              <label for="wof-unit">Unit #</label>
-              <input id="wof-unit" name="unit" type="text" placeholder="For multi-family" />
-            </div>
-            <div>
-              <label for="wof-tenant">Tenant Name (if applicable)</label>
-              <input id="wof-tenant" name="tenant_name" type="text" />
-            </div>
-            <div>
-              <label for="wof-category">Category <span class="req">*</span></label>
-              <select id="wof-category" name="category" required>
-                <option value="" disabled selected>Select…</option>
-                <option value="Plumbing">Plumbing</option>
-                <option value="Electrical">Electrical</option>
-                <option value="HVAC">HVAC</option>
-                <option value="Appliance">Appliance</option>
-                <option value="Roof">Roof</option>
-                <option value="Landscaping">Landscaping</option>
-                <option value="Pest Control">Pest Control</option>
-                <option value="General Repair">General Repair</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-            <div>
-              <label for="wof-priority">Priority <span class="req">*</span></label>
-              <select id="wof-priority" name="priority" required>
-                <option value="Medium" selected>Medium</option>
-                <option value="Emergency">Emergency</option>
-                <option value="High">High</option>
-                <option value="Low">Low</option>
-              </select>
-            </div>
-            <div class="full">
-              <label for="wof-description">Description <span class="req">*</span></label>
-              <textarea id="wof-description" name="description" rows="3" required placeholder="What's broken, when it was noticed, any access notes…"></textarea>
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Vendor &amp; Cost</legend>
-          <div class="form-grid">
-            <div>
-              <label for="wof-reported">Reported Date</label>
-              <input id="wof-reported" name="reported_date" type="date" />
-            </div>
-            <div>
-              <label for="wof-scheduled">Scheduled Date</label>
-              <input id="wof-scheduled" name="scheduled_date" type="date" />
-            </div>
-            <div>
-              <label for="wof-vendor">Assigned Vendor</label>
-              <input id="wof-vendor" name="vendor" type="text" placeholder="Company or contractor name" />
-            </div>
-            <div>
-              <label for="wof-vendor-phone">Vendor Phone</label>
-              <input id="wof-vendor-phone" name="vendor_phone" type="tel" />
-            </div>
-            <div>
-              <label for="wof-est-cost">Estimated Cost</label>
-              <input id="wof-est-cost" name="estimated_cost" type="number" step="any" min="0" />
-            </div>
-            <div>
-              <label for="wof-actual-cost">Actual Cost</label>
-              <input id="wof-actual-cost" name="actual_cost" type="number" step="any" min="0" placeholder="Fill after completion" />
-            </div>
-            <div>
-              <label for="wof-status">Status <span class="req">*</span></label>
-              <select id="wof-status" name="status" required>
-                <option value="Reported" selected>Reported</option>
-                <option value="Scheduled">Scheduled</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Complete">Complete</option>
-                <option value="Cancelled">Cancelled</option>
-              </select>
-            </div>
-            <div>
-              <label for="wof-completed">Completed Date</label>
-              <input id="wof-completed" name="completed_date" type="date" />
-            </div>
-            <div class="full">
-              <label for="wof-notes">Notes</label>
-              <textarea id="wof-notes" name="notes" rows="2" placeholder="Parts used, follow-up needed, tenant communication…"></textarea>
-            </div>
-          </div>
-        </fieldset>
-      </form>
-      <div class="form-status" id="workorder-form-status"></div>
-      <footer class="modal-foot">
-        <button class="btn ghost" type="button" id="cancel-workorder">Cancel</button>
-        <button class="btn" type="submit" form="workorder-form" id="submit-workorder">Log Work Order</button>
-      </footer>
-    </div>
-  </div>
 
   <!-- ========================= ADD CONTACT MODAL ========================= -->
   <div class="modal-overlay" id="contact-modal-overlay" aria-hidden="true">
@@ -17468,7 +17287,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     })();
 
     // ============================================================
-    // PROPERTY MANAGEMENT — Properties, Tenants, Work Orders
+    // PROPERTY MANAGEMENT — Properties + Tenants
     //
     // Three Google Sheets, three Google Forms, one Overview tile grid.
     // Same gviz-read / no-cors-POST pattern as the Sales side.
@@ -17476,40 +17295,53 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     // SETUP: see docs/propmgmt-setup.md.
     // ============================================================
     const PROPERTIES_CONFIG = {
-      SHEET_ID:  "",
+      SHEET_ID:  "1viTgRkJ2fAznKH0Kpd-JCTlTdyVBcoFVia5SyGepOJI",
       SHEET_TAB: "Form Responses 1",
-      FORM_URL:  "",
+      FORM_URL:  "https://docs.google.com/forms/d/e/1FAIpQLSekfJ4iXbZY7RUk1WSV_b-zaUBVM9JIIcfwAWYf5WdZdhqrTg/formResponse",
       FIELD_MAP: {
-        property_address: "", property_type: "", unit_count: "", bedrooms: "", bathrooms: "",
-        neighborhood: "", owner_name: "", owner_email: "", owner_phone: "", owner_mailing: "",
-        monthly_rent: "", mgmt_fee_pct: "", lease_start: "", lease_end: "", occupied: "",
-        tenant_name: "", notes: ""
+        property_address: "entry.1511157372",
+        property_type:    "entry.952992198",
+        unit_count:       "entry.942305678",
+        bedrooms:         "entry.1641219169",
+        bathrooms:        "entry.1176081646",
+        neighborhood:     "entry.2117544715",
+        owner_name:       "entry.2075661131",
+        owner_email:      "entry.1289934685",
+        owner_phone:      "entry.1368997442",
+        owner_mailing:    "entry.290222357",
+        monthly_rent:     "entry.2097296619",
+        mgmt_fee_pct:     "entry.1782504590",
+        lease_start:      "entry.911266736",
+        lease_end:        "entry.429265009",
+        occupied:         "entry.1928069894",
+        tenant_name:      "entry.1018787295",
+        notes:            "entry.1756200802"
       }
     };
     const TENANTS_CONFIG = {
-      SHEET_ID:  "",
+      SHEET_ID:  "12peSljgI4vWLuuReP4btW_eyCwF5CCFM2VZ_Dj6rv4I",
       SHEET_TAB: "Form Responses 1",
-      FORM_URL:  "",
+      FORM_URL:  "https://docs.google.com/forms/d/e/1FAIpQLSc3b5GFgr_d7mJ1PmUIH1FHHYiU_Moyym-tMXv3zp1pB5-GOw/formResponse",
       FIELD_MAP: {
-        first_name: "", last_name: "", email: "", phone: "", emergency_contact: "", status: "",
-        property_address: "", unit: "", monthly_rent: "", deposit: "",
-        lease_start: "", lease_end: "", move_in: "", pet_fees: "", notes: ""
+        first_name:        "entry.1054656447",
+        last_name:         "entry.703542891",
+        email:             "entry.1006837887",
+        phone:             "entry.1433730735",
+        emergency_contact: "entry.864604741",
+        status:            "entry.1827415268",
+        property_address:  "entry.147414485",
+        unit:              "entry.1626496900",
+        monthly_rent:      "entry.88628952",
+        deposit:           "entry.1444294942",
+        lease_start:       "entry.1353200662",
+        lease_end:         "entry.58460075",
+        move_in:           "entry.481636267",
+        pet_fees:          "entry.740526935",
+        notes:             "entry.463433102"
       }
     };
-    const WORKORDERS_CONFIG = {
-      SHEET_ID:  "",
-      SHEET_TAB: "Form Responses 1",
-      FORM_URL:  "",
-      FIELD_MAP: {
-        property_address: "", unit: "", tenant_name: "", category: "", priority: "",
-        description: "", reported_date: "", scheduled_date: "", vendor: "", vendor_phone: "",
-        estimated_cost: "", actual_cost: "", status: "", completed_date: "", notes: ""
-      }
-    };
-
     window._pmProperties = [];
     window._pmTenants    = [];
-    window._pmWorkOrders = [];
 
     function _pmEsc(s) {
       return String(s == null ? '' : s)
@@ -17717,127 +17549,11 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       }).join('');
     }
 
-    // ================= WORK ORDERS =================
-    function _pmParseWorkOrders(table) {
-      const cols = table.cols || [];
-      const ix = {
-        property:    _adFindCol(cols, 'property_address', 'Property Address', 'Property'),
-        unit:        _adFindCol(cols, 'unit', 'Unit'),
-        tenant:      _adFindCol(cols, 'tenant_name', 'Tenant'),
-        category:    _adFindCol(cols, 'category', 'Category'),
-        priority:    _adFindCol(cols, 'priority', 'Priority'),
-        description: _adFindCol(cols, 'description', 'Description'),
-        reported:    _adFindCol(cols, 'reported_date', 'Reported', 'Reported Date'),
-        scheduled:   _adFindCol(cols, 'scheduled_date', 'Scheduled', 'Scheduled Date'),
-        vendor:      _adFindCol(cols, 'vendor', 'Vendor'),
-        vendorPh:    _adFindCol(cols, 'vendor_phone', 'Vendor Phone'),
-        estCost:     _adFindCol(cols, 'estimated_cost', 'Estimated Cost'),
-        actCost:     _adFindCol(cols, 'actual_cost', 'Actual Cost'),
-        status:      _adFindCol(cols, 'status', 'Status'),
-        completed:   _adFindCol(cols, 'completed_date', 'Completed', 'Completed Date'),
-        notes:       _adFindCol(cols, 'notes', 'Notes')
-      };
-      return (table.rows || []).map(r => {
-        const c = r.c || [];
-        return {
-          property:    ix.property >= 0 ? _adGvizString(c[ix.property]) : '',
-          unit:        ix.unit >= 0 ? _adGvizString(c[ix.unit]) : '',
-          tenant:      ix.tenant >= 0 ? _adGvizString(c[ix.tenant]) : '',
-          category:    ix.category >= 0 ? _adGvizString(c[ix.category]) : '',
-          priority:    ix.priority >= 0 ? _adGvizString(c[ix.priority]) : '',
-          description: ix.description >= 0 ? _adGvizString(c[ix.description]) : '',
-          reported:    ix.reported >= 0 ? _adGvizDate(c[ix.reported]) : null,
-          scheduled:   ix.scheduled >= 0 ? _adGvizDate(c[ix.scheduled]) : null,
-          vendor:      ix.vendor >= 0 ? _adGvizString(c[ix.vendor]) : '',
-          vendorPh:    ix.vendorPh >= 0 ? _adGvizString(c[ix.vendorPh]) : '',
-          estCost:     ix.estCost >= 0 ? _adGvizNumber(c[ix.estCost]) : 0,
-          actCost:     ix.actCost >= 0 ? _adGvizNumber(c[ix.actCost]) : 0,
-          status:      ix.status >= 0 ? _adGvizString(c[ix.status]) : '',
-          completed:   ix.completed >= 0 ? _adGvizDate(c[ix.completed]) : null,
-          notes:       ix.notes >= 0 ? _adGvizString(c[ix.notes]) : ''
-        };
-      }).filter(w => w.property || w.description);
-    }
-    function _pmLoadWorkOrders() {
-      if (!WORKORDERS_CONFIG.SHEET_ID) { _pmRenderWorkOrders(); _pmRenderOverview(); return Promise.resolve(); }
-      return fetch(_adGvizUrl(WORKORDERS_CONFIG), { cache: 'no-store' })
-        .then(r => r.text())
-        .then(t => { window._pmWorkOrders = _pmParseWorkOrders(_adParseEnvelope(t)); _pmRenderWorkOrders(); _pmRenderOverview(); })
-        .catch(err => { console.warn('[PM] work orders load failed:', err); _pmRenderWorkOrders(); });
-    }
-    function _pmWorkOrderCard(w) {
-      const priBadge = w.priority ? ('<span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; padding:2px 8px; border:1px solid ' + (w.priority === 'Emergency' ? '#d99' : 'var(--rule-strong)') + '; color:' + (w.priority === 'Emergency' ? '#d99' : 'var(--text-muted)') + ';">' + _pmEsc(w.priority) + '</span>') : '';
-      const catBadge = w.category ? ('<span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); margin-left:8px;">' + _pmEsc(w.category) + '</span>') : '';
-      return (
-        '<article class="deal-card">' +
-          '<header class="deal-head">' +
-            '<div>' +
-              '<h3 class="deal-address">' + _pmEsc(w.property || 'No address') + (w.unit ? ' · #' + _pmEsc(w.unit) : '') + '</h3>' +
-              '<div class="deal-meta">' + priBadge + catBadge + '</div>' +
-            '</div>' +
-          '</header>' +
-          '<div style="padding:12px 18px 4px; font-size:12px; color:var(--text);">' + _pmEsc(w.description || '') + '</div>' +
-          '<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; padding:14px 18px; font-size:11px;">' +
-            (w.tenant ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Tenant</div>' + _pmEsc(w.tenant) + '</div>' : '') +
-            (w.reported ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Reported</div>' + _pmFmtDate(w.reported) + '</div>' : '') +
-            (w.scheduled ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Scheduled</div>' + _pmFmtDate(w.scheduled) + '</div>' : '') +
-            (w.vendor ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Vendor</div>' + _pmEsc(w.vendor) + (w.vendorPh ? '<br><span style="color:var(--text-dim);">' + _pmEsc(w.vendorPh) + '</span>' : '') + '</div>' : '') +
-            (w.estCost > 0 ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Est.</div>' + _pmFmtMoney(w.estCost) + '</div>' : '') +
-            (w.actCost > 0 ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Actual</div>' + _pmFmtMoney(w.actCost) + '</div>' : '') +
-            (w.completed ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Completed</div>' + _pmFmtDate(w.completed) + '</div>' : '') +
-          '</div>' +
-        '</article>'
-      );
-    }
-    function _pmRenderWorkOrders() {
-      const all = window._pmWorkOrders || [];
-      const buckets = { 'Reported': [], 'Scheduled': [], 'In Progress': [], 'Complete': [] };
-      const now = Date.now();
-      const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
-      all.forEach(w => {
-        const s = (w.status || 'Reported').trim();
-        if (s === 'Cancelled') return;
-        if (s === 'Complete') {
-          // only last 30 days in Complete list
-          if (!w.completed || w.completed.getTime() >= thirtyDaysAgo) buckets['Complete'].push(w);
-        } else if (buckets[s]) {
-          buckets[s].push(w);
-        } else {
-          buckets['Reported'].push(w);
-        }
-      });
-      // Priority sort: Emergency first, then by reported date
-      const prio = { 'Emergency': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
-      const sortByPri = (a, b) => {
-        const pa = prio[a.priority] ?? 9, pb = prio[b.priority] ?? 9;
-        if (pa !== pb) return pa - pb;
-        const ra = a.reported ? a.reported.getTime() : 0;
-        const rb = b.reported ? b.reported.getTime() : 0;
-        return rb - ra;
-      };
-      Object.keys(buckets).forEach(k => buckets[k].sort(sortByPri));
-
-      function renderBucket(elId, metaId, arr, emptyMsg) {
-        const el   = document.getElementById(elId);
-        const meta = document.getElementById(metaId);
-        if (!el) return;
-        if (meta) meta.textContent = arr.length + ' item' + (arr.length === 1 ? '' : 's');
-        el.innerHTML = arr.length === 0
-          ? '<div class="deal-empty">' + _pmEsc(emptyMsg) + '</div>'
-          : arr.map(_pmWorkOrderCard).join('');
-      }
-      renderBucket('wo-reported-list',   'wo-reported-meta',   buckets['Reported'],
-        WORKORDERS_CONFIG.SHEET_ID ? 'No newly-reported work orders.' : 'Work Orders sheet not connected yet. See docs/propmgmt-setup.md.');
-      renderBucket('wo-scheduled-list',  'wo-scheduled-meta',  buckets['Scheduled'],  'No scheduled work orders.');
-      renderBucket('wo-inprogress-list', 'wo-inprogress-meta', buckets['In Progress'], 'No work orders in progress.');
-      renderBucket('wo-complete-list',   'wo-complete-meta',   buckets['Complete'],   'No work orders completed in the last 30 days.');
-    }
 
     // ================= OVERVIEW TILES =================
     function _pmRenderOverview() {
       const props = window._pmProperties || [];
       const ten   = window._pmTenants || [];
-      const wo    = window._pmWorkOrders || [];
       const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = String(v); };
 
       const total    = props.length;
@@ -17853,9 +17569,6 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const activeTenants = ten.filter(t => t.status === 'Active').length;
       set('pm-tenants-count', activeTenants);
 
-      const openWO = wo.filter(w => ['Reported','Scheduled','In Progress'].includes(w.status || 'Reported')).length;
-      set('pm-workorders-count', openWO);
-
       const rentRoll = props.filter(p => p.occupied).reduce((s, p) => s + (p.rent || 0), 0);
       set('pm-rent-roll', _pmFmtMoney(rentRoll));
 
@@ -17867,19 +17580,13 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const in90 = now + 90 * 24 * 60 * 60 * 1000;
       const endingSoon = ten.filter(t => t.leaseEnd && t.leaseEnd.getTime() >= now && t.leaseEnd.getTime() <= in90).length;
       set('pm-leases-ending', endingSoon);
-
-      const emergency = wo.filter(w => w.priority === 'Emergency' && ['Reported','Scheduled','In Progress'].includes(w.status)).length;
-      set('pm-emergency-wo', emergency);
     }
 
-    // ================= AUTOCOMPLETE (property lists for tenant + WO forms) =================
+    // ================= AUTOCOMPLETE (property list for tenant form) =================
     function _pmPopulatePropertyDatalists() {
       const addrs = Array.from(new Set((window._pmProperties || []).map(p => p.address).filter(Boolean))).sort();
-      ['tf-property-list', 'wof-property-list'].forEach(id => {
-        const dl = document.getElementById(id);
-        if (!dl) return;
-        dl.innerHTML = addrs.map(a => '<option value="' + _pmEsc(a) + '"></option>').join('');
-      });
+      const dl = document.getElementById('tf-property-list');
+      if (dl) dl.innerHTML = addrs.map(a => '<option value="' + _pmEsc(a) + '"></option>').join('');
     }
 
     // ================= MODALS =================
@@ -17896,13 +17603,6 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       openId:    'open-tenant-modal',       closeId:  'close-tenant-modal',
       cancelId:  'cancel-tenant',           submitId: 'submit-tenant',
       config:    TENANTS_CONFIG
-    });
-    _adSetupModal({
-      overlayId: 'workorder-modal-overlay', modalId: 'workorder-modal',
-      formId:    'workorder-form',          statusId: 'workorder-form-status',
-      openId:    'open-workorder-modal',    closeId:  'close-workorder-modal',
-      cancelId:  'cancel-workorder',        submitId: 'submit-workorder',
-      config:    WORKORDERS_CONFIG
     });
 
     // ================= CSV EXPORTS =================
@@ -17962,10 +17662,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     // Load on page mount + when Property Management tab is clicked
     _pmLoadProperties();
     _pmLoadTenants();
-    _pmLoadWorkOrders();
     const pmTab = document.getElementById('tab-propmgmt');
     if (pmTab) pmTab.addEventListener('click', () => {
-      _pmLoadProperties(); _pmLoadTenants(); _pmLoadWorkOrders();
+      _pmLoadProperties(); _pmLoadTenants();
     });
 
     // ============================================================
