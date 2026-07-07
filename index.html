@@ -17975,12 +17975,29 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     function _pmOpenMonthlyStatement() {
       const prop  = document.getElementById('ledger-filter-property').value;
       const month = document.getElementById('ledger-filter-month').value;
-      if (!prop || !month) {
-        alert('Pick a specific Property AND Month in the filters above, then click Generate Monthly Statement again.');
-        return;
+      // Visible in-page status (fall back to alert if the button subtitle is somehow missing)
+      const btn = document.getElementById('ledger-statement-btn');
+      const subEl = btn && btn.querySelector('.action-sub');
+      function warn(msg) {
+        if (subEl) {
+          const orig = subEl.getAttribute('data-orig') || subEl.textContent;
+          if (!subEl.getAttribute('data-orig')) subEl.setAttribute('data-orig', orig);
+          subEl.textContent = msg;
+          subEl.style.color = '#d99';
+          setTimeout(() => { subEl.textContent = orig; subEl.style.color = ''; }, 5000);
+        } else {
+          alert(msg);
+        }
       }
+      if (!prop) { warn('⚠ Pick a Property in the filter bar first'); return; }
+      if (!month) { warn('⚠ Pick a Month in the filter bar first'); return; }
       const url = 'monthly-statement.html?property=' + encodeURIComponent(prop) + '&month=' + encodeURIComponent(month);
-      window.open(url, '_blank');
+      const win = window.open(url, '_blank');
+      if (!win) {
+        // Popup blocked — fall back to same-tab navigation
+        warn('Popup blocked — opening in this tab instead');
+        setTimeout(() => { window.location.href = url; }, 400);
+      }
     }
 
     // Wire the Ledger modal (reuses _adSetupModal — same pattern as Add Property / Add Tenant)
