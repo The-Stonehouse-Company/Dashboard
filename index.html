@@ -2581,6 +2581,8 @@
       color: var(--text);
     }
     .client-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+    .client-table tbody tr.ledger-row-clickable:hover td { background: rgba(255,255,255,0.06); }
+    .client-table tbody tr.ledger-row-clickable:hover .ledger-stmt-link { border-color: var(--text); }
     .client-table tbody tr.is-oh td { border-left: 2px solid var(--text-dim); }
     .client-table .client-name {
       font-weight: 500;
@@ -4755,8 +4757,8 @@
                 <span class="action-arrow" aria-hidden="true">→</span>
               </button>
               <button class="primary-action" type="button" id="ledger-statement-btn">
-                <span class="action-label">Generate Monthly Statement</span>
-                <span class="action-sub">Stonehouse-branded PDF for tenant + landlord based on the filters below</span>
+                <span class="action-label">Monthly Statement PDF</span>
+                <span class="action-sub">Or click any row in the table below — each row is a one-click PDF</span>
                 <span class="action-arrow" aria-hidden="true">↗</span>
               </button>
               <button class="primary-action" type="button" id="export-ledger-csv">
@@ -4811,6 +4813,7 @@
             </div>
 
             <div class="client-table-wrap">
+              <p style="font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); margin:0 0 8px;">Click any row to open its Monthly Statement PDF</p>
               <table class="client-table" id="ledger-table">
                 <thead>
                   <tr>
@@ -4822,10 +4825,11 @@
                     <th>Gas</th>
                     <th>Internet</th>
                     <th>Total</th>
+                    <th>Statement</th>
                   </tr>
                 </thead>
                 <tbody id="ledger-table-body">
-                  <tr><td colspan="8" class="client-empty">Loading ledger…</td></tr>
+                  <tr><td colspan="9" class="client-empty">Loading ledger…</td></tr>
                 </tbody>
               </table>
             </div>
@@ -17917,7 +17921,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       setTxt('ledger-total-count',    list.length);
 
       if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="client-empty">' +
+        tbody.innerHTML = '<tr><td colspan="9" class="client-empty">' +
           (total === 0
             ? (LEDGER_CONFIG.SHEET_ID ? 'No months logged yet. Click "+ Log Monthly Ledger" to record the first month.' : 'Ledger sheet not connected yet. See docs/propmgmt-setup.md.')
             : 'No rows match filters.') +
@@ -17932,8 +17936,13 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         return (a.property || '').localeCompare(b.property || '');
       });
       const monthName = d => d ? d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) : '—';
-      tbody.innerHTML = list.map(e => (
-        '<tr>' +
+      tbody.innerHTML = list.map(e => {
+        const canStatement = e.month && e.property;
+        const stmtUrl = canStatement
+          ? 'monthly-statement.html?property=' + encodeURIComponent(e.property)
+            + '&month=' + encodeURIComponent(e.monthKey)
+          : '';
+        return '<tr' + (canStatement ? ' class="ledger-row-clickable" data-stmt-url="' + _pmEsc(stmtUrl) + '" style="cursor:pointer;"' : '') + '>' +
           '<td style="font-size:11px;">' + monthName(e.month) + '</td>' +
           '<td class="client-name">' + _pmEsc(e.property) + '</td>' +
           '<td>' + _pmFmtMoney(e.rent)     + '</td>' +
@@ -17942,8 +17951,21 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           '<td>' + _pmFmtMoney(e.gas)      + '</td>' +
           '<td>' + _pmFmtMoney(e.internet) + '</td>' +
           '<td style="font-weight:600;">' + _pmFmtMoney(e.total) + '</td>' +
-        '</tr>'
-      )).join('');
+          '<td>' +
+            (canStatement
+              ? '<a href="' + _pmEsc(stmtUrl) + '" target="_blank" rel="noopener" class="ledger-stmt-link" onclick="event.stopPropagation();" style="display:inline-block; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--text); border:1px solid var(--rule-strong); padding:5px 10px; text-decoration:none;">PDF →</a>'
+              : '<span style="color:var(--text-dim); font-size:10px;">missing month</span>') +
+          '</td>' +
+        '</tr>';
+      }).join('');
+
+      // Wire the row-click → open statement (delegated once per render)
+      Array.from(tbody.querySelectorAll('tr.ledger-row-clickable')).forEach(row => {
+        row.addEventListener('click', () => {
+          const url = row.getAttribute('data-stmt-url');
+          if (url) window.open(url, '_blank');
+        });
+      });
     }
     function _pmPopulateLedgerPropertyFilter() {
       const addrs = Array.from(new Set((window._pmProperties || []).map(p => p.address).filter(Boolean))).sort();

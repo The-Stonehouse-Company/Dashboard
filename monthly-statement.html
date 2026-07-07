@@ -280,6 +280,10 @@
 
 <div class="toolbar">
   <span class="status" id="tb-status">Loading…</span>
+  <a class="btn" id="btn-text-tenant"   href="#" hidden>📱 Text Tenant</a>
+  <a class="btn" id="btn-email-tenant"  href="#" hidden>✉ Email Tenant</a>
+  <a class="btn" id="btn-text-landlord" href="#" hidden>📱 Text Landlord</a>
+  <a class="btn" id="btn-email-landlord" href="#" hidden>✉ Email Landlord</a>
   <button class="btn primary" type="button" id="btn-print">Print / Save PDF</button>
   <a class="btn" href="index.html#propmgmt">← Dashboard</a>
 </div>
@@ -511,14 +515,15 @@
       const addr = pIx.addr >= 0 ? gvizString(c[pIx.addr]).trim() : '';
       return addr.toLowerCase() === PROPERTY.toLowerCase();
     });
+    let ownerName = '', ownerEmail = '', ownerPhone = '';
     if (propRow) {
-      const oName = pIx.ownerName >= 0 ? gvizString(propRow[pIx.ownerName]) : '';
-      const oEmail= pIx.ownerEmail>= 0 ? gvizString(propRow[pIx.ownerEmail]) : '';
-      const oPhone= pIx.ownerPhone>= 0 ? gvizString(propRow[pIx.ownerPhone]) : '';
+      ownerName  = pIx.ownerName >= 0 ? gvizString(propRow[pIx.ownerName]) : '';
+      ownerEmail = pIx.ownerEmail>= 0 ? gvizString(propRow[pIx.ownerEmail]) : '';
+      ownerPhone = pIx.ownerPhone>= 0 ? gvizString(propRow[pIx.ownerPhone]) : '';
       const oMail = pIx.ownerMail >= 0 ? gvizString(propRow[pIx.ownerMail]) : '';
-      document.getElementById('p-owner-name').textContent   = oName || '(no owner name on file)';
+      document.getElementById('p-owner-name').textContent   = ownerName || '(no owner name on file)';
       document.getElementById('p-owner-detail').innerHTML   =
-        [oEmail, oPhone, oMail].filter(Boolean).map(esc).join('<br>') || '(no contact on file)';
+        [ownerEmail, ownerPhone, oMail].filter(Boolean).map(esc).join('<br>') || '(no contact on file)';
     } else {
       document.getElementById('p-owner-name').textContent = '(property not found in Properties sheet)';
       document.getElementById('p-owner-detail').textContent = '';
@@ -544,18 +549,68 @@
       const s = tIx.status >= 0 ? gvizString(c[tIx.status]).trim().toLowerCase() : '';
       return s === 'active';
     }) || tenantRows[0];
+    let tenantFirst = '', tenantLast = '', tenantEmail = '', tenantPhone = '';
     if (preferred) {
-      const first = tIx.first >= 0 ? gvizString(preferred[tIx.first]) : '';
-      const last  = tIx.last  >= 0 ? gvizString(preferred[tIx.last]) : '';
-      const email = tIx.email >= 0 ? gvizString(preferred[tIx.email]) : '';
-      const phone = tIx.phone >= 0 ? gvizString(preferred[tIx.phone]) : '';
+      tenantFirst = tIx.first >= 0 ? gvizString(preferred[tIx.first]) : '';
+      tenantLast  = tIx.last  >= 0 ? gvizString(preferred[tIx.last]) : '';
+      tenantEmail = tIx.email >= 0 ? gvizString(preferred[tIx.email]) : '';
+      tenantPhone = tIx.phone >= 0 ? gvizString(preferred[tIx.phone]) : '';
       const unit  = tIx.unit  >= 0 ? gvizString(preferred[tIx.unit]) : '';
-      document.getElementById('p-tenant-name').textContent   = ((first + ' ' + last).trim() || '(no name on file)') + (unit ? '  ·  Unit ' + unit : '');
+      document.getElementById('p-tenant-name').textContent   = ((tenantFirst + ' ' + tenantLast).trim() || '(no name on file)') + (unit ? '  ·  Unit ' + unit : '');
       document.getElementById('p-tenant-detail').innerHTML   =
-        [email, phone].filter(Boolean).map(esc).join('<br>') || '(no contact on file)';
+        [tenantEmail, tenantPhone].filter(Boolean).map(esc).join('<br>') || '(no contact on file)';
     } else {
       document.getElementById('p-tenant-name').textContent = '(no tenant on file for this property)';
       document.getElementById('p-tenant-detail').textContent = '';
+    }
+
+    // ==== Wire the Text / Email quick-send buttons ====
+    // Strip everything but digits from a phone number so sms:/tel: links work
+    // across iOS + Android + macOS.
+    function toDigits(p) { return String(p || '').replace(/[^\d]/g, ''); }
+    // Public URL of THIS statement page. If we're being viewed from file://,
+    // fall back to the GitHub Pages URL so texted / emailed links actually work.
+    function publicStatementUrl() {
+      const isFile = location.protocol === 'file:';
+      const base = isFile
+        ? 'https://the-stonehouse-company.github.io/Dashboard/monthly-statement.html'
+        : (location.origin + location.pathname);
+      return base + '?property=' + encodeURIComponent(PROPERTY) + '&month=' + encodeURIComponent(MONTH);
+    }
+    const monthNice = monthLabel(MONTH);
+    const linkUrl   = publicStatementUrl();
+
+    // --- Tenant SMS ---
+    const btnTextTenant = document.getElementById('btn-text-tenant');
+    if (tenantPhone) {
+      const digits = toDigits(tenantPhone);
+      const body   = `Hi ${tenantFirst || 'there'} — here is your ${monthNice} statement for ${PROPERTY}. Tap to view: ${linkUrl}`;
+      btnTextTenant.href = 'sms:' + digits + '?&body=' + encodeURIComponent(body);
+      btnTextTenant.hidden = false;
+    }
+    // --- Tenant Email ---
+    const btnEmailTenant = document.getElementById('btn-email-tenant');
+    if (tenantEmail) {
+      const subject = 'Monthly Statement — ' + PROPERTY + ' — ' + monthNice;
+      const body    = `Hi ${tenantFirst || 'there'},\n\nAttached (or linked below) is your ${monthNice} monthly statement for ${PROPERTY}.\n\n${linkUrl}\n\n— The Stonehouse Company`;
+      btnEmailTenant.href = 'mailto:' + tenantEmail + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      btnEmailTenant.hidden = false;
+    }
+    // --- Landlord SMS ---
+    const btnTextLandlord = document.getElementById('btn-text-landlord');
+    if (ownerPhone) {
+      const digits = toDigits(ownerPhone);
+      const body   = `Hi ${(ownerName || '').split(' ')[0] || 'there'} — here is the ${monthNice} statement for your property at ${PROPERTY}. Tap to view: ${linkUrl}`;
+      btnTextLandlord.href = 'sms:' + digits + '?&body=' + encodeURIComponent(body);
+      btnTextLandlord.hidden = false;
+    }
+    // --- Landlord Email ---
+    const btnEmailLandlord = document.getElementById('btn-email-landlord');
+    if (ownerEmail) {
+      const subject = 'Monthly Statement — ' + PROPERTY + ' — ' + monthNice;
+      const body    = `Hi ${(ownerName || '').split(' ')[0] || 'there'},\n\nAttached (or linked below) is your ${monthNice} monthly statement for the property at ${PROPERTY}.\n\n${linkUrl}\n\n— The Stonehouse Company`;
+      btnEmailLandlord.href = 'mailto:' + ownerEmail + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      btnEmailLandlord.hidden = false;
     }
 
     // Load ledger + filter by property + month
