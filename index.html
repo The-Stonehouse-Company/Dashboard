@@ -4769,7 +4769,9 @@
               <select id="ledger-filter-property">
                 <option value="">All Properties</option>
               </select>
-              <input type="month" id="ledger-filter-month" title="Month (leave blank for all)" />
+              <select id="ledger-filter-month">
+                <option value="">All Months</option>
+              </select>
               <span id="ledger-count-meta" class="client-count-meta">—</span>
             </div>
 
@@ -17873,7 +17875,12 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       if (!LEDGER_CONFIG.SHEET_ID) { _pmRenderLedger(); return Promise.resolve(); }
       return fetch(_adGvizUrl(LEDGER_CONFIG), { cache: 'no-store' })
         .then(r => r.text())
-        .then(t => { window._pmLedger = _pmParseLedger(_adParseEnvelope(t)); _pmRenderLedger(); })
+        .then(t => {
+          window._pmLedger = _pmParseLedger(_adParseEnvelope(t));
+          // Repopulate filters (so the Month dropdown shows the newly-loaded months)
+          if (typeof _pmPopulateLedgerPropertyFilter === 'function') _pmPopulateLedgerPropertyFilter();
+          _pmRenderLedger();
+        })
         .catch(err => { console.warn('[PM] ledger load failed:', err); _pmRenderLedger(); });
     }
     function _pmFilteredLedger() {
@@ -17965,13 +17972,33 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     function _pmPopulateLedgerPropertyFilter() {
       const addrs = Array.from(new Set((window._pmProperties || []).map(p => p.address).filter(Boolean))).sort();
       const sel = document.getElementById('ledger-filter-property');
-      if (!sel) return;
-      const current = sel.value;
-      sel.innerHTML = '<option value="">All Properties</option>' +
-        addrs.map(a => '<option value="' + _pmEsc(a) + '"' + (a === current ? ' selected' : '') + '>' + _pmEsc(a) + '</option>').join('');
+      if (sel) {
+        const current = sel.value;
+        sel.innerHTML = '<option value="">All Properties</option>' +
+          addrs.map(a => '<option value="' + _pmEsc(a) + '"' + (a === current ? ' selected' : '') + '>' + _pmEsc(a) + '</option>').join('');
+      }
       // Also populate the modal's datalist
       const dl = document.getElementById('lf-property-list');
       if (dl) dl.innerHTML = addrs.map(a => '<option value="' + _pmEsc(a) + '"></option>').join('');
+
+      // Populate the month dropdown with the unique months present in the ledger
+      const monthSel = document.getElementById('ledger-filter-month');
+      if (monthSel) {
+        const monthKeys = Array.from(new Set(
+          (window._pmLedger || [])
+            .map(e => e.monthKey)
+            .filter(Boolean)
+        )).sort().reverse();  // newest first
+        const labelFor = key => {
+          if (!/^\d{4}-\d{2}$/.test(key)) return key;
+          const [y, m] = key.split('-').map(Number);
+          const names = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+          return names[m - 1] + ' ' + y;
+        };
+        const currentMonth = monthSel.value;
+        monthSel.innerHTML = '<option value="">All Months</option>' +
+          monthKeys.map(k => '<option value="' + _pmEsc(k) + '"' + (k === currentMonth ? ' selected' : '') + '>' + _pmEsc(labelFor(k)) + '</option>').join('');
+      }
     }
     function _pmExportLedgerCSV() {
       const list = _pmFilteredLedger();
