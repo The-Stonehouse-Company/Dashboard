@@ -113,6 +113,50 @@
     }
     .editor p.note { font-size: 11px; color: var(--ink-dim); margin: 6px 0 14px; line-height: 1.45; }
 
+    /* Underwriting picker panel */
+    .uw-pull {
+      border: 1px solid var(--accent, #d9c8a3);
+      background: #141210;
+      padding: 14px 14px 12px;
+      margin: 6px 0 18px;
+    }
+    .uw-pull h3 {
+      font-family: var(--font-display, 'Aboreto', serif); font-size: 12px;
+      letter-spacing: .22em; text-transform: uppercase;
+      color: var(--accent, #d9c8a3); font-weight: 400;
+      margin: 0 0 6px;
+    }
+    .uw-pull .desc { font-size: 11px; color: var(--ink-dim); line-height: 1.45; margin: 0 0 10px; }
+    .uw-pull select {
+      width: 100%;
+      background: #000; color: #fff;
+      border: 1px solid var(--rule);
+      padding: 8px 10px; font-size: 12px;
+      font-family: inherit;
+      margin-bottom: 10px;
+    }
+    .uw-pull .checks {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 4px 10px; margin-bottom: 10px;
+    }
+    .uw-pull .checks label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--ink);
+      cursor: pointer;
+    }
+    .uw-pull .checks input { accent-color: var(--accent, #d9c8a3); }
+    .uw-pull .btn-apply {
+      width: 100%;
+      background: var(--accent, #d9c8a3); color: #000;
+      border: none; padding: 9px 12px;
+      font-family: inherit; font-size: 11px;
+      letter-spacing: .18em; text-transform: uppercase;
+      font-weight: 700; cursor: pointer;
+    }
+    .uw-pull .btn-apply:disabled { opacity: 0.4; cursor: not-allowed; }
+    .uw-pull .btn-apply:hover:not(:disabled) { filter: brightness(1.05); }
+    .uw-pull .uw-status { font-size: 10px; color: var(--ink-dim); margin-top: 6px; text-align: center; letter-spacing: 0.06em; }
+
     details.section {
       border: 1px solid var(--rule-soft);
       margin-bottom: 8px;
@@ -427,6 +471,23 @@
     <aside class="editor" id="editor">
       <h2>Build your deck</h2>
       <p class="note">Fill out the sections below. The preview updates as you type. When ready, click <b>Generate PDF</b> — use your browser's print dialog, choose <b>Save as PDF</b>, and set paper size to <b>13.33×7.5 in</b> (or Tabloid Landscape, then crop).</p>
+
+      <!-- ===== Pull from Underwriting Log ===== -->
+      <div class="uw-pull" id="uw-pull-panel">
+        <h3>Pull from Underwriting Log</h3>
+        <p class="desc">Pick a logged deal from your underwriting sheet and auto-fill the deck numbers. Toggle which slides get overwritten.</p>
+        <select id="uw-deal-picker">
+          <option value="">Loading deals…</option>
+        </select>
+        <div class="checks">
+          <label><input type="checkbox" id="uw-apply-conservative" checked> Conservative model</label>
+          <label><input type="checkbox" id="uw-apply-stretch"> Stretch model</label>
+          <label><input type="checkbox" id="uw-apply-overview" checked> Overview cards</label>
+          <label><input type="checkbox" id="uw-apply-summary" checked> Investor summary</label>
+        </div>
+        <button type="button" class="btn-apply" id="uw-apply-btn" disabled>Apply to Deck</button>
+        <div class="uw-status" id="uw-status">Loading…</div>
+      </div>
 
       <!-- Sections will be populated by JS below; only essentials are inline -->
       <div id="form-root"></div>
@@ -1543,7 +1604,254 @@
       document.getElementById('zoom-in').addEventListener('click', () => { zoom = Math.min(1, zoom + 0.05); applyZoom(); });
       document.getElementById('zoom-out').addEventListener('click', () => { zoom = Math.max(0.25, zoom - 0.05); applyZoom(); });
       document.getElementById('zoom-fit').addEventListener('click', fitZoom);
+
+      // ==========================================================
+      // Pull from Underwriting Log — wire picker + apply
+      // ==========================================================
+      initUnderwritingPicker();
     });
+
+    // ============================================================
+    // UNDERWRITING PICKER  ---------------------------------------
+    // ============================================================
+    const UW_LOG_SHEET_ID = '1xsqbZU9R9TNFPhVzwyvYdn2HKYnKiJVFVmLrMLFVtTE';
+    let UW_TABLE = null;
+    let UW_INDEX = null;
+
+    function gvizUrl(sheetId, tab) {
+      return 'https://docs.google.com/spreadsheets/d/' + sheetId +
+             '/gviz/tq?tqx=out:json&headers=1&sheet=' + encodeURIComponent(tab || 'Form Responses 1') +
+             '&t=' + Date.now();
+    }
+    function parseGviz(text) {
+      const m = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
+      if (!m) throw new Error('Unexpected gviz response');
+      const data = JSON.parse(m[1]);
+      if (data.status !== 'ok') throw new Error('gviz error: ' + data.status);
+      return data.table || { cols: [], rows: [] };
+    }
+    function gvizString(cell) {
+      if (!cell) return '';
+      if (cell.f != null) return String(cell.f);
+      if (cell.v != null) return String(cell.v);
+      return '';
+    }
+    function gvizNumber(cell) {
+      if (!cell || cell.v == null) return 0;
+      if (typeof cell.v === 'number') return cell.v;
+      const n = parseFloat(String(cell.v).replace(/[$,\s%]/g, ''));
+      return isNaN(n) ? 0 : n;
+    }
+    function findCol(cols, ...candidates) {
+      const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+      const labels = cols.map(c => norm(c.label));
+      for (const cand of candidates) {
+        const t = norm(cand);
+        const idx = labels.findIndex(l => l === t);
+        if (idx >= 0) return idx;
+      }
+      for (const cand of candidates) {
+        const t = norm(cand);
+        const idx = labels.findIndex(l => l.indexOf(t) >= 0 || t.indexOf(l) >= 0);
+        if (idx >= 0) return idx;
+      }
+      return -1;
+    }
+    function buildIndex(cols) {
+      return {
+        scenario: findCol(cols, 'Scenerio Name', 'Scenario Name'),
+        address:  findCol(cols, 'Property Address', 'Address'),
+        neigh:    findCol(cols, 'Neighborhood'),
+        homes:    findCol(cols, 'Number of Homes'),
+        sqft:     findCol(cols, 'Sq Footage', 'Sq Footage / Home'),
+        buildPsf: findCol(cols, 'Build $ Sq Ft', 'Build $ / Sq Ft'),
+        salePrice:findCol(cols, 'Target Sale $'),
+        constMo:  findCol(cols, 'Construction Months'),
+        saleMo:   findCol(cols, 'Sale Period Months'),
+        overrun:  findCol(cols, 'Construction Overrun'),
+        realtor:  findCol(cols, 'Realtor Commission'),
+        bank:     findCol(cols, 'Bank Fee'),
+        intRate:  findCol(cols, 'Interest Rate'),
+        devFee:   findCol(cols, 'Developer Fee'),
+        pref:     findCol(cols, 'Investor Preferred Return', 'Preferred Return'),
+        lotCost:  findCol(cols, 'Lot Cost'),
+        ownerEq:  findCol(cols, 'Owner Equity Into Land'),
+        taxes:    findCol(cols, 'Annual Taxes'),
+        title:    findCol(cols, 'Title', 'Title / Closing'),
+        pool:     findCol(cols, 'Pool Cost'),
+        designer: findCol(cols, 'Designer Fee'),
+        architect:findCol(cols, 'Architect Fee'),
+        totalCost:findCol(cols, 'Total Project Cost'),
+        equity:   findCol(cols, 'Equity Invested'),
+        loan:     findCol(cols, 'Loan Amount'),
+        grossProfit:findCol(cols, 'Gross Profit'),
+        profitMargin:findCol(cols, 'Profit Margin'),
+        roe:      findCol(cols, 'ROE'),
+        roc:      findCol(cols, 'ROC'),
+        annualRoe:findCol(cols, 'Annualized ROE'),
+        breakeven:findCol(cols, 'Break-Even', 'Break-Even $ / SF'),
+        netRev:   findCol(cols, 'Net Revenue'),
+        constInt: findCol(cols, 'Construction Interest'),
+        bankFeesAmt:findCol(cols, 'Bank Fees'),
+        landLoan: findCol(cols, 'Land Loan')
+      };
+    }
+    async function initUnderwritingPicker() {
+      const statusEl = document.getElementById('uw-status');
+      const picker = document.getElementById('uw-deal-picker');
+      const applyBtn = document.getElementById('uw-apply-btn');
+      try {
+        const res = await fetch(gvizUrl(UW_LOG_SHEET_ID, 'Form Responses 1'), { cache: 'no-store' });
+        const text = await res.text();
+        UW_TABLE = parseGviz(text);
+        UW_INDEX = buildIndex(UW_TABLE.cols || []);
+        const rows = UW_TABLE.rows || [];
+        if (rows.length === 0) {
+          picker.innerHTML = '<option value="">No deals logged yet</option>';
+          statusEl.textContent = 'No deals in log';
+          return;
+        }
+        const options = rows.map((r, i) => {
+          const c = r.c || [];
+          const scen = UW_INDEX.scenario >= 0 ? gvizString(c[UW_INDEX.scenario]) : '';
+          const addr = UW_INDEX.address  >= 0 ? gvizString(c[UW_INDEX.address])  : '';
+          const label = (scen && addr) ? scen + ' · ' + addr : (scen || addr || '(unnamed)');
+          return '<option value="' + i + '">' + label.replace(/</g, '&lt;') + '</option>';
+        }).join('');
+        picker.innerHTML = '<option value="">— Pick a deal —</option>' + options;
+        statusEl.textContent = rows.length + ' deal' + (rows.length === 1 ? '' : 's') + ' available';
+        picker.addEventListener('change', () => {
+          applyBtn.disabled = !picker.value;
+          if (picker.value) {
+            const c = rows[Number(picker.value)].c || [];
+            const scen = UW_INDEX.scenario >= 0 ? gvizString(c[UW_INDEX.scenario]) : '';
+            statusEl.textContent = scen ? ('Selected: ' + scen) : 'Deal selected';
+          }
+        });
+        applyBtn.addEventListener('click', () => {
+          const idx = Number(picker.value);
+          if (isNaN(idx)) return;
+          applyDealToDeck(rows[idx].c || []);
+        });
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = 'Failed to load — check sheet access';
+        picker.innerHTML = '<option value="">(load failed)</option>';
+      }
+    }
+
+    // Map a deal row → deck state, respecting the four checkboxes
+    function applyDealToDeck(cells) {
+      const IX = UW_INDEX;
+      const g   = (i) => i >= 0 ? cells[i] : null;
+      const gn  = (i) => gvizNumber(g(i));
+      const gs  = (i) => gvizString(g(i));
+
+      const address    = gs(IX.address) || 'PROJECT';
+      const scenario   = gs(IX.scenario);
+      const neigh      = gs(IX.neigh);
+      const homes      = Math.max(1, gn(IX.homes) || 1);
+      const sqftPerHome= gn(IX.sqft);
+      const buildPsf   = gn(IX.buildPsf);
+      const salePricePerHome = gn(IX.salePrice);
+      const constMo    = gn(IX.constMo);
+      const saleMo     = gn(IX.saleMo);
+      const overrunPct = gn(IX.overrun) / 100;    // sheet stores as %
+      const realtorPct = gn(IX.realtor) / 100;
+      const bankFeePctInput = gn(IX.bank);
+      const intRate    = gn(IX.intRate);
+      const devFeePct  = gn(IX.devFee);
+      const prefPct    = gn(IX.pref);
+      const lotCost    = gn(IX.lotCost);
+      const ownerEq    = gn(IX.ownerEq);
+      const taxes      = gn(IX.taxes);
+      const title      = gn(IX.title);
+      const pool       = gn(IX.pool);
+      const designer   = gn(IX.designer);
+      const architect  = gn(IX.architect);
+      const totalCost  = gn(IX.totalCost);
+      const equity     = gn(IX.equity);
+      const constInt   = gn(IX.constInt);
+      const bankFeesAmt= gn(IX.bankFeesAmt);
+      const grossProfit= gn(IX.grossProfit);
+      const profitMarg = gn(IX.profitMargin);
+      const annualRoe  = gn(IX.annualRoe);
+      const breakeven  = gn(IX.breakeven);
+      const netRev     = gn(IX.netRev);
+
+      // Derived aggregates
+      const totalSellableSF = Math.round(sqftPerHome * homes);
+      const exitPsf         = sqftPerHome > 0 ? Math.round(salePricePerHome / sqftPerHome) : 0;
+      const totalSalePrice  = salePricePerHome * homes;
+
+      // Basis line items ($) — grouped for slide readability
+      const landBucket   = Math.round(lotCost + title + taxes + ownerEq);
+      const hardBucket   = Math.round((buildPsf * sqftPerHome * homes) * (1 + overrunPct));
+      const softBucket   = Math.round(architect + designer + pool);
+      const carryBucket  = Math.round(constInt + bankFeesAmt);
+      const buildBasis   = [
+        { label: 'Land + closing + taxes',       value: landBucket },
+        { label: 'Hard costs (incl. overrun)',   value: hardBucket },
+        { label: 'Soft costs (arch/design/pool)',value: softBucket },
+        { label: 'Carry + bank fees',            value: carryBucket }
+      ];
+
+      const fmtMoney = (n) => {
+        if (!n) return '—';
+        if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+        if (n >= 1e3) return '$' + Math.round(n / 1e3) + 'k';
+        return '$' + n.toLocaleString();
+      };
+      const fmtPct = (n) => n ? (Math.round(n * 10) / 10) + '%' : '—';
+
+      const applyConservative = document.getElementById('uw-apply-conservative').checked;
+      const applyStretch      = document.getElementById('uw-apply-stretch').checked;
+      const applyOverview     = document.getElementById('uw-apply-overview').checked;
+      const applySummary      = document.getElementById('uw-apply-summary').checked;
+
+      const labelKey = scenario || address;
+
+      if (applyConservative) {
+        state.uw.conservative = {
+          title: 'CONSERVATIVE MODEL · ' + address.toUpperCase() + ' · $' + exitPsf.toLocaleString() + ' / SF EXIT',
+          basis: JSON.parse(JSON.stringify(buildBasis)),
+          sqft: totalSellableSF,
+          exitPsf: exitPsf,
+          sellingCosts: realtorPct || 0.06
+        };
+      }
+      if (applyStretch) {
+        // Stretch = same basis, +8% exit PSF assumption
+        const stretchPsf = Math.round(exitPsf * 1.08);
+        state.uw.stretch = {
+          title: 'STRETCH MODEL · ' + address.toUpperCase() + ' · $' + stretchPsf.toLocaleString() + ' / SF EXIT',
+          basis: JSON.parse(JSON.stringify(buildBasis)),
+          sqft: totalSellableSF,
+          exitPsf: stretchPsf,
+          sellingCosts: realtorPct || 0.06
+        };
+      }
+      if (applyOverview) {
+        state.overview.cards = [
+          { lbl: 'TARGET BASIS', val: fmtMoney(totalCost), sub: 'All-in project cost' },
+          { lbl: 'TARGET EXIT',  val: fmtMoney(totalSalePrice), sub: '$' + exitPsf.toLocaleString() + ' / SF · conservative' },
+          { lbl: 'PROJECT IRR',  val: fmtPct(annualRoe), sub: 'Annualized ROE · base case' },
+          { lbl: 'HOLD PERIOD',  val: (constMo + saleMo) + ' MO', sub: constMo + ' build · ' + saleMo + ' sale' }
+        ];
+      }
+      if (applySummary) {
+        state.summary.capitalRequired = fmtMoney(equity);
+        state.summary.holdPeriod      = (constMo + saleMo) + ' months (' + constMo + ' build · ' + saleMo + ' sale)';
+        state.summary.targetIRR       = fmtPct(annualRoe) + ' annualized ROE';
+        state.summary.preferredReturn = prefPct ? (prefPct + '% pref') : state.summary.preferredReturn;
+      }
+
+      renderForm();
+      rerender({ fast: true });
+      setStatus('Applied "' + (labelKey || 'deal') + '" to deck', 'ok');
+      const st = document.getElementById('uw-status');
+      st.textContent = 'Applied · ' + labelKey;
+    }
   </script>
 </body>
 </html>
