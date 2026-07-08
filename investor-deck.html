@@ -489,6 +489,15 @@
         <div class="uw-status" id="uw-status">Loading…</div>
       </div>
 
+      <!-- ===== RealTracs PDF importer (build comps) ===== -->
+      <div class="uw-pull" id="rt-pull-panel">
+        <h3>Import Build Comps · RealTracs PDF</h3>
+        <p class="desc">Export the Residential Property CMA summary from RealTracs, drop the PDF here, and we'll prefill Closed &amp; Under-Contract comps. Land comps and Coming Soon comps stay manual.</p>
+        <input type="file" id="rt-file-input" accept="application/pdf" style="display:none">
+        <button type="button" class="btn-apply" id="rt-import-btn">Choose RealTracs PDF</button>
+        <div class="uw-status" id="rt-status">Ready</div>
+      </div>
+
       <!-- Sections will be populated by JS below; only essentials are inline -->
       <div id="form-root"></div>
 
@@ -1609,6 +1618,11 @@
       // Pull from Underwriting Log — wire picker + apply
       // ==========================================================
       initUnderwritingPicker();
+
+      // ==========================================================
+      // Import Build Comps · RealTracs PDF
+      // ==========================================================
+      initRealTracsImport();
     });
 
     // ============================================================
@@ -1851,6 +1865,199 @@
       setStatus('Applied "' + (labelKey || 'deal') + '" to deck', 'ok');
       const st = document.getElementById('uw-status');
       st.textContent = 'Applied · ' + labelKey;
+    }
+
+    // ============================================================
+    // REALTRACS PDF IMPORT  --------------------------------------
+    // Lazy-loads pdf.js. Parses UC + Closed sections of a
+    // Residential Property CMA export. Maps into deck comps state.
+    // ============================================================
+    const PDFJS_URL    = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    const PDFJS_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    function loadPdfJs() {
+      if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = PDFJS_URL; s.async = true;
+        s.onload = () => {
+          if (!window.pdfjsLib) return reject(new Error('pdf.js loaded but pdfjsLib missing'));
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+          resolve(window.pdfjsLib);
+        };
+        s.onerror = () => reject(new Error('Failed to load pdf.js'));
+        document.head.appendChild(s);
+      });
+    }
+
+    async function extractLinesFromPDF(arrayBuffer) {
+      const pdfjsLib = await loadPdfJs();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const allLines = [];
+      for (let pn = 1; pn <= pdf.numPages; pn++) {
+        const page = await pdf.getPage(pn);
+        const tc = await page.getTextContent();
+        const buckets = new Map();
+        for (const item of tc.items) {
+          const y = Math.round(item.transform[5]);
+          const x = item.transform[4];
+          if (!buckets.has(y)) buckets.set(y, []);
+          buckets.get(y).push({ x: x, s: item.str });
+        }
+        const ys = Array.from(buckets.keys()).sort((a, b) => b - a);
+        for (const y of ys) {
+          const row = buckets.get(y).sort((a, b) => a.x - b.x);
+          allLines.push(row.map(r => r.s).join('  '));
+        }
+      }
+      return allLines;
+    }
+
+    const STREET_SUFFIX_RE = /\b(Dr|Rd|Ct|Pl|Ave|St|Cir|Ln|Way|Blvd|Pkwy|Pike|Hwy|Trl|Sq|Ter|Xing|Loop|Park|Place|Court|Drive|Road|Avenue|Street|Boulevard|Lane|Trail)\b\.?/;
+
+    function rtLooksLikeCompRow(line) { return /^\s*\d{7}\s/.test(line); }
+    function rtParseRow(line, isClosed) {
+      line = line.trim();
+      const m1 = /^(\d{7})\s+(.*)$/.exec(line);
+      if (!m1) return null;
+      const rest = m1[2];
+      const yb = /\b(19\d{2}|20\d{2})\b/.exec(rest);
+      if (!yb) return null;
+      const head = rest.slice(0, yb.index);
+      const headRe = /(\d+(?:\.\d+)?)\s+(\d{1,2})\s+(\d+(?:\s*\/\s*\d+)?)\s*$/;
+      const hm = headRe.exec(head);
+      if (!hm) return null;
+      const acres = hm[1], br = hm[2], bath = hm[3].replace(/\s+/g, '');
+      const addrSubdev = rest.slice(0, hm.index).trim();
+      let address = addrSubdev;
+      const suf = STREET_SUFFIX_RE.exec(addrSubdev);
+      if (suf) address = addrSubdev.slice(0, suf.index + suf[0].length).trim();
+      else address = (addrSubdev.split(/\s{2,}/)[0] || '').trim();
+
+      const tail = rest.slice(yb.index).trim();
+      const tokens = tail.split(/\s+/);
+      if (tokens.length < 7) return null;
+      const rec = {
+        mls: m1[1], address, acres, br, bath,
+        yearBuilt: tokens[0], garage: tokens[1], sqft: tokens[2],
+        lpPsf: tokens[3], listPrice: tokens[4]
+      };
+      if (isClosed) {
+        if (tokens.length < 10) return null;
+        rec.spPsf = tokens[5]; rec.salePrice = tokens[6];
+        rec.closed = tokens[7]; rec.dom = tokens[8]; rec.ltc = tokens[9];
+      } else {
+        rec.dom = tokens[5]; rec.ltc = tokens[6];
+      }
+      return rec;
+    }
+
+    function rtParseCma(lines) {
+      const uc = [], closed = [];
+      let section = null;
+      for (const ln of lines) {
+        const lower = ln.toLowerCase();
+        if (lower.indexOf('under contract') !== -1 && lower.indexOf('showing') !== -1) { section = 'uc'; continue; }
+        if (lower.trim() === 'closed' || lower.indexOf('closed - showing') !== -1) { section = 'closed'; continue; }
+        if (!section) continue;
+        if (/^\s*(Average|Median)\b/.test(ln)) continue;
+        if (rtLooksLikeCompRow(ln)) {
+          const rec = rtParseRow(ln, section === 'closed');
+          if (rec) (section === 'closed' ? closed : uc).push(rec);
+        }
+      }
+      return { uc, closed };
+    }
+
+    // Format $X,XXX,XXX → $X.XXM (or $XXXk); keep raw if unparseable
+    function rtFormatPrice(raw) {
+      if (!raw) return '';
+      const n = parseFloat(String(raw).replace(/[$,\s]/g, ''));
+      if (!isFinite(n) || n === 0) return String(raw);
+      if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+      if (n >= 1e3) return '$' + Math.round(n / 1e3) + 'k';
+      return '$' + n.toLocaleString();
+    }
+    function rtFormatSqft(raw) {
+      if (!raw) return '';
+      const n = parseFloat(String(raw).replace(/[,\s]/g, ''));
+      if (!isFinite(n) || n === 0) return String(raw);
+      return n.toLocaleString();
+    }
+    function rtFormatPsf(raw) {
+      if (!raw) return '';
+      const s = String(raw).trim();
+      return s.startsWith('$') ? s : '$' + s;
+    }
+
+    // rec → closedComps entry
+    function rtToClosed(rec) {
+      return {
+        address: rec.address || '',
+        sqft:    rtFormatSqft(rec.sqft),
+        sold:    rtFormatPrice(rec.salePrice),
+        psf:     rtFormatPsf(rec.spPsf),
+        date:    rec.closed || '',
+        photo:   ''
+      };
+    }
+    // rec → presoldComps entry
+    function rtToPresold(rec) {
+      return {
+        address: rec.address || '',
+        sqft:    rtFormatSqft(rec.sqft),
+        list:    rtFormatPrice(rec.listPrice),
+        psf:     rtFormatPsf(rec.lpPsf),
+        status:  'Under contract' + (rec.dom ? ' · DOM ' + rec.dom : ''),
+        photo:   ''
+      };
+    }
+
+    function initRealTracsImport() {
+      const btn = document.getElementById('rt-import-btn');
+      const fileEl = document.getElementById('rt-file-input');
+      const statusEl = document.getElementById('rt-status');
+      if (!btn || !fileEl) return;
+
+      const setSt = (msg) => { if (statusEl) statusEl.textContent = msg; };
+
+      btn.addEventListener('click', () => fileEl.click());
+      fileEl.addEventListener('change', async () => {
+        const file = fileEl.files && fileEl.files[0];
+        if (!file) return;
+        btn.disabled = true;
+        setSt('Reading PDF…');
+        try {
+          const buf = await file.arrayBuffer();
+          const lines = await extractLinesFromPDF(buf);
+          const { uc, closed } = rtParseCma(lines);
+          if (uc.length === 0 && closed.length === 0) {
+            setSt('No comps found — is this a RealTracs Residential CMA export?');
+            setStatus('RealTracs: no comps found', 'err');
+            return;
+          }
+          if (closed.length) {
+            state.comps.closedComps = closed.slice(0, 3).map(rtToClosed);
+          }
+          if (uc.length) {
+            state.comps.presoldComps = uc.slice(0, 3).map(rtToPresold);
+          }
+          renderForm();
+          rerender({ fast: true });
+          const parts = [];
+          if (closed.length) parts.push(Math.min(3, closed.length) + ' closed');
+          if (uc.length)     parts.push(Math.min(3, uc.length) + ' UC');
+          setSt('Imported · ' + parts.join(' + '));
+          setStatus('Imported ' + parts.join(' + ') + ' from RealTracs', 'ok');
+        } catch (err) {
+          console.error(err);
+          setSt('Import failed — ' + (err && err.message || 'unknown error'));
+          setStatus('RealTracs import failed', 'err');
+        } finally {
+          btn.disabled = false;
+          fileEl.value = ''; // allow re-import of same file
+        }
+      });
     }
   </script>
 </body>
