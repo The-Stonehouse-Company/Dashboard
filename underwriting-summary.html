@@ -70,7 +70,7 @@
     min-height: 11in;
     background: var(--paper);
     color: var(--ink);
-    padding: 0.65in 0.7in;
+    padding: 0.5in 0.55in;
     margin: 0 auto;
     box-shadow: 0 6px 32px rgba(0,0,0,0.35);
     position: relative;
@@ -79,9 +79,9 @@
   /* Header */
   .header {
     display: flex; align-items: flex-start; justify-content: space-between;
-    padding-bottom: 14pt;
+    padding-bottom: 10pt;
     border-bottom: 1px solid var(--ink);
-    margin-bottom: 22pt;
+    margin-bottom: 14pt;
   }
   .header .brand-block { flex: 1; }
   .header .arch { width: 40px; display: block; margin-bottom: 6pt; }
@@ -111,19 +111,19 @@
   }
 
   /* Title */
-  .title-block { text-align: center; margin-bottom: 22pt; }
+  .title-block { text-align: center; margin-bottom: 14pt; }
   .title-block .eyebrow {
     font-family: var(--font-body);
-    font-size: 9pt;
+    font-size: 8pt;
     letter-spacing: 0.32em;
     text-transform: uppercase;
     color: var(--muted);
-    margin-bottom: 6pt;
+    margin-bottom: 4pt;
   }
   .title-block h1 {
     font-family: var(--font-display);
-    font-size: 22pt;
-    letter-spacing: 0.14em;
+    font-size: 18pt;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--ink);
     font-weight: 400;
@@ -131,51 +131,51 @@
   }
   .title-block .scenario {
     font-family: var(--font-body);
-    font-size: 11pt;
+    font-size: 10pt;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--muted);
-    margin-top: 8pt;
+    margin-top: 5pt;
   }
 
   /* Section header */
   h2 {
     font-family: var(--font-body);
-    font-size: 10pt;
+    font-size: 9pt;
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--ink);
-    padding-bottom: 5pt;
+    padding-bottom: 4pt;
     border-bottom: 1px solid var(--ink);
-    margin: 0 0 10pt;
+    margin: 0 0 7pt;
   }
-  section { margin-bottom: 20pt; }
+  section { margin-bottom: 12pt; }
 
   /* Hero returns tiles */
   .hero-returns {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10pt;
-    margin-bottom: 20pt;
+    gap: 8pt;
+    margin-bottom: 14pt;
   }
   .hero-tile {
     border: 1px solid var(--rule);
-    padding: 14pt 12pt;
+    padding: 10pt 10pt;
     text-align: center;
     background: var(--panel);
   }
   .hero-tile .label {
     font-family: var(--font-body);
-    font-size: 8pt;
+    font-size: 7.5pt;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--muted);
-    margin-bottom: 6pt;
+    margin-bottom: 4pt;
   }
   .hero-tile .val {
     font-family: var(--font-display);
-    font-size: 20pt;
+    font-size: 17pt;
     color: var(--ink);
     letter-spacing: 0.02em;
   }
@@ -184,25 +184,27 @@
   .kv-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 6pt 24pt;
+    gap: 2pt 20pt;
   }
+  .kv-grid.two { grid-template-columns: repeat(2, 1fr); }
+  .kv-grid.four { grid-template-columns: repeat(4, 1fr); }
   .kv {
     display: flex;
     justify-content: space-between;
-    padding: 5pt 0;
+    padding: 3pt 0;
     border-bottom: 1px dotted #ddd;
-    font-size: 10.5pt;
+    font-size: 9pt;
   }
   .kv .k { color: var(--muted); letter-spacing: 0.02em; }
   .kv .v { color: var(--ink); font-weight: 600; text-align: right; }
 
   /* Notes */
   .notes {
-    padding: 14pt 16pt;
+    padding: 9pt 12pt;
     background: var(--panel);
     border: 1px solid var(--rule);
-    font-size: 10.5pt;
-    line-height: 1.55;
+    font-size: 9.5pt;
+    line-height: 1.5;
     color: var(--muted);
   }
   .notes .empty { font-style: italic; color: var(--dim); }
@@ -236,13 +238,13 @@
 
   /* Footer */
   .footer {
-    margin-top: 30pt;
-    padding-top: 12pt;
+    margin-top: 16pt;
+    padding-top: 8pt;
     border-top: 1px solid var(--rule);
     display: flex;
     justify-content: space-between;
     font-family: var(--font-body);
-    font-size: 8pt;
+    font-size: 7.5pt;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--dim);
@@ -302,44 +304,74 @@
     </div>
 
     <section>
-      <h2>Project Overview</h2>
+      <h2>Project Overview — Inputs</h2>
       <div class="kv-grid">
         <div class="kv"><span class="k">Neighborhood</span><span class="v" id="k-neigh">—</span></div>
         <div class="kv"><span class="k">Number of Homes</span><span class="v" id="k-homes">—</span></div>
         <div class="kv"><span class="k">Sq Footage / Home</span><span class="v" id="k-sqft">—</span></div>
         <div class="kv"><span class="k">Build $ / SF</span><span class="v" id="k-build-psf">—</span></div>
         <div class="kv"><span class="k">Target Sale $</span><span class="v" id="k-sale-price">—</span></div>
-        <div class="kv"><span class="k">Break-Even $ / SF</span><span class="v" id="k-breakeven-psf">—</span></div>
         <div class="kv"><span class="k">Construction Period</span><span class="v" id="k-const-months">—</span></div>
         <div class="kv"><span class="k">Sale Period</span><span class="v" id="k-sale-months">—</span></div>
         <div class="kv"><span class="k">Number of Investors</span><span class="v" id="k-investors">—</span></div>
+        <div class="kv"><span class="k">Capital Mode</span><span class="v" id="k-cap-mode">—</span></div>
       </div>
     </section>
 
     <section>
-      <h2>Capital Structure</h2>
+      <h2>Land &amp; Site Costs — Inputs</h2>
       <div class="kv-grid">
+        <div class="kv"><span class="k">Lot Cost</span><span class="v" id="k-lot-cost">—</span></div>
+        <div class="kv"><span class="k">Owner Equity Into Land</span><span class="v" id="k-owner-eq">—</span></div>
+        <div class="kv"><span class="k">Annual Taxes</span><span class="v" id="k-taxes">—</span></div>
+        <div class="kv"><span class="k">Title / Closing</span><span class="v" id="k-title">—</span></div>
+        <div class="kv"><span class="k">Architect Fee</span><span class="v" id="k-architect">—</span></div>
+        <div class="kv"><span class="k">Designer Fee</span><span class="v" id="k-designer">—</span></div>
+        <div class="kv"><span class="k">Pool Cost</span><span class="v" id="k-pool">—</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Fee &amp; Rate Assumptions — Inputs</h2>
+      <div class="kv-grid">
+        <div class="kv"><span class="k">Construction Overrun</span><span class="v" id="k-overrun">—</span></div>
+        <div class="kv"><span class="k">Realtor Commission</span><span class="v" id="k-realtor">—</span></div>
+        <div class="kv"><span class="k">Bank Fee</span><span class="v" id="k-bank-fee">—</span></div>
+        <div class="kv"><span class="k">Interest Rate</span><span class="v" id="k-int-rate">—</span></div>
+        <div class="kv"><span class="k">Developer Fee</span><span class="v" id="k-dev-fee">—</span></div>
+        <div class="kv"><span class="k">Investor Pref Return</span><span class="v" id="k-pref">—</span></div>
+        <div class="kv"><span class="k">LTC Ratio (target)</span><span class="v" id="k-ltc-ratio">—</span></div>
+        <div class="kv"><span class="k">Target LTV</span><span class="v" id="k-ltv-target">—</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Capital Structure — Computed</h2>
+      <div class="kv-grid">
+        <div class="kv"><span class="k">Total Project Cost</span><span class="v" id="k-total-cost">—</span></div>
         <div class="kv"><span class="k">Equity Invested</span><span class="v" id="k-equity">—</span></div>
         <div class="kv"><span class="k">Equity / Investor</span><span class="v" id="k-equity-per">—</span></div>
         <div class="kv"><span class="k">Loan Amount</span><span class="v" id="k-loan">—</span></div>
+        <div class="kv"><span class="k">Land Loan</span><span class="v" id="k-land-loan">—</span></div>
+        <div class="kv"><span class="k">Construction Interest</span><span class="v" id="k-const-int">—</span></div>
+        <div class="kv"><span class="k">Bank Fees ($)</span><span class="v" id="k-bank-fees-amt">—</span></div>
         <div class="kv"><span class="k">Computed LTC</span><span class="v" id="k-ltc">—</span></div>
         <div class="kv"><span class="k">Computed LTV</span><span class="v" id="k-ltv">—</span></div>
-        <div class="kv"><span class="k">Capital Mode</span><span class="v" id="k-cap-mode">—</span></div>
-        <div class="kv"><span class="k">Interest Rate</span><span class="v" id="k-int-rate">—</span></div>
-        <div class="kv"><span class="k">Investor Pref Return</span><span class="v" id="k-pref">—</span></div>
-        <div class="kv"><span class="k">Developer Fee</span><span class="v" id="k-dev-fee">—</span></div>
       </div>
     </section>
 
     <section>
-      <h2>Returns</h2>
+      <h2>Returns — Computed</h2>
       <div class="kv-grid">
+        <div class="kv"><span class="k">Net Revenue</span><span class="v" id="k-net-rev">—</span></div>
+        <div class="kv"><span class="k">Gross Profit</span><span class="v" id="k-gross-profit">—</span></div>
+        <div class="kv"><span class="k">Profit Margin</span><span class="v" id="k-profit-margin">—</span></div>
         <div class="kv"><span class="k">ROE</span><span class="v" id="k-roe">—</span></div>
         <div class="kv"><span class="k">ROC</span><span class="v" id="k-roc">—</span></div>
         <div class="kv"><span class="k">Annualized ROE</span><span class="v" id="k-annual-roe">—</span></div>
         <div class="kv"><span class="k">Profit / Home</span><span class="v" id="k-profit-per-home">—</span></div>
         <div class="kv"><span class="k">Developer Net Profit</span><span class="v" id="k-dev-net">—</span></div>
-        <div class="kv"><span class="k">Net Revenue</span><span class="v" id="k-net-rev">—</span></div>
+        <div class="kv"><span class="k">Break-Even $ / SF</span><span class="v" id="k-breakeven-psf">—</span></div>
       </div>
     </section>
 
@@ -530,7 +562,10 @@
       profitPerHome:findCol(cols, 'Profit Per Home'),
       devNet:   findCol(cols, 'Developer Net Profit'),
       breakeven:findCol(cols, 'Break-Even', 'Break-Even $ / SF'),
-      netRev:   findCol(cols, 'Net Revenue')
+      netRev:   findCol(cols, 'Net Revenue'),
+      constInt: findCol(cols, 'Construction Interest'),
+      bankFeesAmt:findCol(cols, 'Bank Fees'),
+      landLoan: findCol(cols, 'Land Loan')
     };
 
     // Find the row matching SELECTED_DEAL (by scenario name OR address)
@@ -563,41 +598,63 @@
     document.getElementById('meta-issued').textContent = fmtLongDate(new Date());
     document.getElementById('foot-generated').textContent = 'Generated · ' + fmtLongDate(new Date());
 
-    // Hero returns
+    // Hero returns tiles
     document.getElementById('t-total-cost').textContent    = money(gvizNumber(val(ix.totalCost)));
     document.getElementById('t-gross-profit').textContent  = money(gvizNumber(val(ix.grossProfit)));
     document.getElementById('t-profit-margin').textContent = pct(gvizNumber(val(ix.profitMargin)));
     document.getElementById('t-annual-roe').textContent    = pct(gvizNumber(val(ix.annualRoe)));
 
-    // Project Overview
+    // Project Overview — Inputs
     document.getElementById('k-neigh').textContent         = txt(gvizString(val(ix.neigh)));
     document.getElementById('k-homes').textContent         = num(gvizNumber(val(ix.homes)));
     document.getElementById('k-sqft').textContent          = num(gvizNumber(val(ix.sqft)));
     document.getElementById('k-build-psf').textContent     = '$' + num(gvizNumber(val(ix.buildPsf)));
     document.getElementById('k-sale-price').textContent    = moneyDetailed(gvizNumber(val(ix.salePrice)));
-    document.getElementById('k-breakeven-psf').textContent = '$' + num(gvizNumber(val(ix.breakeven)));
     document.getElementById('k-const-months').textContent  = num(gvizNumber(val(ix.constMo))) + ' mo';
     document.getElementById('k-sale-months').textContent   = num(gvizNumber(val(ix.saleMo))) + ' mo';
     document.getElementById('k-investors').textContent     = num(gvizNumber(val(ix.investors)));
+    document.getElementById('k-cap-mode').textContent      = txt(gvizString(val(ix.capMode)));
 
-    // Capital Structure
-    document.getElementById('k-equity').textContent      = moneyDetailed(gvizNumber(val(ix.equity)));
-    document.getElementById('k-equity-per').textContent  = moneyDetailed(gvizNumber(val(ix.equityPer)));
-    document.getElementById('k-loan').textContent        = moneyDetailed(gvizNumber(val(ix.loan)));
-    document.getElementById('k-ltc').textContent         = pct(gvizNumber(val(ix.compLtc)));
-    document.getElementById('k-ltv').textContent         = pct(gvizNumber(val(ix.compLtv)));
-    document.getElementById('k-cap-mode').textContent    = txt(gvizString(val(ix.capMode)));
-    document.getElementById('k-int-rate').textContent    = pct(gvizNumber(val(ix.intRate)));
-    document.getElementById('k-pref').textContent        = pct(gvizNumber(val(ix.pref)));
-    document.getElementById('k-dev-fee').textContent     = pct(gvizNumber(val(ix.devFee)));
+    // Land & Site Costs — Inputs
+    document.getElementById('k-lot-cost').textContent      = moneyDetailed(gvizNumber(val(ix.lotCost)));
+    document.getElementById('k-owner-eq').textContent      = moneyDetailed(gvizNumber(val(ix.ownerEq)));
+    document.getElementById('k-taxes').textContent         = moneyDetailed(gvizNumber(val(ix.taxes)));
+    document.getElementById('k-title').textContent         = moneyDetailed(gvizNumber(val(ix.title)));
+    document.getElementById('k-architect').textContent     = moneyDetailed(gvizNumber(val(ix.architect)));
+    document.getElementById('k-designer').textContent      = moneyDetailed(gvizNumber(val(ix.designer)));
+    document.getElementById('k-pool').textContent          = moneyDetailed(gvizNumber(val(ix.pool)));
 
-    // Returns
+    // Fee & Rate Assumptions — Inputs
+    document.getElementById('k-overrun').textContent       = pct(gvizNumber(val(ix.overrun)));
+    document.getElementById('k-realtor').textContent       = pct(gvizNumber(val(ix.realtor)));
+    document.getElementById('k-bank-fee').textContent      = pct(gvizNumber(val(ix.bank)));
+    document.getElementById('k-int-rate').textContent      = pct(gvizNumber(val(ix.intRate)));
+    document.getElementById('k-dev-fee').textContent       = pct(gvizNumber(val(ix.devFee)));
+    document.getElementById('k-pref').textContent          = pct(gvizNumber(val(ix.pref)));
+    document.getElementById('k-ltc-ratio').textContent     = pct(gvizNumber(val(ix.ltcRatio)));
+    document.getElementById('k-ltv-target').textContent    = pct(gvizNumber(val(ix.ltvTarget)));
+
+    // Capital Structure — Computed
+    document.getElementById('k-total-cost').textContent    = moneyDetailed(gvizNumber(val(ix.totalCost)));
+    document.getElementById('k-equity').textContent        = moneyDetailed(gvizNumber(val(ix.equity)));
+    document.getElementById('k-equity-per').textContent    = moneyDetailed(gvizNumber(val(ix.equityPer)));
+    document.getElementById('k-loan').textContent          = moneyDetailed(gvizNumber(val(ix.loan)));
+    document.getElementById('k-land-loan').textContent     = moneyDetailed(gvizNumber(val(ix.landLoan)));
+    document.getElementById('k-const-int').textContent     = moneyDetailed(gvizNumber(val(ix.constInt)));
+    document.getElementById('k-bank-fees-amt').textContent = moneyDetailed(gvizNumber(val(ix.bankFeesAmt)));
+    document.getElementById('k-ltc').textContent           = pct(gvizNumber(val(ix.compLtc)));
+    document.getElementById('k-ltv').textContent           = pct(gvizNumber(val(ix.compLtv)));
+
+    // Returns — Computed
+    document.getElementById('k-net-rev').textContent        = moneyDetailed(gvizNumber(val(ix.netRev)));
+    document.getElementById('k-gross-profit').textContent   = moneyDetailed(gvizNumber(val(ix.grossProfit)));
+    document.getElementById('k-profit-margin').textContent  = pct(gvizNumber(val(ix.profitMargin)));
     document.getElementById('k-roe').textContent            = pct(gvizNumber(val(ix.roe)));
     document.getElementById('k-roc').textContent            = pct(gvizNumber(val(ix.roc)));
     document.getElementById('k-annual-roe').textContent     = pct(gvizNumber(val(ix.annualRoe)));
     document.getElementById('k-profit-per-home').textContent= moneyDetailed(gvizNumber(val(ix.profitPerHome)));
     document.getElementById('k-dev-net').textContent        = moneyDetailed(gvizNumber(val(ix.devNet)));
-    document.getElementById('k-net-rev').textContent        = moneyDetailed(gvizNumber(val(ix.netRev)));
+    document.getElementById('k-breakeven-psf').textContent  = '$' + num(gvizNumber(val(ix.breakeven)));
 
     // Notes
     const notesEl = document.getElementById('k-notes');
