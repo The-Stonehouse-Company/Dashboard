@@ -489,6 +489,21 @@
         <div class="uw-status" id="uw-status">Loading…</div>
       </div>
 
+      <!-- ===== Pull from Land Acquisition Log ===== -->
+      <div class="uw-pull" id="land-pull-panel">
+        <h3>Pull from Land Acquisition Log</h3>
+        <p class="desc">Pick a logged lot to auto-fill the Land slide — eyebrow, narrative, and key-facts bullets. Optionally sync the cover address.</p>
+        <select id="land-deal-picker">
+          <option value="">Loading lots…</option>
+        </select>
+        <div class="checks">
+          <label><input type="checkbox" id="land-apply-land" checked> Land slide (03)</label>
+          <label><input type="checkbox" id="land-apply-cover"> Cover address</label>
+        </div>
+        <button type="button" class="btn-apply" id="land-apply-btn" disabled>Apply to Deck</button>
+        <div class="uw-status" id="land-status">Loading…</div>
+      </div>
+
       <!-- ===== RealTracs PDF importer (build comps) ===== -->
       <div class="uw-pull" id="rt-pull-panel">
         <h3>Import Build Comps · RealTracs PDF</h3>
@@ -1620,6 +1635,11 @@
       initUnderwritingPicker();
 
       // ==========================================================
+      // Pull from Land Acquisition Log — wire picker + apply
+      // ==========================================================
+      initLandPicker();
+
+      // ==========================================================
       // Import Build Comps · RealTracs PDF
       // ==========================================================
       initRealTracsImport();
@@ -1865,6 +1885,167 @@
       setStatus('Applied "' + (labelKey || 'deal') + '" to deck', 'ok');
       const st = document.getElementById('uw-status');
       st.textContent = 'Applied · ' + labelKey;
+    }
+
+    // ============================================================
+    // LAND ACQUISITION PICKER  -----------------------------------
+    // Reads the Land Intake sheet and applies fields to
+    // state.land (eyebrow, narrative, bullets) and optionally
+    // state.project (cover address / location line).
+    // ============================================================
+    const LAND_SHEET_ID = '1pA82pl93-fhGpSoBmU4coJbkLf8KtJlMesc2p5XcKTA';
+    let LAND_TABLE = null;
+    let LAND_INDEX = null;
+
+    function buildLandIndex(cols) {
+      return {
+        address:    findCol(cols, 'Property Address', 'Address'),
+        neigh:      findCol(cols, 'Neighborhood/Area', 'Neighborhood'),
+        askingPrice:findCol(cols, 'Asking Price'),
+        contractPrice:findCol(cols, 'Contract Price'),
+        lotSize:    findCol(cols, 'Lot Size'),
+        topography: findCol(cols, 'Topography'),
+        zoning:     findCol(cols, 'Zoning'),
+        floodZone:  findCol(cols, 'Flood Zone'),
+        needsVar:   findCol(cols, 'Needs Variance', 'Needs Variance?'),
+        setFront:   findCol(cols, 'Setback - Front'),
+        setRear:    findCol(cols, 'Setback - Rear'),
+        setInt:     findCol(cols, 'Setback - Interior'),
+        setRoad:    findCol(cols, 'Setback - Road Side'),
+        dimFront:   findCol(cols, 'Lot Dimension - Front'),
+        dimLeft:    findCol(cols, 'Lot Dimension - Side Left'),
+        dimRear:    findCol(cols, 'Lot Dimension - Rear'),
+        dimRight:   findCol(cols, 'Lot Dimension - Side Right'),
+        bestComp:   findCol(cols, 'Best Comp'),
+        notes:      findCol(cols, 'Additional Notes'),
+        status:     findCol(cols, 'Status')
+      };
+    }
+
+    async function initLandPicker() {
+      const statusEl = document.getElementById('land-status');
+      const picker = document.getElementById('land-deal-picker');
+      const applyBtn = document.getElementById('land-apply-btn');
+      try {
+        const res = await fetch(gvizUrl(LAND_SHEET_ID, 'Form Responses 1'), { cache: 'no-store' });
+        const text = await res.text();
+        LAND_TABLE = parseGviz(text);
+        LAND_INDEX = buildLandIndex(LAND_TABLE.cols || []);
+        const rows = LAND_TABLE.rows || [];
+        if (rows.length === 0) {
+          picker.innerHTML = '<option value="">No lots logged yet</option>';
+          statusEl.textContent = 'No lots in log';
+          return;
+        }
+        const options = rows.map((r, i) => {
+          const c = r.c || [];
+          const addr = LAND_INDEX.address >= 0 ? gvizString(c[LAND_INDEX.address]) : '';
+          const neigh = LAND_INDEX.neigh   >= 0 ? gvizString(c[LAND_INDEX.neigh])   : '';
+          const label = addr + (neigh ? ' · ' + neigh : '');
+          return '<option value="' + i + '">' + (label || '(unnamed)').replace(/</g, '&lt;') + '</option>';
+        }).join('');
+        picker.innerHTML = '<option value="">— Pick a lot —</option>' + options;
+        statusEl.textContent = rows.length + ' lot' + (rows.length === 1 ? '' : 's') + ' available';
+        picker.addEventListener('change', () => {
+          applyBtn.disabled = !picker.value;
+          if (picker.value) {
+            const c = rows[Number(picker.value)].c || [];
+            const addr = LAND_INDEX.address >= 0 ? gvizString(c[LAND_INDEX.address]) : '';
+            statusEl.textContent = addr ? ('Selected: ' + addr) : 'Lot selected';
+          }
+        });
+        applyBtn.addEventListener('click', () => {
+          const idx = Number(picker.value);
+          if (isNaN(idx)) return;
+          applyLandToDeck(rows[idx].c || []);
+        });
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = 'Failed to load — check sheet access';
+        picker.innerHTML = '<option value="">(load failed)</option>';
+      }
+    }
+
+    function applyLandToDeck(cells) {
+      const IX = LAND_INDEX;
+      const g  = (i) => i >= 0 ? cells[i] : null;
+      const gs = (i) => gvizString(g(i));
+      const gn = (i) => gvizNumber(g(i));
+
+      const address    = gs(IX.address);
+      const neigh      = gs(IX.neigh);
+      const lotSize    = gs(IX.lotSize);
+      const topo       = gs(IX.topography);
+      const zoning     = gs(IX.zoning);
+      const flood      = gs(IX.floodZone);
+      const needsVar   = gs(IX.needsVar);
+      const dimFront   = gs(IX.dimFront);
+      const dimLeft    = gs(IX.dimLeft);
+      const dimRear    = gs(IX.dimRear);
+      const dimRight   = gs(IX.dimRight);
+      const bestComp   = gs(IX.bestComp);
+      const notes      = gs(IX.notes);
+
+      const applyLand  = document.getElementById('land-apply-land').checked;
+      const applyCover = document.getElementById('land-apply-cover').checked;
+
+      // ---- Build Land slide fields ----
+      // Eyebrow: prefer lot size; fall back to street
+      const eyebrow = lotSize
+        ? ('SITE · ' + lotSize.toUpperCase())
+        : (address ? ('SITE · ' + address.toUpperCase()) : 'SITE');
+
+      // Narrative — human-readable auto paragraph
+      const narrativeParts = [];
+      if (address) {
+        const lotBit = lotSize ? ('The subject ' + lotSize.toLowerCase() + ' parcel at ' + address)
+                               : ('The subject parcel at ' + address);
+        narrativeParts.push(lotBit + (neigh ? (' sits in the ' + neigh + ' area') : '') + '.');
+      }
+      if (zoning) {
+        narrativeParts.push('Zoned ' + zoning + (topo ? (' with ' + topo.toLowerCase() + ' topography') : '') + '.');
+      } else if (topo) {
+        narrativeParts.push(topo.charAt(0).toUpperCase() + topo.slice(1) + ' topography.');
+      }
+      if (dimFront) {
+        const dim = [dimFront, dimLeft, dimRear, dimRight].filter(Boolean).join(' × ');
+        narrativeParts.push('Lot dimensions ' + dim + ' ft.');
+      }
+      if (notes) {
+        narrativeParts.push(notes);
+      }
+      const narrative = narrativeParts.join(' ');
+
+      // Bullets — mechanical key-facts list
+      const bullets = [];
+      if (lotSize)  bullets.push(lotSize + (dimFront ? (' · ' + dimFront + ' ft frontage') : ''));
+      if (zoning)   bullets.push('Zoned ' + zoning);
+      if (topo)     bullets.push('Topography: ' + topo);
+      if (flood) {
+        const noFlood = /^(no|none|x|zone x)$/i.test(flood.trim());
+        bullets.push(noFlood ? 'Not in flood zone' : ('Flood zone: ' + flood));
+      }
+      if (needsVar) {
+        const needs = /^(yes|y|true)$/i.test(needsVar.trim());
+        bullets.push(needs ? 'Variance required' : 'No variance required');
+      }
+      if (bestComp) bullets.push('Best land comp · ' + bestComp);
+
+      if (applyLand) {
+        state.land.eyebrow   = eyebrow;
+        state.land.narrative = narrative || state.land.narrative;
+        if (bullets.length) state.land.bullets = bullets;
+      }
+
+      if (applyCover && address) {
+        state.project.address = address.toUpperCase();
+        if (neigh) state.project.location = neigh + ' · Nashville';
+      }
+
+      renderForm();
+      rerender({ fast: true });
+      setStatus('Applied land info · ' + (address || 'lot'), 'ok');
+      document.getElementById('land-status').textContent = 'Applied · ' + (address || 'lot');
     }
 
     // ============================================================
