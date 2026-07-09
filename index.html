@@ -4296,6 +4296,7 @@
           <details class="subnav-group">
             <summary>Files</summary>
             <a class="subnav-launcher" href="assets/customrep-files/scope-of-services.pdf" download="Stonehouse-Scope-of-Services.pdf" target="_blank" rel="noopener">Scope of Services</a>
+            <a class="subnav-launcher" href="assets/customrep-files/custom-home-timeline.pdf" download="Stonehouse-Custom-Home-Timeline.pdf" target="_blank" rel="noopener">Custom Home Timeline</a>
             <a class="subnav-launcher" href="assets/customrep-files/Stonehouse-Engagement-Letter.docx" download="Stonehouse-Engagement-Letter-Template.docx">Engagement Letter (Word)</a>
           </details>
 
@@ -4395,6 +4396,15 @@
             <h3 class="file-title">Scope of Services</h3>
             <p class="file-desc">Client-facing overview of the owner-rep role, the 5% fee on hard construction costs, what counts as hard vs. soft cost, and how the fee is paid across the build.</p>
             <a class="file-btn" href="assets/customrep-files/scope-of-services.pdf" download="Stonehouse-Custom-Home-Rep-Scope-of-Services.pdf" target="_blank" rel="noopener">
+              Download PDF <span class="arrow">↓</span>
+            </a>
+          </article>
+
+          <article class="file-card">
+            <div class="file-eyebrow">Reference</div>
+            <h3 class="file-title">Custom Home Timeline</h3>
+            <p class="file-desc">One-page phase-by-phase client timeline — Due Diligence through Certificate of Occupancy, plus ongoing touchpoints (designer check-ins, monthly budget reviews, selection meetings, subcontractor quote reviews). Typical engagement 16&ndash;18 months.</p>
+            <a class="file-btn" href="assets/customrep-files/custom-home-timeline.pdf" download="Stonehouse-Custom-Home-Timeline.pdf" target="_blank" rel="noopener">
               Download PDF <span class="arrow">↓</span>
             </a>
           </article>
@@ -14524,6 +14534,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           price: '', completion: '',
           builder: '', area: '',
           hasPlans: false, hasDesignBoard: false, hasOnePager: true,
+          hasShowcase: true,
         },
         {
           slug:        '1055-zophi-st',
@@ -14612,6 +14623,15 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             '<a class="listing-btn primary" href="' + assetBase + 'one-pager.pdf" ' +
               'download="' + dlName + '" target="_blank" rel="noopener">' +
               'Download One Pager <span class="arrow">↓</span>' +
+            '</a>'
+          );
+        }
+        if (L.hasShowcase) {
+          const dlName = 'Showcase-Deck-' + esc(L.slug) + '.pptx';
+          actions.push(
+            '<a class="listing-btn" href="' + assetBase + 'showcase-deck.pptx" ' +
+              'download="' + dlName + '" target="_blank" rel="noopener">' +
+              'Showcase Deck <span class="arrow">↓</span>' +
             '</a>'
           );
         }
