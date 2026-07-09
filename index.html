@@ -3500,6 +3500,7 @@
             <details class="subnav-subgroup">
               <summary>Documents</summary>
               <a class="subnav-launcher" href="assets/marketing-templates/strategic-marketing-plan-new-construction.pdf" download="Stonehouse-Strategic-Marketing-Plan-New-Construction.pdf" target="_blank" rel="noopener">Marketing Plan</a>
+              <a class="subnav-launcher" href="assets/listings/2495-deer-meadow-ln/showcase-deck.pdf" download="Showcase-Deck-2495-Deer-Meadow-Ln.pdf" target="_blank" rel="noopener">Deer Meadow Showcase Deck</a>
             </details>
 
             <details class="subnav-subgroup">
@@ -14627,11 +14628,18 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           );
         }
         if (L.hasShowcase) {
-          const dlName = 'Showcase-Deck-' + esc(L.slug) + '.pptx';
+          const dlPdf = 'Showcase-Deck-' + esc(L.slug) + '.pdf';
+          const dlPpt = 'Showcase-Deck-' + esc(L.slug) + '.pptx';
+          actions.push(
+            '<a class="listing-btn" href="' + assetBase + 'showcase-deck.pdf" ' +
+              'download="' + dlPdf + '" target="_blank" rel="noopener">' +
+              'Showcase Deck (PDF) <span class="arrow">↓</span>' +
+            '</a>'
+          );
           actions.push(
             '<a class="listing-btn" href="' + assetBase + 'showcase-deck.pptx" ' +
-              'download="' + dlName + '" target="_blank" rel="noopener">' +
-              'Showcase Deck <span class="arrow">↓</span>' +
+              'download="' + dlPpt + '" target="_blank" rel="noopener">' +
+              'Showcase Deck (PPTX) <span class="arrow">↓</span>' +
             '</a>'
           );
         }
