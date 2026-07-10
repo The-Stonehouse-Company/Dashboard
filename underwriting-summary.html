@@ -490,13 +490,19 @@
     const cols = table.cols || [];
     const scenIx = findCol(cols, 'Scenerio Name', 'Scenario Name');
     const addrIx = findCol(cols, 'Property Address', 'Address');
-    const options = (table.rows || []).map(r => {
+    const tsIx   = findCol(cols, 'Timestamp');
+    const options = (table.rows || []).map((r, i) => {
       const c = r.c || [];
       const scen = scenIx >= 0 ? gvizString(c[scenIx]) : '';
       const addr = addrIx >= 0 ? gvizString(c[addrIx]) : '';
+      const ts   = tsIx   >= 0 ? gvizString(c[tsIx])   : '';
       const label = (scen && addr) ? scen + ' · ' + addr : (scen || addr || '(unnamed)');
-      return { key: scen || addr, label };
-    }).filter(o => o.key);
+      // Row-index-based unique key (guaranteed distinct even for
+      // deals sharing scenario+address). "i:<index>" prefix keeps it
+      // trivially parseable in render() and stable across page reloads
+      // as long as no row above it is deleted in the sheet.
+      return { key: 'i:' + i, label, scen, addr, ts };
+    }).filter(o => o.label !== '(unnamed)');
 
     const optHtml = '<option value="">— Pick a deal —</option>' +
       options.map(o => '<option value="' + esc(o.key) + '"' +
@@ -568,12 +574,21 @@
       landLoan: findCol(cols, 'Land Loan')
     };
 
-    // Find the row matching SELECTED_DEAL (by scenario name OR address)
-    const deal = (table.rows || []).map(r => r.c || []).find(c => {
-      const scen = ix.scenario >= 0 ? gvizString(c[ix.scenario]) : '';
-      const addr = ix.address  >= 0 ? gvizString(c[ix.address])  : '';
-      return scen === SELECTED_DEAL || addr === SELECTED_DEAL;
-    });
+    // SELECTED_DEAL is now "i:<row-index>" for uniqueness. Fall back
+    // to the legacy scenario/address match if someone opens an old link.
+    const rows = (table.rows || []).map(r => r.c || []);
+    let deal = null;
+    if (/^i:\d+$/.test(SELECTED_DEAL)) {
+      const idx = Number(SELECTED_DEAL.slice(2));
+      deal = rows[idx] || null;
+    }
+    if (!deal) {
+      deal = rows.find(c => {
+        const scen = ix.scenario >= 0 ? gvizString(c[ix.scenario]) : '';
+        const addr = ix.address  >= 0 ? gvizString(c[ix.address])  : '';
+        return scen === SELECTED_DEAL || addr === SELECTED_DEAL;
+      });
+    }
 
     if (!deal) {
       setStatus('Deal not found');
