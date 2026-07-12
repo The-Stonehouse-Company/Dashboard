@@ -14545,6 +14545,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           price: '', completion: '',
           builder: '', area: '',
           hasPlans: false, hasDesignBoard: false, hasOnePager: true,
+          hasMoodBoard: true,
         },
         {
           slug:        '934-thomas-ave',
@@ -14623,6 +14624,15 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             '<a class="listing-btn primary" href="' + assetBase + 'one-pager.pdf" ' +
               'download="' + dlName + '" target="_blank" rel="noopener">' +
               'Download One Pager <span class="arrow">↓</span>' +
+            '</a>'
+          );
+        }
+        if (L.hasMoodBoard) {
+          const dlName = 'Mood-Board-' + esc(L.slug) + '.pdf';
+          actions.push(
+            '<a class="listing-btn" href="' + assetBase + 'mood-board.pdf" ' +
+              'download="' + dlName + '" target="_blank" rel="noopener">' +
+              'Mood Board <span class="arrow">↓</span>' +
             '</a>'
           );
         }
