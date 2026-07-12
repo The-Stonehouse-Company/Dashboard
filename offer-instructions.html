@@ -414,18 +414,24 @@
     // Stonehouse brokerage defaults — used to seed the editable
     // contract-info form on first load. Once the user edits a field,
     // their override is persisted to localStorage and overrides this.
+    // Compass Tennessee LLC is the licensed brokerage; Stonehouse
+    // is the sales team hung under Compass. The Listing Company on
+    // any Stonehouse listing therefore = Compass, not Stonehouse.
     const BROKERAGE = {
-      company: 'Stonehouse Real Estate LLC',
-      dba:     'The Stonehouse Company',
-      address: '206 Ben Allen Rd #7, Nashville, TN 37207',
-      license: '',                   // ← fill once known
-      phone:   '(615) 812-0066'
+      company: 'Compass Tennessee LLC',
+      dba:     '',                                 // no DBA — Compass is the legal name
+      address: '2206 21st Ave S, Nashville, TN 37212',
+      license: '264416',
+      phone:   '615.475.5616'
     };
 
     // ============================================================
     // STATE  -----------------------------------------------------
     // ============================================================
-    const STORAGE_KEY = 'stonehouse.offerInstructions.v1';
+    // v2 bumped 2026-07-12: BROKERAGE swapped to Compass Tennessee LLC
+    // and title company defaults to Premier Escrow LLC. Bumping the key
+    // discards stale saved state so users get the new defaults.
+    const STORAGE_KEY = 'stonehouse.offerInstructions.v2';
 
     const DEFAULT_STATE = {
       property: {
@@ -449,10 +455,12 @@
         '*Personal Interest Disclosure (if applicable)'
       ],
       title: {
-        company:  '',
-        address:  '',
-        contact:  '',
-        phone:    '',                // title contact phone
+        // Premier Escrow LLC is Stonehouse's default closing partner.
+        // Override per-deal if a different escrow/title is used.
+        company:  'Premier Escrow LLC',
+        address:  '4301 Hillsboro Pike, Suite 300, Nashville, TN 37215',
+        contact:  'Dylan Potter',
+        phone:    '(615) 337-3082',
         days:     '5'                // earnest money days
       },
       // Editable "Information to Include in Contract" block.
