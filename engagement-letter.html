@@ -77,11 +77,97 @@
     .toolbar .tb-btn:hover { opacity: .85; }
     .toolbar .tb-btn:disabled { opacity: .4; cursor: wait; }
 
+    /* ============ Split-view generator layout ============ */
+    .layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      min-height: 100vh;
+    }
+    @media (max-width: 900px){ .layout { grid-template-columns: 1fr; } }
+
+    /* Left sidebar form */
+    .editor {
+      background: #0a0a0a;
+      border-right: 1px solid #2a2a2a;
+      padding: 76px 20px 60px;
+      position: sticky; top: 0;
+      align-self: start;
+      height: 100vh;
+      overflow-y: auto;
+      color: #eee;
+    }
+    .editor h2 {
+      font-family: var(--font-heading);
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.24em; text-transform: uppercase;
+      color: #ffffff;
+      margin: 0 0 6px;
+    }
+    .editor p.note {
+      font-family: var(--font-heading);
+      font-size: 11px; color: #bbbbbb;
+      line-height: 1.5;
+      margin: 0 0 20px;
+    }
+    .editor .field {
+      display: flex; flex-direction: column; gap: 6px;
+      margin-bottom: 14px;
+    }
+    .editor label {
+      font-family: var(--font-heading);
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: #cccccc;
+    }
+    .editor input,
+    .editor textarea {
+      font-family: var(--font-heading);
+      font-size: 13px;
+      background: #141414;
+      color: #ffffff;
+      border: 1px solid #2a2a2a;
+      padding: 10px 12px;
+      resize: vertical;
+      outline: none;
+    }
+    .editor input:focus,
+    .editor textarea:focus { border-color: #ffffff; }
+    .editor textarea { min-height: 66px; line-height: 1.4; }
+    .editor .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .editor .divider {
+      height: 1px; background: #2a2a2a;
+      margin: 20px 0;
+    }
+
+    /* Right preview pane */
+    .preview {
+      background: var(--bg);
+      padding-top: 56px;
+    }
+    .preview .preview-head {
+      position: sticky; top: 56px; z-index: 5;
+      background: linear-gradient(to bottom, #1a1a1a 65%, transparent);
+      padding: 6px 24px 12px;
+      font-family: var(--font-heading);
+      font-size: 10px; letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #999999;
+    }
+
     /* Page container — vertical column of US-Letter pages */
     .doc {
       display: flex; flex-direction: column;
       align-items: center; gap: 28px;
-      padding: 32px 16px 80px;
+      padding: 12px 16px 80px;
+      transform-origin: top center;
+    }
+    /* Slight down-scale so the letter-sized pages fit nicely
+       in the preview pane without needing horizontal scroll. */
+    @media (min-width: 901px) and (max-width: 1200px){
+      .doc { transform: scale(0.78); margin-bottom: -320px; }
+    }
+    @media (min-width: 1201px) and (max-width: 1400px){
+      .doc { transform: scale(0.86); margin-bottom: -220px; }
     }
 
     /* Individual page — fixed dimensions so html2canvas captures consistently */
@@ -278,12 +364,60 @@
 
 <div class="toolbar">
   <span class="tb-status" id="tb-status">Loading…</span>
-  <button class="tb-btn" type="button" id="print-btn" disabled>Print</button>
-  <button class="tb-btn primary" type="button" id="pdf-btn" disabled>Download PDF</button>
+  <button class="tb-btn" type="button" id="print-btn">Print</button>
+  <button class="tb-btn primary" type="button" id="pdf-btn">Download PDF</button>
 </div>
 
-<div class="doc" id="doc">
-  <!-- Pages are injected by JS once the payload is read from IDB. -->
+<div class="layout">
+
+  <!-- ============ LEFT: FORM SIDEBAR ============ -->
+  <aside class="editor" id="editor">
+    <h2>Build your engagement letter</h2>
+    <p class="note">Fill in the fields below. The preview on the right updates as you type. When you're happy, click <b>Download PDF</b>.</p>
+
+    <div class="field">
+      <label for="f-effectiveDate">Effective date</label>
+      <input type="date" id="f-effectiveDate" />
+    </div>
+
+    <div class="divider"></div>
+
+    <h2 style="margin-bottom:12px;">Client</h2>
+
+    <div class="field">
+      <label for="f-clientName">Client name</label>
+      <input type="text" id="f-clientName" placeholder="Full legal name" />
+    </div>
+
+    <div class="field">
+      <label for="f-clientEmail">Client email</label>
+      <input type="email" id="f-clientEmail" placeholder="name@domain.com" />
+    </div>
+
+    <div class="field">
+      <label for="f-clientAddress">Client address</label>
+      <textarea id="f-clientAddress" placeholder="Street&#10;City, ST ZIP"></textarea>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2 style="margin-bottom:12px;">Project</h2>
+
+    <div class="field">
+      <label for="f-projectAddress">Project address</label>
+      <input type="text" id="f-projectAddress" placeholder="123 Sample Rd, Nashville, TN" />
+    </div>
+
+    <p class="note" style="margin-top:20px;">The Stonehouse party block, scope, fee, and legal sections come pre-filled from the master template.</p>
+  </aside>
+
+  <!-- ============ RIGHT: LIVE PREVIEW ============ -->
+  <main class="preview">
+    <div class="preview-head">Live preview · 8-page letter · US Letter portrait</div>
+    <div class="doc" id="doc">
+      <!-- Pages are injected by JS. -->
+    </div>
+  </main>
 </div>
 
 <script>
@@ -719,27 +853,77 @@
   }
 
   // ============================================================
+  // STATE + FORM BINDING — sidebar drives live preview
+  // ============================================================
+  const STORAGE_KEY = 'stonehouse.engagementLetter.v1';
+  const FIELDS = ['effectiveDate', 'clientName', 'clientEmail', 'clientAddress', 'projectAddress'];
+
+  function loadState() {
+    // 1) Try localStorage first
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (_) {}
+    // 2) Fall back to the legacy IDB payload (still works when the
+    //    modal in index.html opens this page with a fresh client)
+    return null;
+  }
+  function saveState(state) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+  }
+
+  let __state = loadState() || {
+    effectiveDate:  '',
+    clientName:     '',
+    clientEmail:    '',
+    clientAddress: '',
+    projectAddress:''
+  };
+
+  // Populate form inputs from state, and wire input → state → re-render
+  function bindForm() {
+    FIELDS.forEach((key) => {
+      const el = document.getElementById('f-' + key);
+      if (!el) return;
+      el.value = __state[key] || '';
+      el.addEventListener('input', () => {
+        __state[key] = el.value;
+        saveState(__state);
+        render();
+      });
+    });
+  }
+
+  function render() {
+    docEl.innerHTML = buildPages(__state);
+  }
+
+  // ============================================================
   // BOOT
   // ============================================================
-  let __payload = null;
-  pdfBtn.addEventListener('click', () => __payload && buildPdf(__payload));
+  pdfBtn.addEventListener('click', () => buildPdf(__state));
   printBtn.addEventListener('click', () => window.print());
 
   (async function init() {
-    setStatus('Loading payload…');
-    const p = await readPayload();
-    __payload = p;
-    if (!p) {
-      setStatus('Could not load engagement-letter data — open the modal from the dashboard and try again.', 'err');
-      return;
-    }
-    docEl.innerHTML = buildPages(p);
+    setStatus('Ready · edit the sidebar to fill the letter');
+
+    // If we were opened from the dashboard modal (via IDB payload),
+    // merge that in on top of any existing localStorage state.
+    try {
+      const p = await Promise.race([
+        readPayload(),
+        new Promise((r) => setTimeout(() => r(null), 1500))
+      ]);
+      if (p) {
+        FIELDS.forEach((k) => { if (p[k]) __state[k] = p[k]; });
+        saveState(__state);
+      }
+    } catch (_) {}
+
+    bindForm();
+    render();
     pdfBtn.disabled = false;
     printBtn.disabled = false;
-    setStatus('Ready · downloading PDF…');
-    // Wait a tick so fonts settle before html2canvas snapshots.
-    await new Promise((r) => setTimeout(r, 500));
-    buildPdf(p);
   })();
 </script>
 </body>
