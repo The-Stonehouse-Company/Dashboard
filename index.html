@@ -7807,6 +7807,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               <div class="out-head">Financing & Sizing</div>
               <div class="out-body">
                 <div class="out-row hi"><span class="k">Total Project Cost</span><span class="v" id="uw-out-tpc">$0</span></div>
+                <div class="out-row"><span class="k">Developer Fee</span><span class="v" id="uw-out-dev-fee">$0</span></div>
                 <div class="out-row"><span class="k">Equity Invested</span><span class="v" id="uw-out-equity">$0</span></div>
                 <div class="out-row"><span class="k">Equity per Investor</span><span class="v" id="uw-out-equity-per">$0</span></div>
                 <div class="out-row"><span class="k">Loan Amount</span><span class="v" id="uw-out-loan">$0</span></div>
@@ -12794,6 +12795,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
         // ---- Financing ----
         out('uw-out-tpc').textContent           = fmtUSD(r.tpc);
+        out('uw-out-dev-fee').textContent       = fmtUSD(r.devFee);
         out('uw-out-equity').textContent        = fmtUSD(r.equity);
         out('uw-out-equity-per').textContent    = fmtUSD(r.equityPerInvestor);
         out('uw-out-loan').textContent          = fmtUSD(r.loan);
