@@ -353,6 +353,7 @@
         <div class="kv"><span class="k">Equity / Investor</span><span class="v" id="k-equity-per">—</span></div>
         <div class="kv"><span class="k">Loan Amount</span><span class="v" id="k-loan">—</span></div>
         <div class="kv"><span class="k">Land Loan</span><span class="v" id="k-land-loan">—</span></div>
+        <div class="kv"><span class="k">Developer Fee ($)</span><span class="v" id="k-dev-fee-amt">—</span></div>
         <div class="kv"><span class="k">Construction Interest</span><span class="v" id="k-const-int">—</span></div>
         <div class="kv"><span class="k">Bank Fees ($)</span><span class="v" id="k-bank-fees-amt">—</span></div>
         <div class="kv"><span class="k">Computed LTC</span><span class="v" id="k-ltc">—</span></div>
@@ -655,6 +656,22 @@
     document.getElementById('k-equity-per').textContent    = moneyDetailed(gvizNumber(val(ix.equityPer)));
     document.getElementById('k-loan').textContent          = moneyDetailed(gvizNumber(val(ix.loan)));
     document.getElementById('k-land-loan').textContent     = moneyDetailed(gvizNumber(val(ix.landLoan)));
+
+    // Developer Fee $ — computed from inputs (sheet only stores the %)
+    // Formula (matches Underwriting Model):
+    //   devFee = (lotCost + build + overrun) × devFeePct
+    //   where build   = sqft × buildPsf × homes
+    //         overrun = build × overrunPct
+    const _lot     = gvizNumber(val(ix.lotCost));
+    const _sqft    = gvizNumber(val(ix.sqft));
+    const _psf     = gvizNumber(val(ix.buildPsf));
+    const _homes   = Math.max(1, gvizNumber(val(ix.homes)) || 1);
+    const _overrun = gvizNumber(val(ix.overrun)) / 100;
+    const _dfPct   = gvizNumber(val(ix.devFee)) / 100;
+    const _build   = _sqft * _psf * _homes;
+    const _devFeeAmt = (_lot + _build + _build * _overrun) * _dfPct;
+    document.getElementById('k-dev-fee-amt').textContent = moneyDetailed(_devFeeAmt);
+
     document.getElementById('k-const-int').textContent     = moneyDetailed(gvizNumber(val(ix.constInt)));
     document.getElementById('k-bank-fees-amt').textContent = moneyDetailed(gvizNumber(val(ix.bankFeesAmt)));
     document.getElementById('k-ltc').textContent           = pct(gvizNumber(val(ix.compLtc)));
