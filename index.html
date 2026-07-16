@@ -4290,6 +4290,8 @@
             <summary>Generators</summary>
             <button class="subnav-launcher" type="button" data-launches="open-nurturing-modal">Log a Nurturing Client</button>
             <button class="subnav-launcher" type="button" data-launches="open-customrep-intake-modal">Log a New Project</button>
+            <button class="subnav-launcher" type="button" data-launches="open-che-modal">Cost Estimator</button>
+            <a class="subnav-launcher" href="estimate-summary.html" target="_blank" rel="noopener">Cost Estimate Summary PDF</a>
             <a class="subnav-launcher" href="engagement-letter.html" target="_blank" rel="noopener">Engagement Letter</a>
           </details>
 
@@ -4324,6 +4326,11 @@
           <button class="primary-action" type="button" id="open-customrep-intake-modal" aria-haspopup="dialog" aria-controls="customrep-intake-modal">
             <span class="action-label">Log a New Project</span>
             <span class="action-sub">Promote a signed client to the active pipeline</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="primary-action" type="button" id="open-che-modal" aria-haspopup="dialog" aria-controls="che-modal">
+            <span class="action-label">Custom Home Cost Estimator</span>
+            <span class="action-sub">Hard + soft cost breakdown with financing — for client-facing budgets</span>
             <span class="action-arrow" aria-hidden="true">→</span>
           </button>
         </div>
@@ -8013,6 +8020,148 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     </div>
   </div>
 
+  <!-- ========================= CUSTOM HOME COST ESTIMATOR MODAL ========================= -->
+  <div class="modal-overlay is-xwide" id="che-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="che-modal-title" id="che-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Custom Home Rep</span>
+          <h2 class="modal-title" id="che-modal-title">Custom Home Cost Estimator</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-che-modal" aria-label="Close">×</button>
+      </header>
+
+      <div class="uw-panel" aria-hidden="false">
+        <div class="uw-section uw-section-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="uw-field">
+            <label for="che-address">Property Address</label>
+            <input id="che-address" type="text" placeholder="123 Main St, Nashville, TN" />
+          </div>
+          <div class="uw-field">
+            <label for="che-client">Client Name (optional)</label>
+            <input id="che-client" type="text" placeholder="Client name for header" />
+          </div>
+        </div>
+
+        <div class="uw-grid">
+
+          <!-- LEFT COLUMN: INPUTS -->
+          <div class="uw-inputs">
+
+            <div class="uw-section">
+              <div class="uw-section-head">Hard Costs</div>
+              <div class="uw-section-grid">
+                <div class="uw-field"><label for="che-build-psf">Build $ / Sq Ft</label><div class="prefix-dollar"><input id="che-build-psf" type="number" min="0" step="1" value="350" /></div></div>
+                <div class="uw-field"><label for="che-sqft">Sq Footage</label><input id="che-sqft" type="number" min="0" step="1" value="5000" /></div>
+                <div class="uw-field full"><label for="che-pool">Pool Cost</label><div class="prefix-dollar"><input id="che-pool" type="number" min="0" step="1" value="0" /></div></div>
+              </div>
+            </div>
+
+            <div class="uw-section">
+              <div class="uw-section-head">Soft Costs</div>
+              <div class="uw-section-grid">
+                <div class="uw-field"><label for="che-architect">Architect Fee</label><div class="prefix-dollar"><input id="che-architect" type="number" min="0" step="1" value="0" /></div></div>
+                <div class="uw-field"><label for="che-designer">Designer Fee</label><div class="prefix-dollar"><input id="che-designer" type="number" min="0" step="1" value="0" /></div></div>
+                <div class="uw-field"><label for="che-builder-fee">Builder Fee (% of Hard)</label><div class="suffix" data-suffix="%"><input id="che-builder-fee" type="number" min="0" step="0.1" value="15" /></div></div>
+                <div class="uw-field"><label for="che-owner-rep-fee">Owner's Rep Fee (% of Hard)</label><div class="suffix" data-suffix="%"><input id="che-owner-rep-fee" type="number" min="0" step="0.1" value="5" /></div></div>
+              </div>
+            </div>
+
+            <div class="uw-section">
+              <div class="uw-section-head">Financing</div>
+              <div class="uw-section-grid">
+                <div class="uw-field"><label for="che-constr-mo">Construction (Months)</label><input id="che-constr-mo" type="number" min="0" step="1" value="14" /></div>
+                <div class="uw-field"><label for="che-rate">Interest Rate (Annual)</label><div class="suffix" data-suffix="%"><input id="che-rate" type="number" min="0" step="0.1" value="8" /></div></div>
+                <div class="uw-field"><label for="che-bank-fee">Bank Fee</label><div class="suffix" data-suffix="%"><input id="che-bank-fee" type="number" min="0" step="0.1" value="1" /></div></div>
+                <div class="uw-field"><label for="che-owner-equity">Owner Equity (Land)</label><div class="prefix-dollar"><input id="che-owner-equity" type="number" min="0" step="1" value="0" /></div></div>
+
+                <div class="uw-field full">
+                  <label for="che-cap-mode">Capital Mode</label>
+                  <select id="che-cap-mode">
+                    <option value="Cash">All Cash (No Loan)</option>
+                    <option value="LTC" selected>% of Total Cost (LTC)</option>
+                    <option value="LTV">% of Appraised Value (LTV)</option>
+                  </select>
+                </div>
+                <div class="uw-field" id="che-ltc-wrap">
+                  <label for="che-ltc">LTC Ratio</label>
+                  <select id="che-ltc">
+                    <option value="0.10">90% LTC (10% equity)</option>
+                    <option value="0.15">85% LTC (15% equity)</option>
+                    <option value="0.20" selected>80% LTC (20% equity)</option>
+                    <option value="0.25">75% LTC (25% equity)</option>
+                    <option value="Custom">Custom</option>
+                  </select>
+                </div>
+                <div class="uw-field" id="che-ltc-custom-wrap" hidden>
+                  <label for="che-ltc-custom">Custom Equity</label>
+                  <div class="suffix" data-suffix="%"><input id="che-ltc-custom" type="number" min="0" max="100" step="0.5" value="20" /></div>
+                </div>
+                <div class="uw-field" id="che-ltv-wrap" hidden>
+                  <label for="che-ltv-target">Target LTV</label>
+                  <div class="suffix" data-suffix="%"><input id="che-ltv-target" type="number" min="0" max="100" step="0.5" value="70" /></div>
+                </div>
+                <div class="uw-field full" id="che-ltv-appraised-wrap" hidden>
+                  <label for="che-appraised">Estimated Appraised Value</label>
+                  <div class="prefix-dollar"><input id="che-appraised" type="number" min="0" step="1" value="0" /></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN: OUTPUTS -->
+          <div class="uw-outputs">
+
+            <div class="uw-outcard">
+              <div class="out-head">Hard Costs</div>
+              <div class="out-body">
+                <div class="out-row"><span class="k">Base Build ($/SF × SF)</span><span class="v" id="che-out-build">$0</span></div>
+                <div class="out-row"><span class="k">Pool</span><span class="v" id="che-out-pool">$0</span></div>
+                <div class="out-row hi"><span class="k">Total Hard Costs</span><span class="v" id="che-out-hard">$0</span></div>
+              </div>
+            </div>
+
+            <div class="uw-outcard">
+              <div class="out-head">Soft Costs</div>
+              <div class="out-body">
+                <div class="out-row"><span class="k">Architect</span><span class="v" id="che-out-architect">$0</span></div>
+                <div class="out-row"><span class="k">Designer</span><span class="v" id="che-out-designer">$0</span></div>
+                <div class="out-row"><span class="k">Builder Fee</span><span class="v" id="che-out-builder-fee">$0</span></div>
+                <div class="out-row"><span class="k">Owner's Rep Fee (Stonehouse)</span><span class="v" id="che-out-owner-rep-fee">$0</span></div>
+                <div class="out-row"><span class="k">Construction Interest</span><span class="v" id="che-out-interest">$0</span></div>
+                <div class="out-row"><span class="k">Bank Fee</span><span class="v" id="che-out-bank-fee">$0</span></div>
+                <div class="out-row hi"><span class="k">Total Soft Costs</span><span class="v" id="che-out-soft">$0</span></div>
+              </div>
+            </div>
+
+            <div class="uw-outcard">
+              <div class="out-head">Financing Summary</div>
+              <div class="out-body">
+                <div class="out-row hi"><span class="k">Total Project Cost</span><span class="v" id="che-out-tpc">$0</span></div>
+                <div class="out-row"><span class="k">Loan Amount</span><span class="v" id="che-out-loan">$0</span></div>
+                <div class="out-row"><span class="k">Owner Equity Required</span><span class="v" id="che-out-equity">$0</span></div>
+                <div class="out-row"><span class="k">Loan-to-Cost (LTC)</span><span class="v" id="che-out-ltc">0.00%</span></div>
+                <div class="out-row"><span class="k">Loan-to-Value (LTV)</span><span class="v" id="che-out-ltv">0.00%</span></div>
+                <div class="out-row"><span class="k">Blended $ / SF (all-in)</span><span class="v" id="che-out-blended">$0</span></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <footer class="modal-foot">
+        <div class="uw-log-status-wrap" style="flex:1; text-align:left;">
+          <input type="text" id="che-estimate-name" placeholder='Estimate name — e.g., "Base", "Value Engineered"' style="width:100%; padding:8px 12px; font-size:12px; background:transparent; color:var(--text); border:1px solid var(--rule);" />
+          <div class="form-status" id="che-log-status" role="status" aria-live="polite" style="margin-top:6px;"></div>
+        </div>
+        <button class="btn ghost" type="button" id="che-reset-btn">Reset</button>
+        <button class="btn ghost" type="button" id="che-log-btn">Log This Estimate</button>
+        <button class="btn" type="button" id="che-close-btn">Done</button>
+      </footer>
+    </div>
+  </div>
+
   <!-- ========================= CUSTOM REP INTAKE MODAL ========================= -->
   <div class="modal-overlay is-wide" id="customrep-intake-modal-overlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="customrep-intake-title" id="customrep-intake-modal">
@@ -8440,7 +8589,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       { id: 'nurturing-client',    name: 'Log a Nurturing Client',  division: 'customrep',   category: 'intake',    href: '#customrep', external: false, desc: 'Track prospects in conversation — stage, source, budget, last touch, next action.', status: 'live' },
 
       // Cross-division
-      { id: 'engagement-letter',   name: 'Engagement Letter',       division: 'cross',       category: 'generator', href: 'engagement-letter.html', external: true, desc: 'Stonehouse-branded engagement letter — buyer/seller representation.', status: 'live' }
+      { id: 'engagement-letter',   name: 'Engagement Letter',       division: 'cross',       category: 'generator', href: 'engagement-letter.html', external: true, desc: 'Stonehouse-branded engagement letter — buyer/seller representation.', status: 'live' },
+      { id: 'custom-home-estimator',name: 'Custom Home Cost Estimator', division: 'customrep', category: 'calculator', href: '#customrep', external: false, desc: 'Client-facing budget: hard + soft costs with financing (LTC/LTV/Cash).', status: 'live' },
+      { id: 'estimate-summary',    name: 'Cost Estimate Summary PDF', division: 'customrep', category: 'generator', href: 'estimate-summary.html', external: true, desc: 'One-page Stonehouse-branded printable summary of a logged cost estimate.', status: 'live' }
     ];
 
     // ============================================================
@@ -13457,6 +13608,396 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         } finally {
           submitBtn.disabled = false;
           submitBtn.textContent = originalLabel;
+        }
+      });
+    })();
+
+    // ============================================================
+    // Custom Home Rep · Cost Estimator modal controller
+    //  - Client-facing budget tool: hard + soft costs + financing.
+    //  - Similar shape to the Underwriting Model but simplified for a
+    //    single custom home (no per-unit math, no investor equity).
+    //  - Interest uses a half-balance approximation (loan × mo-rate ×
+    //    months × 0.5) — good enough for a client estimate; the full
+    //    draw-schedule math lives in the Development UW model.
+    // ============================================================
+    (function () {
+      const overlay   = document.getElementById('che-modal-overlay');
+      const modal     = document.getElementById('che-modal');
+      const openBtn   = document.getElementById('open-che-modal');
+      const closeBtn  = document.getElementById('close-che-modal');
+      const doneBtn   = document.getElementById('che-close-btn');
+      const resetBtn  = document.getElementById('che-reset-btn');
+      if (!overlay || !modal) return;
+
+      // Bind data-launches="open-che-modal" from sidebar too
+      document.querySelectorAll('[data-launches="open-che-modal"]').forEach(el =>
+        el.addEventListener('click', open));
+
+      const STORAGE_KEY = 'stonehouse.customHomeEstimate.v1';
+      const DEFAULTS = {
+        address: '', client: '',
+        buildPsf: 350, sqft: 5000, pool: 0,
+        architect: 0, designer: 0,
+        builderFeePct: 15, ownerRepFeePct: 5,
+        constrMo: 14, rate: 8, bankFeePct: 1, ownerEquity: 0,
+        capMode: 'LTC', ltcRatio: 0.20, ltcCustom: 20, ltvTarget: 70, appraised: 0
+      };
+
+      const inputs = {
+        address:     document.getElementById('che-address'),
+        client:      document.getElementById('che-client'),
+        buildPsf:    document.getElementById('che-build-psf'),
+        sqft:        document.getElementById('che-sqft'),
+        pool:        document.getElementById('che-pool'),
+        architect:   document.getElementById('che-architect'),
+        designer:    document.getElementById('che-designer'),
+        builderFee:  document.getElementById('che-builder-fee'),
+        ownerRepFee: document.getElementById('che-owner-rep-fee'),
+        constrMo:    document.getElementById('che-constr-mo'),
+        rate:        document.getElementById('che-rate'),
+        bankFee:     document.getElementById('che-bank-fee'),
+        ownerEquity: document.getElementById('che-owner-equity'),
+        capMode:     document.getElementById('che-cap-mode'),
+        ltc:         document.getElementById('che-ltc'),
+        ltcCustom:   document.getElementById('che-ltc-custom'),
+        ltvTarget:   document.getElementById('che-ltv-target'),
+        appraised:   document.getElementById('che-appraised')
+      };
+
+      const outs = {
+        build:       document.getElementById('che-out-build'),
+        pool:        document.getElementById('che-out-pool'),
+        hard:        document.getElementById('che-out-hard'),
+        architect:   document.getElementById('che-out-architect'),
+        designer:    document.getElementById('che-out-designer'),
+        builderFee:  document.getElementById('che-out-builder-fee'),
+        ownerRepFee: document.getElementById('che-out-owner-rep-fee'),
+        interest:    document.getElementById('che-out-interest'),
+        bankFee:     document.getElementById('che-out-bank-fee'),
+        soft:        document.getElementById('che-out-soft'),
+        tpc:         document.getElementById('che-out-tpc'),
+        loan:        document.getElementById('che-out-loan'),
+        equity:      document.getElementById('che-out-equity'),
+        ltc:         document.getElementById('che-out-ltc'),
+        ltv:         document.getElementById('che-out-ltv'),
+        blended:     document.getElementById('che-out-blended')
+      };
+
+      const usd = new Intl.NumberFormat('en-US', {
+        style: 'currency', currency: 'USD', maximumFractionDigits: 0
+      });
+      function fmtUSD(n) { return isFinite(n) ? usd.format(n) : '$0'; }
+      function pctFmt(n) { return isFinite(n) ? (n * 100).toFixed(2) + '%' : '0.00%'; }
+      function numFrom(el, def=0) { const v = parseFloat(el.value); return isFinite(v) ? v : def; }
+      function strFrom(el) { return (el.value || '').trim(); }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return null;
+          return Object.assign({}, DEFAULTS, JSON.parse(raw));
+        } catch { return null; }
+      }
+      function saveState(state) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+      }
+
+      function applyState(s) {
+        inputs.address.value     = s.address     || '';
+        inputs.client.value      = s.client      || '';
+        inputs.buildPsf.value    = s.buildPsf;
+        inputs.sqft.value        = s.sqft;
+        inputs.pool.value        = s.pool;
+        inputs.architect.value   = s.architect;
+        inputs.designer.value    = s.designer;
+        inputs.builderFee.value  = s.builderFeePct;
+        inputs.ownerRepFee.value = s.ownerRepFeePct;
+        inputs.constrMo.value    = s.constrMo;
+        inputs.rate.value        = s.rate;
+        inputs.bankFee.value     = s.bankFeePct;
+        inputs.ownerEquity.value = s.ownerEquity;
+        inputs.capMode.value     = s.capMode || 'LTC';
+        inputs.ltcCustom.value   = s.ltcCustom;
+        inputs.ltvTarget.value   = s.ltvTarget;
+        inputs.appraised.value   = s.appraised;
+        // LTC ratio select: match saved value, or fall back to Custom
+        const opts = ['0.10','0.15','0.20','0.25'];
+        inputs.ltc.value = opts.includes(String(s.ltcRatio)) ? String(s.ltcRatio) : 'Custom';
+        updateCapVisibility();
+      }
+      function readState() {
+        const ltcSel = inputs.ltc.value;
+        return {
+          address: strFrom(inputs.address),
+          client:  strFrom(inputs.client),
+          buildPsf: numFrom(inputs.buildPsf),
+          sqft: numFrom(inputs.sqft),
+          pool: numFrom(inputs.pool),
+          architect: numFrom(inputs.architect),
+          designer: numFrom(inputs.designer),
+          builderFeePct: numFrom(inputs.builderFee),
+          ownerRepFeePct: numFrom(inputs.ownerRepFee),
+          constrMo: numFrom(inputs.constrMo),
+          rate: numFrom(inputs.rate),
+          bankFeePct: numFrom(inputs.bankFee),
+          ownerEquity: numFrom(inputs.ownerEquity),
+          capMode: inputs.capMode.value,
+          ltcRatio: ltcSel === 'Custom'
+            ? Math.max(0, Math.min(100, numFrom(inputs.ltcCustom, 20))) / 100
+            : parseFloat(ltcSel),
+          ltcCustom: numFrom(inputs.ltcCustom, 20),
+          ltvTarget: numFrom(inputs.ltvTarget, 70),
+          appraised: numFrom(inputs.appraised)
+        };
+      }
+
+      function updateCapVisibility() {
+        const mode = inputs.capMode.value;
+        document.getElementById('che-ltc-wrap').hidden = (mode !== 'LTC');
+        document.getElementById('che-ltc-custom-wrap').hidden = !(mode === 'LTC' && inputs.ltc.value === 'Custom');
+        document.getElementById('che-ltv-wrap').hidden = (mode !== 'LTV');
+        document.getElementById('che-ltv-appraised-wrap').hidden = (mode !== 'LTV');
+      }
+
+      function compute(s) {
+        // Hard costs
+        const baseBuild = s.buildPsf * s.sqft;
+        const totalHard = baseBuild + s.pool;
+
+        // Soft costs (excluding financing which depends on loan)
+        const builderFee  = totalHard * (s.builderFeePct / 100);
+        const ownerRepFee = totalHard * (s.ownerRepFeePct / 100);
+        const softNoFin   = s.architect + s.designer + builderFee + ownerRepFee;
+
+        // Costs before financing
+        const preFin = totalHard + softNoFin;
+
+        // Financing — solve iteratively because interest depends on loan,
+        // which depends on TPC, which depends on interest.
+        const monthlyRate = s.rate / 100 / 12;
+        const halfLife    = Math.max(0, s.constrMo) * 0.5;
+        const bankFrac    = s.bankFeePct / 100;
+        // If mode = Cash, no loan/interest at all
+        if (s.capMode === 'Cash') {
+          const tpc = preFin;
+          const loan = 0, interest = 0, bankFee = 0;
+          const equity = Math.max(0, tpc - loan);
+          return finish({s, baseBuild, totalHard, builderFee, ownerRepFee, interest, bankFee,
+                         softNoFin, tpc, loan, equity});
+        }
+
+        let loan = 0, interest = 0, bankFee = 0, tpc = preFin;
+        for (let i = 0; i < 8; i++) {
+          if (s.capMode === 'LTC') {
+            tpc  = preFin + interest + bankFee;
+            loan = s.ltcRatio * tpc;
+          } else if (s.capMode === 'LTV') {
+            loan = (s.ltvTarget / 100) * s.appraised;
+            tpc  = preFin + interest + bankFee;  // TPC still adds financing on cost side
+          }
+          // Subtract owner-equity-into-land from the effective borrowing base
+          // (owner is putting cash toward land so loan doesn't need to cover it).
+          const effectiveLoan = Math.max(0, loan - s.ownerEquity);
+          interest = effectiveLoan * monthlyRate * halfLife;
+          bankFee  = loan * bankFrac;
+        }
+        const equity = Math.max(0, tpc - loan);
+        return finish({s, baseBuild, totalHard, builderFee, ownerRepFee, interest, bankFee,
+                       softNoFin, tpc, loan, equity});
+
+        function finish(r) {
+          const totalSoft = r.softNoFin + r.interest + r.bankFee;
+          const ltc = r.tpc > 0 ? r.loan / r.tpc : 0;
+          const ltv = (r.s.capMode === 'LTV' && r.s.appraised > 0)
+            ? r.loan / r.s.appraised
+            : 0;
+          const blended = r.s.sqft > 0 ? r.tpc / r.s.sqft : 0;
+          return {
+            baseBuild: r.baseBuild, pool: r.s.pool, totalHard: r.totalHard,
+            architect: r.s.architect, designer: r.s.designer,
+            builderFee: r.builderFee, ownerRepFee: r.ownerRepFee,
+            interest: r.interest, bankFee: r.bankFee, totalSoft,
+            tpc: r.tpc, loan: r.loan, equity: r.equity, ltc, ltv, blended
+          };
+        }
+      }
+
+      function render() {
+        const s = readState();
+        saveState(s);
+        const r = compute(s);
+        outs.build.textContent       = fmtUSD(r.baseBuild);
+        outs.pool.textContent        = fmtUSD(r.pool);
+        outs.hard.textContent        = fmtUSD(r.totalHard);
+        outs.architect.textContent   = fmtUSD(r.architect);
+        outs.designer.textContent    = fmtUSD(r.designer);
+        outs.builderFee.textContent  = fmtUSD(r.builderFee);
+        outs.ownerRepFee.textContent = fmtUSD(r.ownerRepFee);
+        outs.interest.textContent    = fmtUSD(r.interest);
+        outs.bankFee.textContent     = fmtUSD(r.bankFee);
+        outs.soft.textContent        = fmtUSD(r.totalSoft);
+        outs.tpc.textContent         = fmtUSD(r.tpc);
+        outs.loan.textContent        = fmtUSD(r.loan);
+        outs.equity.textContent      = fmtUSD(r.equity);
+        outs.ltc.textContent         = pctFmt(r.ltc);
+        outs.ltv.textContent         = pctFmt(r.ltv);
+        outs.blended.textContent     = fmtUSD(r.blended) + ' / SF';
+      }
+
+      // Wire every input to re-render on any change
+      Object.values(inputs).forEach(el => {
+        if (!el) return;
+        el.addEventListener('input',  render);
+        el.addEventListener('change', render);
+      });
+      inputs.capMode.addEventListener('change', () => { updateCapVisibility(); render(); });
+      inputs.ltc    .addEventListener('change', () => { updateCapVisibility(); render(); });
+
+      function open() {
+        applyState(loadState() || DEFAULTS);
+        render();
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+      function close() {
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+      openBtn && openBtn.addEventListener('click', open);
+      closeBtn && closeBtn.addEventListener('click', close);
+      doneBtn && doneBtn.addEventListener('click', close);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') close();
+      });
+      resetBtn && resetBtn.addEventListener('click', () => {
+        if (!confirm('Reset all fields to defaults?')) return;
+        applyState(DEFAULTS);
+        render();
+      });
+
+      // ============================================================
+      // Log This Estimate → posts snapshot to Google Form
+      //
+      // SETUP: see docs/che-setup.md. Fill CHE_LOG_SHEET_ID,
+      // CHE_LOG_FORM_URL, and CHE_LOG_FIELD_MAP after Ryan sends
+      // back the sheet ID, formResponse URL, and pre-filled entry IDs.
+      // ============================================================
+      const CHE_LOG_SHEET_ID = "1rWbnXhjVap71jtuqVwAUiWO1QCJy0lgNWdeM5C5Qzy4";
+      const CHE_LOG_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdZNhDOM6QyGTjws-bl1JAs1sBf-F89DhOr26ODp0WPNAG3xA/formResponse";
+      const CHE_LOG_FIELD_MAP = {
+        estimate_name:         "entry.523009227",
+        client_name:           "entry.1779157025",
+        property_address:      "entry.725172538",
+        build_psf:             "entry.1222485453",
+        sqft:                  "entry.465251011",
+        pool_cost:             "entry.15279569",
+        architect_fee:         "entry.807123712",
+        designer_fee:          "entry.374143421",
+        builder_fee_pct:       "entry.116422430",
+        owner_rep_fee_pct:     "entry.1505134654",
+        construction_months:   "entry.1571794083",
+        interest_rate:         "entry.132247855",
+        bank_fee_pct:          "entry.979591128",
+        owner_equity:          "entry.1495334210",
+        capital_mode:          "entry.760620938",
+        ltc_ratio:             "entry.2137979662",
+        ltv_target:            "entry.823561849",
+        appraised_value:       "entry.448202715",
+        base_build:            "entry.1227789176",
+        total_hard:            "entry.929919831",
+        builder_fee_amt:       "entry.1139517554",
+        owner_rep_fee_amt:     "entry.673028598",
+        construction_interest: "entry.633685053",
+        bank_fee_amt:          "entry.1946563565",
+        total_soft:            "entry.20964490",
+        total_project_cost:    "entry.388990458",
+        loan_amount:           "entry.1204545957",
+        owner_equity_required: "entry.1527874426",
+        computed_ltc:          "entry.2088598804",
+        computed_ltv:          "entry.819266346",
+        blended_psf:           "entry.943243065"
+      };
+
+      const logStatusEl = document.getElementById('che-log-status');
+      const logBtn      = document.getElementById('che-log-btn');
+      const estimateNameEl = document.getElementById('che-estimate-name');
+
+      function logStatus(level, msg) {
+        if (!logStatusEl) return;
+        logStatusEl.textContent = msg || '';
+        logStatusEl.style.color = level === 'err' ? '#f4b9b9'
+                              : level === 'ok'  ? '#b6e3c5'
+                              : '';
+      }
+
+      logBtn && logBtn.addEventListener('click', async () => {
+        const s = readState();
+        const r = compute(s);
+        const name = (estimateNameEl.value || '').trim();
+        if (!name) {
+          logStatus('err', 'Give the estimate a name first (e.g., "Base", "Upgraded", "Value Engineered").');
+          estimateNameEl.focus();
+          return;
+        }
+        const formReady = !/PASTE_/.test(CHE_LOG_FORM_URL) &&
+                          !Object.values(CHE_LOG_FIELD_MAP).some(v => /PASTE/.test(v));
+        if (!formReady) {
+          logStatus('err', 'Form not wired yet — see docs/che-setup.md. Send Ryan the sheet ID, form URL, and pre-filled link.');
+          return;
+        }
+
+        logBtn.disabled = true;
+        logStatus('', 'Logging…');
+
+        const round = (n) => isFinite(n) ? Math.round(n) : 0;
+        const payload = {
+          estimate_name:         name,
+          client_name:           s.client,
+          property_address:      s.address,
+          build_psf:             s.buildPsf,
+          sqft:                  s.sqft,
+          pool_cost:             s.pool,
+          architect_fee:         s.architect,
+          designer_fee:          s.designer,
+          builder_fee_pct:       s.builderFeePct,
+          owner_rep_fee_pct:     s.ownerRepFeePct,
+          construction_months:   s.constrMo,
+          interest_rate:         s.rate,
+          bank_fee_pct:          s.bankFeePct,
+          owner_equity:          s.ownerEquity,
+          capital_mode:          s.capMode,
+          ltc_ratio:             (s.ltcRatio * 100).toFixed(2),
+          ltv_target:            s.ltvTarget,
+          appraised_value:       s.appraised,
+          base_build:            round(r.baseBuild),
+          total_hard:            round(r.totalHard),
+          builder_fee_amt:       round(r.builderFee),
+          owner_rep_fee_amt:     round(r.ownerRepFee),
+          construction_interest: round(r.interest),
+          bank_fee_amt:          round(r.bankFee),
+          total_soft:            round(r.totalSoft),
+          total_project_cost:    round(r.tpc),
+          loan_amount:           round(r.loan),
+          owner_equity_required: round(r.equity),
+          computed_ltc:          (r.ltc * 100).toFixed(2),
+          computed_ltv:          (r.ltv * 100).toFixed(2),
+          blended_psf:           round(r.blended)
+        };
+        const body = new URLSearchParams();
+        for (const [k, v] of Object.entries(payload)) {
+          const id = CHE_LOG_FIELD_MAP[k];
+          if (id) body.append(id, String(v));
+        }
+        try {
+          await fetch(CHE_LOG_FORM_URL, { method: 'POST', mode: 'no-cors', body });
+          logStatus('ok', 'Logged "' + name + '" ✓  Ready to log another variant.');
+          estimateNameEl.value = '';
+        } catch (err) {
+          logStatus('err', 'Log failed — ' + (err.message || 'network error'));
+        } finally {
+          logBtn.disabled = false;
         }
       });
     })();
