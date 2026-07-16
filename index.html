@@ -8062,6 +8062,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               <div class="uw-section-grid">
                 <div class="uw-field"><label for="che-architect">Architect Fee</label><div class="prefix-dollar"><input id="che-architect" type="number" min="0" step="1" value="0" /></div></div>
                 <div class="uw-field"><label for="che-designer">Designer Fee</label><div class="prefix-dollar"><input id="che-designer" type="number" min="0" step="1" value="0" /></div></div>
+                <div class="uw-field"><label for="che-taxes">Taxes (during construction)</label><div class="prefix-dollar"><input id="che-taxes" type="number" min="0" step="1" value="0" /></div></div>
+                <div class="uw-field"><label for="che-closing">Closing Cost</label><div class="prefix-dollar"><input id="che-closing" type="number" min="0" step="1" value="0" /></div></div>
                 <div class="uw-field"><label for="che-builder-fee">Builder Fee (% of Hard)</label><div class="suffix" data-suffix="%"><input id="che-builder-fee" type="number" min="0" step="0.1" value="15" /></div></div>
                 <div class="uw-field"><label for="che-owner-rep-fee">Owner's Rep Fee (% of Hard)</label><div class="suffix" data-suffix="%"><input id="che-owner-rep-fee" type="number" min="0" step="0.1" value="5" /></div></div>
               </div>
@@ -8086,9 +8088,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
                 <div class="uw-field" id="che-ltc-wrap">
                   <label for="che-ltc">LTC Ratio</label>
                   <select id="che-ltc">
+                    <option value="0.00" selected>100% LTC (Full Financing)</option>
                     <option value="0.10">90% LTC (10% equity)</option>
                     <option value="0.15">85% LTC (15% equity)</option>
-                    <option value="0.20" selected>80% LTC (20% equity)</option>
+                    <option value="0.20">80% LTC (20% equity)</option>
                     <option value="0.25">75% LTC (25% equity)</option>
                     <option value="Custom">Custom</option>
                   </select>
@@ -8126,6 +8129,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               <div class="out-body">
                 <div class="out-row"><span class="k">Architect</span><span class="v" id="che-out-architect">$0</span></div>
                 <div class="out-row"><span class="k">Designer</span><span class="v" id="che-out-designer">$0</span></div>
+                <div class="out-row"><span class="k">Taxes</span><span class="v" id="che-out-taxes">$0</span></div>
+                <div class="out-row"><span class="k">Closing Cost</span><span class="v" id="che-out-closing">$0</span></div>
                 <div class="out-row"><span class="k">Builder Fee</span><span class="v" id="che-out-builder-fee">$0</span></div>
                 <div class="out-row"><span class="k">Owner's Rep Fee (Stonehouse)</span><span class="v" id="che-out-owner-rep-fee">$0</span></div>
                 <div class="out-row"><span class="k">Construction Interest</span><span class="v" id="che-out-interest">$0</span></div>
@@ -13634,14 +13639,15 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       document.querySelectorAll('[data-launches="open-che-modal"]').forEach(el =>
         el.addEventListener('click', open));
 
-      const STORAGE_KEY = 'stonehouse.customHomeEstimate.v1';
+      // v2 — added taxes + closing_cost, default to 100% financing
+      const STORAGE_KEY = 'stonehouse.customHomeEstimate.v2';
       const DEFAULTS = {
         address: '', client: '',
         buildPsf: 350, sqft: 5000, pool: 0,
-        architect: 0, designer: 0,
+        architect: 0, designer: 0, taxes: 0, closingCost: 0,
         builderFeePct: 15, ownerRepFeePct: 5,
         constrMo: 14, rate: 8, bankFeePct: 1, ownerEquity: 0,
-        capMode: 'LTC', ltcRatio: 0.20, ltcCustom: 20, ltvTarget: 70, appraised: 0
+        capMode: 'LTC', ltcRatio: 0.00, ltcCustom: 0, ltvTarget: 70, appraised: 0
       };
 
       const inputs = {
@@ -13652,6 +13658,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         pool:        document.getElementById('che-pool'),
         architect:   document.getElementById('che-architect'),
         designer:    document.getElementById('che-designer'),
+        taxes:       document.getElementById('che-taxes'),
+        closing:     document.getElementById('che-closing'),
         builderFee:  document.getElementById('che-builder-fee'),
         ownerRepFee: document.getElementById('che-owner-rep-fee'),
         constrMo:    document.getElementById('che-constr-mo'),
@@ -13671,6 +13679,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         hard:        document.getElementById('che-out-hard'),
         architect:   document.getElementById('che-out-architect'),
         designer:    document.getElementById('che-out-designer'),
+        taxes:       document.getElementById('che-out-taxes'),
+        closing:     document.getElementById('che-out-closing'),
         builderFee:  document.getElementById('che-out-builder-fee'),
         ownerRepFee: document.getElementById('che-out-owner-rep-fee'),
         interest:    document.getElementById('che-out-interest'),
@@ -13711,6 +13721,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         inputs.pool.value        = s.pool;
         inputs.architect.value   = s.architect;
         inputs.designer.value    = s.designer;
+        inputs.taxes.value       = s.taxes;
+        inputs.closing.value     = s.closingCost;
         inputs.builderFee.value  = s.builderFeePct;
         inputs.ownerRepFee.value = s.ownerRepFeePct;
         inputs.constrMo.value    = s.constrMo;
@@ -13722,8 +13734,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         inputs.ltvTarget.value   = s.ltvTarget;
         inputs.appraised.value   = s.appraised;
         // LTC ratio select: match saved value, or fall back to Custom
-        const opts = ['0.10','0.15','0.20','0.25'];
-        inputs.ltc.value = opts.includes(String(s.ltcRatio)) ? String(s.ltcRatio) : 'Custom';
+        const opts = ['0.00','0.10','0.15','0.20','0.25'];
+        inputs.ltc.value = opts.includes(String(s.ltcRatio.toFixed(2))) ? String(s.ltcRatio.toFixed(2)) : 'Custom';
         updateCapVisibility();
       }
       function readState() {
@@ -13736,6 +13748,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           pool: numFrom(inputs.pool),
           architect: numFrom(inputs.architect),
           designer: numFrom(inputs.designer),
+          taxes: numFrom(inputs.taxes),
+          closingCost: numFrom(inputs.closing),
           builderFeePct: numFrom(inputs.builderFee),
           ownerRepFeePct: numFrom(inputs.ownerRepFee),
           constrMo: numFrom(inputs.constrMo),
@@ -13744,9 +13758,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           ownerEquity: numFrom(inputs.ownerEquity),
           capMode: inputs.capMode.value,
           ltcRatio: ltcSel === 'Custom'
-            ? Math.max(0, Math.min(100, numFrom(inputs.ltcCustom, 20))) / 100
+            ? Math.max(0, Math.min(100, numFrom(inputs.ltcCustom, 0))) / 100
             : parseFloat(ltcSel),
-          ltcCustom: numFrom(inputs.ltcCustom, 20),
+          ltcCustom: numFrom(inputs.ltcCustom, 0),
           ltvTarget: numFrom(inputs.ltvTarget, 70),
           appraised: numFrom(inputs.appraised)
         };
@@ -13760,6 +13774,25 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         document.getElementById('che-ltv-appraised-wrap').hidden = (mode !== 'LTV');
       }
 
+      // Monthly draw schedule: loan is drawn evenly across construction
+      // months, interest capitalizes each month on the outstanding balance.
+      // This matches how construction loans actually accrue interest
+      // (draws roll in monthly, interest compounds).
+      function drawScheduleInterest(loan, months, annualRate) {
+        if (loan <= 0 || months <= 0 || annualRate <= 0) return 0;
+        const monthlyRate = annualRate / 100 / 12;
+        const monthlyDraw = loan / months;
+        let balance = 0;
+        let totalInt = 0;
+        for (let m = 0; m < months; m++) {
+          balance += monthlyDraw;         // draw at start of month
+          const int = balance * monthlyRate;
+          balance += int;                  // interest capitalizes
+          totalInt += int;
+        }
+        return totalInt;
+      }
+
       function compute(s) {
         // Hard costs
         const baseBuild = s.buildPsf * s.sqft;
@@ -13768,54 +13801,55 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         // Soft costs (excluding financing which depends on loan)
         const builderFee  = totalHard * (s.builderFeePct / 100);
         const ownerRepFee = totalHard * (s.ownerRepFeePct / 100);
-        const softNoFin   = s.architect + s.designer + builderFee + ownerRepFee;
+        const softNoFin   = s.architect + s.designer + s.taxes + s.closingCost
+                          + builderFee + ownerRepFee;
 
-        // Costs before financing
+        // Everything pre-financing
         const preFin = totalHard + softNoFin;
+        const bankFrac = s.bankFeePct / 100;
 
-        // Financing — solve iteratively because interest depends on loan,
-        // which depends on TPC, which depends on interest.
-        const monthlyRate = s.rate / 100 / 12;
-        const halfLife    = Math.max(0, s.constrMo) * 0.5;
-        const bankFrac    = s.bankFeePct / 100;
-        // If mode = Cash, no loan/interest at all
+        // Cash mode: no loan, no interest, no bank fee
         if (s.capMode === 'Cash') {
           const tpc = preFin;
-          const loan = 0, interest = 0, bankFee = 0;
-          const equity = Math.max(0, tpc - loan);
-          return finish({s, baseBuild, totalHard, builderFee, ownerRepFee, interest, bankFee,
-                         softNoFin, tpc, loan, equity});
+          return finish({s, baseBuild, totalHard, builderFee, ownerRepFee,
+                         interest: 0, bankFee: 0, softNoFin, tpc,
+                         loan: 0, equity: tpc});
         }
 
-        let loan = 0, interest = 0, bankFee = 0, tpc = preFin;
-        for (let i = 0; i < 8; i++) {
+        // Iteratively solve — interest depends on loan, loan depends on TPC,
+        // TPC includes interest+bankFee. Converges in ~5 passes.
+        let loan = 0, interest = 0, bankFee = 0, tpc = preFin, equity = 0;
+        for (let i = 0; i < 10; i++) {
+          tpc = preFin + interest + bankFee;
           if (s.capMode === 'LTC') {
-            tpc  = preFin + interest + bankFee;
-            loan = s.ltcRatio * tpc;
+            // ltcRatio is the EQUITY fraction (e.g., 0.20 = 20% equity)
+            //   equity = ltcRatio × tpc,  loan = tpc - equity
+            equity = s.ltcRatio * tpc;
+            loan   = tpc - equity;
           } else if (s.capMode === 'LTV') {
             loan = (s.ltvTarget / 100) * s.appraised;
-            tpc  = preFin + interest + bankFee;  // TPC still adds financing on cost side
+            equity = Math.max(0, tpc - loan);
           }
-          // Subtract owner-equity-into-land from the effective borrowing base
-          // (owner is putting cash toward land so loan doesn't need to cover it).
-          const effectiveLoan = Math.max(0, loan - s.ownerEquity);
-          interest = effectiveLoan * monthlyRate * halfLife;
+          // Owner Equity (land) reduces the loan since owner brings cash to
+          // close on the lot before construction draws begin.
+          const netLoan = Math.max(0, loan - s.ownerEquity);
+          interest = drawScheduleInterest(netLoan, s.constrMo, s.rate);
           bankFee  = loan * bankFrac;
         }
-        const equity = Math.max(0, tpc - loan);
-        return finish({s, baseBuild, totalHard, builderFee, ownerRepFee, interest, bankFee,
-                       softNoFin, tpc, loan, equity});
+        return finish({s, baseBuild, totalHard, builderFee, ownerRepFee,
+                       interest, bankFee, softNoFin, tpc, loan, equity});
 
         function finish(r) {
           const totalSoft = r.softNoFin + r.interest + r.bankFee;
           const ltc = r.tpc > 0 ? r.loan / r.tpc : 0;
           const ltv = (r.s.capMode === 'LTV' && r.s.appraised > 0)
             ? r.loan / r.s.appraised
-            : 0;
+            : (r.tpc > 0 ? r.loan / r.tpc : 0);  // fall back to LTC-style
           const blended = r.s.sqft > 0 ? r.tpc / r.s.sqft : 0;
           return {
             baseBuild: r.baseBuild, pool: r.s.pool, totalHard: r.totalHard,
             architect: r.s.architect, designer: r.s.designer,
+            taxes: r.s.taxes, closingCost: r.s.closingCost,
             builderFee: r.builderFee, ownerRepFee: r.ownerRepFee,
             interest: r.interest, bankFee: r.bankFee, totalSoft,
             tpc: r.tpc, loan: r.loan, equity: r.equity, ltc, ltv, blended
@@ -13832,6 +13866,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         outs.hard.textContent        = fmtUSD(r.totalHard);
         outs.architect.textContent   = fmtUSD(r.architect);
         outs.designer.textContent    = fmtUSD(r.designer);
+        outs.taxes.textContent       = fmtUSD(r.taxes);
+        outs.closing.textContent     = fmtUSD(r.closingCost);
         outs.builderFee.textContent  = fmtUSD(r.builderFee);
         outs.ownerRepFee.textContent = fmtUSD(r.ownerRepFee);
         outs.interest.textContent    = fmtUSD(r.interest);
@@ -13895,6 +13931,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         pool_cost:             "entry.15279569",
         architect_fee:         "entry.807123712",
         designer_fee:          "entry.374143421",
+        taxes:                 "entry.778005721",
+        closing_cost:          "entry.1702119944",
         builder_fee_pct:       "entry.116422430",
         owner_rep_fee_pct:     "entry.1505134654",
         construction_months:   "entry.1571794083",
@@ -13961,6 +13999,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           pool_cost:             s.pool,
           architect_fee:         s.architect,
           designer_fee:          s.designer,
+          taxes:                 s.taxes,
+          closing_cost:          s.closingCost,
           builder_fee_pct:       s.builderFeePct,
           owner_rep_fee_pct:     s.ownerRepFeePct,
           construction_months:   s.constrMo,
