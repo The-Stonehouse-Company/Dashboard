@@ -1162,12 +1162,14 @@
       background: var(--bg-elev);
       border: 1px solid var(--rule-strong);
       padding: 22px 24px 20px;
+    }
+    /* Photo variant — only applied when the renderer adds .has-photo.
+       All other cards (Land, Custom Rep, Development) stay in their
+       original single-column layout. */
+    .deal-card.has-photo {
       display: grid;
       grid-template-columns: 132px 1fr;
       column-gap: 20px;
-    }
-    .deal-card.no-photo {
-      grid-template-columns: 1fr;
     }
     .deal-photo {
       width: 132px; height: 132px;
@@ -1184,11 +1186,8 @@
       letter-spacing: 0.16em; text-transform: uppercase;
       color: var(--text-muted); text-align: center; padding: 8px;
     }
-    .deal-body { display: contents; }
-    .deal-card > .deal-head,
-    .deal-card > .deal-bar { grid-column: 2; }
-    .deal-card.no-photo > .deal-head,
-    .deal-card.no-photo > .deal-bar { grid-column: auto; }
+    .deal-card.has-photo > .deal-head,
+    .deal-card.has-photo > .deal-bar { grid-column: 2; }
     .deal-head {
       display: flex; justify-content: space-between;
       align-items: flex-start;
@@ -1198,9 +1197,10 @@
       margin-bottom: 14px;
     }
     @media (max-width: 640px) {
-      .deal-card { grid-template-columns: 1fr; }
+      .deal-card.has-photo { grid-template-columns: 1fr; }
       .deal-photo { width: 100%; height: 180px; margin-bottom: 12px; }
-      .deal-card > .deal-head, .deal-card > .deal-bar { grid-column: auto; }
+      .deal-card.has-photo > .deal-head,
+      .deal-card.has-photo > .deal-bar { grid-column: auto; }
     }
     .deal-address {
       font-family: var(--font-display);
@@ -16579,7 +16579,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       if (d.dateUC && d.ddEnd)   bars.push(_adProgressBar('Due Diligence', d.dateUC, d.ddEnd, today));
       if (d.dateUC && d.closing) bars.push(_adProgressBar('Closing',       d.dateUC, d.closing, today));
       return (
-        '<article class="deal-card">' +
+        '<article class="deal-card has-photo">' +
           _adPhotoTile(d.address) +
           '<header class="deal-head">' +
             '<div>' +
@@ -16607,7 +16607,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const bars = [];
       if (d.dateUC && d.closing) bars.push(_adProgressBar('Closing', d.dateUC, d.closing, today));
       return (
-        '<article class="deal-card">' +
+        '<article class="deal-card has-photo">' +
           _adPhotoTile(d.address) +
           '<header class="deal-head">' +
             '<div>' +
