@@ -1162,7 +1162,33 @@
       background: var(--bg-elev);
       border: 1px solid var(--rule-strong);
       padding: 22px 24px 20px;
+      display: grid;
+      grid-template-columns: 132px 1fr;
+      column-gap: 20px;
     }
+    .deal-card.no-photo {
+      grid-template-columns: 1fr;
+    }
+    .deal-photo {
+      width: 132px; height: 132px;
+      background: #0d0d0d center/cover no-repeat;
+      border: 1px solid var(--rule-strong);
+      overflow: hidden;
+      position: relative;
+    }
+    .deal-photo.placeholder::after {
+      content: "No photo yet";
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-body); font-size: 9px;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--text-muted); text-align: center; padding: 8px;
+    }
+    .deal-body { display: contents; }
+    .deal-card > .deal-head,
+    .deal-card > .deal-bar { grid-column: 2; }
+    .deal-card.no-photo > .deal-head,
+    .deal-card.no-photo > .deal-bar { grid-column: auto; }
     .deal-head {
       display: flex; justify-content: space-between;
       align-items: flex-start;
@@ -1170,6 +1196,11 @@
       padding-bottom: 16px;
       border-bottom: 1px solid var(--rule);
       margin-bottom: 14px;
+    }
+    @media (max-width: 640px) {
+      .deal-card { grid-template-columns: 1fr; }
+      .deal-photo { width: 100%; height: 180px; margin-bottom: 12px; }
+      .deal-card > .deal-head, .deal-card > .deal-bar { grid-column: auto; }
     }
     .deal-address {
       font-family: var(--font-display);
@@ -5423,6 +5454,19 @@
         </fieldset>
 
         <fieldset>
+          <legend>Property Photo (optional)</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="bd-photo">Hero photo</label>
+              <input id="bd-photo" name="photo" type="file" accept="image/*" />
+              <div style="font-size:10px; color:var(--text-muted); letter-spacing:.08em; margin-top:4px;">
+                Uploads to <code>assets/listings/&lt;slug&gt;/hero.jpg</code> and appears on the pipeline card. First upload requires a GitHub personal access token — pasted once, saved to this browser.
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
           <legend>Notes</legend>
           <div class="form-grid">
             <div class="full">
@@ -5515,6 +5559,19 @@
             <div>
               <label for="ls-sold">Sold Price (if closed)</label>
               <input id="ls-sold" name="sold_price" type="number" step="any" min="0" placeholder="1235000" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Property Photo (optional)</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="ls-photo">Hero photo</label>
+              <input id="ls-photo" name="photo" type="file" accept="image/*" />
+              <div style="font-size:10px; color:var(--text-muted); letter-spacing:.08em; margin-top:4px;">
+                Uploads to <code>assets/listings/&lt;slug&gt;/hero.jpg</code> and appears on the pipeline card. First upload requires a GitHub personal access token — pasted once, saved to this browser.
+              </div>
             </div>
           </div>
         </fieldset>
@@ -16457,6 +16514,33 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       return '<span style="display:inline-block;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text);border:1px solid var(--rule-strong);padding:4px 9px;">' + s + '</span>';
     }
 
+    // ----- Photo helper -----
+    // Slugify the address to match assets/listings/<slug>/hero.jpg.
+    // Strategy: lowercase, strip city/state (comma+onward), replace non-alpha-num
+    // with hyphens. E.g. "1055 Zophi St, Nashville, TN" → "1055-zophi-st".
+    function _adAddressSlug(address) {
+      if (!address) return '';
+      let s = String(address).toLowerCase();
+      const comma = s.indexOf(',');
+      if (comma > 0) s = s.slice(0, comma);
+      s = s.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      return s;
+    }
+    function _adPhotoTile(address) {
+      const slug = _adAddressSlug(address);
+      if (!slug) {
+        return '<div class="deal-photo placeholder"></div>';
+      }
+      const url = 'assets/listings/' + slug + '/hero.jpg';
+      // Use inline <img> with onerror fallback so a missing file collapses to
+      // a subtle placeholder instead of a broken-image icon.
+      return '<div class="deal-photo" style="background-image:url(' + url + ');">' +
+             '<img src="' + url + '" alt="" style="display:none;" ' +
+                  'onerror="this.parentNode.classList.add(\'placeholder\');this.parentNode.style.backgroundImage=\'none\';" ' +
+                  'onload="this.remove();" />' +
+             '</div>';
+    }
+
     // ----- Card renderers -----
     function _adBuyerCard(d, today) {
       const bars = [];
@@ -16464,6 +16548,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       if (d.dateUC && d.closing) bars.push(_adProgressBar('Closing',       d.dateUC, d.closing, today));
       return (
         '<article class="deal-card">' +
+          _adPhotoTile(d.address) +
           '<header class="deal-head">' +
             '<div>' +
               '<h3 class="deal-address">' + _adEsc(d.address || 'Untitled property') + '</h3>' +
@@ -16491,6 +16576,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       if (d.dateUC && d.closing) bars.push(_adProgressBar('Closing', d.dateUC, d.closing, today));
       return (
         '<article class="deal-card">' +
+          _adPhotoTile(d.address) +
           '<header class="deal-head">' +
             '<div>' +
               '<h3 class="deal-address">' + _adEsc(d.address || 'Untitled property') + '</h3>' +
@@ -16742,6 +16828,72 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     })();
 
     // ============================================================
+    // Shared GitHub photo uploader — writes to assets/listings/<slug>/hero.jpg
+    // Reuses the same PAT + repo pattern as newsletter-composer.html.
+    // ============================================================
+    const _GH_REPO_OWNER = 'The-Stonehouse-Company';
+    const _GH_REPO_NAME  = 'Dashboard';
+    const _GH_BRANCH     = 'main';
+    const _GH_LS_TOKEN   = 'stonehouse-gh-pat';   // shared with newsletter composer
+
+    function _ghGetToken() {
+      try { return localStorage.getItem(_GH_LS_TOKEN); } catch (_) { return null; }
+    }
+    function _ghSaveToken(t) {
+      try { localStorage.setItem(_GH_LS_TOKEN, t); } catch (_) {}
+    }
+    function _ghPromptForToken() {
+      const existing = _ghGetToken() || '';
+      const t = prompt(
+        'Paste your GitHub Personal Access Token (repo scope).\n' +
+        'It saves to this browser only — one-time setup.\n' +
+        'Get one at github.com/settings/tokens → Fine-grained → repo:contents write access.',
+        existing
+      );
+      if (t && t.trim()) { _ghSaveToken(t.trim()); return t.trim(); }
+      return null;
+    }
+    async function _ghUploadHero(slug, file) {
+      let token = _ghGetToken();
+      if (!token) { token = _ghPromptForToken(); }
+      if (!token) throw new Error('No GitHub token — photo upload skipped.');
+
+      const path = 'assets/listings/' + slug + '/hero.jpg';
+      const b64  = await new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload  = () => resolve(String(r.result).split(',')[1]);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+
+      const headers = {
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Authorization': 'Bearer ' + token
+      };
+      // Check if file already exists (need SHA to overwrite)
+      let sha = null;
+      try {
+        const ck = await fetch(
+          'https://api.github.com/repos/' + _GH_REPO_OWNER + '/' + _GH_REPO_NAME +
+          '/contents/' + path + '?ref=' + _GH_BRANCH + '&_=' + Date.now(),
+          { headers, cache: 'no-store' }
+        );
+        if (ck.ok) sha = (await ck.json()).sha;
+      } catch (_) {}
+      const body = { message: 'Add hero photo for ' + slug, content: b64, branch: _GH_BRANCH };
+      if (sha) body.sha = sha;
+      const res = await fetch(
+        'https://api.github.com/repos/' + _GH_REPO_OWNER + '/' + _GH_REPO_NAME + '/contents/' + path,
+        { method: 'PUT',
+          headers: Object.assign({}, headers, { 'Content-Type': 'application/json' }),
+          body: JSON.stringify(body) }
+      );
+      if (!res.ok) throw new Error('GitHub upload failed: ' + res.status + ' ' + (await res.text()).slice(0, 200));
+      return path;
+    }
+
+    // ============================================================
     // BUYER-DEAL + LISTING modal controllers (open/close, submit via Form)
     // ============================================================
     function _adSetupModal(opts) {
@@ -16800,8 +16952,31 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         submitBtn.textContent = 'Submitting…';
         try {
           const fd = new FormData(form);
+
+          // --- Photo upload (optional) ---
+          // If the form has a "photo" file field with a picked image, upload
+          // it to GitHub at assets/listings/<slug>/hero.jpg BEFORE the form
+          // submits. Photo failure ≠ form failure — we still log the row.
+          const photoFile = fd.get('photo');
+          const address = fd.get('property_address') || '';
+          if (photoFile && photoFile.size > 0 && address) {
+            const slug = _adAddressSlug(address);
+            if (slug) {
+              try {
+                submitBtn.textContent = 'Uploading photo…';
+                await _ghUploadHero(slug, photoFile);
+                setStatus('ok', '📸 Photo uploaded. Logging deal…');
+              } catch (photoErr) {
+                console.warn('[photo upload] failed:', photoErr);
+                setStatus('warn', '⚠ Photo upload failed (' + (photoErr.message || photoErr).slice(0, 60) + ') — continuing to log deal.');
+              }
+            }
+          }
+          submitBtn.textContent = 'Submitting…';
+
           const body = new URLSearchParams();
           for (const [k, v] of fd.entries()) {
+            if (k === 'photo') continue;                 // never send file to Google Form
             const key = cfg.FIELD_MAP[k];
             if (key) body.append(key, v);
           }
