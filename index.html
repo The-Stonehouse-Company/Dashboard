@@ -3547,9 +3547,9 @@
         </div>
       </div>
 
-      <!-- ACTIVE DEALS subtab: buyer-side + listing-side -->
+      <!-- ACTIVE DEALS subtab: buyer-side + listing-side (split into Coming Soon + Active) -->
       <div class="subpanel" id="subpanel-sales-deals" role="tabpanel" aria-hidden="true" tabindex="0">
-        <p class="subpanel-intro">Track every deal in motion. Buyer-side deals under contract live in the top section; sell-side listings with their current stage live below.</p>
+        <p class="subpanel-intro">Two divisions: buyer-side representations under contract, and sell-side listings — coming soon and live on-market.</p>
 
         <div class="action-grid">
           <button class="primary-action" type="button" id="open-buyerdeal-modal" aria-haspopup="dialog" aria-controls="buyerdeal-modal">
@@ -3564,31 +3564,60 @@
           </button>
         </div>
 
-        <section class="pipeline-section" aria-labelledby="buyerdeal-title">
-          <header class="pipeline-head">
-            <div>
-              <div class="eyebrow" style="margin-bottom:8px;">Buyer Side · Active Pipeline</div>
-              <h2 class="pipeline-title" id="buyerdeal-title">Under Contract — Buyer Rep</h2>
-            </div>
-            <div class="pipeline-meta" id="buyerdeal-meta">Loading…</div>
+        <!-- ============ BUYER SECTION ============ -->
+        <div class="pipeline-division" style="margin-top:24px;">
+          <header class="pipeline-division-head" style="border-bottom:1px solid var(--rule-strong); padding-bottom:10px; margin-bottom:14px;">
+            <div class="eyebrow" style="letter-spacing:.2em; font-size:11px; color:var(--text-muted);">Division 01</div>
+            <h2 style="font-family:var(--font-display); font-size:22px; letter-spacing:.08em; text-transform:uppercase; margin:4px 0 0;">Buyer Side</h2>
           </header>
-          <div class="deal-list" id="buyerdeal-list">
-            <div class="deal-empty">Loading deals…</div>
-          </div>
-        </section>
 
-        <section class="pipeline-section" aria-labelledby="listings-title">
-          <header class="pipeline-head">
-            <div>
-              <div class="eyebrow" style="margin-bottom:8px;">Sell Side · Active Pipeline</div>
-              <h2 class="pipeline-title" id="listings-title">Listings — Seller Rep</h2>
+          <section class="pipeline-section" aria-labelledby="buyerdeal-title">
+            <header class="pipeline-head">
+              <div>
+                <div class="eyebrow" style="margin-bottom:8px;">Buyer Rep · Under Contract</div>
+                <h2 class="pipeline-title" id="buyerdeal-title">Active Buyer Deals</h2>
+              </div>
+              <div class="pipeline-meta" id="buyerdeal-meta">Loading…</div>
+            </header>
+            <div class="deal-list" id="buyerdeal-list">
+              <div class="deal-empty">Loading deals…</div>
             </div>
-            <div class="pipeline-meta" id="listings-meta">Loading…</div>
+          </section>
+        </div>
+
+        <!-- ============ LISTING SECTION ============ -->
+        <div class="pipeline-division" style="margin-top:36px;">
+          <header class="pipeline-division-head" style="border-bottom:1px solid var(--rule-strong); padding-bottom:10px; margin-bottom:14px;">
+            <div class="eyebrow" style="letter-spacing:.2em; font-size:11px; color:var(--text-muted);">Division 02</div>
+            <h2 style="font-family:var(--font-display); font-size:22px; letter-spacing:.08em; text-transform:uppercase; margin:4px 0 0;">Listing Side</h2>
           </header>
-          <div class="deal-list" id="listings-list">
-            <div class="deal-empty">Loading listings…</div>
-          </div>
-        </section>
+
+          <section class="pipeline-section" aria-labelledby="listings-cs-title">
+            <header class="pipeline-head">
+              <div>
+                <div class="eyebrow" style="margin-bottom:8px;">Listings · Pre-Launch</div>
+                <h2 class="pipeline-title" id="listings-cs-title">Coming Soon</h2>
+              </div>
+              <div class="pipeline-meta" id="listings-cs-meta">Loading…</div>
+            </header>
+            <div class="deal-list" id="listings-cs-list">
+              <div class="deal-empty">Loading listings…</div>
+            </div>
+          </section>
+
+          <section class="pipeline-section" aria-labelledby="listings-active-title">
+            <header class="pipeline-head">
+              <div>
+                <div class="eyebrow" style="margin-bottom:8px;">Listings · On Market</div>
+                <h2 class="pipeline-title" id="listings-active-title">Active</h2>
+              </div>
+              <div class="pipeline-meta" id="listings-active-meta">Loading…</div>
+            </header>
+            <div class="deal-list" id="listings-active-list">
+              <div class="deal-empty">Loading listings…</div>
+            </div>
+          </section>
+        </div>
       </div>
 
       <div class="subpanel" id="subpanel-sales-commissions" role="tabpanel" aria-hidden="true" tabindex="0">
@@ -6208,8 +6237,10 @@
                 <option value="" disabled selected>Select stage…</option>
                 <option value="Aquired">Aquired</option>
                 <option value="Pre-Con">Pre-Con</option>
+                <option value="Demolition">Demolition</option>
                 <option value="Framing">Framing</option>
-                <option value="Mechanicals">Mechanicals</option>
+                <option value="Mechanical">Mechanical</option>
+                <option value="Drywall">Drywall</option>
                 <option value="Finishes">Finishes</option>
                 <option value="Listed">Listed</option>
                 <option value="Sold">Sold</option>
@@ -16596,25 +16627,32 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     })();
 
     // ============================================================
-    // LISTINGS (sell-side) pipeline loader
+    // LISTINGS (sell-side) pipeline loader — split into
+    // Coming Soon and Active (everything else that's live).
     // ============================================================
     (function () {
-      const listEl = document.getElementById('listings-list');
-      const metaEl = document.getElementById('listings-meta');
-      if (!listEl) return;
-      function setMeta(t) { if (metaEl) metaEl.textContent = t; }
-      function setEmpty(m) { listEl.innerHTML = '<div class="deal-empty">' + _adEsc(m) + '</div>'; }
-      function setError(m) { listEl.innerHTML = '<div class="deal-error">' + _adEsc(m) + '</div>'; }
+      const csListEl     = document.getElementById('listings-cs-list');
+      const csMetaEl     = document.getElementById('listings-cs-meta');
+      const activeListEl = document.getElementById('listings-active-list');
+      const activeMetaEl = document.getElementById('listings-active-meta');
+      if (!csListEl || !activeListEl) return;
+
+      function setMeta(el, t) { if (el) el.textContent = t; }
+      function setEmpty(el, m) { el.innerHTML = '<div class="deal-empty">' + _adEsc(m) + '</div>'; }
+      function setError(el, m) { el.innerHTML = '<div class="deal-error">' + _adEsc(m) + '</div>'; }
 
       if (!LISTING_CONFIG.SHEET_ID) {
-        setMeta('Setup pending');
-        setEmpty('Listings sheet not yet connected. See docs/active-deals-setup.md to wire it up.');
+        setMeta(csMetaEl, 'Setup pending');
+        setEmpty(csListEl, 'Listings sheet not yet connected. See docs/active-deals-setup.md.');
+        setMeta(activeMetaEl, 'Setup pending');
+        setEmpty(activeListEl, 'Listings sheet not yet connected.');
         return;
       }
 
       async function load() {
         try {
-          setMeta('Loading…'); setEmpty('Loading listings…');
+          setMeta(csMetaEl, 'Loading…');     setEmpty(csListEl, 'Loading listings…');
+          setMeta(activeMetaEl, 'Loading…'); setEmpty(activeListEl, 'Loading listings…');
           const res = await fetch(_adGvizUrl(LISTING_CONFIG), { cache: 'no-store' });
           if (!res.ok) throw new Error('HTTP ' + res.status);
           const table = _adParseEnvelope(await res.text());
@@ -16648,9 +16686,16 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           })
             .filter(d => d.address)
             .filter(d => !/^(closed|withdrawn|expired)$/i.test(d.stage)); // hide archive states
-          // Sort by stage priority, then by list date desc
-          const stagePriority = { 'Coming Soon': 0, 'Active': 1, 'Showing': 2, 'Pending': 3, 'Under Contract': 4 };
-          listings.sort((a, b) => {
+
+          // ---- Split by stage ----
+          const isComingSoon = (d) => /^coming\s*soon$/i.test(d.stage);
+          const comingSoon = listings.filter(isComingSoon);
+          const active     = listings.filter(d => !isComingSoon(d));
+
+          // Sort each: within Active use stage priority, then list date desc.
+          // Coming Soon: sort by list date asc (earliest launch first).
+          const stagePriority = { 'Active': 0, 'Showing': 1, 'Pending': 2, 'Under Contract': 3 };
+          active.sort((a, b) => {
             const pa = stagePriority[a.stage] ?? 99;
             const pb = stagePriority[b.stage] ?? 99;
             if (pa !== pb) return pa - pb;
@@ -16658,20 +16703,37 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             const lb = b.listDate ? b.listDate.getTime() : 0;
             return lb - la;
           });
-          // Track count + volume for Home tiles
+          comingSoon.sort((a, b) => {
+            const la = a.listDate ? a.listDate.getTime() : Infinity;
+            const lb = b.listDate ? b.listDate.getTime() : Infinity;
+            return la - lb;
+          });
+
+          // Home tiles still care about total live listings count/volume
           window._salesCounts = window._salesCounts || { buyer: 0, listings: 0, buyerVolume: 0, listingVolume: 0 };
           window._salesCounts.listings = listings.length;
           window._salesCounts.listingVolume = listings.reduce((sum, d) => sum + (d.listPrice || 0), 0);
           _adRefreshSalesHomeTile();
-          if (listings.length === 0) {
-            setMeta('0 active'); setEmpty('No active listings.');
-            return;
+
+          // Render Coming Soon
+          if (comingSoon.length === 0) {
+            setMeta(csMetaEl, '0'); setEmpty(csListEl, 'No listings coming soon.');
+          } else {
+            setMeta(csMetaEl, comingSoon.length + ' listing' + (comingSoon.length === 1 ? '' : 's'));
+            csListEl.innerHTML = comingSoon.map(d => _adListingCard(d, today)).join('');
           }
-          setMeta(listings.length + ' listing' + (listings.length === 1 ? '' : 's'));
-          listEl.innerHTML = listings.map(d => _adListingCard(d, today)).join('');
+
+          // Render Active
+          if (active.length === 0) {
+            setMeta(activeMetaEl, '0'); setEmpty(activeListEl, 'No listings on market.');
+          } else {
+            setMeta(activeMetaEl, active.length + ' listing' + (active.length === 1 ? '' : 's'));
+            activeListEl.innerHTML = active.map(d => _adListingCard(d, today)).join('');
+          }
         } catch (err) {
           console.error('[LISTINGS] load failed:', err);
-          setMeta('Could not load'); setError('Could not load: ' + (err.message || err));
+          setMeta(csMetaEl, 'Could not load'); setError(csListEl, 'Could not load: ' + (err.message || err));
+          setMeta(activeMetaEl, 'Could not load'); setError(activeListEl, 'Could not load: ' + (err.message || err));
         }
       }
       load();
