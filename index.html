@@ -16516,15 +16516,47 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
     // ----- Photo helper -----
     // Slugify the address to match assets/listings/<slug>/hero.jpg.
-    // Strategy: lowercase, strip city/state (comma+onward), replace non-alpha-num
-    // with hyphens. E.g. "1055 Zophi St, Nashville, TN" → "1055-zophi-st".
+    // Users type addresses inconsistently — with/without commas, city before
+    // or after the street suffix, abbreviations like "Mdw" for "Meadow", etc.
+    // Strategy:
+    //   1. lowercase, strip periods
+    //   2. expand known abbreviations to their full spellings
+    //   3. find the first STREET SUFFIX (st/ave/dr/ln/blvd/…) and cut there
+    //   4. hyphenate
+    // Handles: "1055 Zophi St. Nashville, TN 37216"  → 1055-zophi-st
+    //          "2495 Deer Mdw Ln Arrington, TN"      → 2495-deer-meadow-ln
+    //          "715 Davis Dr. Brentwood TN 37027"    → 715-davis-dr
+    const _AD_STREET_SUFFIXES = [
+      'street','st','avenue','ave','drive','dr','lane','ln','boulevard','blvd',
+      'road','rd','court','ct','circle','cir','way','place','pl','parkway','pkwy',
+      'terrace','ter','trail','trl','highway','hwy','square','sq','loop','row',
+      'crossing','xing','pike','park','pkwy','row','plaza','plz'
+    ];
+    const _AD_ABBREVIATIONS = {
+      'mdw':'meadow', 'mtn':'mountain', 'hts':'heights', 'hbr':'harbor',
+      'crk':'creek', 'vlg':'village', 'shr':'shore', 'lk':'lake',
+      'grn':'green', 'hl':'hill', 'hls':'hills', 'brg':'bridge', 'brk':'brook',
+      'is':'island', 'jct':'junction', 'pnes':'pines', 'pt':'point',
+      'rdg':'ridge', 'spg':'spring', 'spgs':'springs', 'sq':'square',
+      'stn':'station', 'valy':'valley', 'vw':'view', 'wds':'woods'
+    };
     function _adAddressSlug(address) {
       if (!address) return '';
-      let s = String(address).toLowerCase();
+      let s = String(address).toLowerCase().replace(/\./g, ' ');
+      // Cut everything past first comma (city/state/zip)
       const comma = s.indexOf(',');
       if (comma > 0) s = s.slice(0, comma);
-      s = s.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-      return s;
+      // Tokenize + expand common street abbreviations
+      let tokens = s.split(/\s+/).filter(Boolean).map(t =>
+        _AD_ABBREVIATIONS[t] || t
+      );
+      // Find the first street suffix and truncate there
+      let cutAt = -1;
+      for (let i = 0; i < tokens.length; i++) {
+        if (_AD_STREET_SUFFIXES.indexOf(tokens[i]) >= 0) { cutAt = i; break; }
+      }
+      if (cutAt >= 0) tokens = tokens.slice(0, cutAt + 1);
+      return tokens.join('-').replace(/[^a-z0-9-]+/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
     }
     function _adPhotoTile(address) {
       const slug = _adAddressSlug(address);
