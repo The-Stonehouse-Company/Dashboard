@@ -4939,6 +4939,21 @@
           <div class="subpanel" id="subpanel-propmgmt-files" role="tabpanel" aria-hidden="true" tabindex="0">
             <p class="subpanel-intro">Templates and documents for the Property Management division. Drop new PDFs into <code>Dashboard/assets/propmgmt-files/</code> and add cards below.</p>
             <div class="template-grid">
+              <article class="template-card" id="movein-report-card">
+                <div class="template-card-head">
+                  <span class="template-kind">Inspection · Online Form</span>
+                  <span class="template-status">Ready</span>
+                </div>
+                <h3>Tenant Move-In Report</h3>
+                <p>Send this link to a new tenant on their move-in day. Mobile-friendly form — they walk through the property on their phone, mark condition + notes per room, sign, and submit. Every submission lands in your Google Sheet and emails you.</p>
+                <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+                  <button type="button" class="btn ghost" id="movein-open-btn" style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; padding:8px 12px; border:1px solid var(--panel-edge); background:transparent; color:var(--ink); cursor:pointer;">Preview Form</button>
+                  <button type="button" class="btn" id="movein-copy-btn" style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; padding:8px 12px; border:0; background:var(--ink); color:var(--paper); cursor:pointer;">Copy Tenant Link</button>
+                  <button type="button" class="btn ghost" id="movein-copyprefill-btn" style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; padding:8px 12px; border:1px solid var(--panel-edge); background:transparent; color:var(--ink); cursor:pointer;">Copy Pre-Filled Link…</button>
+                </div>
+                <div id="movein-status" style="font-size:11px; margin-top:8px; color:var(--text-dim);"></div>
+              </article>
+
               <article class="template-card">
                 <div class="template-card-head">
                   <span class="template-kind">Agreement · Template</span>
@@ -8695,7 +8710,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       // Cross-division
       { id: 'engagement-letter',   name: 'Engagement Letter',       division: 'cross',       category: 'generator', href: 'engagement-letter.html', external: true, desc: 'Stonehouse-branded engagement letter — buyer/seller representation.', status: 'live' },
       { id: 'custom-home-estimator',name: 'Custom Home Cost Estimator', division: 'customrep', category: 'calculator', href: '#customrep', external: false, desc: 'Client-facing budget: hard + soft costs with financing (LTC/LTV/Cash).', status: 'live' },
-      { id: 'estimate-summary',    name: 'Cost Estimate Summary PDF', division: 'customrep', category: 'generator', href: 'estimate-summary.html', external: true, desc: 'One-page Stonehouse-branded printable summary of a logged cost estimate.', status: 'live' }
+      { id: 'estimate-summary',    name: 'Cost Estimate Summary PDF', division: 'customrep', category: 'generator', href: 'estimate-summary.html', external: true, desc: 'One-page Stonehouse-branded printable summary of a logged cost estimate.', status: 'live' },
+
+      // Property Management
+      { id: 'move-in-report',      name: 'Tenant Move-In Report', division: 'propmgmt', category: 'intake', href: 'move-in-report.html', external: true, desc: 'Mobile-friendly online form — tenant walks through on their phone, marks condition + notes per room, signs, and submits. Emails you the moment they hit send.', status: 'live' }
     ];
 
     // ============================================================
@@ -18690,6 +18708,69 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       cancelId:  'cancel-tenant',           submitId: 'submit-tenant',
       config:    TENANTS_CONFIG
     });
+
+    // ================= MOVE-IN REPORT LINK ACTIONS =================
+    // Three buttons on the "Tenant Move-In Report" card in Files:
+    //   Preview Form         → opens move-in-report.html in a new tab
+    //   Copy Tenant Link     → clipboards the plain public URL
+    //   Copy Pre-Filled Link → prompts for property + tenant, builds URL with query params, clipboards
+    (function () {
+      const REPORT_URL_BASE = location.origin + location.pathname.replace(/[^/]*$/, '') + 'move-in-report.html';
+      const openBtn        = document.getElementById('movein-open-btn');
+      const copyBtn        = document.getElementById('movein-copy-btn');
+      const copyPrefillBtn = document.getElementById('movein-copyprefill-btn');
+      const statusEl       = document.getElementById('movein-status');
+      if (!copyBtn) return; // card not on page
+
+      function _flash(msg, ok = true) {
+        statusEl.textContent = msg;
+        statusEl.style.color = ok ? '#9ec39e' : '#d99';
+        setTimeout(() => { statusEl.textContent = ''; }, 3500);
+      }
+      async function _copy(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch (_) {
+          // Fallback for older browsers
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand('copy'); document.body.removeChild(ta); return true; }
+          catch (__) { document.body.removeChild(ta); return false; }
+        }
+      }
+
+      if (openBtn) openBtn.addEventListener('click', () => window.open(REPORT_URL_BASE, '_blank'));
+
+      copyBtn.addEventListener('click', async () => {
+        const ok = await _copy(REPORT_URL_BASE);
+        _flash(ok ? '✓ Link copied — paste into a text or email' : 'Copy failed — select and copy manually', ok);
+      });
+
+      copyPrefillBtn.addEventListener('click', async () => {
+        const property = prompt('Property address (required):');
+        if (!property) return;
+        const unit    = prompt('Unit / suite (leave blank if N/A):', '') || '';
+        const tenant  = prompt('Tenant full name:', '') || '';
+        const email   = prompt('Tenant email:', '') || '';
+        const phone   = prompt('Tenant phone (numbers only):', '') || '';
+        const start   = prompt('Lease start date (YYYY-MM-DD, blank OK):', '') || '';
+
+        const params = new URLSearchParams();
+        if (property) params.set('property', property);
+        if (unit)     params.set('unit', unit);
+        if (tenant)   params.set('tenant', tenant);
+        if (email)    params.set('email', email);
+        if (phone)    params.set('phone', phone.replace(/\D+/g, ''));
+        if (start)    params.set('start', start);
+
+        const url = REPORT_URL_BASE + '?' + params.toString();
+        const ok = await _copy(url);
+        _flash(ok ? '✓ Pre-filled link copied for ' + (tenant || property) : 'Copy failed', ok);
+      });
+    })();
 
     // ================= CSV EXPORTS =================
     function _pmExportPropertiesCSV() {
