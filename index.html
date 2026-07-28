@@ -4216,6 +4216,7 @@
         <aside class="division-subnav" role="tablist" aria-label="Land Acquisition sections" data-subtab-parent="land">
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-land-overview" aria-selected="true"  data-subkey="overview">Overview</button>
           <button class="subtab subnav-item" role="tab" aria-controls="subpanel-land-pipeline" aria-selected="false" data-subkey="pipeline">Pipeline</button>
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-land-buyboxes" aria-selected="false" data-subkey="buyboxes">Buy Boxes</button>
 
           <details class="subnav-group">
             <summary>Tools</summary>
@@ -4331,6 +4332,40 @@
               Download PDF <span class="arrow">↓</span>
             </a>
           </article>
+        </div>
+      </div>
+
+      <!-- ============= BUY BOXES ============= -->
+      <div class="subpanel" id="subpanel-land-buyboxes" role="tabpanel" aria-hidden="true" tabindex="0">
+        <p class="subpanel-intro">Active builder + developer acquisition criteria. Each buy box captures what one builder/developer wants to buy in one city — target neighborhoods, price ranges, lot size, frontage, depth, and must-haves. Land agents use these to match incoming lots to the right builder.</p>
+
+        <div class="action-grid" style="margin-bottom:16px;">
+          <button class="primary-action" type="button" id="open-buybox-modal" aria-haspopup="dialog" aria-controls="buybox-modal">
+            <span class="action-label">+ Add Buy Box</span>
+            <span class="action-sub">Log criteria for a builder or developer's next acquisition</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="bb-filters" style="display:grid; grid-template-columns: 1fr 180px 180px 160px; gap:10px; margin-bottom:14px;">
+          <input id="bb-search" type="text" placeholder="Search builder, city, suburb, notes…" />
+          <select id="bb-filter-builder"><option value="">All Builders / Developers</option></select>
+          <select id="bb-filter-city"><option value="">All Cities</option></select>
+          <select id="bb-filter-status">
+            <option value="">All Statuses</option>
+            <option value="Active">Active</option>
+            <option value="On Hold">On Hold</option>
+            <option value="Archived">Archived</option>
+          </select>
+        </div>
+        <div id="bb-count-meta" style="font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase; margin-bottom:10px;">Loading…</div>
+
+        <!-- Card grid -->
+        <div id="buybox-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:14px;">
+          <div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">
+            Loading buy boxes…
+          </div>
         </div>
       </div>
 
@@ -6735,6 +6770,161 @@
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="cancel-contact">Cancel</button>
         <button class="btn" type="submit" form="contact-form" id="submit-contact">Add Contact</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========================= BUY BOX MODAL ========================= -->
+  <div class="modal-overlay" id="buybox-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="buybox-modal-title" id="buybox-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow" id="buybox-modal-eyebrow">Land Acquisition · Buy Box</span>
+          <h2 class="modal-title" id="buybox-modal-title">Add Buy Box</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-buybox-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="buybox-form" autocomplete="off" novalidate>
+        <!-- Hidden field: buy_box_id — set on Add (new random) or Edit (pre-filled) -->
+        <input type="hidden" id="bb-id" name="buy_box_id" />
+
+        <fieldset>
+          <legend>Builder / Developer</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="bb-builder">Assign To <span class="req">*</span></label>
+              <select id="bb-builder" name="builder_name" required>
+                <option value="" disabled selected>Loading builders + developers…</option>
+              </select>
+              <p class="form-hint" style="margin-top:6px; font-size:11px; color:var(--text-dim);">
+                Dropdown pulls from <b>Development → Contacts</b> (Builders + Developers only).
+                Need someone new? Add them there first, then come back here.
+              </p>
+            </div>
+            <div>
+              <label for="bb-status">Status</label>
+              <select id="bb-status" name="status">
+                <option value="Active" selected>Active</option>
+                <option value="On Hold">On Hold</option>
+                <option value="Archived">Archived</option>
+              </select>
+            </div>
+            <div>
+              <label for="bb-priority">Priority</label>
+              <select id="bb-priority" name="priority">
+                <option value="">—</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Geography</legend>
+          <div class="form-grid">
+            <div>
+              <label for="bb-city">City <span class="req">*</span></label>
+              <input id="bb-city" name="city" type="text" required placeholder="Nashville" />
+            </div>
+            <div>
+              <label for="bb-state">State</label>
+              <input id="bb-state" name="state" type="text" placeholder="TN" maxlength="2" value="TN" />
+            </div>
+            <div class="full">
+              <label for="bb-suburbs">Target Neighborhoods / Suburbs</label>
+              <textarea id="bb-suburbs" name="suburbs" rows="2" placeholder="East Nashville, 12South, Germantown, Sylvan Park"></textarea>
+              <p class="form-hint" style="margin-top:4px; font-size:11px; color:var(--text-dim);">Comma-separated list of neighborhoods within this city.</p>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Pricing</legend>
+          <div class="form-grid">
+            <div>
+              <label for="bb-min-price">Min Price ($)</label>
+              <input id="bb-min-price" name="min_price" type="number" min="0" step="1000" placeholder="400000" />
+            </div>
+            <div>
+              <label for="bb-max-price">Max Price ($)</label>
+              <input id="bb-max-price" name="max_price" type="number" min="0" step="1000" placeholder="900000" />
+            </div>
+            <div class="full">
+              <label for="bb-suburb-pricing">Per-Suburb Pricing Notes</label>
+              <textarea id="bb-suburb-pricing" name="suburb_pricing" rows="3" placeholder="12South: $700K–$900K · East Nash: $400K–$600K · Germantown: $550K–$750K"></textarea>
+              <p class="form-hint" style="margin-top:4px; font-size:11px; color:var(--text-dim);">Optional — free-text override when different suburbs have different max prices.</p>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Lot Size &amp; Dimensions</legend>
+          <div class="form-grid">
+            <div>
+              <label for="bb-min-lot">Min Lot Size (sq ft)</label>
+              <input id="bb-min-lot" name="min_lot_sqft" type="number" min="0" step="100" placeholder="5000" />
+            </div>
+            <div>
+              <label for="bb-max-lot">Max Lot Size (sq ft)</label>
+              <input id="bb-max-lot" name="max_lot_sqft" type="number" min="0" step="100" placeholder="15000" />
+            </div>
+            <div>
+              <label for="bb-min-frontage">Min Frontage (ft)</label>
+              <input id="bb-min-frontage" name="min_frontage_ft" type="number" min="0" step="1" placeholder="50" />
+            </div>
+            <div>
+              <label for="bb-max-frontage">Max Frontage (ft)</label>
+              <input id="bb-max-frontage" name="max_frontage_ft" type="number" min="0" step="1" placeholder="120" />
+            </div>
+            <div>
+              <label for="bb-min-depth">Min Depth (ft)</label>
+              <input id="bb-min-depth" name="min_depth_ft" type="number" min="0" step="1" placeholder="100" />
+            </div>
+            <div>
+              <label for="bb-max-depth">Max Depth (ft)</label>
+              <input id="bb-max-depth" name="max_depth_ft" type="number" min="0" step="1" placeholder="200" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Preferences</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="bb-must-haves">Must-Haves</label>
+              <textarea id="bb-must-haves" name="must_haves" rows="2" placeholder="Flat lot, city water & sewer, no easements, R6 zoning or better"></textarea>
+            </div>
+            <div class="full">
+              <label for="bb-deal-breakers">Deal Breakers</label>
+              <textarea id="bb-deal-breakers" name="deal_breakers" rows="2" placeholder="Flood zone, HPZ overlay, sloped lot, alley access only"></textarea>
+            </div>
+            <div class="full">
+              <label for="bb-notes">Additional Notes</label>
+              <textarea id="bb-notes" name="notes" rows="2" placeholder="Anything else worth noting for this buy box"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Logged By</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="bb-logged-by">Land Agent Name <span class="req">*</span></label>
+              <input id="bb-logged-by" name="logged_by" type="text" required placeholder="Your name" />
+              <p class="form-hint" style="margin-top:4px; font-size:11px; color:var(--text-dim);">Who added or last updated this buy box.</p>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="form-status" id="buybox-form-status" aria-live="polite"></div>
+      </form>
+
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-buybox">Cancel</button>
+        <button class="btn" type="submit" form="buybox-form" id="submit-buybox">Save Buy Box</button>
       </footer>
     </div>
   </div>
@@ -19483,6 +19673,469 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     // Re-evaluate code when team roster finishes loading (Ryan's passcode
     // may not have been available on first render).
     document.addEventListener('stonehouse:team-loaded', () => { /* no-op; _ctExpectedCode reads live */ });
+
+    // ============================================================
+    // LAND ACQUISITION — BUY BOXES
+    //
+    // A buy box captures one builder/developer's acquisition criteria
+    // for one city. Each row in the sheet has a stable buy_box_id;
+    // edits submit a NEW row with the SAME id and the parser keeps
+    // only the latest per id (append-only sheet, edit-in-place UX).
+    //
+    // Builder dropdown is scoped to Contacts where category = 'Builders'
+    // or 'Developers'. If none exist, the modal explains that the agent
+    // needs to add the contact first in Development → Contacts.
+    //
+    // SETUP: see docs/buybox-setup.md.
+    // ============================================================
+    const BUYBOX_CONFIG = {
+      SHEET_ID:  "1012o5cpaVQ1nf9uk0xxbv8NxH_exkM2C3FaN9NIDfr0",
+      SHEET_TAB: "Form Responses 1",
+      FORM_URL:  "https://docs.google.com/forms/d/e/1FAIpQLSfGB32gOHYNj7syvMmUAp91rPcrfgZXOKTkYVB04h8bnHuxqA/formResponse",
+      FIELD_MAP: {
+        buy_box_id:      "entry.795908468",
+        builder_name:    "entry.1300019770",
+        status:          "entry.1529921140",
+        priority:        "entry.1512519823",
+        city:            "entry.1924244242",
+        state:           "entry.1054798501",
+        suburbs:         "entry.86669680",
+        min_price:       "entry.319787932",
+        max_price:       "entry.624652553",
+        suburb_pricing:  "entry.2072242054",
+        min_lot_sqft:    "entry.1205892179",
+        max_lot_sqft:    "entry.1373049132",
+        min_frontage_ft: "entry.21264700",
+        max_frontage_ft: "entry.1139799128",
+        min_depth_ft:    "entry.401848341",
+        max_depth_ft:    "entry.109297835",
+        must_haves:      "entry.1415481583",
+        deal_breakers:   "entry.1825351676",
+        notes:           "entry.2039447586",
+        logged_by:       "entry.887775077"
+      }
+    };
+
+    let _buyBoxRows = [];
+    let _buyBoxLoaded = false;
+
+    function _bbEsc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function _bbFmt$(n) {
+      const num = Number(n);
+      if (!isFinite(num) || num === 0) return '';
+      return '$' + Math.round(num).toLocaleString();
+    }
+    function _bbRange$(min, max) {
+      const lo = _bbFmt$(min), hi = _bbFmt$(max);
+      if (lo && hi) return lo + ' – ' + hi;
+      return lo || hi || '';
+    }
+    function _bbRangeNum(min, max, unit) {
+      const lo = min && Number(min);
+      const hi = max && Number(max);
+      const u = unit ? ' ' + unit : '';
+      if (lo && hi) return lo.toLocaleString() + '–' + hi.toLocaleString() + u;
+      if (lo) return lo.toLocaleString() + '+' + u;
+      if (hi) return 'up to ' + hi.toLocaleString() + u;
+      return '';
+    }
+
+    function _bbNewId() {
+      return 'bb-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+    }
+
+    // Parse sheet rows into buy box objects. Sheet is APPEND-ONLY: an
+    // edit submits a new row with the same buy_box_id. We keep the
+    // LATEST row per id (by Timestamp) so the UI shows the current state.
+    function _parseBuyBoxSheet(table) {
+      const cols = table.cols || [];
+      const ix = {
+        timestamp:    _adFindCol(cols, 'Timestamp'),
+        id:           _adFindCol(cols, 'buy_box_id', 'Buy Box ID'),
+        builder:      _adFindCol(cols, 'builder_name', 'Builder / Developer'),
+        status:       _adFindCol(cols, 'status', 'Status'),
+        priority:     _adFindCol(cols, 'priority', 'Priority'),
+        city:         _adFindCol(cols, 'city', 'City'),
+        state:        _adFindCol(cols, 'state', 'State'),
+        suburbs:      _adFindCol(cols, 'suburbs', 'Suburbs'),
+        minPrice:     _adFindCol(cols, 'min_price', 'Min Price'),
+        maxPrice:     _adFindCol(cols, 'max_price', 'Max Price'),
+        subPricing:   _adFindCol(cols, 'suburb_pricing', 'Suburb Pricing'),
+        minLot:       _adFindCol(cols, 'min_lot_sqft', 'Min Lot'),
+        maxLot:       _adFindCol(cols, 'max_lot_sqft', 'Max Lot'),
+        minFront:     _adFindCol(cols, 'min_frontage_ft', 'Min Frontage'),
+        maxFront:     _adFindCol(cols, 'max_frontage_ft', 'Max Frontage'),
+        minDepth:     _adFindCol(cols, 'min_depth_ft', 'Min Depth'),
+        maxDepth:     _adFindCol(cols, 'max_depth_ft', 'Max Depth'),
+        mustHaves:    _adFindCol(cols, 'must_haves', 'Must-Haves'),
+        dealBreakers: _adFindCol(cols, 'deal_breakers', 'Deal Breakers'),
+        notes:        _adFindCol(cols, 'notes', 'Notes'),
+        loggedBy:     _adFindCol(cols, 'logged_by', 'Logged By')
+      };
+      const rows = (table.rows || []).map(r => {
+        const c = r.c || [];
+        return {
+          timestamp: ix.timestamp >= 0 ? _adGvizDate(c[ix.timestamp]) : null,
+          id:        ix.id >= 0 ? _adGvizString(c[ix.id]) : '',
+          builder:   ix.builder >= 0 ? _adGvizString(c[ix.builder]) : '',
+          status:    ix.status >= 0 ? _adGvizString(c[ix.status]) : '',
+          priority:  ix.priority >= 0 ? _adGvizString(c[ix.priority]) : '',
+          city:      ix.city >= 0 ? _adGvizString(c[ix.city]) : '',
+          state:     ix.state >= 0 ? _adGvizString(c[ix.state]) : '',
+          suburbs:   ix.suburbs >= 0 ? _adGvizString(c[ix.suburbs]) : '',
+          minPrice:  ix.minPrice >= 0 ? _adGvizString(c[ix.minPrice]) : '',
+          maxPrice:  ix.maxPrice >= 0 ? _adGvizString(c[ix.maxPrice]) : '',
+          subPricing:ix.subPricing >= 0 ? _adGvizString(c[ix.subPricing]) : '',
+          minLot:    ix.minLot >= 0 ? _adGvizString(c[ix.minLot]) : '',
+          maxLot:    ix.maxLot >= 0 ? _adGvizString(c[ix.maxLot]) : '',
+          minFront:  ix.minFront >= 0 ? _adGvizString(c[ix.minFront]) : '',
+          maxFront:  ix.maxFront >= 0 ? _adGvizString(c[ix.maxFront]) : '',
+          minDepth:  ix.minDepth >= 0 ? _adGvizString(c[ix.minDepth]) : '',
+          maxDepth:  ix.maxDepth >= 0 ? _adGvizString(c[ix.maxDepth]) : '',
+          mustHaves: ix.mustHaves >= 0 ? _adGvizString(c[ix.mustHaves]) : '',
+          dealBreakers: ix.dealBreakers >= 0 ? _adGvizString(c[ix.dealBreakers]) : '',
+          notes:     ix.notes >= 0 ? _adGvizString(c[ix.notes]) : '',
+          loggedBy:  ix.loggedBy >= 0 ? _adGvizString(c[ix.loggedBy]) : ''
+        };
+      }).filter(r => r.id || r.builder);
+
+      // Dedupe by id — keep LATEST by timestamp
+      const latest = new Map();
+      rows.forEach(r => {
+        const key = r.id || (r.builder + '|' + r.city); // fallback for pre-id rows
+        const existing = latest.get(key);
+        if (!existing || (r.timestamp && (!existing.timestamp || r.timestamp > existing.timestamp))) {
+          latest.set(key, r);
+        }
+      });
+      return Array.from(latest.values());
+    }
+
+    function _bbLoad() {
+      const gridEl = document.getElementById('buybox-grid');
+      const metaEl = document.getElementById('bb-count-meta');
+      if (!gridEl) return Promise.resolve();
+      if (!BUYBOX_CONFIG.SHEET_ID) {
+        _buyBoxRows = [];
+        _buyBoxLoaded = true;
+        _bbRender();
+        return Promise.resolve();
+      }
+      return fetch(_adGvizUrl(BUYBOX_CONFIG), { cache: 'no-store' })
+        .then(r => r.text())
+        .then(t => _adParseEnvelope(t))
+        .then(table => { _buyBoxRows = _parseBuyBoxSheet(table); _buyBoxLoaded = true; _bbRender(); })
+        .catch(err => { console.warn('[BUYBOX] sheet failed:', err); _buyBoxRows = []; _buyBoxLoaded = true; _bbRender(); });
+    }
+
+    function _bbBuilderContacts() {
+      // Only Builders + Developers from the Contacts roster
+      return (_contactRows || [])
+        .filter(c => ['Builders','Developers'].indexOf((c.category || '').trim()) >= 0)
+        .filter(c => c.name)
+        .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    }
+
+    function _bbPopulateBuilderDropdown() {
+      const sel = document.getElementById('bb-builder');
+      if (!sel) return;
+      const contacts = _bbBuilderContacts();
+      if (contacts.length === 0) {
+        sel.innerHTML = '<option value="" disabled selected>No builders or developers in Contacts</option>';
+        return;
+      }
+      const opts = ['<option value="" disabled selected>Select builder or developer…</option>'];
+      contacts.forEach(c => {
+        const label = c.name + (c.company ? ' — ' + c.company : '') +
+                      ' (' + (c.category === 'Builders' ? 'Builder' : 'Developer') + ')';
+        opts.push('<option value="' + _bbEsc(c.name) + '">' + _bbEsc(label) + '</option>');
+      });
+      sel.innerHTML = opts.join('');
+    }
+
+    function _bbPopulateFilters() {
+      const builderSel = document.getElementById('bb-filter-builder');
+      const citySel    = document.getElementById('bb-filter-city');
+      if (!builderSel || !citySel) return;
+      const builders = Array.from(new Set(_buyBoxRows.map(r => r.builder).filter(Boolean))).sort();
+      const cities   = Array.from(new Set(_buyBoxRows.map(r => r.city).filter(Boolean))).sort();
+      const prevB = builderSel.value, prevC = citySel.value;
+      builderSel.innerHTML = '<option value="">All Builders / Developers</option>' +
+        builders.map(b => '<option value="' + _bbEsc(b) + '">' + _bbEsc(b) + '</option>').join('');
+      citySel.innerHTML = '<option value="">All Cities</option>' +
+        cities.map(c => '<option value="' + _bbEsc(c) + '">' + _bbEsc(c) + '</option>').join('');
+      builderSel.value = prevB;
+      citySel.value = prevC;
+    }
+
+    function _bbFilteredRows() {
+      const q  = ((document.getElementById('bb-search') || {}).value || '').toLowerCase().trim();
+      const fB = ((document.getElementById('bb-filter-builder') || {}).value || '').trim();
+      const fC = ((document.getElementById('bb-filter-city') || {}).value || '').trim();
+      const fS = ((document.getElementById('bb-filter-status') || {}).value || '').trim();
+      return _buyBoxRows.filter(r => {
+        if (fB && r.builder !== fB) return false;
+        if (fC && r.city !== fC) return false;
+        if (fS && r.status !== fS) return false;
+        if (q) {
+          const blob = [r.builder, r.city, r.suburbs, r.subPricing, r.mustHaves, r.dealBreakers, r.notes].join(' ').toLowerCase();
+          if (blob.indexOf(q) < 0) return false;
+        }
+        return true;
+      });
+    }
+
+    function _bbStatusPill(s) {
+      const st = (s || 'Active').trim();
+      const bg = st === 'Active' ? '#1c3a1c' :
+                 st === 'On Hold' ? '#3a301c' :
+                 st === 'Archived' ? '#2a2a2a' : '#2a2a2a';
+      const fg = st === 'Active' ? '#9ec39e' :
+                 st === 'On Hold' ? '#d9c580' :
+                 st === 'Archived' ? '#888' : '#888';
+      return '<span style="display:inline-block; padding:2px 8px; font-size:9px; letter-spacing:.14em; text-transform:uppercase; background:' + bg + '; color:' + fg + '; border-radius:2px;">' + _bbEsc(st) + '</span>';
+    }
+    function _bbPriorityPill(p) {
+      if (!p) return '';
+      const bg = p === 'High' ? '#3a1c1c' : p === 'Medium' ? '#3a301c' : '#1c2a3a';
+      const fg = p === 'High' ? '#d99' : p === 'Medium' ? '#d9c580' : '#8fb1d9';
+      return '<span style="display:inline-block; padding:2px 8px; font-size:9px; letter-spacing:.14em; text-transform:uppercase; background:' + bg + '; color:' + fg + '; border-radius:2px; margin-left:6px;">' + _bbEsc(p) + '</span>';
+    }
+
+    function _bbCardHtml(r) {
+      const price = _bbRange$(r.minPrice, r.maxPrice);
+      const lot   = _bbRangeNum(r.minLot, r.maxLot, 'sq ft');
+      const front = _bbRangeNum(r.minFront, r.maxFront, 'ft');
+      const depth = _bbRangeNum(r.minDepth, r.maxDepth, 'ft');
+      const suburbs = (r.suburbs || '').split(',').map(s => s.trim()).filter(Boolean);
+      const pillCol = 'display:inline-block; padding:2px 8px; font-size:10px; background:#1a1a1a; color:#ddd; margin:2px 3px 0 0; border:1px solid #2a2a2a;';
+      return `
+        <article class="bb-card" data-id="${_bbEsc(r.id)}" style="background:var(--panel); border:1px solid var(--panel-edge); padding:14px 16px; position:relative;">
+          <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:8px;">
+            <div style="min-width:0; flex:1;">
+              <div style="font-family:var(--font-display); font-size:14px; letter-spacing:.14em; text-transform:uppercase; color:#fff; margin-bottom:2px;">${_bbEsc(r.builder) || '<span style="color:#666;">Unknown builder</span>'}</div>
+              <div style="font-size:12px; color:var(--text-dim);">${_bbEsc(r.city)}${r.state ? ', ' + _bbEsc(r.state) : ''}</div>
+            </div>
+            <div style="text-align:right; white-space:nowrap;">
+              ${_bbStatusPill(r.status)}${_bbPriorityPill(r.priority)}
+            </div>
+          </div>
+
+          ${price ? `<div style="font-size:16px; color:#fff; margin:8px 0 4px;"><b>${_bbEsc(price)}</b></div>` : ''}
+
+          ${suburbs.length ? `
+            <div style="margin:8px 0 6px;">
+              ${suburbs.map(s => `<span style="${pillCol}">${_bbEsc(s)}</span>`).join('')}
+            </div>` : ''}
+
+          ${r.subPricing ? `<div style="font-size:11px; color:var(--text-dim); margin:6px 0; line-height:1.4;">${_bbEsc(r.subPricing)}</div>` : ''}
+
+          <table style="width:100%; font-size:11px; margin:8px 0 6px; color:#bbb;">
+            ${lot   ? `<tr><td style="width:80px; color:#888;">Lot</td><td>${_bbEsc(lot)}</td></tr>` : ''}
+            ${front ? `<tr><td style="color:#888;">Frontage</td><td>${_bbEsc(front)}</td></tr>` : ''}
+            ${depth ? `<tr><td style="color:#888;">Depth</td><td>${_bbEsc(depth)}</td></tr>` : ''}
+          </table>
+
+          ${r.mustHaves ? `<div style="font-size:11px; margin:6px 0 4px;"><b style="color:#9ec39e;">Must:</b> <span style="color:#ccc;">${_bbEsc(r.mustHaves)}</span></div>` : ''}
+          ${r.dealBreakers ? `<div style="font-size:11px; margin:4px 0 4px;"><b style="color:#d99;">Avoid:</b> <span style="color:#ccc;">${_bbEsc(r.dealBreakers)}</span></div>` : ''}
+          ${r.notes ? `<div style="font-size:11px; color:var(--text-dim); margin-top:6px; padding-top:6px; border-top:1px solid #222;">${_bbEsc(r.notes)}</div>` : ''}
+
+          <div style="margin-top:10px; padding-top:8px; border-top:1px solid #222; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:10px; color:#666; letter-spacing:.1em; text-transform:uppercase;">
+              ${r.loggedBy ? 'By ' + _bbEsc(r.loggedBy) : ''}
+              ${r.timestamp ? ' · ' + r.timestamp.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'2-digit'}) : ''}
+            </span>
+            <button type="button" class="bb-edit-btn" data-id="${_bbEsc(r.id)}"
+                    style="font-size:10px; letter-spacing:.14em; text-transform:uppercase; padding:5px 10px; border:1px solid var(--panel-edge); background:transparent; color:#fff; cursor:pointer;">Edit</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function _bbRender() {
+      const gridEl = document.getElementById('buybox-grid');
+      const metaEl = document.getElementById('bb-count-meta');
+      if (!gridEl) return;
+      _bbPopulateFilters();
+      const rows = _bbFilteredRows();
+      if (metaEl) metaEl.textContent = rows.length + ' of ' + _buyBoxRows.length + ' buy boxes';
+      if (!_buyBoxLoaded) {
+        gridEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">Loading…</div>';
+        return;
+      }
+      if (_buyBoxRows.length === 0) {
+        gridEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">' +
+          (BUYBOX_CONFIG.SHEET_ID
+            ? 'No buy boxes yet. Click <b>+ Add Buy Box</b> to log the first.'
+            : 'Buy Box sheet not connected yet. See docs/buybox-setup.md.') +
+          '</div>';
+        return;
+      }
+      if (rows.length === 0) {
+        gridEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">No buy boxes match the current filters.</div>';
+        return;
+      }
+      gridEl.innerHTML = rows.map(_bbCardHtml).join('');
+      // Wire edit buttons
+      gridEl.querySelectorAll('.bb-edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = btn.getAttribute('data-id');
+          const row = _buyBoxRows.find(r => r.id === id);
+          if (row) _bbOpenEdit(row);
+        });
+      });
+    }
+
+    // ------ Modal open/close ------
+    function _bbOpenModal(mode) {
+      const overlay = document.getElementById('buybox-modal-overlay');
+      const title   = document.getElementById('buybox-modal-title');
+      if (!overlay) return;
+      title.textContent = mode === 'edit' ? 'Edit Buy Box' : 'Add Buy Box';
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      // Populate builders every time in case Contacts finished loading
+      _bbPopulateBuilderDropdown();
+    }
+    function _bbCloseModal() {
+      const overlay = document.getElementById('buybox-modal-overlay');
+      if (!overlay) return;
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+    }
+    function _bbResetForm() {
+      const form = document.getElementById('buybox-form');
+      if (!form) return;
+      form.reset();
+      document.getElementById('bb-id').value = _bbNewId();
+      document.getElementById('bb-state').value = 'TN';
+      document.getElementById('bb-status').value = 'Active';
+      const status = document.getElementById('buybox-form-status');
+      if (status) { status.className = 'form-status'; status.textContent = ''; }
+    }
+    function _bbFillForm(row) {
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val == null ? '' : val; };
+      set('bb-id',           row.id || _bbNewId());
+      set('bb-builder',      row.builder);
+      set('bb-status',       row.status || 'Active');
+      set('bb-priority',     row.priority);
+      set('bb-city',         row.city);
+      set('bb-state',        row.state || 'TN');
+      set('bb-suburbs',      row.suburbs);
+      set('bb-min-price',    row.minPrice);
+      set('bb-max-price',    row.maxPrice);
+      set('bb-suburb-pricing', row.subPricing);
+      set('bb-min-lot',      row.minLot);
+      set('bb-max-lot',      row.maxLot);
+      set('bb-min-frontage', row.minFront);
+      set('bb-max-frontage', row.maxFront);
+      set('bb-min-depth',    row.minDepth);
+      set('bb-max-depth',    row.maxDepth);
+      set('bb-must-haves',   row.mustHaves);
+      set('bb-deal-breakers', row.dealBreakers);
+      set('bb-notes',        row.notes);
+      set('bb-logged-by',    row.loggedBy);
+    }
+    function _bbOpenAdd() {
+      _bbResetForm();
+      _bbOpenModal('add');
+    }
+    function _bbOpenEdit(row) {
+      _bbFillForm(row);
+      _bbOpenModal('edit');
+    }
+
+    // ------ Submit ------
+    async function _bbSubmit(e) {
+      e.preventDefault();
+      const form   = document.getElementById('buybox-form');
+      const btn    = document.getElementById('submit-buybox');
+      const status = document.getElementById('buybox-form-status');
+      status.className = 'form-status';
+      status.textContent = '';
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+
+      if (!BUYBOX_CONFIG.FORM_URL || !Object.values(BUYBOX_CONFIG.FIELD_MAP).some(v => v)) {
+        status.className = 'form-status show warn';
+        status.textContent = "Sheet/Form isn't wired yet — see docs/buybox-setup.md.";
+        return;
+      }
+      // Guard: no builders in Contacts
+      if (_bbBuilderContacts().length === 0) {
+        status.className = 'form-status show err';
+        status.textContent = 'No Builders or Developers in Contacts yet. Add one first at Development → Contacts.';
+        return;
+      }
+
+      btn.disabled = true;
+      const orig = btn.textContent;
+      btn.textContent = 'Saving…';
+      try {
+        const fd = new FormData(form);
+        const body = new URLSearchParams();
+        for (const [k, v] of fd.entries()) {
+          const key = BUYBOX_CONFIG.FIELD_MAP[k];
+          if (key) body.append(key, v);
+        }
+        await fetch(BUYBOX_CONFIG.FORM_URL, { method: 'POST', mode: 'no-cors', body });
+        status.className = 'form-status show ok';
+        status.textContent = '✅ Saved. Reloading list…';
+        setTimeout(() => { _bbCloseModal(); _bbLoad(); }, 900);
+      } catch (err) {
+        status.className = 'form-status show err';
+        status.textContent = 'Network error: ' + (err.message || err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = orig;
+      }
+    }
+
+    // ------ Boot ------
+    (function _bbBoot() {
+      const openBtn   = document.getElementById('open-buybox-modal');
+      const closeBtn  = document.getElementById('close-buybox-modal');
+      const cancelBtn = document.getElementById('cancel-buybox');
+      const form      = document.getElementById('buybox-form');
+      const overlay   = document.getElementById('buybox-modal-overlay');
+      if (!openBtn || !form) return;
+
+      openBtn.addEventListener('click', _bbOpenAdd);
+      if (closeBtn) closeBtn.addEventListener('click', _bbCloseModal);
+      if (cancelBtn) cancelBtn.addEventListener('click', _bbCloseModal);
+      if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) _bbCloseModal(); });
+      document.addEventListener('keydown', (e) => {
+        if (overlay && overlay.getAttribute('aria-hidden') === 'false' && e.key === 'Escape') {
+          e.preventDefault(); _bbCloseModal();
+        }
+      });
+      form.addEventListener('submit', _bbSubmit);
+
+      // Wire filter inputs
+      ['bb-search','bb-filter-builder','bb-filter-city','bb-filter-status'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', _bbRender);
+      });
+
+      // Load buy boxes on subtab click + eagerly on boot
+      const bbTab = document.querySelector('[aria-controls="subpanel-land-buyboxes"]');
+      if (bbTab) bbTab.addEventListener('click', () => {
+        _bbLoad();
+        // Re-populate builder dropdown when contacts data is fresh
+        _bbPopulateBuilderDropdown();
+      });
+      _bbLoad();
+
+      // Refresh builder dropdown as soon as contacts finish loading
+      document.addEventListener('stonehouse:team-loaded', _bbPopulateBuilderDropdown);
+      // Also trigger contacts load (they only load when the Contacts subpanel is opened
+      // via passcode gate — but the buy box dropdown needs them earlier)
+      if (typeof _ctLoad === 'function' && !_contactsLoaded) _ctLoad();
+    })();
   </script>
 </body>
 </html>
