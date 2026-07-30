@@ -16793,12 +16793,21 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     }
 
     // ----- Card renderers -----
+    // Edit button — same shape on Buyer + Listing cards. Address is the
+    // stable key for looking up the row in window._buyerDealsByAddress /
+    // window._listingsByAddress; type distinguishes which modal to open.
+    function _adEditBtn(address, type) {
+      return '<button type="button" class="deal-edit-btn" data-address="' +
+        _adEsc(address) + '" data-type="' + type + '" ' +
+        'style="position:absolute; top:8px; right:10px; z-index:2; font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px solid var(--panel-edge); background:rgba(20,20,20,.85); color:#fff; cursor:pointer;">Edit</button>';
+    }
     function _adBuyerCard(d, today) {
       const bars = [];
       if (d.dateUC && d.ddEnd)   bars.push(_adProgressBar('Due Diligence', d.dateUC, d.ddEnd, today));
       if (d.dateUC && d.closing) bars.push(_adProgressBar('Closing',       d.dateUC, d.closing, today));
       return (
-        '<article class="deal-card has-photo">' +
+        '<article class="deal-card has-photo" style="position:relative;">' +
+          _adEditBtn(d.address, 'buyer') +
           _adPhotoTile(d.address) +
           '<header class="deal-head">' +
             '<div>' +
@@ -16826,7 +16835,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const bars = [];
       if (d.dateUC && d.closing) bars.push(_adProgressBar('Closing', d.dateUC, d.closing, today));
       return (
-        '<article class="deal-card has-photo">' +
+        '<article class="deal-card has-photo" style="position:relative;">' +
+          _adEditBtn(d.address, 'listing') +
           _adPhotoTile(d.address) +
           '<header class="deal-head">' +
             '<div>' +
@@ -16842,6 +16852,25 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           bars.join('') +
         '</article>'
       );
+    }
+
+    // ----- Dedupe helper -----
+    // Both sheets are append-only. When agent Edits a deal, the modal
+    // submits a new row with the SAME address; parsers call this to keep
+    // only the latest row per address (by Timestamp, falls back to keeping
+    // the last row if timestamps are missing).
+    function _adDedupeByAddress(rows) {
+      const map = new Map();
+      rows.forEach(r => {
+        const key = (r.address || '').trim().toLowerCase();
+        if (!key) return;
+        const existing = map.get(key);
+        if (!existing) { map.set(key, r); return; }
+        const rt = r.timestamp && r.timestamp.getTime ? r.timestamp.getTime() : 0;
+        const et = existing.timestamp && existing.timestamp.getTime ? existing.timestamp.getTime() : 0;
+        if (rt >= et) map.set(key, r);
+      });
+      return Array.from(map.values());
     }
     function _adProgressBar(label, start, end, today) {
       if (!start || !end) {
@@ -16898,33 +16927,39 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           const table = _adParseEnvelope(await res.text());
           const cols = table.cols || [];
           const ix = {
+            timestamp:      _adFindCol(cols, 'Timestamp'),
             address:        _adFindCol(cols, 'Property Address'),
             client:         _adFindCol(cols, 'Client', 'Buyer', 'Client Name'),
             agent:          _adFindCol(cols, 'Agent', 'Stonehouse Agent'),
             listingAgent:   _adFindCol(cols, 'Listing Agent'),
+            listingBrokerage: _adFindCol(cols, 'Listing Brokerage'),
             stage:          _adFindCol(cols, 'Stage', 'Current Stage'),
             contractPrice:  _adFindCol(cols, 'Contract Price', 'Price'),
+            earnestMoney:   _adFindCol(cols, 'Earnest Money'),
             dateUC:         _adFindCol(cols, 'Date Under Contract', 'Under Contract'),
             ddEnd:          _adFindCol(cols, 'Due Diligence End', 'DD End'),
             closing:        _adFindCol(cols, 'Closing Date', 'Closing'),
-            // New fields (added after form schema change) — optional
             emDue:          _adFindCol(cols, 'Earnest Money Due'),
             inspectionEnd:  _adFindCol(cols, 'Inspection Period Ends', 'Inspection End'),
             resolutionEnd:  _adFindCol(cols, 'Resolution Period Ends', 'Resolution End'),
             finalWalk:      _adFindCol(cols, 'Final Walkthrough', 'Final Walk Through', 'Final Walk-Through'),
-            blueTape:       _adFindCol(cols, 'Blue Tape Walkthrough', 'Blue Tape Walk Through', 'Blue Tape Walk-Through')
+            blueTape:       _adFindCol(cols, 'Blue Tape Walkthrough', 'Blue Tape Walk Through', 'Blue Tape Walk-Through'),
+            notes:          _adFindCol(cols, 'Notes')
           };
           if (ix.address < 0) throw new Error('Sheet missing "Property Address" column.');
           const today = new Date(); today.setHours(0, 0, 0, 0);
-          const deals = (table.rows || []).map(r => {
+          const rawRows = (table.rows || []).map(r => {
             const c = r.c || [];
             return {
+              timestamp:      ix.timestamp >= 0 ? _adGvizDate(c[ix.timestamp]) : null,
               address:        _adGvizString(c[ix.address]),
               client:         ix.client >= 0 ? _adGvizString(c[ix.client]) : '',
               agent:          ix.agent >= 0 ? _adGvizString(c[ix.agent]) : '',
               listingAgent:   ix.listingAgent >= 0 ? _adGvizString(c[ix.listingAgent]) : '',
+              listingBrokerage: ix.listingBrokerage >= 0 ? _adGvizString(c[ix.listingBrokerage]) : '',
               stage:          ix.stage >= 0 ? _adGvizString(c[ix.stage]) : '',
               contractPrice:  ix.contractPrice >= 0 ? _adGvizNumber(c[ix.contractPrice]) : 0,
+              earnestMoney:   ix.earnestMoney >= 0 ? _adGvizNumber(c[ix.earnestMoney]) : 0,
               dateUC:         ix.dateUC >= 0 ? _adGvizDate(c[ix.dateUC]) : null,
               ddEnd:          ix.ddEnd >= 0 ? _adGvizDate(c[ix.ddEnd]) : null,
               closing:        ix.closing >= 0 ? _adGvizDate(c[ix.closing]) : null,
@@ -16932,11 +16967,17 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               inspectionEnd:  ix.inspectionEnd >= 0 ? _adGvizDate(c[ix.inspectionEnd]) : null,
               resolutionEnd:  ix.resolutionEnd >= 0 ? _adGvizDate(c[ix.resolutionEnd]) : null,
               finalWalk:      ix.finalWalk >= 0 ? _adGvizDate(c[ix.finalWalk]) : null,
-              blueTape:       ix.blueTape >= 0 ? _adGvizDate(c[ix.blueTape]) : null
+              blueTape:       ix.blueTape >= 0 ? _adGvizDate(c[ix.blueTape]) : null,
+              notes:          ix.notes >= 0 ? _adGvizString(c[ix.notes]) : ''
             };
-          })
-            .filter(d => d.address)
-            .filter(d => !/^(closed|killed)$/i.test(d.stage)); // hide closed/killed from active pipeline
+          }).filter(d => d.address);
+          // Dedupe by address (edits overwrite by keeping latest Timestamp)
+          const dedupedAll = _adDedupeByAddress(rawRows);
+          // Registry for edit modal lookup — includes ALL stages so Edit works on any card
+          window._buyerDealsByAddress = new Map();
+          dedupedAll.forEach(d => window._buyerDealsByAddress.set((d.address || '').trim().toLowerCase(), d));
+          // Filter Active Pipeline to hide closed/killed
+          const deals = dedupedAll.filter(d => !/^(closed|killed)$/i.test(d.stage));
           deals.sort((a, b) => {
             const ac = a.closing ? a.closing.getTime() : Infinity;
             const bc = b.closing ? b.closing.getTime() : Infinity;
@@ -16995,6 +17036,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           const table = _adParseEnvelope(await res.text());
           const cols = table.cols || [];
           const ix = {
+            timestamp:   _adFindCol(cols, 'Timestamp'),
             address:     _adFindCol(cols, 'Property Address'),
             seller:      _adFindCol(cols, 'Seller', 'Seller Name'),
             agent:       _adFindCol(cols, 'Agent', 'Listing Agent', 'Stonehouse Agent'),
@@ -17003,13 +17045,16 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             listDate:    _adFindCol(cols, 'List Date'),
             dateUC:      _adFindCol(cols, 'Date Under Contract', 'Under Contract'),
             closing:     _adFindCol(cols, 'Closing Date', 'Closing'),
-            soldPrice:   _adFindCol(cols, 'Sold Price')
+            soldPrice:   _adFindCol(cols, 'Sold Price'),
+            buyerAgent:  _adFindCol(cols, "Buyer's Agent", 'Buyer Agent'),
+            notes:       _adFindCol(cols, 'Notes')
           };
           if (ix.address < 0) throw new Error('Sheet missing "Property Address" column.');
           const today = new Date(); today.setHours(0, 0, 0, 0);
-          const listings = (table.rows || []).map(r => {
+          const rawRows = (table.rows || []).map(r => {
             const c = r.c || [];
             return {
+              timestamp:  ix.timestamp >= 0 ? _adGvizDate(c[ix.timestamp]) : null,
               address:    _adGvizString(c[ix.address]),
               seller:     ix.seller >= 0 ? _adGvizString(c[ix.seller]) : '',
               agent:      ix.agent >= 0 ? _adGvizString(c[ix.agent]) : '',
@@ -17018,11 +17063,18 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               listDate:   ix.listDate >= 0 ? _adGvizDate(c[ix.listDate]) : null,
               dateUC:     ix.dateUC >= 0 ? _adGvizDate(c[ix.dateUC]) : null,
               closing:    ix.closing >= 0 ? _adGvizDate(c[ix.closing]) : null,
-              soldPrice:  ix.soldPrice >= 0 ? _adGvizNumber(c[ix.soldPrice]) : 0
+              soldPrice:  ix.soldPrice >= 0 ? _adGvizNumber(c[ix.soldPrice]) : 0,
+              buyerAgent: ix.buyerAgent >= 0 ? _adGvizString(c[ix.buyerAgent]) : '',
+              notes:      ix.notes >= 0 ? _adGvizString(c[ix.notes]) : ''
             };
-          })
-            .filter(d => d.address)
-            .filter(d => !/^(closed|withdrawn|expired)$/i.test(d.stage)); // hide archive states
+          }).filter(d => d.address);
+          // Dedupe by address (edits overwrite by keeping latest Timestamp)
+          const dedupedAll = _adDedupeByAddress(rawRows);
+          // Registry for edit modal lookup — all listings, all stages
+          window._listingsByAddress = new Map();
+          dedupedAll.forEach(d => window._listingsByAddress.set((d.address || '').trim().toLowerCase(), d));
+          // Filter active pipeline: hide archive states
+          const listings = dedupedAll.filter(d => !/^(closed|withdrawn|expired)$/i.test(d.stage));
 
           // ---- Split by stage ----
           const isComingSoon = (d) => /^coming\s*soon$/i.test(d.stage);
@@ -19673,6 +19725,125 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     // Re-evaluate code when team roster finishes loading (Ryan's passcode
     // may not have been available on first render).
     document.addEventListener('stonehouse:team-loaded', () => { /* no-op; _ctExpectedCode reads live */ });
+
+    // ============================================================
+    // ACTIVE PIPELINE — Edit deal from card
+    //
+    // Each Buyer + Listing card has an Edit button. Clicking it opens
+    // the same Log modal, pre-filled with the row's current values.
+    // Submit sends a NEW form row with the same address; the parser
+    // dedupes by address (latest Timestamp wins), so the card updates
+    // in place. No sheet/form schema changes required.
+    // ============================================================
+    (function () {
+      function _adDateInput(d) {
+        if (!(d instanceof Date) || isNaN(d)) return '';
+        // Guard against off-by-one from timezone: use local Y/M/D
+        const yyyy = d.getFullYear();
+        const mm   = String(d.getMonth() + 1).padStart(2, '0');
+        const dd   = String(d.getDate()).padStart(2, '0');
+        return yyyy + '-' + mm + '-' + dd;
+      }
+      function _setVal(id, v) { const el = document.getElementById(id); if (el) el.value = (v == null ? '' : v); }
+      function _setDate(id, d) { const el = document.getElementById(id); if (el) el.value = _adDateInput(d); }
+
+      function _openBuyerModal() {
+        const overlay = document.getElementById('buyerdeal-modal-overlay');
+        if (!overlay) return;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+      }
+      function _openListingModal() {
+        const overlay = document.getElementById('listing-modal-overlay');
+        if (!overlay) return;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+      }
+
+      // Reset title + submit-button label when opening the "+ Log" flow fresh,
+      // in case a previous Edit left them in edit-mode state
+      const openBuyerBtn = document.getElementById('open-buyerdeal-modal');
+      if (openBuyerBtn) openBuyerBtn.addEventListener('click', () => {
+        const form = document.getElementById('buyerdeal-form');
+        if (form) form.reset();
+        const title = document.querySelector('#buyerdeal-modal .modal-title');
+        if (title) title.textContent = 'Log a Buyer-Side Deal';
+        const sub = document.getElementById('submit-buyerdeal');
+        if (sub) sub.textContent = 'Log Buyer Deal';
+      });
+      const openListingBtn = document.getElementById('open-listing-modal');
+      if (openListingBtn) openListingBtn.addEventListener('click', () => {
+        const form = document.getElementById('listing-form');
+        if (form) form.reset();
+        const title = document.querySelector('#listing-modal .modal-title');
+        if (title) title.textContent = 'Log a Listing';
+        const sub = document.getElementById('submit-listing');
+        if (sub) sub.textContent = 'Log Listing';
+      });
+
+      function _fillBuyerModal(d) {
+        _setVal('bd-agent',            d.agent);
+        _setVal('bd-client',           d.client);
+        _setVal('bd-address',          d.address);
+        _setVal('bd-stage',            d.stage);
+        _setVal('bd-listing-agent',    d.listingAgent);
+        _setVal('bd-listing-brokerage', d.listingBrokerage);
+        _setVal('bd-price',            d.contractPrice || '');
+        _setVal('bd-em',               d.earnestMoney || '');
+        _setDate('bd-uc',              d.dateUC);
+        _setDate('bd-em-due',          d.emDue);
+        _setDate('bd-dd',              d.ddEnd);
+        _setDate('bd-insp-end',        d.inspectionEnd);
+        _setDate('bd-res-end',         d.resolutionEnd);
+        _setDate('bd-walk',            d.finalWalk);
+        _setDate('bd-blue',            d.blueTape);
+        _setDate('bd-close',           d.closing);
+        _setVal('bd-notes',            d.notes);
+        // Rebrand modal chrome
+        const title = document.querySelector('#buyerdeal-modal .modal-title');
+        if (title) title.textContent = 'Edit Buyer Deal';
+        const sub = document.getElementById('submit-buyerdeal');
+        if (sub) sub.textContent = 'Save Changes';
+      }
+      function _fillListingModal(d) {
+        _setVal('ls-agent',       d.agent);
+        _setVal('ls-seller',      d.seller);
+        _setVal('ls-address',     d.address);
+        _setVal('ls-stage',       d.stage);
+        _setVal('ls-buyer-agent', d.buyerAgent);
+        _setVal('ls-list-price',  d.listPrice || '');
+        _setDate('ls-list-date',  d.listDate);
+        _setDate('ls-uc',         d.dateUC);
+        _setDate('ls-close',      d.closing);
+        _setVal('ls-sold',        d.soldPrice || '');
+        _setVal('ls-notes',       d.notes);
+        const title = document.querySelector('#listing-modal .modal-title');
+        if (title) title.textContent = 'Edit Listing';
+        const sub = document.getElementById('submit-listing');
+        if (sub) sub.textContent = 'Save Changes';
+      }
+
+      // Delegated click on all Edit buttons (works after re-render)
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest && e.target.closest('.deal-edit-btn');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const address = (btn.getAttribute('data-address') || '').trim().toLowerCase();
+        const type    = btn.getAttribute('data-type');
+        if (type === 'buyer') {
+          const d = (window._buyerDealsByAddress || new Map()).get(address);
+          if (!d) { alert('Deal data not loaded yet. Try again in a moment.'); return; }
+          _fillBuyerModal(d);
+          _openBuyerModal();
+        } else if (type === 'listing') {
+          const d = (window._listingsByAddress || new Map()).get(address);
+          if (!d) { alert('Listing data not loaded yet. Try again in a moment.'); return; }
+          _fillListingModal(d);
+          _openListingModal();
+        }
+      });
+    })();
 
     // ============================================================
     // LAND ACQUISITION — BUY BOXES
