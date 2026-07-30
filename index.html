@@ -1267,6 +1267,36 @@
     .deal-bar.approaching .bar-status { color: #e8c068; }
     .deal-bar.past .bar-status { color: #d97a7a; }
     .deal-bar.done .bar-status { color: var(--text-dim); }
+    /* Per-milestone "complete" checkbox — visible on dark backgrounds */
+    .deal-bar .bar-complete-check {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border: 1.5px solid #888;
+      background: #0a0a0a;
+      border-radius: 2px;
+      cursor: pointer;
+      display: inline-block;
+      flex: 0 0 14px;
+      margin: 0;
+      position: relative;
+      vertical-align: middle;
+      transition: background .15s, border-color .15s;
+    }
+    .deal-bar .bar-complete-check:hover { border-color: #ccc; background: #1a1a1a; }
+    .deal-bar .bar-complete-check:checked {
+      background: #9ec39e;
+      border-color: #9ec39e;
+    }
+    .deal-bar .bar-complete-check:checked::after {
+      content: '';
+      position: absolute;
+      left: 3px; top: 0px;
+      width: 4px; height: 8px;
+      border: solid #0a0a0a;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
     .deal-bar .bar-dates {
       grid-column: 2 / -1;
       margin-top: 6px;
