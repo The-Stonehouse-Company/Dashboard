@@ -6101,6 +6101,18 @@
               <label for="if-date-submitted">Date Submitted</label>
               <input id="if-date-submitted" name="date_submitted" type="date" />
             </div>
+            <div>
+              <label for="if-status">Pipeline Status</label>
+              <select id="if-status" name="status">
+                <option value="">— Select status —</option>
+                <option value="Active">Active</option>
+                <option value="Under Contract">Under Contract</option>
+                <option value="First Right of Refusal">First Right of Refusal</option>
+                <option value="Fell Out of Contract">Fell Out of Contract</option>
+                <option value="Closed">Closed</option>
+              </select>
+              <p class="form-hint" style="margin-top:4px; font-size:11px; color:var(--text-dim);">Routes the card to Under Contract, FRoR, or Fell Out bucket. Leave blank for new intakes.</p>
+            </div>
           </div>
         </fieldset>
 
@@ -14626,6 +14638,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const FIELD_MAP = {
         agent:                "entry.1406468642",
         date_submitted:       "entry.811071528",
+        status:               "",   // ← waiting on the entry ID from your pre-filled link
         property_address:     "entry.2060471301",
         neighborhood:         "entry.497192192",
         asking_price:         "entry.26953202",
@@ -19911,6 +19924,77 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           _fillListingModal(d);
           _openListingModal();
         }
+      });
+
+      // -------- Land Acquisition Pipeline Edit --------
+      // Same pattern: Edit button on Land pipeline cards opens the
+      // Property Intake modal pre-filled with the sheet row's values.
+      // Save submits a new row; parser dedupes by address, latest wins.
+      function _openIntakeModal() {
+        const overlay = document.getElementById('intake-modal-overlay');
+        if (!overlay) return;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+      }
+      function _fillIntakeModal(d) {
+        _setVal('if-agent',            d.agent);
+        _setDate('if-date-submitted',  d.dateSubmitted);
+        _setVal('if-status',           d.statusRaw);
+        _setVal('if-address',          d.address);
+        _setVal('if-neighborhood',     d.neighborhood);
+        _setVal('if-asking',           d.askingPrice || '');
+        _setVal('if-contract',         d.contract || '');
+        _setDate('if-first-contact',   d.firstContact);
+        _setDate('if-under-contract',  d.underContract);
+        _setDate('if-dd-end',          d.ddEnd);
+        _setDate('if-closing',         d.closing);
+        _setVal('if-lot-size',         d.lotSize);
+        _setVal('if-topography',       d.topography);
+        _setVal('if-zoning',           d.zoning);
+        // Radio groups
+        const flood = document.querySelector('input[name="flood_zone"][value="' + (d.floodZone || '') + '"]');
+        if (flood) flood.checked = true;
+        const nv = document.querySelector('input[name="needs_variance"][value="' + (d.needsVariance || '') + '"]');
+        if (nv) nv.checked = true;
+        _setVal('if-sb-front',         d.sbFront || '');
+        _setVal('if-sb-rear',          d.sbRear || '');
+        _setVal('if-sb-interior',      d.sbInterior || '');
+        _setVal('if-sb-roadside',      d.sbRoadside || '');
+        _setVal('if-dim-front',        d.dimFront || '');
+        _setVal('if-dim-side-left',    d.dimLeft || '');
+        _setVal('if-dim-rear',         d.dimRear || '');
+        _setVal('if-dim-side-right',   d.dimRight || '');
+        _setVal('if-comps-area',       d.compsArea);
+        _setVal('if-best-comp',        d.bestComp);
+        _setVal('if-cma',              d.cma);
+        _setVal('if-land-comps',       d.landComps);
+        _setVal('if-notes',            d.notes);
+        const title = document.querySelector('#intake-modal .modal-title');
+        if (title) title.textContent = 'Edit Property Intake';
+        const sub = document.getElementById('submit-intake');
+        if (sub) sub.textContent = 'Save Changes';
+      }
+      // Reset intake modal when opened via the "+ Submit Property Intake" flow
+      const openIntakeBtn = document.getElementById('open-intake-modal');
+      if (openIntakeBtn) openIntakeBtn.addEventListener('click', () => {
+        const form = document.getElementById('intake-form');
+        if (form) form.reset();
+        const title = document.querySelector('#intake-modal .modal-title');
+        if (title) title.textContent = 'Property Intake';
+        const sub = document.getElementById('submit-intake');
+        if (sub) sub.textContent = 'Submit Property Intake';
+      });
+      // Land Edit button click delegation
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest && e.target.closest('.land-edit-btn');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const address = (btn.getAttribute('data-address') || '').trim().toLowerCase();
+        const d = (window._landDealsByAddress || new Map()).get(address);
+        if (!d) { alert('Land deal data not loaded yet. Try again in a moment.'); return; }
+        _fillIntakeModal(d);
+        _openIntakeModal();
       });
     })();
 
