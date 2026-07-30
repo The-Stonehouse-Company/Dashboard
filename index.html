@@ -9784,9 +9784,17 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         );
       }
 
+      // Edit button — top-right corner. data-address is the stable key;
+      // click delegated to a global handler that pre-fills the intake modal.
+      function landEditBtn(address) {
+        return '<button type="button" class="land-edit-btn" data-address="' +
+          esc(address) + '" ' +
+          'style="position:absolute; top:8px; right:10px; z-index:2; font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px solid var(--panel-edge); background:rgba(20,20,20,.85); color:#fff; cursor:pointer;">Edit</button>';
+      }
       function renderDealCard(d, today) {
         return (
-          '<article class="deal-card">' +
+          '<article class="deal-card" style="position:relative;">' +
+            landEditBtn(d.address) +
             '<header class="deal-head">' +
               '<div>' +
                 '<h3 class="deal-address">' + esc(d.address || 'Untitled property') + '</h3>' +
@@ -9812,7 +9820,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       function renderSimpleCard(d, caption) {
         const priceVal = d.contract || d.askingPrice;
         return (
-          '<article class="deal-card">' +
+          '<article class="deal-card" style="position:relative;">' +
+            landEditBtn(d.address) +
             '<header class="deal-head">' +
               '<div>' +
                 '<h3 class="deal-address">' + esc(d.address || 'Untitled property') + '</h3>' +
@@ -9850,15 +9859,36 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           // for back-compat: if the sheet doesn't have a Status column,
           // everything routes by date rules (under-contract date → active).
           const ix = {
+            timestamp:      findCol(cols, 'Timestamp'),
+            agent:          findCol(cols, 'Agent Name', 'Agent'),
+            dateSubmitted:  findCol(cols, 'Date Submitted'),
             address:        findCol(cols, 'Property Address'),
             neighborhood:   findCol(cols, 'Neighborhood / Area', 'Neighborhood'),
             asking:         findCol(cols, 'Asking Price'),
             contract:       findCol(cols, 'Contract Price'),
+            firstContact:   findCol(cols, 'First Contact Date'),
             underContract:  findCol(cols, 'Date Under Contract', 'Under Contract'),
             ddEnd:          findCol(cols, 'Due Diligence End', 'DD End'),
             closing:        findCol(cols, 'Closing Date', 'Closing'),
             status:         findCol(cols, 'Status', 'Pipeline Status', 'Stage'),
-            firstContact:   findCol(cols, 'First Contact Date'),
+            lotSize:        findCol(cols, 'Lot Size'),
+            topography:     findCol(cols, 'Topography'),
+            zoning:         findCol(cols, 'Zoning'),
+            floodZone:      findCol(cols, 'Flood Zone'),
+            needsVariance:  findCol(cols, 'Needs Variance?', 'Needs Variance'),
+            sbFront:        findCol(cols, 'Setback Front', 'Front Setback'),
+            sbRear:         findCol(cols, 'Setback Rear',  'Rear Setback'),
+            sbInterior:     findCol(cols, 'Setback Interior', 'Interior Setback'),
+            sbRoadside:     findCol(cols, 'Setback Road Side', 'Road Side Setback'),
+            dimFront:       findCol(cols, 'Dim Front', 'Lot Front', 'Front (Lot)'),
+            dimLeft:        findCol(cols, 'Dim Side Left', 'Side Left', 'Lot Side Left'),
+            dimRear:        findCol(cols, 'Dim Rear', 'Lot Rear'),
+            dimRight:       findCol(cols, 'Dim Side Right', 'Side Right', 'Lot Side Right'),
+            compsArea:      findCol(cols, 'Comps in Area'),
+            bestComp:       findCol(cols, 'Best Comp'),
+            cma:            findCol(cols, 'CMA'),
+            landComps:      findCol(cols, 'Land Comps'),
+            notes:          findCol(cols, 'Additional Notes', 'Notes')
           };
 
           const requiredKeys = ['address', 'underContract', 'ddEnd', 'closing'];
@@ -9884,22 +9914,61 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             return 'active';
           }
 
-          const all = rawRows.map((r) => {
+          const rawAll = rawRows.map((r) => {
             const c = r.c || [];
             const statusRaw = ix.status >= 0 ? parseGvizString(c[ix.status]) : '';
             return {
+              timestamp:     ix.timestamp >= 0 ? parseGvizDate(c[ix.timestamp]) : null,
+              agent:         ix.agent >= 0 ? parseGvizString(c[ix.agent]) : '',
+              dateSubmitted: ix.dateSubmitted >= 0 ? parseGvizDate(c[ix.dateSubmitted]) : null,
               address:       parseGvizString(c[ix.address]),
               neighborhood:  parseGvizString(c[ix.neighborhood]),
               askingPrice:   ix.asking >= 0 ? parseGvizNumber(c[ix.asking]) : 0,
               contract:      parseGvizNumber(c[ix.contract]),
+              firstContact:  ix.firstContact >= 0 ? parseGvizDate(c[ix.firstContact]) : null,
               underContract: parseGvizDate(c[ix.underContract]),
               ddEnd:         parseGvizDate(c[ix.ddEnd]),
               closing:       parseGvizDate(c[ix.closing]),
-              firstContact:  ix.firstContact >= 0 ? parseGvizDate(c[ix.firstContact]) : null,
+              lotSize:       ix.lotSize >= 0 ? parseGvizString(c[ix.lotSize]) : '',
+              topography:    ix.topography >= 0 ? parseGvizString(c[ix.topography]) : '',
+              zoning:        ix.zoning >= 0 ? parseGvizString(c[ix.zoning]) : '',
+              floodZone:     ix.floodZone >= 0 ? parseGvizString(c[ix.floodZone]) : '',
+              needsVariance: ix.needsVariance >= 0 ? parseGvizString(c[ix.needsVariance]) : '',
+              sbFront:       ix.sbFront >= 0 ? parseGvizNumber(c[ix.sbFront]) : 0,
+              sbRear:        ix.sbRear >= 0 ? parseGvizNumber(c[ix.sbRear]) : 0,
+              sbInterior:    ix.sbInterior >= 0 ? parseGvizNumber(c[ix.sbInterior]) : 0,
+              sbRoadside:    ix.sbRoadside >= 0 ? parseGvizNumber(c[ix.sbRoadside]) : 0,
+              dimFront:      ix.dimFront >= 0 ? parseGvizNumber(c[ix.dimFront]) : 0,
+              dimLeft:       ix.dimLeft >= 0 ? parseGvizNumber(c[ix.dimLeft]) : 0,
+              dimRear:       ix.dimRear >= 0 ? parseGvizNumber(c[ix.dimRear]) : 0,
+              dimRight:      ix.dimRight >= 0 ? parseGvizNumber(c[ix.dimRight]) : 0,
+              compsArea:     ix.compsArea >= 0 ? parseGvizString(c[ix.compsArea]) : '',
+              bestComp:      ix.bestComp >= 0 ? parseGvizString(c[ix.bestComp]) : '',
+              cma:           ix.cma >= 0 ? parseGvizString(c[ix.cma]) : '',
+              landComps:     ix.landComps >= 0 ? parseGvizString(c[ix.landComps]) : '',
+              notes:         ix.notes >= 0 ? parseGvizString(c[ix.notes]) : '',
               statusRaw:     statusRaw,
               bucket:        bucketFor(statusRaw)
             };
           }).filter((d) => d.address); // need at least an address
+
+          // Dedupe by address — an Edit submits a NEW row with the same
+          // address; keep the row with the latest Timestamp so cards
+          // reflect the current state.
+          const byAddr = new Map();
+          rawAll.forEach(d => {
+            const key = (d.address || '').trim().toLowerCase();
+            const existing = byAddr.get(key);
+            if (!existing) { byAddr.set(key, d); return; }
+            const dt = d.timestamp && d.timestamp.getTime ? d.timestamp.getTime() : 0;
+            const et = existing.timestamp && existing.timestamp.getTime ? existing.timestamp.getTime() : 0;
+            if (dt >= et) byAddr.set(key, d);
+          });
+          const all = Array.from(byAddr.values());
+
+          // Global registry — edit handler looks up by lowercased address
+          window._landDealsByAddress = new Map();
+          all.forEach(d => window._landDealsByAddress.set((d.address || '').trim().toLowerCase(), d));
 
           // ---------- Bucket: ACTIVE (under contract) ----------
           // Status = blank/active AND has under-contract date AND not closed.
