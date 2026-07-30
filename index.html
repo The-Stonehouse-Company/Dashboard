@@ -6144,7 +6144,15 @@
               <input id="if-under-contract" name="date_under_contract" type="date" />
             </div>
             <div>
-              <label for="if-dd-end">Due Diligence End</label>
+              <label for="if-llc-deadline">LLC Formation Deadline</label>
+              <input id="if-llc-deadline" name="llc_formation_deadline" type="date" />
+            </div>
+            <div>
+              <label for="if-em-deadline">Earnest Money Deadline</label>
+              <input id="if-em-deadline" name="earnest_money_deadline" type="date" />
+            </div>
+            <div>
+              <label for="if-dd-end">Due Diligence Deadline</label>
               <input id="if-dd-end" name="due_diligence_end" type="date" />
             </div>
             <div>
@@ -9804,6 +9812,13 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           'style="position:absolute; top:8px; right:10px; z-index:2; font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px solid var(--panel-edge); background:rgba(20,20,20,.85); color:#fff; cursor:pointer;">Edit</button>';
       }
       function renderDealCard(d, today) {
+        // Show a bar for every deadline that has a date. All bars anchor
+        // on Date Under Contract so they share a common start.
+        const bars = [];
+        if (d.underContract && d.llcDeadline) bars.push(renderBar('LLC Formation', d.underContract, d.llcDeadline, today));
+        if (d.underContract && d.emDeadline)  bars.push(renderBar('Earnest Money', d.underContract, d.emDeadline,  today));
+        if (d.underContract && d.ddEnd)       bars.push(renderBar('Due Diligence', d.underContract, d.ddEnd,       today));
+        if (d.underContract && d.closing)     bars.push(renderBar('Closing',       d.underContract, d.closing,     today));
         return (
           '<article class="deal-card" style="position:relative;">' +
             landEditBtn(d.address) +
@@ -9812,6 +9827,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
                 '<h3 class="deal-address">' + esc(d.address || 'Untitled property') + '</h3>' +
                 '<div class="deal-meta">' +
                   esc(d.neighborhood || '') +
+                  (d.underContract ? ' &nbsp;·&nbsp; <span style="color:var(--text-dim);">UC ' + esc(fmtDate(d.underContract)) + '</span>' : '') +
                 '</div>' +
               '</div>' +
               (d.contract
@@ -9819,8 +9835,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
                 : ''
               ) +
             '</header>' +
-            renderBar('Due Diligence', d.underContract, d.ddEnd,   today) +
-            renderBar('Closing',       d.underContract, d.closing, today) +
+            bars.join('') +
           '</article>'
         );
       }
@@ -9880,7 +9895,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             contract:       findCol(cols, 'Contract Price'),
             firstContact:   findCol(cols, 'First Contact Date'),
             underContract:  findCol(cols, 'Date Under Contract', 'Under Contract'),
-            ddEnd:          findCol(cols, 'Due Diligence End', 'DD End'),
+            llcDeadline:    findCol(cols, 'LLC Formation Deadline', 'llc_formation_deadline'),
+            emDeadline:     findCol(cols, 'Earnest Money Deadline', 'earnest_money_deadline'),
+            ddEnd:          findCol(cols, 'Due Diligence End', 'Due Diligence Deadline', 'DD End'),
             closing:        findCol(cols, 'Closing Date', 'Closing'),
             status:         findCol(cols, 'Status', 'Pipeline Status', 'Stage'),
             lotSize:        findCol(cols, 'Lot Size'),
@@ -9939,6 +9956,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               contract:      parseGvizNumber(c[ix.contract]),
               firstContact:  ix.firstContact >= 0 ? parseGvizDate(c[ix.firstContact]) : null,
               underContract: parseGvizDate(c[ix.underContract]),
+              llcDeadline:   ix.llcDeadline >= 0 ? parseGvizDate(c[ix.llcDeadline]) : null,
+              emDeadline:    ix.emDeadline >= 0 ? parseGvizDate(c[ix.emDeadline]) : null,
               ddEnd:         parseGvizDate(c[ix.ddEnd]),
               closing:       parseGvizDate(c[ix.closing]),
               lotSize:       ix.lotSize >= 0 ? parseGvizString(c[ix.lotSize]) : '',
@@ -14645,6 +14664,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         contract_price:       "entry.1151681388",
         first_contact_date:   "entry.279169809",
         date_under_contract:  "entry.1544531142",
+        llc_formation_deadline: "entry.1127281078",
+        earnest_money_deadline: "entry.697653472",
         due_diligence_end:    "entry.1539335063",
         closing_date:         "entry.1158654140",
         lot_size:             "entry.1752724272",
@@ -19946,6 +19967,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         _setVal('if-contract',         d.contract || '');
         _setDate('if-first-contact',   d.firstContact);
         _setDate('if-under-contract',  d.underContract);
+        _setDate('if-llc-deadline',    d.llcDeadline);
+        _setDate('if-em-deadline',     d.emDeadline);
         _setDate('if-dd-end',          d.ddEnd);
         _setDate('if-closing',         d.closing);
         _setVal('if-lot-size',         d.lotSize);
