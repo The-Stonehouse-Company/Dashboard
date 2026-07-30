@@ -1187,7 +1187,8 @@
       color: var(--text-muted); text-align: center; padding: 8px;
     }
     .deal-card.has-photo > .deal-head,
-    .deal-card.has-photo > .deal-bar { grid-column: 2; }
+    .deal-card.has-photo > .deal-bar,
+    .deal-card.has-photo > .deal-extra { grid-column: 2; }
     .deal-head {
       display: flex; justify-content: space-between;
       align-items: flex-start;
@@ -1200,7 +1201,8 @@
       .deal-card.has-photo { grid-template-columns: 1fr; }
       .deal-photo { width: 100%; height: 180px; margin-bottom: 12px; }
       .deal-card.has-photo > .deal-head,
-      .deal-card.has-photo > .deal-bar { grid-column: auto; }
+      .deal-card.has-photo > .deal-bar,
+      .deal-card.has-photo > .deal-extra { grid-column: auto; }
     }
     .deal-address {
       font-family: var(--font-display);
@@ -17012,22 +17014,31 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       if (d.inspectionDate) badges.push('Insp ' + fmt(d.inspectionDate));
       if (d.appraisalDate)  badges.push('Appr ' + fmt(d.appraisalDate));
       const badgeRow = badges.length
-        ? '<div style="display:flex; gap:6px; padding:6px 12px 0; flex-wrap:wrap;">' +
+        ? '<div class="deal-extra" style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">' +
             badges.map(t => '<span style="font-size:10px; letter-spacing:.1em; padding:2px 8px; border:1px solid var(--panel-edge); background:#141414; color:#bbb;">' + _adEsc(t) + '</span>').join('') +
           '</div>'
         : '';
-      // Closing + inspection company contacts (small footer line)
-      const contactBits = [];
+      // Closing + inspection company contacts — proper labeled grid,
+      // spans full card width, wraps nicely
+      const cells = [];
+      const mkCell = (label, val) => cells.push(
+        '<div>' +
+          '<div style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-muted); font-weight:600; margin-bottom:2px;">' + label + '</div>' +
+          '<div style="font-size:12px; color:var(--text); line-height:1.35;">' + _adEsc(val) + '</div>' +
+        '</div>'
+      );
       if (d.closingAttorney) {
-        let a = 'Attorney: ' + d.closingAttorney;
-        if (d.closingAttorneyPhone) a += ' (' + d.closingAttorneyPhone + ')';
-        contactBits.push(a);
+        let val = d.closingAttorney;
+        if (d.closingAttorneyPhone) val += ' · ' + d.closingAttorneyPhone;
+        mkCell('Closing Attorney', val);
       }
-      if (d.closingCompany)  contactBits.push('Closing: ' + d.closingCompany);
-      if (d.inspectionCompany) contactBits.push('Inspection: ' + d.inspectionCompany);
-      const contactRow = contactBits.length
-        ? '<div style="font-size:10px; color:var(--text-dim); padding:6px 12px 0; letter-spacing:.05em;">' +
-            _adEsc(contactBits.join(' · ')) + '</div>'
+      if (d.closingCompany)    mkCell('Closing Company', d.closingCompany);
+      if (d.closingLocation)   mkCell('Closing Location', d.closingLocation);
+      if (d.inspectionCompany) mkCell('Inspection Company', d.inspectionCompany);
+      const contactRow = cells.length
+        ? '<div class="deal-extra" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:14px 20px; margin-top:14px; padding-top:12px; border-top:1px solid var(--rule);">' +
+            cells.join('') +
+          '</div>'
         : '';
       return (
         '<article class="deal-card has-photo" style="position:relative;">' +
@@ -17038,7 +17049,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               '<h3 class="deal-address">' + _adEsc(d.address || 'Untitled property') + '</h3>' +
               '<div class="deal-meta">' +
                 _adEsc(d.client || '') +
-                (d.listingAgent ? ' &nbsp;·&nbsp; <span style="color:var(--text-dim);">vs. ' + _adEsc(d.listingAgent) + '</span>' : '') +
+                (d.listingAgent ? ' &nbsp;·&nbsp; <span style="color:var(--text-dim);">Listing Agent: ' + _adEsc(d.listingAgent) + '</span>' : '') +
                 ' &nbsp; ' + _adStageChip(d.stage) +
               '</div>' +
             '</div>' +
