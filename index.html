@@ -5483,20 +5483,20 @@
               <input id="bd-uc" name="date_under_contract" type="date" required />
             </div>
             <div>
-              <label for="bd-em-due">Earnest Money Due</label>
+              <label for="bd-em-due">Earnest Money Deadline</label>
               <input id="bd-em-due" name="earnest_money_due" type="date" />
             </div>
             <div>
-              <label for="bd-dd">Due Diligence End</label>
-              <input id="bd-dd" name="dd_end" type="date" />
-            </div>
-            <div>
-              <label for="bd-insp-end">Inspection Period Ends</label>
+              <label for="bd-insp-end">Inspection Period End</label>
               <input id="bd-insp-end" name="inspection_period_ends" type="date" />
             </div>
             <div>
-              <label for="bd-res-end">Resolution Period Ends</label>
+              <label for="bd-res-end">Resolution Period End</label>
               <input id="bd-res-end" name="resolution_period_ends" type="date" />
+            </div>
+            <div>
+              <label for="bd-close">Closing Date</label>
+              <input id="bd-close" name="closing_date" type="date" />
             </div>
             <div>
               <label for="bd-walk">Final Walk-Through</label>
@@ -5506,9 +5506,45 @@
               <label for="bd-blue">Blue Tape Walk-Through (if any)</label>
               <input id="bd-blue" name="blue_tape_walkthrough" type="date" />
             </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Inspection &amp; Appraisal</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="bd-insp-company">Inspection Company</label>
+              <input id="bd-insp-company" name="inspection_company" type="text" placeholder="e.g. HouseCheck Nashville" />
+            </div>
             <div>
-              <label for="bd-close">Closing Date</label>
-              <input id="bd-close" name="closing_date" type="date" />
+              <label for="bd-insp-date">Date of Inspection</label>
+              <input id="bd-insp-date" name="inspection_date" type="date" />
+            </div>
+            <div>
+              <label for="bd-appraisal-date">Date of Appraisal</label>
+              <input id="bd-appraisal-date" name="appraisal_date" type="date" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Closing</legend>
+          <div class="form-grid">
+            <div>
+              <label for="bd-closing-company">Closing Company</label>
+              <input id="bd-closing-company" name="closing_company" type="text" placeholder="e.g. Premier Escrow" />
+            </div>
+            <div>
+              <label for="bd-closing-attorney">Closing Attorney</label>
+              <input id="bd-closing-attorney" name="closing_attorney" type="text" placeholder="Attorney name" />
+            </div>
+            <div>
+              <label for="bd-closing-attorney-phone">Closing Attorney Phone</label>
+              <input id="bd-closing-attorney-phone" name="closing_attorney_phone" type="tel" placeholder="(615) 555-0123" />
+            </div>
+            <div class="full">
+              <label for="bd-closing-location">Closing Company Location</label>
+              <input id="bd-closing-location" name="closing_company_location" type="text" placeholder="Full address" />
             </div>
           </div>
         </fieldset>
@@ -16701,7 +16737,15 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         inspection_period_ends: "entry.547294873",
         resolution_period_ends: "entry.112969510",
         final_walkthrough:      "entry.1180216668",
-        blue_tape_walkthrough:  "entry.578157943"
+        blue_tape_walkthrough:  "entry.578157943",
+        // Additional fields
+        closing_company:          "entry.1368402293",
+        closing_attorney:         "entry.958895723",
+        closing_attorney_phone:   "entry.1841389823",
+        closing_company_location: "entry.1850209647",
+        inspection_company:       "entry.2040456726",
+        inspection_date:          "entry.1281829498",
+        appraisal_date:           "entry.608173480"
       }
     };
 
@@ -16906,8 +16950,37 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     }
     function _adBuyerCard(d, today) {
       const bars = [];
-      if (d.dateUC && d.ddEnd)   bars.push(_adProgressBar('Due Diligence', d.dateUC, d.ddEnd, today));
-      if (d.dateUC && d.closing) bars.push(_adProgressBar('Closing',       d.dateUC, d.closing, today));
+      if (d.dateUC && d.emDue)         bars.push(_adProgressBar('Earnest Money',      d.dateUC, d.emDue,         today));
+      if (d.dateUC && d.inspectionEnd) bars.push(_adProgressBar('Inspection Period',  d.dateUC, d.inspectionEnd, today));
+      if (d.dateUC && d.resolutionEnd) bars.push(_adProgressBar('Resolution Period',  d.dateUC, d.resolutionEnd, today));
+      if (d.dateUC && d.closing)       bars.push(_adProgressBar('Closing',            d.dateUC, d.closing,       today));
+      // Back-compat: fall back to DD End if Inspection Period End isn't populated
+      if (!d.inspectionEnd && d.dateUC && d.ddEnd) {
+        bars.splice(1, 0, _adProgressBar('Due Diligence', d.dateUC, d.ddEnd, today));
+      }
+      // Discrete key-date badges (Inspection / Appraisal)
+      const badges = [];
+      const fmt = (dt) => (dt instanceof Date && !isNaN(dt)) ? dt.toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
+      if (d.inspectionDate) badges.push('Insp ' + fmt(d.inspectionDate));
+      if (d.appraisalDate)  badges.push('Appr ' + fmt(d.appraisalDate));
+      const badgeRow = badges.length
+        ? '<div style="display:flex; gap:6px; padding:6px 12px 0; flex-wrap:wrap;">' +
+            badges.map(t => '<span style="font-size:10px; letter-spacing:.1em; padding:2px 8px; border:1px solid var(--panel-edge); background:#141414; color:#bbb;">' + _adEsc(t) + '</span>').join('') +
+          '</div>'
+        : '';
+      // Closing + inspection company contacts (small footer line)
+      const contactBits = [];
+      if (d.closingAttorney) {
+        let a = 'Attorney: ' + d.closingAttorney;
+        if (d.closingAttorneyPhone) a += ' (' + d.closingAttorneyPhone + ')';
+        contactBits.push(a);
+      }
+      if (d.closingCompany)  contactBits.push('Closing: ' + d.closingCompany);
+      if (d.inspectionCompany) contactBits.push('Inspection: ' + d.inspectionCompany);
+      const contactRow = contactBits.length
+        ? '<div style="font-size:10px; color:var(--text-dim); padding:6px 12px 0; letter-spacing:.05em;">' +
+            _adEsc(contactBits.join(' · ')) + '</div>'
+        : '';
       return (
         '<article class="deal-card has-photo" style="position:relative;">' +
           _adEditBtn(d.address, 'buyer') +
@@ -16924,6 +16997,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             (d.contractPrice ? '<div class="deal-price">' + _adEsc(_adFmtUSD(d.contractPrice)) + '</div>' : '') +
           '</header>' +
           bars.join('') +
+          badgeRow +
+          contactRow +
         '</article>'
       );
     }
@@ -17042,12 +17117,20 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             dateUC:         _adFindCol(cols, 'Date Under Contract', 'Under Contract'),
             ddEnd:          _adFindCol(cols, 'Due Diligence End', 'DD End'),
             closing:        _adFindCol(cols, 'Closing Date', 'Closing'),
-            emDue:          _adFindCol(cols, 'Earnest Money Due'),
-            inspectionEnd:  _adFindCol(cols, 'Inspection Period Ends', 'Inspection End'),
-            resolutionEnd:  _adFindCol(cols, 'Resolution Period Ends', 'Resolution End'),
+            emDue:          _adFindCol(cols, 'Earnest Money Due', 'Earnest Money Deadline'),
+            inspectionEnd:  _adFindCol(cols, 'Inspection Period Ends', 'Inspection Period End', 'Inspection End'),
+            resolutionEnd:  _adFindCol(cols, 'Resolution Period Ends', 'Resolution Period End', 'Resolution End'),
             finalWalk:      _adFindCol(cols, 'Final Walkthrough', 'Final Walk Through', 'Final Walk-Through'),
             blueTape:       _adFindCol(cols, 'Blue Tape Walkthrough', 'Blue Tape Walk Through', 'Blue Tape Walk-Through'),
-            notes:          _adFindCol(cols, 'Notes')
+            notes:          _adFindCol(cols, 'Notes'),
+            // New fields
+            closingCompany:   _adFindCol(cols, 'Closing Company'),
+            closingAttorney:  _adFindCol(cols, 'Closing Attorney'),
+            closingAttorneyPhone: _adFindCol(cols, 'Closing Attorney Phone'),
+            closingLocation:  _adFindCol(cols, 'Closing Company Location'),
+            inspectionCompany:_adFindCol(cols, 'Inspection Company'),
+            inspectionDate:   _adFindCol(cols, 'Date of Inspection', 'Inspection Date'),
+            appraisalDate:    _adFindCol(cols, 'Date of Appraisal', 'Appraisal Date')
           };
           if (ix.address < 0) throw new Error('Sheet missing "Property Address" column.');
           const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -17071,7 +17154,14 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               resolutionEnd:  ix.resolutionEnd >= 0 ? _adGvizDate(c[ix.resolutionEnd]) : null,
               finalWalk:      ix.finalWalk >= 0 ? _adGvizDate(c[ix.finalWalk]) : null,
               blueTape:       ix.blueTape >= 0 ? _adGvizDate(c[ix.blueTape]) : null,
-              notes:          ix.notes >= 0 ? _adGvizString(c[ix.notes]) : ''
+              notes:          ix.notes >= 0 ? _adGvizString(c[ix.notes]) : '',
+              closingCompany:   ix.closingCompany >= 0 ? _adGvizString(c[ix.closingCompany]) : '',
+              closingAttorney:  ix.closingAttorney >= 0 ? _adGvizString(c[ix.closingAttorney]) : '',
+              closingAttorneyPhone: ix.closingAttorneyPhone >= 0 ? _adGvizString(c[ix.closingAttorneyPhone]) : '',
+              closingLocation:  ix.closingLocation >= 0 ? _adGvizString(c[ix.closingLocation]) : '',
+              inspectionCompany:ix.inspectionCompany >= 0 ? _adGvizString(c[ix.inspectionCompany]) : '',
+              inspectionDate:   ix.inspectionDate >= 0 ? _adGvizDate(c[ix.inspectionDate]) : null,
+              appraisalDate:    ix.appraisalDate >= 0 ? _adGvizDate(c[ix.appraisalDate]) : null
             };
           }).filter(d => d.address);
           // Dedupe by address (edits overwrite by keeping latest Timestamp)
@@ -19895,13 +19985,20 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         _setVal('bd-em',               d.earnestMoney || '');
         _setDate('bd-uc',              d.dateUC);
         _setDate('bd-em-due',          d.emDue);
-        _setDate('bd-dd',              d.ddEnd);
         _setDate('bd-insp-end',        d.inspectionEnd);
         _setDate('bd-res-end',         d.resolutionEnd);
         _setDate('bd-walk',            d.finalWalk);
         _setDate('bd-blue',            d.blueTape);
         _setDate('bd-close',           d.closing);
         _setVal('bd-notes',            d.notes);
+        // New fields
+        _setVal('bd-closing-company',  d.closingCompany);
+        _setVal('bd-closing-attorney', d.closingAttorney);
+        _setVal('bd-closing-attorney-phone', d.closingAttorneyPhone);
+        _setVal('bd-closing-location', d.closingLocation);
+        _setVal('bd-insp-company',     d.inspectionCompany);
+        _setDate('bd-insp-date',       d.inspectionDate);
+        _setDate('bd-appraisal-date',  d.appraisalDate);
         // Rebrand modal chrome
         const title = document.querySelector('#buyerdeal-modal .modal-title');
         if (title) title.textContent = 'Edit Buyer Deal';
