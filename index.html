@@ -16987,9 +16987,13 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     // stable key for looking up the row in window._buyerDealsByAddress /
     // window._listingsByAddress; type distinguishes which modal to open.
     function _adEditBtn(address, type) {
-      return '<button type="button" class="deal-edit-btn" data-address="' +
-        _adEsc(address) + '" data-type="' + type + '" ' +
-        'style="position:absolute; top:8px; right:10px; z-index:2; font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px solid var(--panel-edge); background:rgba(20,20,20,.85); color:#fff; cursor:pointer;">Edit</button>';
+      const enc = encodeURIComponent(address || '');
+      return '<div style="position:absolute; top:8px; right:10px; z-index:2; display:flex; gap:6px;">' +
+        '<a href="deal-report.html?address=' + enc + '&type=' + type + '" target="_blank" rel="noopener" ' +
+          'style="font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px solid var(--panel-edge); background:rgba(20,20,20,.85); color:#fff; text-decoration:none;">Report</a>' +
+        '<button type="button" class="deal-edit-btn" data-address="' + _adEsc(address) + '" data-type="' + type + '" ' +
+          'style="font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px solid var(--panel-edge); background:rgba(20,20,20,.85); color:#fff; cursor:pointer;">Edit</button>' +
+      '</div>';
     }
     function _adBuyerCard(d, today) {
       const bars = [];
