@@ -16988,36 +16988,41 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     // Edit button — same shape on Buyer + Listing cards. Address is the
     // stable key for looking up the row in window._buyerDealsByAddress /
     // window._listingsByAddress; type distinguishes which modal to open.
-    function _adEditBtn(address, type) {
+    // Report + Edit buttons rendered INSIDE the deal-head right column,
+    // stacked ABOVE the price so they never overlap it. Called from both
+    // _adBuyerCard and _adListingCard.
+    function _adEditBtnRow(address, type) {
       const enc = encodeURIComponent(address || '');
-      return '<div style="position:absolute; top:8px; right:10px; z-index:2; display:flex; gap:6px;">' +
+      return '<div style="display:flex; gap:6px; margin-bottom:8px; justify-content:flex-end;">' +
         '<a href="deal-report.html?address=' + enc + '&type=' + type + '" target="_blank" rel="noopener" ' +
           'style="font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px solid var(--panel-edge); background:rgba(20,20,20,.85); color:#fff; text-decoration:none;">Report</a>' +
         '<button type="button" class="deal-edit-btn" data-address="' + _adEsc(address) + '" data-type="' + type + '" ' +
           'style="font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px solid var(--panel-edge); background:rgba(20,20,20,.85); color:#fff; cursor:pointer;">Edit</button>' +
       '</div>';
     }
+    // Back-compat shim in case anything else called _adEditBtn expecting
+    // the absolute-positioned corner div. Returns empty (buttons live in
+    // the header now).
+    function _adEditBtn() { return ''; }
     function _adBuyerCard(d, today) {
       const bars = [];
       const addr = d.address;
+      // Markers show discrete events on the correct timeline bar:
+      //   Inspection date → pinned to Inspection Period bar
+      //   Appraisal date  → pinned to Closing bar (financing/appraisal is
+      //                     between resolution and closing in the standard flow)
+      const inspMarkers = d.inspectionDate ? [{ label: 'Inspected', date: d.inspectionDate }] : [];
+      const closeMarkers = d.appraisalDate ? [{ label: 'Appraisal', date: d.appraisalDate }] : [];
       if (d.dateUC && d.emDue)         bars.push(_adProgressBar('Earnest Money',      d.dateUC, d.emDue,         today, addr));
-      if (d.dateUC && d.inspectionEnd) bars.push(_adProgressBar('Inspection Period',  d.dateUC, d.inspectionEnd, today, addr));
+      if (d.dateUC && d.inspectionEnd) bars.push(_adProgressBar('Inspection Period',  d.dateUC, d.inspectionEnd, today, addr, inspMarkers));
       if (d.dateUC && d.resolutionEnd) bars.push(_adProgressBar('Resolution Period',  d.dateUC, d.resolutionEnd, today, addr));
-      if (d.dateUC && d.closing)       bars.push(_adProgressBar('Closing',            d.dateUC, d.closing,       today, addr));
+      if (d.dateUC && d.closing)       bars.push(_adProgressBar('Closing',            d.dateUC, d.closing,       today, addr, closeMarkers));
       // Back-compat: fall back to DD End if Inspection Period End isn't populated
       if (!d.inspectionEnd && d.dateUC && d.ddEnd) {
-        bars.splice(1, 0, _adProgressBar('Due Diligence', d.dateUC, d.ddEnd, today, addr));
+        bars.splice(1, 0, _adProgressBar('Due Diligence', d.dateUC, d.ddEnd, today, addr, inspMarkers));
       }
-      // Discrete key-date badges (Inspection / Appraisal)
-      const badges = [];
-      const fmt = (dt) => (dt instanceof Date && !isNaN(dt)) ? dt.toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
-      if (d.inspectionDate) badges.push('Insp ' + fmt(d.inspectionDate));
-      if (d.appraisalDate)  badges.push('Appr ' + fmt(d.appraisalDate));
-      const badgeRow = badges.length
-        ? '<div class="deal-extra" style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">' +
-            badges.map(t => '<span style="font-size:10px; letter-spacing:.1em; padding:2px 8px; border:1px solid var(--panel-edge); background:#141414; color:#bbb;">' + _adEsc(t) + '</span>').join('') +
-          '</div>'
-        : '';
+      // (Prior badge row for Insp/Appr removed — markers live on the timeline now)
+      const badgeRow = '';
       // Closing + inspection company contacts — proper labeled grid,
       // spans full card width, wraps nicely
       const cells = [];
@@ -17041,8 +17046,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           '</div>'
         : '';
       return (
-        '<article class="deal-card has-photo" style="position:relative;">' +
-          _adEditBtn(d.address, 'buyer') +
+        '<article class="deal-card has-photo">' +
           _adPhotoTile(d.address) +
           '<header class="deal-head">' +
             '<div>' +
@@ -17053,7 +17057,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
                 ' &nbsp; ' + _adStageChip(d.stage) +
               '</div>' +
             '</div>' +
-            (d.contractPrice ? '<div class="deal-price">' + _adEsc(_adFmtUSD(d.contractPrice)) + '</div>' : '') +
+            '<div style="display:flex; flex-direction:column; align-items:flex-end;">' +
+              _adEditBtnRow(d.address, 'buyer') +
+              (d.contractPrice ? '<div class="deal-price">' + _adEsc(_adFmtUSD(d.contractPrice)) + '</div>' : '') +
+            '</div>' +
           '</header>' +
           bars.join('') +
           badgeRow +
@@ -17072,8 +17079,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const bars = [];
       if (d.dateUC && d.closing) bars.push(_adProgressBar('Closing', d.dateUC, d.closing, today, d.address));
       return (
-        '<article class="deal-card has-photo" style="position:relative;">' +
-          _adEditBtn(d.address, 'listing') +
+        '<article class="deal-card has-photo">' +
           _adPhotoTile(d.address) +
           '<header class="deal-head">' +
             '<div>' +
@@ -17084,7 +17090,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
                 ' &nbsp; ' + _adStageChip(d.stage) +
               '</div>' +
             '</div>' +
-            (d.listPrice ? '<div class="deal-price">' + _adEsc(_adFmtUSD(d.listPrice)) + '</div>' : '') +
+            '<div style="display:flex; flex-direction:column; align-items:flex-end;">' +
+              _adEditBtnRow(d.address, 'listing') +
+              (d.listPrice ? '<div class="deal-price">' + _adEsc(_adFmtUSD(d.listPrice)) + '</div>' : '') +
+            '</div>' +
           '</header>' +
           bars.join('') +
         '</article>'
@@ -17127,7 +17136,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       } catch (_) {}
     }
 
-    function _adProgressBar(label, start, end, today, address) {
+    function _adProgressBar(label, start, end, today, address, markers) {
       if (!start || !end) {
         return '<div class="deal-bar"><div class="bar-row">' +
           '<div class="bar-label">' + _adEsc(label) + '</div>' +
@@ -17154,10 +17163,27 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         : '<span>' + _adEsc(countdown) + '</span>';
       const fillPct = complete ? '100' : pct.toFixed(1);
       const addrAttr = _adEsc(address || '');
-      return '<div class="deal-bar ' + state + '">' +
+      // Optional markers — small pins on the track for discrete events
+      // like the actual inspection date or appraisal date. Position is
+      // % from start, clamped so early/late events still show near an edge.
+      const markerHtml = (markers || []).filter(m => m && m.date instanceof Date && !isNaN(m.date))
+        .map(m => {
+          const dayOffset = _adDaysBetween(start, m.date);
+          const pctPos = Math.max(0, Math.min(100, (dayOffset / total) * 100));
+          const shortDate = m.date.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+          const title = _adEsc(m.label + ': ' + shortDate);
+          return '<span class="bar-marker" title="' + title + '" style="' +
+            'position:absolute; left:' + pctPos.toFixed(1) + '%; top:50%; transform:translate(-50%, -50%); ' +
+            'width:10px; height:10px; background:#9ec39e; border:2px solid #0a0a0a; border-radius:50%; ' +
+            'box-shadow:0 0 0 1px #9ec39e; z-index:2;' +
+            '"><span style="position:absolute; top:14px; left:50%; transform:translateX(-50%); white-space:nowrap; ' +
+            'font-size:9px; letter-spacing:.08em; color:#9ec39e; text-transform:uppercase;">' +
+            _adEsc(m.label) + ' ' + _adEsc(shortDate) + '</span></span>';
+        }).join('');
+      return '<div class="deal-bar ' + state + '"' + (markerHtml ? ' style="padding-bottom:14px;"' : '') + '>' +
         '<div class="bar-row">' +
           '<div class="bar-label">' + _adEsc(label) + '</div>' +
-          '<div class="bar-track"><div class="bar-fill" style="width:' + fillPct + '%"></div></div>' +
+          '<div class="bar-track" style="position:relative;"><div class="bar-fill" style="width:' + fillPct + '%"></div>' + markerHtml + '</div>' +
           '<div class="bar-status">' +
             '<label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; user-select:none;" title="Mark ' + _adEsc(label) + ' complete">' +
               '<input type="checkbox" class="bar-complete-check" data-address="' + addrAttr + '" data-label="' + _adEsc(label) + '"' + (complete ? ' checked' : '') + ' style="cursor:pointer;" />' +
