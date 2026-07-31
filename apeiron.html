@@ -869,16 +869,22 @@
        Builder, Landscape Architect, Owner's Rep. Cards enrich
        from Development → Contacts by name match.
        ========================================================= */
+    // Each member has a `source`: 'contacts' → look up in Development Contacts,
+    // 'roster' → look up in the internal Stonehouse Team Roster.
+    // Owner's Rep is 'roster' because it's an internal role — as Apeiron
+    // hires more reps, Ryan adds them to the Team Roster once and assigns
+    // them here per project.
     const APEIRON_TEAMS = {
       campbell: [
-        { role: 'Architect',           name: 'Andrew King' },
-        { role: 'Interior Designer',   name: 'Kathryn Zelenik' },
-        { role: 'Builder',             name: 'Justin Davis' },
-        { role: 'Landscape Architect', name: 'Brad Allison' },
-        { role: "Owner's Representative", name: 'Ryan Stonehouse' }
+        { role: 'Architect',              name: 'Andrew King',      source: 'contacts' },
+        { role: 'Interior Designer',      name: 'Kathryn Zelenik',  source: 'contacts' },
+        { role: 'Builder',                name: 'Justin Davis',     source: 'contacts' },
+        { role: 'Landscape Architect',    name: 'Brad Allison',     source: 'contacts' },
+        { role: "Owner's Representative", name: 'Ryan Stonehouse',  source: 'roster'   }
       ]
     };
     const CONTACTS_SHEET_ID = "1wmXxSO0qF8OSkkx6iqmHuepX0QrxbQRb4Iw4-jybeww";
+    const TEAM_ROSTER_SHEET_ID = "18TAk4nYhNACQao-X2VelyraVq-xWUIPeD12I2w3hF4Q";
 
     // Fetch the Contacts sheet once and stash by lowercased name for lookup
     async function _fetchContactsIndex() {
@@ -945,15 +951,68 @@
       `;
     }
 
+    // Same shape as Contacts index but from the internal Team Roster sheet.
+    // Maps lowercased name → { name, role/title, phone, email, company }
+    async function _fetchTeamRosterIndex() {
+      try {
+        const url = 'https://docs.google.com/spreadsheets/d/' + TEAM_ROSTER_SHEET_ID +
+          '/gviz/tq?tqx=out:json&headers=1&sheet=Form%20Responses%201&t=' + Date.now();
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) return {};
+        const text = await res.text();
+        const m = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
+        if (!m) return {};
+        const data = JSON.parse(m[1]);
+        if (data.status !== 'ok') return {};
+        const cols = data.table.cols || [];
+        const rows = data.table.rows || [];
+        const norm = s => String(s || '').toLowerCase().trim();
+        const idx = label => cols.findIndex(c => norm(c.label) === label);
+        const ix = {
+          name:  idx('name'),
+          title: idx('title'),
+          role:  idx('role'),
+          email: idx('email'),
+          phone: idx('phone'),
+        };
+        const byName = {};
+        rows.forEach(r => {
+          const c = r.c || [];
+          const get = i => (i >= 0 && c[i] && c[i].v != null) ? String(c[i].v).trim() : '';
+          const name = get(ix.name);
+          if (!name) return;
+          byName[name.toLowerCase()] = {
+            name,
+            // Map to same shape as contacts so _teamCardHtml can share logic:
+            //   company -> title (their job title inside Stonehouse)
+            //   role    -> role tier (Founder / Agent / Specialist / Admin)
+            company: get(ix.title),
+            role:    get(ix.role),
+            email:   get(ix.email),
+            phone:   get(ix.phone)
+          };
+        });
+        return byName;
+      } catch (err) {
+        console.warn('[Apeiron Team] Team Roster fetch failed:', err);
+        return {};
+      }
+    }
+
     (async function _renderTeams() {
       const grids = document.querySelectorAll('.team-grid[data-project]');
       if (grids.length === 0) return;
-      const contactsByName = await _fetchContactsIndex();
+      // Fetch both sources in parallel
+      const [contactsByName, rosterByName] = await Promise.all([
+        _fetchContactsIndex(),
+        _fetchTeamRosterIndex()
+      ]);
       grids.forEach(grid => {
         const projectId = grid.getAttribute('data-project');
         const roster = APEIRON_TEAMS[projectId] || [];
         grid.innerHTML = roster.map(m => {
-          const c = contactsByName[m.name.toLowerCase()];
+          const src = (m.source === 'roster') ? rosterByName : contactsByName;
+          const c = src[m.name.toLowerCase()];
           return _teamCardHtml(m, c);
         }).join('');
       });
