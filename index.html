@@ -3182,6 +3182,133 @@
       <div class="intro-wordmark">The Stonehouse Company</div>
     </div>
   </div>
+
+  <!-- ========================= DIVISION HUB =========================
+       Shown after the intro splash. Grid of profile circles — one per
+       division/brand. Clicking a live circle enters that division;
+       "Coming soon" circles show a subtle tooltip and do nothing.
+       Admin is currently the only wired-up destination (this dashboard).
+       ============================================================= -->
+  <div id="division-hub" aria-hidden="true">
+    <div class="hub-inner">
+      <img class="hub-arch" src="assets/icon-arch-transparent.png" alt="" />
+      <h1 class="hub-title">The Stonehouse Company</h1>
+      <p class="hub-sub">Select your division</p>
+      <div class="hub-grid">
+        <button type="button" class="hub-card" data-target="admin">
+          <div class="hub-avatar" data-slug="admin">
+            <img src="assets/hub/admin.jpg" alt="" onerror="this.style.display='none';" />
+            <span class="hub-initial">A</span>
+          </div>
+          <div class="hub-name">Admin</div>
+          <div class="hub-role">Full dashboard access</div>
+        </button>
+        <button type="button" class="hub-card is-soon" data-target="petra">
+          <div class="hub-avatar" data-slug="petra">
+            <img src="assets/hub/petra.jpg" alt="" onerror="this.style.display='none';" />
+            <span class="hub-initial">P</span>
+          </div>
+          <div class="hub-name">Petra Luxury Group</div>
+          <div class="hub-role">Coming soon</div>
+        </button>
+        <button type="button" class="hub-card is-soon" data-target="apeiron">
+          <div class="hub-avatar" data-slug="apeiron">
+            <img src="assets/hub/apeiron.jpg" alt="" onerror="this.style.display='none';" />
+            <span class="hub-initial">A</span>
+          </div>
+          <div class="hub-name">Apeiron</div>
+          <div class="hub-role">Coming soon</div>
+        </button>
+        <button type="button" class="hub-card is-soon" data-target="propmgmt">
+          <div class="hub-avatar" data-slug="propmgmt">
+            <img src="assets/hub/propmgmt.jpg" alt="" onerror="this.style.display='none';" />
+            <span class="hub-initial">P</span>
+          </div>
+          <div class="hub-name">Property Management</div>
+          <div class="hub-role">Coming soon</div>
+        </button>
+      </div>
+    </div>
+  </div>
+  <style>
+    /* Hub overlay — full-screen black background with centered grid */
+    #division-hub {
+      position: fixed; inset: 0; z-index: 9998;
+      background: #000; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px 20px;
+      opacity: 0; pointer-events: none;
+      transition: opacity .6s ease;
+      font-family: 'Mulish', 'Helvetica Neue', Arial, sans-serif;
+    }
+    #division-hub[aria-hidden="false"] {
+      opacity: 1; pointer-events: auto;
+    }
+    #division-hub.is-leaving { opacity: 0; }
+    .hub-inner {
+      max-width: 1000px; width: 100%; text-align: center;
+    }
+    .hub-arch {
+      width: 56px; height: 56px; object-fit: contain;
+      margin: 0 auto 18px; display: block;
+    }
+    .hub-title {
+      font-family: 'Aboreto', 'Cormorant Garamond', serif;
+      font-size: clamp(22px, 3vw, 32px);
+      letter-spacing: .22em; text-transform: uppercase;
+      margin: 0 0 8px; font-weight: 400;
+    }
+    .hub-sub {
+      font-size: 11px; letter-spacing: .3em; text-transform: uppercase;
+      color: #888; margin: 0 0 48px;
+    }
+    .hub-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 32px 24px;
+      max-width: 900px; margin: 0 auto;
+    }
+    .hub-card {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      padding: 20px 12px; background: transparent; border: 0;
+      color: #fff; cursor: pointer; font-family: inherit;
+      transition: opacity .2s;
+    }
+    .hub-card:hover { opacity: .85; }
+    .hub-card:hover .hub-avatar { transform: scale(1.03); border-color: #fff; }
+    .hub-avatar {
+      width: 140px; height: 140px; border-radius: 50%;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      overflow: hidden; position: relative;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .2s, border-color .2s;
+    }
+    .hub-avatar img {
+      width: 100%; height: 100%; object-fit: cover;
+      position: absolute; inset: 0; z-index: 2;
+    }
+    .hub-initial {
+      font-family: 'Aboreto', serif; font-size: 48px;
+      letter-spacing: .04em; color: #444;
+      z-index: 1;
+    }
+    .hub-name {
+      font-family: 'Aboreto', serif; font-size: 14px;
+      letter-spacing: .2em; text-transform: uppercase; color: #fff;
+    }
+    .hub-role {
+      font-size: 9px; letter-spacing: .22em; text-transform: uppercase;
+      color: #666; margin-top: -6px;
+    }
+    .hub-card.is-soon .hub-avatar { opacity: .55; }
+    .hub-card.is-soon:hover .hub-avatar { border-color: #666; transform: scale(1); }
+    .hub-card.is-soon .hub-name { color: #888; }
+    @media (max-width: 640px) {
+      .hub-avatar { width: 100px; height: 100px; }
+      .hub-initial { font-size: 32px; }
+      .hub-grid { gap: 20px 16px; }
+    }
+  </style>
   <style>
     /* Splash overlay — defaults VISIBLE (opaque black) so it covers the
        dashboard from the first paint. The arch + wordmark are individually
@@ -3320,21 +3447,24 @@
       const VALID_MS       = 30 * 24 * 60 * 60 * 1000; // 30 days
 
       // Stonehouse intro splash — brand reveal that runs between the
-      // access gate and the dashboard. Plays every load. Click to dismiss.
+      // access gate and the DIVISION HUB. Plays every load. Click to dismiss.
       window.showStonehouseIntro = function () {
         const splash = document.getElementById('stonehouse-intro');
         if (!splash) return;
         splash.setAttribute('aria-hidden', 'false');
         splash.classList.add('is-playing');
         // Sequence: arch fades in 0–2.4s, wordmark fades in 1.1–3.1s.
-        // Hold a beat past the wordmark settling, then fade to dashboard.
+        // Hold a beat past the wordmark settling, then fade to the hub.
         const HOLD_MS = 4300;
         let dismissed = false;
         function dismiss() {
           if (dismissed) return;
           dismissed = true;
           splash.classList.add('is-leaving');
-          // Remove after the CSS fade-out completes (1.2s)
+          // Show the division hub (instead of the dashboard directly)
+          const hub = document.getElementById('division-hub');
+          if (hub) hub.setAttribute('aria-hidden', 'false');
+          // Remove splash after the CSS fade-out completes (1.2s)
           setTimeout(() => {
             if (splash.parentNode) splash.parentNode.removeChild(splash);
           }, 1250);
@@ -3342,6 +3472,34 @@
         splash.addEventListener('click', dismiss);
         setTimeout(dismiss, HOLD_MS);
       };
+
+      // Hub circle clicks — Admin enters the dashboard, "coming soon"
+      // cards give a subtle flash so the user knows they're not broken.
+      (function () {
+        const hub = document.getElementById('division-hub');
+        if (!hub) return;
+        hub.addEventListener('click', (e) => {
+          const card = e.target.closest && e.target.closest('.hub-card');
+          if (!card) return;
+          const target = card.getAttribute('data-target');
+          if (target === 'admin') {
+            hub.classList.add('is-leaving');
+            setTimeout(() => {
+              hub.setAttribute('aria-hidden', 'true');
+              hub.classList.remove('is-leaving');
+            }, 600);
+            return;
+          }
+          // Coming soon — subtle shake to signal it's not wired yet
+          card.animate([
+            { transform: 'translateX(-4px)' },
+            { transform: 'translateX(4px)' },
+            { transform: 'translateX(-3px)' },
+            { transform: 'translateX(3px)' },
+            { transform: 'translateX(0)' }
+          ], { duration: 260, easing: 'ease-out' });
+        });
+      })();
 
       // If a saved token is still valid AND the version matches, skip the gate.
       try {
