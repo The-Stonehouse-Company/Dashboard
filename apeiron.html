@@ -46,19 +46,19 @@
     .topbar {
       position: sticky; top: 0; z-index: 50;
       background: #000; border-bottom: 1px solid var(--panel-edge);
-      display: flex; align-items: center; gap: 18px;
-      padding: 16px 24px;
+      display: flex; align-items: center; gap: 22px;
+      padding: 20px 28px;
     }
     .topbar .brand {
-      display: flex; align-items: center; gap: 18px;
+      display: flex; align-items: center; gap: 22px;
     }
     .topbar .brand img.arch {
-      width: 72px; height: 72px; object-fit: contain;
+      width: 120px; height: 120px; object-fit: contain;
       background: transparent;
     }
     .topbar .brand .name {
       font-family: var(--font-display);
-      font-size: 22px; letter-spacing: .32em; text-transform: uppercase;
+      font-size: 28px; letter-spacing: .32em; text-transform: uppercase;
       color: #fff;
     }
     .topbar .brand .name small {
@@ -79,7 +79,7 @@
     .shell {
       display: grid;
       grid-template-columns: 260px 1fr;
-      min-height: calc(100vh - 61px);
+      min-height: calc(100vh - 160px);
     }
 
     /* ==================== Side nav ==================== */
@@ -87,8 +87,8 @@
       background: #0a0a0a;
       border-right: 1px solid var(--panel-edge);
       padding: 22px 18px;
-      position: sticky; top: 61px;
-      height: calc(100vh - 61px); overflow-y: auto;
+      position: sticky; top: 160px;
+      height: calc(100vh - 160px); overflow-y: auto;
     }
     .sidenav .section-label {
       font-size: 9px; letter-spacing: .22em; text-transform: uppercase;
