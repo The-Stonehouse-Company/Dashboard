@@ -4897,10 +4897,11 @@
                     <th>Status</th>
                     <th>Email</th>
                     <th>Phone</th>
+                    <th>Move-In Report</th>
                   </tr>
                 </thead>
                 <tbody id="tenant-table-body">
-                  <tr><td colspan="7" class="client-empty">Loading tenants…</td></tr>
+                  <tr><td colspan="8" class="client-empty">Loading tenants…</td></tr>
                 </tbody>
               </table>
             </div>
@@ -19226,17 +19227,42 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const total = (window._pmTenants || []).length;
       if (meta) meta.textContent = list.length + ' of ' + total;
       if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="client-empty">' +
+        tbody.innerHTML = '<tr><td colspan="8" class="client-empty">' +
           (total === 0
             ? (TENANTS_CONFIG.SHEET_ID ? 'No tenants yet. Click "+ Add Tenant" to add the first.' : 'Tenants sheet not connected yet. See docs/propmgmt-setup.md.')
             : 'No tenants match filters.') +
           '</td></tr>';
         return;
       }
+      const reportEmails = window._pmMoveInReportEmails || new Set();
+      const reportNames  = window._pmMoveInReportNames  || new Set();
       tbody.innerHTML = list.map(t => {
         const name = ((t.first || '') + ' ' + (t.last || '')).trim() || '(no name)';
         const propUnit = _pmEsc(t.property) + (t.unit ? ' · #' + _pmEsc(t.unit) : '');
         const leaseWindow = (t.leaseStart ? _pmFmtDate(t.leaseStart) : '?') + ' → ' + (t.leaseEnd ? _pmFmtDate(t.leaseEnd) : '?');
+        // Check for a matching move-in report by email (preferred), then name
+        const emailKey = (t.email || '').trim().toLowerCase();
+        const nameKey  = name.trim().toLowerCase();
+        const hasReport = (emailKey && reportEmails.has(emailKey)) || (nameKey && reportNames.has(nameKey));
+        let reportCell;
+        if (hasReport) {
+          const q = emailKey ? 'email=' + encodeURIComponent(emailKey) : 'name=' + encodeURIComponent(nameKey);
+          reportCell = '<a href="tenant-report-view.html?' + q + '" target="_blank" rel="noopener" ' +
+            'style="font-size:10px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px solid var(--panel-edge); background:transparent; color:#9ec39e; text-decoration:none;">✓ View</a>';
+        } else {
+          // Not submitted → offer copy-link shortcut
+          const params = new URLSearchParams();
+          if (t.property) params.set('property', t.property);
+          if (t.unit)     params.set('unit', t.unit);
+          if (name && name !== '(no name)') params.set('tenant', name);
+          if (t.email)    params.set('email', t.email);
+          if (t.phone)    params.set('phone', String(t.phone).replace(/\D+/g, ''));
+          if (t.leaseStart) params.set('start', new Date(t.leaseStart).toISOString().slice(0,10));
+          const link = 'move-in-report.html' + (params.toString() ? '?' + params.toString() : '');
+          reportCell = '<a href="' + link + '" target="_blank" rel="noopener" ' +
+            'style="font-size:10px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px dashed var(--panel-edge); background:transparent; color:var(--text-dim); text-decoration:none;" ' +
+            'title="No report submitted yet — open the tenant form pre-filled">Send Link</a>';
+        }
         return '<tr>' +
           '<td class="client-name">' + _pmEsc(name) + '</td>' +
           '<td style="font-size:11px;">' + propUnit + '</td>' +
@@ -19245,8 +19271,38 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           '<td class="client-status">' + _pmEsc(t.status || '') + '</td>' +
           '<td>' + (t.email ? '<a href="mailto:' + _pmEsc(t.email) + '" style="color:var(--text); border-bottom:1px solid var(--rule);">' + _pmEsc(t.email) + '</a>' : '') + '</td>' +
           '<td>' + (t.phone ? '<a href="tel:' + _pmEsc(t.phone) + '" style="color:var(--text-muted);">' + _pmEsc(t.phone) + '</a>' : '') + '</td>' +
+          '<td>' + reportCell + '</td>' +
         '</tr>';
       }).join('');
+    }
+
+    // ---- Move-In Reports lookup — fetch the reports sheet once, index
+    //      by tenant email + name so _pmRenderTenants can show a "View"
+    //      badge on rows where a report was submitted.
+    const MOVEIN_REPORTS_SHEET_ID = "1pD3iSQpwhnlCbn8Cgyl2_bH3kPyFTMY-ROONcGTFbDc";
+    function _pmLoadMoveInReports() {
+      const url = 'https://docs.google.com/spreadsheets/d/' + MOVEIN_REPORTS_SHEET_ID +
+        '/gviz/tq?tqx=out:json&headers=1&sheet=Form%20Responses%201&t=' + Date.now();
+      return fetch(url, { cache: 'no-store' })
+        .then(r => r.text())
+        .then(t => _adParseEnvelope(t))
+        .then(table => {
+          const cols = table.cols || [];
+          const rows = table.rows || [];
+          const emailIx = cols.findIndex(c => /tenant.?email/i.test(c.label));
+          const nameIx  = cols.findIndex(c => /tenant.?name/i.test(c.label));
+          const emails = new Set();
+          const names  = new Set();
+          rows.forEach(r => {
+            const c = r.c || [];
+            if (emailIx >= 0 && c[emailIx] && c[emailIx].v) emails.add(String(c[emailIx].v).trim().toLowerCase());
+            if (nameIx  >= 0 && c[nameIx]  && c[nameIx].v)  names.add(String(c[nameIx].v).trim().toLowerCase());
+          });
+          window._pmMoveInReportEmails = emails;
+          window._pmMoveInReportNames  = names;
+          _pmRenderTenants();
+        })
+        .catch(err => { console.warn('[PM] move-in reports load failed:', err); });
     }
 
 
@@ -19642,9 +19698,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     _pmLoadProperties();
     _pmLoadTenants();
     _pmLoadLedger();
+    _pmLoadMoveInReports();
     const pmTab = document.getElementById('tab-propmgmt');
     if (pmTab) pmTab.addEventListener('click', () => {
-      _pmLoadProperties(); _pmLoadTenants(); _pmLoadLedger();
+      _pmLoadProperties(); _pmLoadTenants(); _pmLoadLedger(); _pmLoadMoveInReports();
     });
 
     // ============================================================
