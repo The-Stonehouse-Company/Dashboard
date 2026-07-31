@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <style>
   :root {
     --paper:  #ffffff;
@@ -286,10 +288,10 @@
 
 <div class="toolbar">
   <span class="status" id="tb-status">Loading…</span>
-  <a class="btn" id="btn-text-tenant"   href="#" hidden>📱 Text Tenant</a>
-  <a class="btn" id="btn-email-tenant"  href="#" hidden>✉ Email Tenant</a>
-  <a class="btn" id="btn-text-landlord" href="#" hidden>📱 Text Landlord</a>
-  <a class="btn" id="btn-email-landlord" href="#" hidden>✉ Email Landlord</a>
+  <button class="btn" type="button" id="btn-text-tenant"   hidden>📱 Text Tenant + PDF</button>
+  <button class="btn" type="button" id="btn-email-tenant"  hidden>✉ Email Tenant + PDF</button>
+  <button class="btn" type="button" id="btn-text-landlord" hidden>📱 Text Landlord + PDF</button>
+  <button class="btn" type="button" id="btn-email-landlord" hidden>✉ Email Landlord + PDF</button>
   <button class="btn primary" type="button" id="btn-print">Print / Save PDF</button>
   <a class="btn" href="index.html#propmgmt">← Dashboard</a>
 </div>
@@ -571,52 +573,129 @@
     }
 
     // ==== Wire the Text / Email quick-send buttons ====
-    // Strip everything but digits from a phone number so sms:/tel: links work
-    // across iOS + Android + macOS.
+    // Flow: click → render this page to a PDF → try navigator.share so the
+    // OS share sheet lets you pick Messages / Mail with the PDF attached →
+    // fall back to auto-download + opening sms:/mailto: composer.
     function toDigits(p) { return String(p || '').replace(/[^\d]/g, ''); }
-    // Public URL of THIS statement page. If we're being viewed from file://,
-    // fall back to the GitHub Pages URL so texted / emailed links actually work.
-    function publicStatementUrl() {
-      const isFile = location.protocol === 'file:';
-      const base = isFile
-        ? 'https://the-stonehouse-company.github.io/Dashboard/monthly-statement.html'
-        : (location.origin + location.pathname);
-      return base + '?property=' + encodeURIComponent(PROPERTY) + '&month=' + encodeURIComponent(MONTH);
-    }
     const monthNice = monthLabel(MONTH);
-    const linkUrl   = publicStatementUrl();
 
-    // --- Tenant SMS ---
-    const btnTextTenant = document.getElementById('btn-text-tenant');
-    if (tenantPhone) {
-      const digits = toDigits(tenantPhone);
-      const body   = `Hi ${tenantFirst || 'there'} — here is your ${monthNice} statement for ${PROPERTY}. Tap to view: ${linkUrl}`;
-      btnTextTenant.href = 'sms:' + digits + '?&body=' + encodeURIComponent(body);
-      btnTextTenant.hidden = false;
+    // Slugified filename so downloads are legible
+    function pdfFilename() {
+      const slug = String(PROPERTY || 'property').toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      return 'stonehouse-statement-' + slug + '-' + MONTH + '.pdf';
     }
-    // --- Tenant Email ---
-    const btnEmailTenant = document.getElementById('btn-email-tenant');
-    if (tenantEmail) {
+
+    // Build a PDF from the .page element using html2canvas + pdf-lib.
+    // Returns { blob, filename, arrayBuffer }.
+    async function buildStatementPdf() {
+      const pageEl = document.getElementById('page');
+      const setStat = (msg) => { const s = document.getElementById('tb-status'); if (s) s.textContent = msg; };
+      setStat('Building PDF…');
+      const canvas = await html2canvas(pageEl, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false
+      });
+      const imgArr = await (await fetch(canvas.toDataURL('image/jpeg', 0.92))).arrayBuffer();
+      const { PDFDocument } = PDFLib;
+      const doc = await PDFDocument.create();
+      const page = doc.addPage([612, 792]); // US Letter, points
+      const jpg = await doc.embedJpg(imgArr);
+      const scale = Math.min(612 / jpg.width, 792 / jpg.height);
+      const w = jpg.width * scale, h = jpg.height * scale;
+      page.drawImage(jpg, { x: (612 - w) / 2, y: (792 - h) / 2, width: w, height: h });
+      const bytes = await doc.save();
+      setStat('PDF ready');
+      const blob = new Blob([bytes], { type: 'application/pdf' });
+      return { blob, filename: pdfFilename(), bytes };
+    }
+
+    // Download a blob as a file (fallback path)
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 300);
+    }
+
+    // Master send routine. mode = 'sms' | 'email'. Uses Web Share API
+    // when available (mobile) so recipient + body + PDF attachment all
+    // land in the same share sheet — user just picks the app.
+    async function sendStatement(mode, contact) {
+      const btnStatus = document.getElementById('tb-status');
+      const { blob, filename } = await buildStatementPdf();
+      const file = new File([blob], filename, { type: 'application/pdf' });
+
+      const first = (contact.name || '').split(' ')[0] || 'there';
       const subject = 'Monthly Statement — ' + PROPERTY + ' — ' + monthNice;
-      const body    = `Hi ${tenantFirst || 'there'},\n\nAttached (or linked below) is your ${monthNice} monthly statement for ${PROPERTY}.\n\n${linkUrl}\n\n— The Stonehouse Company`;
-      btnEmailTenant.href = 'mailto:' + tenantEmail + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-      btnEmailTenant.hidden = false;
+      const body = (mode === 'sms')
+        ? `Hi ${first} — attached is your ${monthNice} statement for ${PROPERTY}. — Stonehouse`
+        : `Hi ${first},\n\nAttached is your ${monthNice} monthly statement for ${PROPERTY}.\n\n— The Stonehouse Company`;
+
+      // Preferred: native share with PDF file attached
+      const shareData = {
+        title: subject,
+        text: body,
+        files: [file]
+      };
+      if (navigator.canShare && navigator.canShare(shareData)) {
+        try {
+          await navigator.share(shareData);
+          if (btnStatus) btnStatus.textContent = 'Shared';
+          return;
+        } catch (err) {
+          // User cancelled — fall through to download+link so they can
+          // still get the PDF if they want.
+          if (err && err.name === 'AbortError') return;
+          console.warn('[share] fell back:', err);
+        }
+      }
+
+      // Fallback (desktop / older browsers): auto-download PDF + open
+      // sms:/mailto: composer. User attaches the just-downloaded PDF.
+      downloadBlob(blob, filename);
+      let url;
+      if (mode === 'sms') {
+        const digits = toDigits(contact.phone);
+        url = 'sms:' + digits + '?&body=' + encodeURIComponent(body + '\n\n(PDF just downloaded — attach it in Messages.)');
+      } else {
+        url = 'mailto:' + (contact.email || '') +
+          '?subject=' + encodeURIComponent(subject) +
+          '&body=' + encodeURIComponent(body + '\n\n(PDF just downloaded — attach it in your email compose window.)');
+      }
+      window.location.href = url;
+      if (btnStatus) btnStatus.textContent = 'PDF downloaded — attach in composer';
     }
-    // --- Landlord SMS ---
+
+    // Wire each button — buttons stay hidden until we know we have contact info.
+    const btnTextTenant   = document.getElementById('btn-text-tenant');
+    const btnEmailTenant  = document.getElementById('btn-email-tenant');
     const btnTextLandlord = document.getElementById('btn-text-landlord');
-    if (ownerPhone) {
-      const digits = toDigits(ownerPhone);
-      const body   = `Hi ${(ownerName || '').split(' ')[0] || 'there'} — here is the ${monthNice} statement for your property at ${PROPERTY}. Tap to view: ${linkUrl}`;
-      btnTextLandlord.href = 'sms:' + digits + '?&body=' + encodeURIComponent(body);
-      btnTextLandlord.hidden = false;
+    const btnEmailLandlord= document.getElementById('btn-email-landlord');
+    if (tenantPhone) {
+      btnTextTenant.hidden = false;
+      btnTextTenant.addEventListener('click', () =>
+        sendStatement('sms', { name: tenantFirst || '', phone: tenantPhone }));
     }
-    // --- Landlord Email ---
-    const btnEmailLandlord = document.getElementById('btn-email-landlord');
+    if (tenantEmail) {
+      btnEmailTenant.hidden = false;
+      btnEmailTenant.addEventListener('click', () =>
+        sendStatement('email', { name: tenantFirst || '', email: tenantEmail }));
+    }
+    if (ownerPhone) {
+      btnTextLandlord.hidden = false;
+      btnTextLandlord.addEventListener('click', () =>
+        sendStatement('sms', { name: ownerName || '', phone: ownerPhone }));
+    }
     if (ownerEmail) {
-      const subject = 'Monthly Statement — ' + PROPERTY + ' — ' + monthNice;
-      const body    = `Hi ${(ownerName || '').split(' ')[0] || 'there'},\n\nAttached (or linked below) is your ${monthNice} monthly statement for the property at ${PROPERTY}.\n\n${linkUrl}\n\n— The Stonehouse Company`;
-      btnEmailLandlord.href = 'mailto:' + ownerEmail + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
       btnEmailLandlord.hidden = false;
+      btnEmailLandlord.addEventListener('click', () =>
+        sendStatement('email', { name: ownerName || '', email: ownerEmail }));
     }
 
     // Load ledger + filter by property + month
