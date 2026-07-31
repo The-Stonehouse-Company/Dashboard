@@ -10362,6 +10362,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           p.designer  ? '<strong>Designer</strong><span class="v">'  + esc(p.designer)  + '</span>' : '',
           p.builder   ? '<strong>Builder</strong><span class="v">'   + esc(p.builder)   + '</span>' : '',
         ].filter(Boolean).join('<span class="sep" style="margin:0 10px;color:var(--text-dim);">·</span>');
+        const editKey = (p.address || p.client || '').trim();
+        const editBtn = '<button type="button" class="customrep-edit-btn" data-key="' + esc(editKey) + '" ' +
+          'style="font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px solid var(--panel-edge); background:rgba(20,20,20,.85); color:#fff; cursor:pointer; margin-bottom:8px;">Edit</button>';
 
         return (
           '<article class="deal-card">' +
@@ -10371,10 +10374,13 @@ It has become a major relocation center for large companies like Amazon, Oracle,
                 '<div class="deal-meta">' + esc(p.address || '') + '</div>' +
                 (p.stage ? '<div class="deal-stage-chip">Stage · ' + esc(stageLabel) + '</div>' : '') +
               '</div>' +
-              (p.hardCost
-                ? '<div class="deal-price">' + esc(fmtUSD(p.hardCost)) + '<div style="font-size:9px;color:var(--text-dim);letter-spacing:var(--tracking-wide);text-transform:uppercase;margin-top:4px;text-align:right;">Hard Cost Est.</div></div>'
-                : ''
-              ) +
+              '<div style="display:flex; flex-direction:column; align-items:flex-end;">' +
+                editBtn +
+                (p.hardCost
+                  ? '<div class="deal-price">' + esc(fmtUSD(p.hardCost)) + '<div style="font-size:9px;color:var(--text-dim);letter-spacing:var(--tracking-wide);text-transform:uppercase;margin-top:4px;text-align:right;">Hard Cost Est.</div></div>'
+                  : ''
+                ) +
+              '</div>' +
             '</header>' +
 
             (teamRow
@@ -10432,6 +10438,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           const rawRows = table.rows || [];
 
           const ix = {
+            timestamp:        findCol(cols, 'Timestamp'),
             client:           findCol(cols, 'Client Name', 'Client', 'Owner Name'),
             address:          findCol(cols, 'Property Address', 'Address'),
             architect:        findCol(cols, 'Architect'),
@@ -10450,9 +10457,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           }
 
           const today = startOfDay(new Date());
-          const allProjects = rawRows.map((r) => {
+          const rawAll = rawRows.map((r) => {
             const c = r.c || [];
             return {
+              timestamp:        ix.timestamp       >= 0 ? parseGvizDate(c[ix.timestamp])         : null,
               client:           ix.client          >= 0 ? parseGvizString(c[ix.client])          : '',
               address:          ix.address         >= 0 ? parseGvizString(c[ix.address])         : '',
               architect:        ix.architect       >= 0 ? parseGvizString(c[ix.architect])       : '',
@@ -10466,8 +10474,24 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               notes:            ix.notes           >= 0 ? parseGvizString(c[ix.notes])           : '',
             };
           })
-          // Need at least an identifying field to render a card.
           .filter((p) => p.client || p.address);
+
+          // Dedupe by address (Edit resubmits with same address; latest wins)
+          const byKey = new Map();
+          rawAll.forEach(p => {
+            const key = (p.address || p.client || '').trim().toLowerCase();
+            if (!key) return;
+            const existing = byKey.get(key);
+            if (!existing) { byKey.set(key, p); return; }
+            const pt = p.timestamp?.getTime?.() || 0;
+            const et = existing.timestamp?.getTime?.() || 0;
+            if (pt >= et) byKey.set(key, p);
+          });
+          const allProjects = Array.from(byKey.values());
+
+          // Global registry — edit handler looks up by lowercased address
+          window._customrepByAddress = new Map();
+          allProjects.forEach(p => window._customrepByAddress.set((p.address || p.client || '').trim().toLowerCase(), p));
 
           // Split into active vs completed:
           //   Completed = stage explicitly marked C.O. OR projected CO
@@ -20263,6 +20287,56 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         if (!d) { alert('Land deal data not loaded yet. Try again in a moment.'); return; }
         _fillIntakeModal(d);
         _openIntakeModal();
+      });
+
+      // -------- Custom Home Rep Pipeline Edit --------
+      // Edit button on active project cards → opens Log New Project modal
+      // pre-filled with the sheet row's values. Save resubmits with same
+      // address; the loader dedupes by address so the card updates in place.
+      function _openCustomrepModal() {
+        const overlay = document.getElementById('customrep-intake-modal-overlay');
+        if (!overlay) return;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+      }
+      function _fillCustomrepModal(p) {
+        _setVal('crf-client',            p.client);
+        _setVal('crf-address',           p.address);
+        _setVal('crf-architect',         p.architect);
+        _setVal('crf-designer',          p.designer);
+        _setVal('crf-builder',           p.builder);
+        _setDate('crf-engagement-start', p.engagementStart);
+        _setDate('crf-projected-start',  p.projectedStart);
+        _setDate('crf-projected-co',     p.projectedCO);
+        _setVal('crf-stage',             p.stage);
+        _setVal('crf-hard-cost',         p.hardCost || '');
+        _setVal('crf-notes',             p.notes);
+        const title = document.getElementById('customrep-intake-title');
+        if (title) title.textContent = 'Edit Project';
+        const sub = document.getElementById('submit-customrep-intake');
+        if (sub) sub.textContent = 'Save Changes';
+      }
+      // Reset modal when opened via "+ Log a New Project" for fresh add
+      const openCustomrepBtn = document.getElementById('open-customrep-intake-modal');
+      if (openCustomrepBtn) openCustomrepBtn.addEventListener('click', () => {
+        const form = document.getElementById('customrep-intake-form');
+        if (form) form.reset();
+        const title = document.getElementById('customrep-intake-title');
+        if (title) title.textContent = 'Log a New Project';
+        const sub = document.getElementById('submit-customrep-intake');
+        if (sub) sub.textContent = 'Log Project';
+      });
+      // Delegated click for Custom Rep edit buttons
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest && e.target.closest('.customrep-edit-btn');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const key = (btn.getAttribute('data-key') || '').trim().toLowerCase();
+        const p = (window._customrepByAddress || new Map()).get(key);
+        if (!p) { alert('Project data not loaded yet. Try again in a moment.'); return; }
+        _fillCustomrepModal(p);
+        _openCustomrepModal();
       });
     })();
 
