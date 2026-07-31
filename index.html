@@ -3294,7 +3294,7 @@
     .hub-card:hover { opacity: .85; }
     .hub-card:hover .hub-avatar { transform: scale(1.03); border-color: #fff; }
     .hub-avatar {
-      width: 140px; height: 140px; border-radius: 50%;
+      width: 160px; height: 160px; border-radius: 50%;
       background: #1a1a1a;
       border: 1px solid #333;
       overflow: hidden; position: relative;
@@ -3304,6 +3304,19 @@
     .hub-avatar img {
       width: 100%; height: 100%; object-fit: cover;
       position: absolute; inset: 0; z-index: 2;
+    }
+    /* When the logo is a transparent PNG (like Apeiron), let it breathe:
+       kill the disc background + border and switch object-fit so the logo
+       shows at its natural aspect ratio instead of being cropped square. */
+    .hub-avatar[data-slug="apeiron"] {
+      background: transparent; border: 0;
+    }
+    .hub-avatar[data-slug="apeiron"] img {
+      object-fit: contain;
+      padding: 8px;
+    }
+    .hub-card:hover .hub-avatar[data-slug="apeiron"] {
+      border: 0; transform: scale(1.05);
     }
     .hub-initial {
       font-family: 'Aboreto', serif; font-size: 48px;
