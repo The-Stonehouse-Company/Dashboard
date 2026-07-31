@@ -104,11 +104,73 @@
     }
     .sidenav .nav-item:hover { color: #fff; background: #141414; }
     .sidenav .nav-item.is-active { color: #fff; background: #141414; border-left: 2px solid var(--accent); padding-left: 10px; }
+    /* Parent items (like "In Build") — labeled group header, non-clickable */
+    .sidenav .nav-item-parent {
+      color: var(--text-dim); cursor: default; padding-top: 4px;
+      font-weight: 600; font-size: 11px;
+    }
+    /* Sub-nav items — indented client tabs beneath In Build */
+    .sidenav .nav-sub {
+      padding-left: 26px; font-size: 11px;
+      color: var(--text-muted);
+    }
+    .sidenav .nav-sub::before {
+      content: '· '; color: var(--text-dim); margin-right: 4px;
+    }
+    .sidenav .nav-sub.is-active {
+      padding-left: 24px; color: #fff; background: #141414;
+      border-left: 2px solid var(--accent);
+    }
     .sidenav .nav-group-title {
       font-family: var(--font-display);
       font-size: 10px; letter-spacing: .28em; text-transform: uppercase;
       color: #fff; margin: 22px 0 8px 12px;
     }
+
+    /* ==================== Client project page ==================== */
+    .project-hero {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 24px; padding-bottom: 22px;
+      border-bottom: 1px solid var(--rule); margin-bottom: 24px;
+    }
+    .project-hero .eyebrow {
+      font-size: 9px; letter-spacing: .28em; text-transform: uppercase;
+      color: var(--text-dim); font-weight: 600; margin-bottom: 8px;
+    }
+    .project-hero h2.project-name {
+      font-family: var(--font-display);
+      font-size: 34px; letter-spacing: .1em; text-transform: uppercase;
+      margin: 0 0 4px; font-weight: 400; line-height: 1.1;
+    }
+    .project-hero .project-address {
+      font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 500;
+    }
+    .project-hero .stage-badge {
+      display: inline-block; padding: 5px 12px;
+      font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+      background: var(--accent); color: #000; font-weight: 700;
+    }
+
+    /* Sub-tabs within a client page */
+    .subtabs {
+      display: flex; gap: 4px; flex-wrap: wrap;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 24px;
+    }
+    .subtab {
+      background: transparent; border: 0; color: var(--text-muted);
+      font-family: var(--font-body); font-size: 10px;
+      letter-spacing: .18em; text-transform: uppercase;
+      padding: 10px 14px; cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .subtab:hover { color: #fff; }
+    .subtab.is-active {
+      color: #fff; border-bottom-color: var(--accent);
+    }
+    .subpanel { display: none; }
+    .subpanel.is-active { display: block; }
 
     /* ==================== Content ==================== */
     .content {
@@ -183,7 +245,8 @@
 
       <div class="nav-group-title">Pipeline</div>
       <button type="button" class="nav-item" data-panel="prospects">In Conversation</button>
-      <button type="button" class="nav-item" data-panel="projects">In Build</button>
+      <div class="nav-item nav-item-parent" data-panel="projects">In Build</div>
+      <button type="button" class="nav-item nav-sub" data-panel="client-campbell">Campbell Residence</button>
 
       <div class="nav-group-title">Tools</div>
       <button type="button" class="nav-item" data-panel="tools">Cost Estimator + Docs</button>
@@ -218,13 +281,96 @@
         </div>
       </section>
 
-      <!-- Projects -->
+      <!-- Projects (index — kept for direct-link fallback; usually users
+           navigate straight to a specific client via the sub-nav) -->
       <section class="panel" id="panel-projects" role="tabpanel">
-        <p class="panel-intro">Active projects in build — each with a 7-stage stepper from Pre-Con to Certificate of Occupancy plus an overall build-progress bar.</p>
+        <p class="panel-intro">Active projects in build — pick a client from the sub-nav on the left.</p>
         <div class="placeholder">
-          <div class="mark">— Placeholder —</div>
-          <h2>Active projects coming soon</h2>
-          <p>Reads the same Custom Rep intake sheet as admin. Ryan will spec any Apeiron-specific fields.</p>
+          <div class="mark">— Select a client —</div>
+          <h2>Choose a project</h2>
+          <p>Currently building: Campbell Residence. More clients will appear here as they graduate from In Conversation.</p>
+        </div>
+      </section>
+
+      <!-- ==================== CAMPBELL RESIDENCE ==================== -->
+      <section class="panel" id="panel-client-campbell" role="tabpanel">
+        <div class="project-hero">
+          <div>
+            <div class="eyebrow">In Build · Campbell Residence</div>
+            <h2 class="project-name">Rick &amp; Kati Campbell</h2>
+            <div class="project-address">— Address to be set —</div>
+          </div>
+          <div>
+            <span class="stage-badge">Pre-Con</span>
+          </div>
+        </div>
+
+        <div class="subtabs" role="tablist" aria-label="Campbell Residence sections">
+          <button type="button" class="subtab is-active" data-sub="overview">Overview</button>
+          <button type="button" class="subtab" data-sub="timeline">Timeline</button>
+          <button type="button" class="subtab" data-sub="budget">Budget</button>
+          <button type="button" class="subtab" data-sub="team">Team</button>
+          <button type="button" class="subtab" data-sub="meetings">Meetings &amp; Selections</button>
+          <button type="button" class="subtab" data-sub="documents">Documents</button>
+          <button type="button" class="subtab" data-sub="photos">Photos</button>
+          <button type="button" class="subtab" data-sub="notes">Notes</button>
+        </div>
+
+        <div class="subpanel is-active" data-sub="overview">
+          <div class="placeholder">
+            <div class="mark">— Awaiting spec —</div>
+            <h2>Overview coming</h2>
+            <p>Snapshot: current stage, next milestone, key contacts, budget vs actual, upcoming meetings. Tell me what you want front-and-center.</p>
+          </div>
+        </div>
+        <div class="subpanel" data-sub="timeline">
+          <div class="placeholder">
+            <div class="mark">— Awaiting spec —</div>
+            <h2>Timeline coming</h2>
+            <p>Pre-Con → Demo → Framing → Mechanicals → Drywall → Finishes → CO, with target dates and current position.</p>
+          </div>
+        </div>
+        <div class="subpanel" data-sub="budget">
+          <div class="placeholder">
+            <div class="mark">— Awaiting spec —</div>
+            <h2>Budget coming</h2>
+            <p>Hard costs, soft costs, change orders, spent vs remaining. Could pull from the Cost Estimator or run its own tracker.</p>
+          </div>
+        </div>
+        <div class="subpanel" data-sub="team">
+          <div class="placeholder">
+            <div class="mark">— Awaiting spec —</div>
+            <h2>Team coming</h2>
+            <p>Architect · Interior Designer · Builder · Subs (plumbing, electrical, HVAC, etc.) with contact info.</p>
+          </div>
+        </div>
+        <div class="subpanel" data-sub="meetings">
+          <div class="placeholder">
+            <div class="mark">— Awaiting spec —</div>
+            <h2>Meetings &amp; Selections coming</h2>
+            <p>Weekly check-ins, selection meetings, budget reviews. Upcoming + past logs.</p>
+          </div>
+        </div>
+        <div class="subpanel" data-sub="documents">
+          <div class="placeholder">
+            <div class="mark">— Awaiting spec —</div>
+            <h2>Documents coming</h2>
+            <p>Signed engagement letter, plans, design boards, subcontractor bids, permits.</p>
+          </div>
+        </div>
+        <div class="subpanel" data-sub="photos">
+          <div class="placeholder">
+            <div class="mark">— Awaiting spec —</div>
+            <h2>Photos coming</h2>
+            <p>Progress photos over time — site visits, framing shots, finish selections, punch list.</p>
+          </div>
+        </div>
+        <div class="subpanel" data-sub="notes">
+          <div class="placeholder">
+            <div class="mark">— Awaiting spec —</div>
+            <h2>Notes coming</h2>
+            <p>Running log — conversations, decisions, flags. Chronological.</p>
+          </div>
         </div>
       </section>
 
@@ -286,6 +432,18 @@
         if (btn) btn.click();
       }
     })();
+
+    // Sub-tabs within a client project page (delegated so any client panel
+    // added later gets the same behavior for free).
+    document.addEventListener('click', (e) => {
+      const tab = e.target.closest && e.target.closest('.subtab');
+      if (!tab) return;
+      const panel = tab.closest('.panel');
+      if (!panel) return;
+      const key = tab.getAttribute('data-sub');
+      panel.querySelectorAll('.subtab').forEach(t => t.classList.toggle('is-active', t === tab));
+      panel.querySelectorAll('.subpanel').forEach(p => p.classList.toggle('is-active', p.getAttribute('data-sub') === key));
+    });
   </script>
 </body>
 </html>
