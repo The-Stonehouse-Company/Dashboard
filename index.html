@@ -4812,6 +4812,7 @@
             <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-contacts-builders"           aria-selected="false" data-subkey="contacts-builders">Builders</button>
             <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-contacts-architects"         aria-selected="false" data-subkey="contacts-architects">Architects</button>
             <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-contacts-interior-designers" aria-selected="false" data-subkey="contacts-interior-designers">Interior Designers</button>
+            <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-contacts-landscape-architects" aria-selected="false" data-subkey="contacts-landscape-architects">Landscape Architects</button>
             <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-contacts-surveyors"          aria-selected="false" data-subkey="contacts-surveyors">Surveyors</button>
             <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-contacts-engineers"          aria-selected="false" data-subkey="contacts-engineers">Engineers</button>
             <button class="subtab subnav-item" role="tab" aria-controls="subpanel-development-contacts-city-officials"     aria-selected="false" data-subkey="contacts-city-officials">City Officials</button>
@@ -4924,6 +4925,7 @@
       <div class="subpanel contacts-subpanel" id="subpanel-development-contacts-builders" role="tabpanel" aria-hidden="true" tabindex="0" data-contact-cat="Builders"></div>
       <div class="subpanel contacts-subpanel" id="subpanel-development-contacts-architects" role="tabpanel" aria-hidden="true" tabindex="0" data-contact-cat="Architects"></div>
       <div class="subpanel contacts-subpanel" id="subpanel-development-contacts-interior-designers" role="tabpanel" aria-hidden="true" tabindex="0" data-contact-cat="Interior Designers"></div>
+      <div class="subpanel contacts-subpanel" id="subpanel-development-contacts-landscape-architects" role="tabpanel" aria-hidden="true" tabindex="0" data-contact-cat="Landscape Architects"></div>
       <div class="subpanel contacts-subpanel" id="subpanel-development-contacts-surveyors" role="tabpanel" aria-hidden="true" tabindex="0" data-contact-cat="Surveyors"></div>
       <div class="subpanel contacts-subpanel" id="subpanel-development-contacts-engineers" role="tabpanel" aria-hidden="true" tabindex="0" data-contact-cat="Engineers"></div>
       <div class="subpanel contacts-subpanel" id="subpanel-development-contacts-city-officials" role="tabpanel" aria-hidden="true" tabindex="0" data-contact-cat="City Officials"></div>
@@ -6985,6 +6987,7 @@
                 <option value="Builders">Builders</option>
                 <option value="Architects">Architects</option>
                 <option value="Interior Designers">Interior Designers</option>
+                <option value="Landscape Architects">Landscape Architects</option>
                 <option value="Surveyors">Surveyors</option>
                 <option value="Engineers">Engineers</option>
                 <option value="City Officials">City Officials</option>
@@ -8786,18 +8789,28 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
         <fieldset>
           <legend>Team</legend>
+          <p class="form-hint" style="margin:-4px 0 10px; font-size:11px; color:var(--text-dim);">
+            Dropdowns pull from <b>Development → Contacts</b> filtered by category.
+            Need someone new? Add them under the right contact category first, then reopen this modal.
+          </p>
           <div class="form-grid">
             <div>
               <label for="crf-architect">Architect</label>
-              <input id="crf-architect" name="architect" type="text" placeholder="Studio name" />
+              <select id="crf-architect" name="architect" data-contact-cat="Architects">
+                <option value="">— Select architect —</option>
+              </select>
             </div>
             <div>
-              <label for="crf-designer">Designer</label>
-              <input id="crf-designer" name="designer" type="text" placeholder="Designer / firm" />
+              <label for="crf-designer">Interior Designer</label>
+              <select id="crf-designer" name="designer" data-contact-cat="Interior Designers">
+                <option value="">— Select designer —</option>
+              </select>
             </div>
             <div class="full">
               <label for="crf-builder">Builder</label>
-              <input id="crf-builder" name="builder" type="text" placeholder="General contractor" />
+              <select id="crf-builder" name="builder" data-contact-cat="Builders">
+                <option value="">— Select builder —</option>
+              </select>
             </div>
           </div>
         </fieldset>
@@ -19942,32 +19955,35 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
     const CONTACT_CATEGORIES = [
       'Investors', 'Builders', 'Architects', 'Interior Designers',
+      'Landscape Architects',
       'Surveyors', 'Engineers', 'City Officials', 'Developers'
     ];
 
     // Singular labels for the "+ Add" button / modal heading
     const CONTACT_CATEGORY_SINGULAR = {
-      'Investors':           'Investor',
-      'Builders':             'Builder',
-      'Architects':           'Architect',
-      'Interior Designers':   'Interior Designer',
-      'Surveyors':            'Surveyor',
-      'Engineers':            'Engineer',
-      'City Officials':       'City Official',
-      'Developers':           'Developer'
+      'Investors':             'Investor',
+      'Builders':              'Builder',
+      'Architects':            'Architect',
+      'Interior Designers':    'Interior Designer',
+      'Landscape Architects':  'Landscape Architect',
+      'Surveyors':             'Surveyor',
+      'Engineers':             'Engineer',
+      'City Officials':        'City Official',
+      'Developers':            'Developer'
     };
 
     let _contactRows = [];
     let _contactsLoaded = false;
     const _CONTACT_INTRO = {
-      'Investors':            'Capital partners backing Stonehouse Company developments. Equity, debt, JV, family office.',
-      'Builders':             'General contractors and builders we partner with on developments and custom-home projects.',
-      'Architects':           'Architects we work with on residential developments — modern, traditional, infill, ground-up.',
-      'Interior Designers':   'Interior designers and stagers for finish-out, model homes, and listing prep.',
-      'Surveyors':            'Land surveyors for boundary, topo, ALTA, and lot-split work.',
-      'Engineers':            'Civil, structural, MEP, and geotech engineers for design and permitting.',
-      'City Officials':       'City and county contacts — codes, planning, zoning, MWS, inspections.',
-      'Developers':           'Other developers — JV opportunities, lot trades, market intel, peer network.'
+      'Investors':             'Capital partners backing Stonehouse Company developments. Equity, debt, JV, family office.',
+      'Builders':              'General contractors and builders we partner with on developments and custom-home projects.',
+      'Architects':            'Architects we work with on residential developments — modern, traditional, infill, ground-up.',
+      'Interior Designers':    'Interior designers and stagers for finish-out, model homes, and listing prep.',
+      'Landscape Architects':  'Landscape architects for site design, hardscape, planting plans, and outdoor rooms.',
+      'Surveyors':             'Land surveyors for boundary, topo, ALTA, and lot-split work.',
+      'Engineers':             'Civil, structural, MEP, and geotech engineers for design and permitting.',
+      'City Officials':        'City and county contacts — codes, planning, zoning, MWS, inspections.',
+      'Developers':            'Other developers — JV opportunities, lot trades, market intel, peer network.'
     };
 
     function _ctEsc(s) {
@@ -20086,9 +20102,55 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       return fetch(_adGvizUrl(CONTACTS_CONFIG), { cache: 'no-store' })
         .then(r => r.text())
         .then(t => _adParseEnvelope(t))
-        .then(table => { _contactRows = _parseContactSheet(table); _contactsLoaded = true; _ctRenderAll(); })
+        .then(table => {
+          _contactRows = _parseContactSheet(table);
+          _contactsLoaded = true;
+          _ctRenderAll();
+          // Newly loaded contacts populate any select[data-contact-cat] on
+          // the page (Custom Rep intake modal, etc.)
+          if (typeof _populateContactSelects === 'function') _populateContactSelects();
+        })
         .catch(err => { console.warn('[CONTACTS] sheet failed:', err); _contactRows = []; _contactsLoaded = true; _ctRenderAll(); });
     }
+
+    // Populate any <select data-contact-cat="..."> on the page with
+    // contacts filtered by that category. Used by the Custom Rep intake
+    // modal (Architect, Interior Designer, Builder), and generic — any
+    // future modal can just add a select with data-contact-cat and the
+    // same helper wires it up.
+    function _populateContactSelects() {
+      const selects = document.querySelectorAll('select[data-contact-cat]');
+      if (selects.length === 0) return;
+      selects.forEach(sel => {
+        const cat = sel.getAttribute('data-contact-cat');
+        const prev = sel.value;
+        const matches = (_contactRows || [])
+          .filter(c => (c.category || '').trim() === cat)
+          .filter(c => c.name)
+          .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        const placeholder = sel.querySelector('option[value=""]');
+        const placeholderHtml = placeholder ? placeholder.outerHTML :
+          '<option value="">— Select —</option>';
+        const options = matches.map(c => {
+          const label = c.name + (c.company ? ' — ' + c.company : '');
+          return '<option value="' + _ctEsc(c.name) + '">' + _ctEsc(label) + '</option>';
+        }).join('');
+        sel.innerHTML = placeholderHtml + options;
+        // Restore previous selection if it still exists
+        if (prev && Array.from(sel.options).some(o => o.value === prev)) {
+          sel.value = prev;
+        }
+      });
+    }
+    // Trigger population when the custom rep intake modal opens (contacts
+    // may have loaded after DOMContentLoaded).
+    document.addEventListener('DOMContentLoaded', () => {
+      const openBtn = document.getElementById('open-customrep-intake-modal');
+      if (openBtn) openBtn.addEventListener('click', () => {
+        if (_contactsLoaded) _populateContactSelects();
+        else if (typeof _ctLoad === 'function') _ctLoad().then(() => _populateContactSelects());
+      });
+    });
 
     function _ctSearchFor(category) {
       const el = document.querySelector('.contact-search[data-cat="' + (window.CSS && CSS.escape ? CSS.escape(category) : category) + '"]');
