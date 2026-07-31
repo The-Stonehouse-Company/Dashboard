@@ -290,6 +290,57 @@
     .tl-legend .dot.progress { background: #e8c068; border-color: #e8c068; }
     .tl-legend .dot.done { background: #9ec39e; border-color: #9ec39e; }
 
+    /* ==================== Document cards ==================== */
+    .doc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .doc-card {
+      background: var(--panel);
+      border: 1px solid var(--rule);
+      padding: 16px 18px;
+      display: flex; flex-direction: column; gap: 10px;
+      min-height: 120px;
+      transition: border-color .15s;
+    }
+    .doc-card:hover { border-color: var(--rule-strong); }
+    .doc-card.has-file { border-color: #4a7548; }
+    .doc-card .doc-label {
+      font-family: var(--font-body); font-size: 11px;
+      letter-spacing: .16em; text-transform: uppercase;
+      color: #fff; font-weight: 700;
+    }
+    .doc-card .doc-current {
+      font-size: 11px; color: var(--text-muted); line-height: 1.4;
+      flex: 1;
+    }
+    .doc-card .doc-current .filename {
+      color: #fff; word-break: break-all;
+    }
+    .doc-card .doc-current .meta {
+      font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--text-dim); margin-top: 4px;
+    }
+    .doc-card .doc-current.empty {
+      color: var(--text-dim); font-style: italic;
+    }
+    .doc-card .doc-actions {
+      display: flex; gap: 8px; margin-top: auto;
+    }
+    .doc-card .doc-btn {
+      font-family: var(--font-body); font-size: 10px;
+      letter-spacing: .16em; text-transform: uppercase; font-weight: 600;
+      padding: 7px 12px; cursor: pointer;
+      border: 1px solid var(--panel-edge); background: transparent; color: #fff;
+      text-decoration: none; display: inline-block;
+    }
+    .doc-card .doc-btn:hover { border-color: #fff; background: #141414; }
+    .doc-card .doc-btn.primary { background: #fff; color: #000; border-color: #fff; }
+    .doc-card .doc-btn.primary:hover { opacity: .85; background: #fff; }
+    .doc-card .doc-btn.busy { opacity: .5; cursor: default; pointer-events: none; }
+    .doc-card input[type="file"] { display: none; }
+
     /* ==================== Team cards ==================== */
     .team-grid {
       display: grid;
@@ -507,6 +558,7 @@
           <button type="button" class="subtab" data-sub="meetings">Meetings &amp; Selections</button>
           <button type="button" class="subtab" data-sub="documents">Documents</button>
           <button type="button" class="subtab" data-sub="photos">Photos</button>
+          <button type="button" class="subtab" data-sub="communications">Communications</button>
           <button type="button" class="subtab" data-sub="notes">Notes</button>
         </div>
 
@@ -556,17 +608,39 @@
           </div>
         </div>
         <div class="subpanel" data-sub="documents">
-          <div class="placeholder">
-            <div class="mark">— Awaiting spec —</div>
-            <h2>Documents coming</h2>
-            <p>Signed engagement letter, plans, design boards, subcontractor bids, permits.</p>
+          <p class="panel-intro" style="margin-bottom:18px;">Every contract, plan, and design board for this project — one slot per document. Click <b>Upload</b> to add a file; upload again to replace with a newer version. Files are stored in the repo so they're always accessible.</p>
+
+          <h3 style="font-family:var(--font-display); font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--text-dim); margin:0 0 12px;">Contracts</h3>
+          <div class="doc-grid" data-project="campbell">
+            <div class="doc-card" data-slot="owners-rep-contract"        data-label="Owner's Rep Contract"></div>
+            <div class="doc-card" data-slot="architect-contract"         data-label="Architect Contract"></div>
+            <div class="doc-card" data-slot="designer-contract"          data-label="Designer Contract"></div>
+            <div class="doc-card" data-slot="builder-contract"           data-label="Builder Contract"></div>
+            <div class="doc-card" data-slot="landscape-architect-contract" data-label="Landscape Architect Contract"></div>
           </div>
+
+          <h3 style="font-family:var(--font-display); font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--text-dim); margin:24px 0 12px;">Plans &amp; Design</h3>
+          <div class="doc-grid" data-project="campbell">
+            <div class="doc-card" data-slot="current-architectural-plans" data-label="Current Architectural Plans"></div>
+            <div class="doc-card" data-slot="current-landscape-plans"     data-label="Current Landscape Architectural Plans"></div>
+            <div class="doc-card" data-slot="current-design-board"        data-label="Current Design Board"></div>
+            <div class="doc-card" data-slot="survey"                      data-label="Survey"></div>
+          </div>
+
+          <div id="doc-status-campbell" style="margin-top:14px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-dim);"></div>
         </div>
         <div class="subpanel" data-sub="photos">
           <div class="placeholder">
             <div class="mark">— Awaiting spec —</div>
             <h2>Photos coming</h2>
             <p>Progress photos over time — site visits, framing shots, finish selections, punch list.</p>
+          </div>
+        </div>
+        <div class="subpanel" data-sub="communications">
+          <div class="placeholder">
+            <div class="mark">— Awaiting setup —</div>
+            <h2>Communications coming</h2>
+            <p>Emails between everyone on the project, threaded chronologically. Waiting on you to pick which integration path — see options in chat.</p>
           </div>
         </div>
         <div class="subpanel" data-sub="notes">
@@ -998,6 +1072,156 @@
         return {};
       }
     }
+
+    /* =========================================================
+       PROJECT DOCUMENTS — per-project upload/replace of contracts,
+       plans, and design boards. Files persist to the GitHub repo
+       at assets/apeiron/{project}/documents/{slot}.{ext}. Metadata
+       (filename + uploaded_at + who) is kept in localStorage so
+       cards show which slots are filled without a HEAD probe.
+       ========================================================= */
+    const GH_REPO_OWNER = 'The-Stonehouse-Company';
+    const GH_REPO_NAME  = 'Dashboard';
+    const GH_BRANCH     = 'main';
+    const GH_TOKEN_KEY  = 'stonehouse.ghToken';
+
+    function _ghGetToken() {
+      try { return localStorage.getItem(GH_TOKEN_KEY) || null; } catch (_) { return null; }
+    }
+    function _ghSaveToken(t) {
+      try { localStorage.setItem(GH_TOKEN_KEY, t); } catch (_) {}
+    }
+    function _ghPromptForToken() {
+      const existing = _ghGetToken() || '';
+      const t = prompt(
+        'Paste your GitHub personal access token to enable document uploads.\n\n' +
+        'Get one at github.com/settings/tokens → Fine-grained → Contents: read/write on this repo.\n' +
+        'The token is saved to this browser only.',
+        existing
+      );
+      if (t && t.trim()) { _ghSaveToken(t.trim()); return t.trim(); }
+      return null;
+    }
+
+    async function _ghUploadDoc(path, file) {
+      let token = _ghGetToken();
+      if (!token) token = _ghPromptForToken();
+      if (!token) throw new Error('No GitHub token — upload cancelled.');
+
+      // Read file as base64 (strip the data: prefix)
+      const b64 = await new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload  = () => resolve(String(r.result).split(',')[1]);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+      const headers = {
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Authorization': 'Bearer ' + token
+      };
+      // Check if file exists → need SHA to overwrite
+      let sha = null;
+      try {
+        const ck = await fetch(
+          'https://api.github.com/repos/' + GH_REPO_OWNER + '/' + GH_REPO_NAME +
+          '/contents/' + encodeURI(path) + '?ref=' + GH_BRANCH + '&_=' + Date.now(),
+          { headers, cache: 'no-store' }
+        );
+        if (ck.ok) sha = (await ck.json()).sha;
+      } catch (_) {}
+      const body = { message: 'Upload document: ' + path, content: b64, branch: GH_BRANCH };
+      if (sha) body.sha = sha;
+      const res = await fetch(
+        'https://api.github.com/repos/' + GH_REPO_OWNER + '/' + GH_REPO_NAME + '/contents/' + encodeURI(path),
+        { method: 'PUT',
+          headers: Object.assign({}, headers, { 'Content-Type': 'application/json' }),
+          body: JSON.stringify(body) }
+      );
+      if (!res.ok) throw new Error('GitHub upload failed: ' + res.status + ' — ' + (await res.text()).slice(0, 200));
+      return path;
+    }
+
+    // Local metadata store — one entry per project/slot
+    function _docStateKey(projectId) { return 'apeiron.docs:' + projectId; }
+    function _docLoadState(projectId) {
+      try { return JSON.parse(localStorage.getItem(_docStateKey(projectId)) || '{}') || {}; }
+      catch (_) { return {}; }
+    }
+    function _docSaveState(projectId, state) {
+      try { localStorage.setItem(_docStateKey(projectId), JSON.stringify(state)); } catch (_) {}
+    }
+    function _extFromFile(file) {
+      const m = /\.([a-z0-9]+)$/i.exec(file.name || '');
+      return m ? m[1].toLowerCase() : 'bin';
+    }
+    function _fmtDate(d) {
+      if (!(d instanceof Date) || isNaN(d)) return '';
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function _renderDocCard(card, projectId, state) {
+      const slot  = card.getAttribute('data-slot');
+      const label = card.getAttribute('data-label');
+      const entry = state[slot];
+      const has   = !!(entry && entry.path);
+      const rawUrl = has
+        ? 'https://raw.githubusercontent.com/' + GH_REPO_OWNER + '/' + GH_REPO_NAME + '/' + GH_BRANCH + '/' + encodeURI(entry.path) + '?_=' + Date.now()
+        : '';
+      const currentHtml = has
+        ? `<div class="filename">${entry.originalName || entry.path.split('/').pop()}</div>
+           <div class="meta">Uploaded ${_fmtDate(new Date(entry.uploadedAt))}${entry.uploadedBy ? ' · ' + entry.uploadedBy : ''}</div>`
+        : `<span class="empty">No file yet</span>`;
+      const actionsHtml = has
+        ? `<a class="doc-btn primary" href="${rawUrl}" target="_blank" rel="noopener">Download</a>
+           <label class="doc-btn">Replace<input type="file" data-role="upload" /></label>`
+        : `<label class="doc-btn primary">Upload<input type="file" data-role="upload" /></label>`;
+      card.classList.toggle('has-file', has);
+      card.innerHTML = `
+        <div class="doc-label">${label}</div>
+        <div class="doc-current ${has ? '' : 'empty'}">${currentHtml}</div>
+        <div class="doc-actions">${actionsHtml}</div>
+      `;
+      // Wire the file input
+      const input = card.querySelector('input[data-role="upload"]');
+      if (input) input.addEventListener('change', async () => {
+        const file = input.files && input.files[0];
+        if (!file) return;
+        const ext = _extFromFile(file);
+        const path = 'assets/apeiron/' + projectId + '/documents/' + slot + '.' + ext;
+        const btns = card.querySelectorAll('.doc-btn');
+        btns.forEach(b => b.classList.add('busy'));
+        const statusEl = document.getElementById('doc-status-' + projectId);
+        if (statusEl) { statusEl.textContent = 'Uploading ' + file.name + '…'; statusEl.style.color = ''; }
+        try {
+          await _ghUploadDoc(path, file);
+          // Update state
+          const st = _docLoadState(projectId);
+          st[slot] = {
+            path: path,
+            originalName: file.name,
+            uploadedAt: new Date().toISOString(),
+            uploadedBy: 'Apeiron Team'
+          };
+          _docSaveState(projectId, st);
+          _renderDocCard(card, projectId, st);
+          if (statusEl) { statusEl.textContent = '✓ Uploaded ' + file.name; statusEl.style.color = '#9ec39e'; }
+        } catch (err) {
+          console.error(err);
+          if (statusEl) { statusEl.textContent = 'Upload failed: ' + (err.message || err); statusEl.style.color = '#d99'; }
+          btns.forEach(b => b.classList.remove('busy'));
+        }
+      });
+    }
+
+    (function _renderDocGrids() {
+      const grids = document.querySelectorAll('.doc-grid[data-project]');
+      grids.forEach(grid => {
+        const projectId = grid.getAttribute('data-project');
+        const state = _docLoadState(projectId);
+        grid.querySelectorAll('.doc-card').forEach(card => _renderDocCard(card, projectId, state));
+      });
+    })();
 
     (async function _renderTeams() {
       const grids = document.querySelectorAll('.team-grid[data-project]');
