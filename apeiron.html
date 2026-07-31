@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Apeiron · Custom Home Representation</title>
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="Apeiron — the Custom Home Representation practice of The Stonehouse Company." />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icon-arch-transparent.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Mulish:wght@200;300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:              #000;
+      --bg-elev:         #0a0a0a;
+      --panel:           #0f0f0f;
+      --panel-edge:      #2a2a2a;
+      --rule:            #2a2a2a;
+      --rule-strong:     #3a3a3a;
+      --text:            #ffffff;
+      --text-muted:      #b8b8b8;
+      --text-dim:        #6a6a6a;
+      --accent:          #eae2d3;   /* warm ivory — matches Stonehouse story color */
+
+      --font-body:       'Mulish', 'Helvetica Neue', Arial, sans-serif;
+      --font-display:    'Aboreto', 'Cormorant Garamond', serif;
+      --font-ui:         'Inter', 'Helvetica Neue', Arial, sans-serif;
+
+      --tracking-wide:   0.18em;
+      --tracking-x-wide: 0.28em;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+    body {
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    button { font: inherit; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ==================== Top bar ==================== */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: #000; border-bottom: 1px solid var(--panel-edge);
+      display: flex; align-items: center; gap: 16px;
+      padding: 14px 24px;
+    }
+    .topbar .brand {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .topbar .brand img.arch {
+      width: 34px; height: 34px; object-fit: contain;
+    }
+    .topbar .brand .name {
+      font-family: var(--font-display);
+      font-size: 18px; letter-spacing: .32em; text-transform: uppercase;
+      color: #fff;
+    }
+    .topbar .brand .name small {
+      display: block; font-family: var(--font-body);
+      font-size: 8px; letter-spacing: .28em; color: var(--text-dim);
+      font-weight: 600; margin-top: 3px;
+    }
+    .topbar .spacer { flex: 1; }
+    .topbar .parent-link {
+      font-family: var(--font-body); font-size: 10px;
+      letter-spacing: .22em; text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 6px 12px; border: 1px solid var(--panel-edge);
+    }
+    .topbar .parent-link:hover { color: #fff; border-color: #fff; }
+
+    /* ==================== Layout ==================== */
+    .shell {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - 61px);
+    }
+
+    /* ==================== Side nav ==================== */
+    .sidenav {
+      background: #0a0a0a;
+      border-right: 1px solid var(--panel-edge);
+      padding: 22px 18px;
+      position: sticky; top: 61px;
+      height: calc(100vh - 61px); overflow-y: auto;
+    }
+    .sidenav .section-label {
+      font-size: 9px; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--text-dim); font-weight: 600;
+      margin: 4px 0 10px;
+    }
+    .sidenav .nav-item {
+      display: block; width: 100%; text-align: left;
+      background: transparent; border: 0; color: var(--text-muted);
+      font-family: var(--font-body); font-size: 12px;
+      letter-spacing: .16em; text-transform: uppercase;
+      padding: 10px 12px; margin: 2px 0;
+      cursor: pointer;
+    }
+    .sidenav .nav-item:hover { color: #fff; background: #141414; }
+    .sidenav .nav-item.is-active { color: #fff; background: #141414; border-left: 2px solid var(--accent); padding-left: 10px; }
+    .sidenav .nav-group-title {
+      font-family: var(--font-display);
+      font-size: 10px; letter-spacing: .28em; text-transform: uppercase;
+      color: #fff; margin: 22px 0 8px 12px;
+    }
+
+    /* ==================== Content ==================== */
+    .content {
+      padding: 40px 48px 80px;
+      max-width: 1400px;
+    }
+    .division-eyebrow {
+      font-size: 10px; letter-spacing: .32em; text-transform: uppercase;
+      color: var(--text-dim); font-weight: 600; margin-bottom: 10px;
+    }
+    h1.division-title {
+      font-family: var(--font-display);
+      font-size: 56px; letter-spacing: .14em; text-transform: uppercase;
+      color: #fff; margin: 0 0 8px; font-weight: 400; line-height: 1;
+    }
+    h1.division-title small {
+      display: block; font-family: var(--font-body);
+      font-size: 12px; letter-spacing: .3em; color: var(--text-muted);
+      font-weight: 500; margin-top: 14px; text-transform: uppercase;
+    }
+
+    .panel {
+      display: none;
+      margin-top: 40px;
+    }
+    .panel.is-active { display: block; }
+    .panel-intro {
+      font-size: 13px; line-height: 1.6; color: var(--text-muted);
+      max-width: 720px; margin: 0 0 22px;
+    }
+
+    /* Placeholder empty-state — used for panels we haven't spec'd yet */
+    .placeholder {
+      border: 1px dashed var(--rule-strong); background: var(--panel);
+      padding: 40px 32px; text-align: center;
+    }
+    .placeholder .mark {
+      font-size: 10px; letter-spacing: .28em; text-transform: uppercase;
+      color: var(--text-dim); font-weight: 600; margin-bottom: 10px;
+    }
+    .placeholder h2 {
+      font-family: var(--font-display); font-size: 14px;
+      letter-spacing: .22em; text-transform: uppercase;
+      margin: 0 0 8px;
+    }
+    .placeholder p {
+      font-size: 12px; color: var(--text-muted); line-height: 1.6;
+      max-width: 520px; margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a href="index.html" class="brand" title="Back to hub">
+      <!-- Apeiron logo — drops into assets/apeiron-logo.png. Falls back
+           to the Stonehouse arch until the real logo is added. -->
+      <img class="arch" src="assets/apeiron-logo.png" alt=""
+           onerror="this.onerror=null; this.src='assets/icon-arch-transparent.png';" />
+      <div class="name">Apeiron<small>Custom Home Representation</small></div>
+    </a>
+    <div class="spacer"></div>
+    <a href="index.html" class="parent-link">← Hub</a>
+  </div>
+
+  <div class="shell">
+
+    <!-- ==================== Side nav ==================== -->
+    <aside class="sidenav" role="tablist" aria-label="Apeiron sections">
+      <div class="section-label">Apeiron</div>
+      <button type="button" class="nav-item is-active" data-panel="overview">Overview</button>
+
+      <div class="nav-group-title">Pipeline</div>
+      <button type="button" class="nav-item" data-panel="prospects">In Conversation</button>
+      <button type="button" class="nav-item" data-panel="projects">In Build</button>
+
+      <div class="nav-group-title">Tools</div>
+      <button type="button" class="nav-item" data-panel="tools">Cost Estimator + Docs</button>
+
+      <div class="nav-group-title">Company</div>
+      <button type="button" class="nav-item" data-panel="team">Team</button>
+      <button type="button" class="nav-item" data-panel="settings">Settings</button>
+    </aside>
+
+    <!-- ==================== Content ==================== -->
+    <main class="content">
+      <div class="division-eyebrow">Apeiron · The Stonehouse Company</div>
+      <h1 class="division-title">Custom Home Representation<small>Your interests. Always.</small></h1>
+
+      <!-- Overview -->
+      <section class="panel is-active" id="panel-overview" role="tabpanel">
+        <p class="panel-intro">Snapshot of the Apeiron practice — active client count, projects in build, upcoming milestones. Content still to be spec'd — Ryan will guide the build section by section.</p>
+        <div class="placeholder">
+          <div class="mark">— Placeholder —</div>
+          <h2>Overview coming soon</h2>
+          <p>KPIs, active clients, upcoming meetings, and monthly wins will live here.</p>
+        </div>
+      </section>
+
+      <!-- Prospects -->
+      <section class="panel" id="panel-prospects" role="tabpanel">
+        <p class="panel-intro">Prospects in conversation — inquiries, discovery calls, proposals out, negotiating. Every row here graduates to <b>In Build</b> when the engagement is signed.</p>
+        <div class="placeholder">
+          <div class="mark">— Placeholder —</div>
+          <h2>Prospect pipeline coming soon</h2>
+          <p>Same underlying sheet as the admin dashboard's nurturing pipeline. Ryan will spec the layout.</p>
+        </div>
+      </section>
+
+      <!-- Projects -->
+      <section class="panel" id="panel-projects" role="tabpanel">
+        <p class="panel-intro">Active projects in build — each with a 7-stage stepper from Pre-Con to Certificate of Occupancy plus an overall build-progress bar.</p>
+        <div class="placeholder">
+          <div class="mark">— Placeholder —</div>
+          <h2>Active projects coming soon</h2>
+          <p>Reads the same Custom Rep intake sheet as admin. Ryan will spec any Apeiron-specific fields.</p>
+        </div>
+      </section>
+
+      <!-- Tools -->
+      <section class="panel" id="panel-tools" role="tabpanel">
+        <p class="panel-intro">Cost Estimator, Estimate Summary PDF, Engagement Letter, Scope of Services, Custom Home Timeline. Same generators as admin — Apeiron-branded where relevant.</p>
+        <div class="placeholder">
+          <div class="mark">— Placeholder —</div>
+          <h2>Tools grid coming soon</h2>
+          <p>Ryan will spec which tools show and how they're grouped.</p>
+        </div>
+      </section>
+
+      <!-- Team -->
+      <section class="panel" id="panel-team" role="tabpanel">
+        <p class="panel-intro">The Apeiron team — reps working under this brand.</p>
+        <div class="placeholder">
+          <div class="mark">— Placeholder —</div>
+          <h2>Team roster coming soon</h2>
+          <p>Names, roles, contact info, follow-ups.</p>
+        </div>
+      </section>
+
+      <!-- Settings -->
+      <section class="panel" id="panel-settings" role="tabpanel">
+        <p class="panel-intro">Apeiron-specific settings — branding, fee defaults, document templates.</p>
+        <div class="placeholder">
+          <div class="mark">— Placeholder —</div>
+          <h2>Settings coming soon</h2>
+          <p>Configuration for the practice will live here.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Simple side-nav → panel switch. Adds .is-active to both the button
+    // and the target section, removes from siblings. Uses data-panel to
+    // pair each button to its panel id ("panel-{key}").
+    (function () {
+      const nav = document.querySelector('.sidenav');
+      const panels = document.querySelectorAll('.content .panel');
+      if (!nav) return;
+      nav.addEventListener('click', (e) => {
+        const btn = e.target.closest('.nav-item');
+        if (!btn) return;
+        const key = btn.getAttribute('data-panel');
+        nav.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('is-active', b === btn));
+        panels.forEach(p => p.classList.toggle('is-active', p.id === 'panel-' + key));
+        // Update URL hash so browser back/forward + shareable links work
+        history.replaceState(null, '', '#' + key);
+        // Scroll content to top when switching panels
+        document.querySelector('.content').scrollIntoView({ behavior: 'instant', block: 'start' });
+      });
+      // Deep-link support: land directly on ?panel=... or #panel-key
+      const hash = (location.hash || '').replace(/^#/, '');
+      if (hash) {
+        const btn = nav.querySelector('[data-panel="' + hash + '"]');
+        if (btn) btn.click();
+      }
+    })();
+  </script>
+</body>
+</html>

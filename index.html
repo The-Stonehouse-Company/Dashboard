@@ -3211,13 +3211,15 @@
           <div class="hub-name">Petra Luxury Group</div>
           <div class="hub-role">Coming soon</div>
         </button>
-        <button type="button" class="hub-card is-soon" data-target="apeiron">
+        <button type="button" class="hub-card" data-target="apeiron">
           <div class="hub-avatar" data-slug="apeiron">
-            <img src="assets/hub/apeiron.jpg" alt="" onerror="this.style.display='none';" />
+            <img src="assets/apeiron-logo.png" alt=""
+                 onerror="this.onerror=null; this.src='assets/hub/apeiron.jpg';
+                          this.onerror=function(){this.style.display='none';};" />
             <span class="hub-initial">A</span>
           </div>
           <div class="hub-name">Apeiron</div>
-          <div class="hub-role">Coming soon</div>
+          <div class="hub-role">Custom Home Rep</div>
         </button>
         <button type="button" class="hub-card is-soon" data-target="propmgmt">
           <div class="hub-avatar" data-slug="propmgmt">
@@ -3504,6 +3506,10 @@
               hub.setAttribute('aria-hidden', 'true');
               hub.classList.remove('is-leaving');
             }, 600);
+            return;
+          }
+          if (target === 'apeiron') {
+            window.location.href = 'apeiron.html';
             return;
           }
           // Coming soon — subtle shake to signal it's not wired yet
