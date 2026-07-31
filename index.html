@@ -3478,10 +3478,20 @@
       const VALID_MS       = 30 * 24 * 60 * 60 * 1000; // 30 days
 
       // Stonehouse intro splash — brand reveal that runs between the
-      // access gate and the DIVISION HUB. Plays every load. Click to dismiss.
+      // access gate and the DIVISION HUB. Plays every load unless the
+      // URL includes ?hub=1 (returning from a division dashboard).
       window.showStonehouseIntro = function () {
         const splash = document.getElementById('stonehouse-intro');
         if (!splash) return;
+        // Skip the animation if agents are switching divisions from
+        // apeiron.html (or any other division link back to the hub).
+        const skipSplash = new URLSearchParams(location.search).get('hub') === '1';
+        if (skipSplash) {
+          if (splash.parentNode) splash.parentNode.removeChild(splash);
+          const hub = document.getElementById('division-hub');
+          if (hub) hub.setAttribute('aria-hidden', 'false');
+          return;
+        }
         splash.setAttribute('aria-hidden', 'false');
         splash.classList.add('is-playing');
         // Sequence: arch fades in 0–2.4s, wordmark fades in 1.1–3.1s.

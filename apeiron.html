@@ -234,7 +234,7 @@
       <div class="name">Apeiron<small>Custom Home Representation</small></div>
     </a>
     <div class="spacer"></div>
-    <a href="index.html" class="parent-link">← Hub</a>
+    <a href="index.html?hub=1" class="parent-link">◫ Switch Division</a>
   </div>
 
   <div class="shell">
@@ -294,16 +294,27 @@
       </section>
 
       <!-- ==================== CAMPBELL RESIDENCE ==================== -->
-      <section class="panel" id="panel-client-campbell" role="tabpanel">
+      <section class="panel" id="panel-client-campbell" role="tabpanel" data-client-match="campbell">
         <div class="project-hero">
           <div>
             <div class="eyebrow">In Build · Campbell Residence</div>
-            <h2 class="project-name">Rick &amp; Kati Campbell</h2>
-            <div class="project-address">— Address to be set —</div>
+            <h2 class="project-name" data-field="client">Rick &amp; Kati Campbell</h2>
+            <div class="project-address" data-field="address">Loading address…</div>
           </div>
-          <div>
-            <span class="stage-badge">Pre-Con</span>
+          <div style="text-align:right;">
+            <span class="stage-badge" data-field="stage">Pre-Con</span>
+            <div style="font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:var(--text-dim); margin-top:10px;" data-field="co-target"></div>
           </div>
+        </div>
+
+        <!-- Team + engagement snapshot pulled from the admin sheet -->
+        <div class="project-snapshot" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:14px 22px; padding:18px 20px; background:var(--panel); border:1px solid var(--rule); margin-bottom:24px;">
+          <div><div style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:600; margin-bottom:4px;">Architect</div><div style="font-size:13px; color:#fff;" data-field="architect">—</div></div>
+          <div><div style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:600; margin-bottom:4px;">Designer</div><div style="font-size:13px; color:#fff;" data-field="designer">—</div></div>
+          <div><div style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:600; margin-bottom:4px;">Builder</div><div style="font-size:13px; color:#fff;" data-field="builder">—</div></div>
+          <div><div style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:600; margin-bottom:4px;">Hard Cost Est.</div><div style="font-size:13px; color:#fff;" data-field="hard-cost">—</div></div>
+          <div><div style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:600; margin-bottom:4px;">Engagement Start</div><div style="font-size:13px; color:#fff;" data-field="engagement">—</div></div>
+          <div><div style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:600; margin-bottom:4px;">Projected CO</div><div style="font-size:13px; color:#fff;" data-field="projected-co">—</div></div>
         </div>
 
         <div class="subtabs" role="tablist" aria-label="Campbell Residence sections">
@@ -445,6 +456,126 @@
       panel.querySelectorAll('.subtab').forEach(t => t.classList.toggle('is-active', t === tab));
       panel.querySelectorAll('.subpanel').forEach(p => p.classList.toggle('is-active', p.getAttribute('data-sub') === key));
     });
+
+    /* =========================================================
+       Pull live project data from the admin Custom Rep Intake
+       sheet. Any panel with data-client-match="<substring>" gets
+       its data-field="..." elements populated from the matching
+       sheet row (case-insensitive substring match on Client Name).
+       ========================================================= */
+    (async function () {
+      const CUSTOMREP_SHEET_ID  = "1_KDEUKCkLZZgeKWbio40H-7qqKdvA8K7DZ1URw_8sGQ";
+      const CUSTOMREP_SHEET_TAB = "Form_Responses";
+      const clientPanels = document.querySelectorAll('.panel[data-client-match]');
+      if (clientPanels.length === 0) return;
+      try {
+        const url = 'https://docs.google.com/spreadsheets/d/' + CUSTOMREP_SHEET_ID +
+          '/gviz/tq?tqx=out:json&headers=1&sheet=' + encodeURIComponent(CUSTOMREP_SHEET_TAB) +
+          '&t=' + Date.now();
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const text = await res.text();
+        const m = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
+        if (!m) throw new Error('Bad gviz envelope');
+        const data = JSON.parse(m[1]);
+        if (data.status !== 'ok') throw new Error(data.errors?.[0]?.detailed_message || data.status);
+        const cols = data.table.cols || [];
+        const rows = data.table.rows || [];
+        const label = s => String(s || '').toLowerCase();
+        const colIdx = name => cols.findIndex(c => label(c.label) === label(name));
+        const ix = {
+          timestamp: colIdx('Timestamp'),
+          client:    colIdx('Client Name'),
+          address:   colIdx('Address'),
+          architect: colIdx('Architect'),
+          designer:  colIdx('Designer'),
+          builder:   colIdx('Builder'),
+          engagement:colIdx('Engagement Start Date'),
+          projectedCO:colIdx('Projected CO Date'),
+          stage:     colIdx('Current Stage'),
+          hardCost:  colIdx('Hard Cost Estimate'),
+          notes:     colIdx('Notes')
+        };
+        function cellStr(c) {
+          if (!c) return '';
+          if (c.f != null) return String(c.f);
+          if (c.v != null) return String(c.v);
+          return '';
+        }
+        function cellDate(c) {
+          if (!c || c.v == null) return null;
+          const v = c.v;
+          if (typeof v === 'string' && /^Date\(/.test(v)) {
+            const m = v.match(/Date\((\d+),(\d+),(\d+)/);
+            if (m) return new Date(+m[1], +m[2], +m[3]);
+          }
+          const d = new Date(v);
+          return isNaN(d) ? null : d;
+        }
+        function fmtDate(d) {
+          if (!(d instanceof Date) || isNaN(d)) return '';
+          return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        function fmtUSD(n) {
+          if (!isFinite(n) || !n) return '';
+          return '$' + Math.round(n).toLocaleString();
+        }
+        // Parse + dedupe by client name (latest Timestamp wins — mirrors admin logic)
+        const byKey = new Map();
+        rows.forEach(r => {
+          const c = r.c || [];
+          const client = cellStr(c[ix.client]).trim();
+          if (!client) return;
+          const key = client.toLowerCase();
+          const ts = cellDate(c[ix.timestamp]);
+          const ex = byKey.get(key);
+          if (!ex || (ts && (!ex._ts || ts > ex._ts))) {
+            byKey.set(key, {
+              _ts:        ts,
+              client:     client,
+              address:    cellStr(c[ix.address]),
+              architect:  cellStr(c[ix.architect]),
+              designer:   cellStr(c[ix.designer]),
+              builder:    cellStr(c[ix.builder]),
+              engagement: cellDate(c[ix.engagement]),
+              projectedCO:cellDate(c[ix.projectedCO]),
+              stage:      cellStr(c[ix.stage]),
+              hardCost:   parseFloat(cellStr(c[ix.hardCost]).replace(/[^\d.]/g, '')) || 0,
+              notes:      cellStr(c[ix.notes])
+            });
+          }
+        });
+        // For each client panel, find a matching row and populate fields
+        clientPanels.forEach(panel => {
+          const needle = (panel.getAttribute('data-client-match') || '').toLowerCase();
+          let match = null;
+          for (const [k, v] of byKey) {
+            if (k.indexOf(needle) >= 0) { match = v; break; }
+          }
+          if (!match) return;
+          const setField = (name, val) => {
+            const el = panel.querySelector('[data-field="' + name + '"]');
+            if (el && val) el.textContent = val;
+          };
+          setField('client',       match.client);
+          setField('address',      match.address);
+          setField('stage',        match.stage);
+          setField('architect',    match.architect);
+          setField('designer',     match.designer);
+          setField('builder',      match.builder);
+          setField('hard-cost',    fmtUSD(match.hardCost));
+          setField('engagement',   fmtDate(match.engagement));
+          setField('projected-co', fmtDate(match.projectedCO));
+          if (match.projectedCO) {
+            const today = new Date(); today.setHours(0,0,0,0);
+            const days = Math.round((match.projectedCO - today) / 86400000);
+            setField('co-target', days > 0 ? days + ' days to CO' : 'CO ' + Math.abs(days) + ' days ago');
+          }
+        });
+      } catch (err) {
+        console.warn('[Apeiron] Custom Rep sheet fetch failed:', err);
+      }
+    })();
   </script>
 </body>
 </html>
