@@ -20652,8 +20652,20 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const builderSel = document.getElementById('bb-filter-builder');
       const citySel    = document.getElementById('bb-filter-city');
       if (!builderSel || !citySel) return;
-      const builders = Array.from(new Set(_buyBoxRows.map(r => r.builder).filter(Boolean))).sort();
-      const cities   = Array.from(new Set(_buyBoxRows.map(r => r.city).filter(Boolean))).sort();
+      // Case-insensitive dedupe — keep the first-seen original casing.
+      // Fixes "Nashville" vs "nashville" vs "Nashville " each showing separately.
+      function dedupeCI(values) {
+        const seen = new Map();
+        values.forEach(v => {
+          if (!v) return;
+          const key = String(v).trim().toLowerCase();
+          if (!key) return;
+          if (!seen.has(key)) seen.set(key, String(v).trim());
+        });
+        return Array.from(seen.values()).sort((a, b) => a.localeCompare(b));
+      }
+      const builders = dedupeCI(_buyBoxRows.map(r => r.builder));
+      const cities   = dedupeCI(_buyBoxRows.map(r => r.city));
       const prevB = builderSel.value, prevC = citySel.value;
       builderSel.innerHTML = '<option value="">All Builders / Developers</option>' +
         builders.map(b => '<option value="' + _bbEsc(b) + '">' + _bbEsc(b) + '</option>').join('');
@@ -20665,12 +20677,12 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
     function _bbFilteredRows() {
       const q  = ((document.getElementById('bb-search') || {}).value || '').toLowerCase().trim();
-      const fB = ((document.getElementById('bb-filter-builder') || {}).value || '').trim();
-      const fC = ((document.getElementById('bb-filter-city') || {}).value || '').trim();
+      const fB = ((document.getElementById('bb-filter-builder') || {}).value || '').trim().toLowerCase();
+      const fC = ((document.getElementById('bb-filter-city') || {}).value || '').trim().toLowerCase();
       const fS = ((document.getElementById('bb-filter-status') || {}).value || '').trim();
       return _buyBoxRows.filter(r => {
-        if (fB && r.builder !== fB) return false;
-        if (fC && r.city !== fC) return false;
+        if (fB && String(r.builder || '').trim().toLowerCase() !== fB) return false;
+        if (fC && String(r.city    || '').trim().toLowerCase() !== fC) return false;
         if (fS && r.status !== fS) return false;
         if (q) {
           const blob = [r.builder, r.city, r.suburbs, r.subPricing, r.mustHaves, r.dealBreakers, r.notes].join(' ').toLowerCase();
