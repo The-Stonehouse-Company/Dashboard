@@ -26,35 +26,41 @@
     padding: 24px 12px 60px;
   }
 
-  /* Floating toolbar - not printed */
+  /* Sticky toolbar spanning full width — wraps on narrow viewports so
+     buttons never get clipped off the right edge. */
   .toolbar {
-    position: fixed; top: 16px; right: 16px;
+    position: sticky; top: 0; left: 0; right: 0;
     z-index: 100;
-    display: flex; gap: 10px; align-items: center;
+    background: #000; border-bottom: 1px solid #2a2a2a;
+    padding: 10px 16px;
+    display: flex; gap: 8px 10px; align-items: center; flex-wrap: wrap;
   }
-  .toolbar .btn {
-    font-family: var(--font-body);
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    padding: 10px 20px;
-    background: transparent;
-    color: #fff;
-    border: 1px solid #fff;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-  }
-  .toolbar .btn.primary { background: #fff; color: #000; }
-  .toolbar .btn:hover { opacity: 0.85; }
   .toolbar .status {
     font-family: var(--font-body);
     font-size: 10px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: #ccc;
-    margin-right: 8px;
+    margin-right: auto;    /* push everything after status to the right */
   }
+  .toolbar .btn {
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    background: transparent;
+    color: #fff;
+    border: 1px solid #fff;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    white-space: nowrap;
+  }
+  .toolbar .btn.primary { background: #fff; color: #000; }
+  .toolbar .btn:hover { opacity: 0.85; }
+  /* Give the page some breathing room under the sticky bar */
+  body > .page { margin-top: 24px; }
 
   /* Letter portrait page */
   .page {
