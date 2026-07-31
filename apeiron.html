@@ -153,6 +153,143 @@
       background: var(--accent); color: #000; font-weight: 700;
     }
 
+    /* ==================== Interactive timeline ==================== */
+    .tl {
+      position: relative;
+      padding-left: 44px;
+      margin-top: 8px;
+    }
+    /* Vertical spine line running through the phase numbers */
+    .tl::before {
+      content: '';
+      position: absolute;
+      left: 15px; top: 12px; bottom: 12px;
+      width: 2px; background: var(--rule);
+    }
+    .tl-phase {
+      position: relative;
+      padding: 6px 0 26px;
+    }
+    .tl-phase:last-child { padding-bottom: 6px; }
+    .tl-num {
+      position: absolute;
+      left: -44px; top: 0;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #141414;
+      border: 2px solid var(--rule);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 13px; color: var(--text-muted); font-weight: 500;
+      z-index: 2;
+      transition: background .2s, border-color .2s, color .2s;
+    }
+    .tl-phase.state-progress .tl-num { border-color: var(--warn-c, #e8c068); color: var(--warn-c, #e8c068); }
+    .tl-phase.state-complete .tl-num {
+      background: #4a7548; border-color: #4a7548; color: #fff;
+    }
+    .tl-phase.state-complete .tl-num::before { content: '✓'; font-size: 15px; }
+    .tl-phase.state-complete .tl-num-label { display: none; }
+    .tl-num-label { display: inline-block; }
+
+    .tl-phase-head {
+      display: flex; justify-content: space-between; align-items: baseline;
+      gap: 14px;
+      margin-bottom: 6px;
+    }
+    .tl-phase-name {
+      font-family: var(--font-display);
+      font-size: 15px; letter-spacing: .18em; text-transform: uppercase;
+      color: #fff; font-weight: 400;
+    }
+    .tl-phase-dur {
+      font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--text-dim); font-weight: 600;
+    }
+    .tl-phase-badge {
+      display: inline-block; padding: 2px 8px; margin-left: 8px;
+      font-size: 9px; letter-spacing: .16em; text-transform: uppercase;
+      background: #141414; color: var(--text-dim); font-weight: 700;
+    }
+    .tl-phase.state-progress .tl-phase-badge { background: #3a301c; color: #e8c068; }
+    .tl-phase.state-complete .tl-phase-badge { background: #1c3a1c; color: #9ec39e; }
+
+    .tl-items {
+      list-style: none; padding: 6px 0 0; margin: 0;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .tl-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 8px 10px 8px 8px;
+      cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: background .15s, border-color .15s;
+    }
+    .tl-item:hover { background: #0e0e0e; border-left-color: var(--rule); }
+    .tl-item .tl-check {
+      flex: 0 0 auto;
+      width: 16px; height: 16px; border-radius: 3px;
+      border: 1.5px solid #666; background: #0a0a0a;
+      position: relative; margin-top: 2px;
+      transition: background .15s, border-color .15s;
+    }
+    .tl-item.done .tl-check {
+      background: #9ec39e; border-color: #9ec39e;
+    }
+    .tl-item.done .tl-check::after {
+      content: '';
+      position: absolute; left: 4px; top: 0px;
+      width: 4px; height: 9px;
+      border: solid #0a0a0a; border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+    .tl-item.progress .tl-check {
+      background: #e8c068; border-color: #e8c068;
+    }
+    .tl-item.progress .tl-check::after {
+      content: '';
+      position: absolute; left: 3px; top: 3px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #0a0a0a;
+    }
+    .tl-item-label {
+      flex: 1;
+      font-size: 12.5px; line-height: 1.45; color: var(--text-muted);
+    }
+    .tl-item.done    .tl-item-label { color: var(--text-dim); text-decoration: line-through; text-decoration-color: #444; }
+    .tl-item.progress .tl-item-label { color: #fff; }
+    .tl-item-meta {
+      font-size: 9px; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--text-dim); margin-top: 2px;
+    }
+    .tl-item.done .tl-item-meta { color: #9ec39e; }
+    .tl-item.progress .tl-item-meta { color: #e8c068; }
+
+    /* Progress bar summarizing overall phase completion */
+    .tl-summary {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px; margin-bottom: 20px;
+      background: var(--panel); border: 1px solid var(--rule);
+    }
+    .tl-summary .lbl {
+      font-size: 9px; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--text-dim); font-weight: 700;
+    }
+    .tl-summary .bar { flex: 1; height: 6px; background: #1a1a1a; border-radius: 3px; overflow: hidden; }
+    .tl-summary .bar-fill { height: 100%; background: #4a7548; transition: width .3s; }
+    .tl-summary .pct { font-family: var(--font-display); font-size: 16px; color: #fff; }
+
+    /* Legend */
+    .tl-legend {
+      display: flex; gap: 14px; margin-bottom: 14px;
+      font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-dim);
+    }
+    .tl-legend span { display: flex; align-items: center; gap: 6px; }
+    .tl-legend .dot {
+      width: 12px; height: 12px; border-radius: 3px; border: 1.5px solid #666; background: #0a0a0a;
+    }
+    .tl-legend .dot.progress { background: #e8c068; border-color: #e8c068; }
+    .tl-legend .dot.done { background: #9ec39e; border-color: #9ec39e; }
+
     /* Sub-tabs within a client page */
     .subtabs {
       display: flex; gap: 4px; flex-wrap: wrap;
@@ -336,11 +473,22 @@
           </div>
         </div>
         <div class="subpanel" data-sub="timeline">
-          <div class="placeholder">
-            <div class="mark">— Awaiting spec —</div>
-            <h2>Timeline coming</h2>
-            <p>Pre-Con → Demo → Framing → Mechanicals → Drywall → Finishes → CO, with target dates and current position.</p>
+          <div class="tl-legend">
+            <span><span class="dot"></span> Upcoming</span>
+            <span><span class="dot progress"></span> In Progress</span>
+            <span><span class="dot done"></span> Complete</span>
+            <span style="margin-left:auto; color:var(--text-dim); font-style:italic; text-transform:none; letter-spacing:.02em;">
+              Click any item to cycle its state.
+            </span>
           </div>
+          <div class="tl-summary" id="tl-summary-campbell">
+            <span class="lbl">Overall progress</span>
+            <div class="bar"><div class="bar-fill" style="width:0%"></div></div>
+            <span class="pct">0%</span>
+          </div>
+          <!-- Timeline is rendered by JS into this container.
+               Data lives in the APEIRON_TIMELINE constant + saved state per project. -->
+          <div class="tl" data-project="campbell" id="tl-campbell"></div>
         </div>
         <div class="subpanel" data-sub="budget">
           <div class="placeholder">
@@ -455,6 +603,221 @@
       const key = tab.getAttribute('data-sub');
       panel.querySelectorAll('.subtab').forEach(t => t.classList.toggle('is-active', t === tab));
       panel.querySelectorAll('.subpanel').forEach(p => p.classList.toggle('is-active', p.getAttribute('data-sub') === key));
+    });
+
+    /* =========================================================
+       INTERACTIVE CUSTOM HOME TIMELINE
+       Data shape: array of phases, each with items. Each item has
+       a stable "key" so state can be saved + restored.
+       State per item = 'upcoming' | 'progress' | 'complete'.
+       Click cycles: upcoming → progress → complete → upcoming.
+       Persistence: localStorage now (instant); Google Form POST
+       when TIMELINE_CONFIG.FORM_URL is filled in (setup guide in
+       docs/apeiron-timeline-setup.md).
+       ========================================================= */
+    const APEIRON_TIMELINE = [
+      { key: 'dd', num: 1, name: 'Due Diligence Phase', duration: '~1 week', items: [
+        { key: 'dd-comps',   label: 'Gather home comparables for project guidance' },
+        { key: 'dd-survey',  label: 'Order survey (if missing)' }
+      ]},
+      { key: 'hiring', num: 2, name: 'Hiring Phase', duration: '1–2 weeks · interviews in order', items: [
+        { key: 'hiring-arch',      label: 'Architect interviews' },
+        { key: 'hiring-builder',   label: 'Builder interviews' },
+        { key: 'hiring-designer',  label: 'Designer interviews (if applicable)' },
+        { key: 'hiring-landscape', label: 'Landscape architect interviews (if applicable)' }
+      ]},
+      { key: 'design', num: 3, name: 'Design Phase', duration: '1–3 months · iterative plan development', items: [
+        { key: 'design-initial',        label: 'Initial team meeting — introductions' },
+        { key: 'design-builder',        label: '1:1 with Builder — budget building' },
+        { key: 'design-architect',      label: '1:1 with Architect — wishlist & initial plans' },
+        { key: 'design-designer',       label: '1:1 with Designer — initial finishes & mood board' },
+        { key: 'design-meeting-2',      label: 'Design Meeting #2 — plans review, corrections, budget alignment, sizing' },
+        { key: 'design-plans-2',        label: 'Second pass of plans — designer on call for fine tuning' },
+        { key: 'design-finishes',       label: 'Design Finishes Meeting — major selections, budget' },
+        { key: 'design-walk',           label: 'Walk Your Plans — finishes, layout & functionality' },
+        { key: 'design-plans-3',        label: 'Third pass of plans — exterior finishes, ceiling heights, flow' },
+        { key: 'design-plans-extra',    label: 'Additional passes scheduled as needed' },
+        { key: 'design-final',          label: 'Final Plans Set' },
+        { key: 'design-moodboard',      label: 'Mood Board Finalized — major selections penciled in' }
+      ]},
+      { key: 'precon', num: 4, name: 'Pre-Construction', duration: 'Weeks preceding groundbreaking', items: [
+        { key: 'precon-demo',    label: 'Demo permit pulled (if applicable)' },
+        { key: 'precon-codes',   label: 'Plans submitted to codes' },
+        { key: 'precon-permits', label: 'Building permits pulled' }
+      ]},
+      { key: 'construction', num: 5, name: 'Construction', duration: '~12-month build · broad-scope milestones', items: [
+        { key: 'const-siteprep',   label: '1. Site Prep — site cleared, utilities marked' },
+        { key: 'const-foundation', label: '2. Foundation — excavation, footings, foundation walls, waterproofing, backfill, first inspection' },
+        { key: 'const-framing',    label: '3. Framing & Dry-In — wall framing, floors, roof, windows & exterior doors; weather-tight shell' },
+        { key: 'const-mep',        label: '4. MEP Rough-Ins & Inspections — mechanical, electrical, plumbing routed & inspected; fireplaces set' },
+        { key: 'const-drywall',    label: '5. Insulation, Drywall & Interior Finishes Begin — insulation, drywall, trim, doors, stairs, cabinetry staged' },
+        { key: 'const-cabinetry',  label: '6. Cabinetry, Fixtures, Flooring & Landscape — cabinets, counters, tile, hardwood, paint, fixtures, appliances, hardscape' },
+        { key: 'const-co',         label: '7. Punch-List, CO & Move-In — final inspections, Certificate of Occupancy, walkthroughs, punch items, keys delivered' }
+      ]}
+    ];
+
+    // ---- Google Sheet sync ----
+    const TIMELINE_CONFIG = {
+      SHEET_ID:  "1vfzckpxrOdDb55zPjbkZjy5mozhq40UM0NdY9wHD3AM",
+      SHEET_TAB: "Form Responses 1",
+      FORM_URL:  "https://docs.google.com/forms/d/e/1FAIpQLSeyU6nFXklBvrb3Hu4YrwxL-H_ZRmLMQYTkSDnJFvxAWZdh8A/formResponse",
+      FIELD_MAP: {
+        project_id:    "entry.837814797",
+        milestone_key: "entry.1629696435",
+        state:         "entry.535980600",
+        updated_by:    "entry.27256755",
+        notes:         "entry.1868483197"
+      }
+    };
+    const CYCLE = { upcoming: 'progress', progress: 'complete', complete: 'upcoming' };
+
+    function _tlLocalKey(projectId) { return 'apeiron.timeline:' + projectId; }
+    function _tlLoadLocal(projectId) {
+      try { return JSON.parse(localStorage.getItem(_tlLocalKey(projectId)) || '{}') || {}; }
+      catch (_) { return {}; }
+    }
+    function _tlSaveLocal(projectId, state) {
+      try { localStorage.setItem(_tlLocalKey(projectId), JSON.stringify(state)); } catch (_) {}
+    }
+    function _tlUpdatedBy() {
+      // For now, all agents share one namespace — future: pull from agent unlock
+      return 'Apeiron Team';
+    }
+
+    // Post a milestone change to the Google Form (fire-and-forget, no-cors).
+    function _tlPostChange(projectId, milestoneKey, state) {
+      if (!TIMELINE_CONFIG.FORM_URL || !TIMELINE_CONFIG.FIELD_MAP.milestone_key) return;
+      const body = new URLSearchParams();
+      const m = TIMELINE_CONFIG.FIELD_MAP;
+      if (m.project_id)    body.append(m.project_id,    projectId);
+      if (m.milestone_key) body.append(m.milestone_key, milestoneKey);
+      if (m.state)         body.append(m.state,         state);
+      if (m.updated_by)    body.append(m.updated_by,    _tlUpdatedBy());
+      fetch(TIMELINE_CONFIG.FORM_URL, { method: 'POST', mode: 'no-cors', body }).catch(() => {});
+    }
+
+    // Fetch shared state from the sheet, merge into local state (sheet wins).
+    async function _tlHydrateFromSheet(projectId, container) {
+      if (!TIMELINE_CONFIG.SHEET_ID) return;
+      try {
+        const url = 'https://docs.google.com/spreadsheets/d/' + TIMELINE_CONFIG.SHEET_ID +
+          '/gviz/tq?tqx=out:json&headers=1&sheet=' + encodeURIComponent(TIMELINE_CONFIG.SHEET_TAB) +
+          '&t=' + Date.now();
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) return;
+        const text = await res.text();
+        const m = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
+        if (!m) return;
+        const data = JSON.parse(m[1]);
+        if (data.status !== 'ok') return;
+        const cols = data.table.cols || [];
+        const rows = data.table.rows || [];
+        const idx = (label) => cols.findIndex(c => String(c.label || '').toLowerCase() === label);
+        const ix = {
+          ts:    idx('timestamp'),
+          proj:  idx('project_id'),
+          key:   idx('milestone_key'),
+          state: idx('state')
+        };
+        // Latest state per milestone key for this project
+        const latest = {};
+        rows.forEach(r => {
+          const c = r.c || [];
+          const p = (ix.proj  >= 0 && c[ix.proj]  ? String(c[ix.proj].v || '').trim()  : '');
+          if (p !== projectId) return;
+          const k = (ix.key   >= 0 && c[ix.key]   ? String(c[ix.key].v || '').trim()   : '');
+          const s = (ix.state >= 0 && c[ix.state] ? String(c[ix.state].v || '').trim() : '');
+          const t = (ix.ts    >= 0 && c[ix.ts]) ? c[ix.ts].v : null;
+          const ts = (typeof t === 'string' && /^Date\(/.test(t)) ? new Date(...t.match(/\d+/g).map(Number)) : new Date(t || 0);
+          if (!k || !s) return;
+          if (!latest[k] || (latest[k]._ts < ts)) latest[k] = { state: s, _ts: ts };
+        });
+        // Merge into local state
+        const local = _tlLoadLocal(projectId);
+        Object.keys(latest).forEach(k => { local[k] = latest[k].state; });
+        _tlSaveLocal(projectId, local);
+        _tlRenderTimeline(container, projectId);
+      } catch (err) {
+        console.warn('[Apeiron Timeline] sheet hydrate failed:', err);
+      }
+    }
+
+    function _tlPhaseState(phase, state) {
+      const total = phase.items.length;
+      const done  = phase.items.filter(i => (state[i.key] || 'upcoming') === 'complete').length;
+      const prog  = phase.items.filter(i => (state[i.key] || 'upcoming') === 'progress').length;
+      if (done === total) return 'complete';
+      if (done > 0 || prog > 0) return 'progress';
+      return 'upcoming';
+    }
+
+    function _tlRenderTimeline(container, projectId) {
+      const state = _tlLoadLocal(projectId);
+      let totalItems = 0, doneItems = 0;
+      const html = APEIRON_TIMELINE.map(phase => {
+        const phaseState = _tlPhaseState(phase, state);
+        totalItems += phase.items.length;
+        const itemsHtml = phase.items.map(item => {
+          const s = state[item.key] || 'upcoming';
+          if (s === 'complete') doneItems++;
+          const cls = s === 'complete' ? 'done' : (s === 'progress' ? 'progress' : '');
+          const meta = s === 'complete' ? 'Complete' : (s === 'progress' ? 'In Progress' : '');
+          return `
+            <li class="tl-item ${cls}" data-item="${item.key}">
+              <span class="tl-check"></span>
+              <div>
+                <div class="tl-item-label">${item.label}</div>
+                ${meta ? '<div class="tl-item-meta">' + meta + '</div>' : ''}
+              </div>
+            </li>
+          `;
+        }).join('');
+        const phaseBadge = phaseState === 'complete' ? '<span class="tl-phase-badge">Complete</span>'
+                        : phaseState === 'progress'  ? '<span class="tl-phase-badge">In Progress</span>'
+                        : '';
+        return `
+          <div class="tl-phase state-${phaseState}" data-phase="${phase.key}">
+            <div class="tl-num"><span class="tl-num-label">${phase.num}</span></div>
+            <div class="tl-phase-head">
+              <div class="tl-phase-name">${phase.name}${phaseBadge}</div>
+              <div class="tl-phase-dur">${phase.duration}</div>
+            </div>
+            <ul class="tl-items">${itemsHtml}</ul>
+          </div>
+        `;
+      }).join('');
+      container.innerHTML = html;
+      // Update summary bar
+      const summary = document.getElementById('tl-summary-' + projectId);
+      if (summary) {
+        const pct = totalItems ? Math.round((doneItems / totalItems) * 100) : 0;
+        summary.querySelector('.bar-fill').style.width = pct + '%';
+        summary.querySelector('.pct').textContent = pct + '%';
+      }
+    }
+
+    // Click delegation: any timeline item cycles state on click
+    document.addEventListener('click', (e) => {
+      const item = e.target.closest && e.target.closest('.tl-item');
+      if (!item) return;
+      const tl = item.closest('.tl');
+      if (!tl) return;
+      const projectId = tl.getAttribute('data-project');
+      const itemKey   = item.getAttribute('data-item');
+      const state     = _tlLoadLocal(projectId);
+      const cur       = state[itemKey] || 'upcoming';
+      const next      = CYCLE[cur];
+      state[itemKey]  = next;
+      _tlSaveLocal(projectId, state);
+      _tlPostChange(projectId, itemKey, next);
+      _tlRenderTimeline(tl, projectId);
+    });
+
+    // Boot every timeline present on the page
+    document.querySelectorAll('.tl[data-project]').forEach(tl => {
+      const projectId = tl.getAttribute('data-project');
+      _tlRenderTimeline(tl, projectId);
+      _tlHydrateFromSheet(projectId, tl);
     });
 
     /* =========================================================
