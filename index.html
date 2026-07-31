@@ -18191,6 +18191,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             staleNote = ' &nbsp; <span style="color:#e8d49a; font-size:9px; letter-spacing:.18em; text-transform:uppercase;">' + days + ' days since last touch</span>';
           }
         }
+        const editKey = (p.client || '').trim();
+        const editBtn = '<button type="button" class="nurturing-edit-btn" data-key="' + _adEsc(editKey) + '" ' +
+          'style="font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px solid var(--panel-edge); background:rgba(20,20,20,.85); color:#fff; cursor:pointer;">Edit</button>';
         return (
           '<article class="deal-card' + staleClass + '">' +
             '<header class="deal-head">' +
@@ -18202,6 +18205,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
                   ' &nbsp; ' + _adStageChip(p.stage) +
                 '</div>' +
               '</div>' +
+              '<div>' + editBtn + '</div>' +
             '</header>' +
             '<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; padding:14px 18px 4px; font-size:11px;">' +
               (p.budgetRange ? '<div><div style="color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; font-size:9px; margin-bottom:4px;">Budget</div>' + _adEsc(p.budgetRange) + '</div>' : '') +
@@ -18222,6 +18226,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           const table = _adParseEnvelope(await res.text());
           const cols = table.cols || [];
           const ix = {
+            timestamp:       _adFindCol(cols, 'Timestamp'),
             client:          _adFindCol(cols, 'Client', 'Client Name'),
             agent:           _adFindCol(cols, 'Agent'),
             stage:           _adFindCol(cols, 'Stage', 'Current Stage'),
@@ -18235,9 +18240,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           };
           if (ix.client < 0) throw new Error('Sheet missing "Client" column.');
           const today = new Date(); today.setHours(0, 0, 0, 0);
-          const prospects = (table.rows || []).map(r => {
+          const rawAll = (table.rows || []).map(r => {
             const c = r.c || [];
             return {
+              timestamp:       ix.timestamp >= 0 ? _adGvizDate(c[ix.timestamp]) : null,
               client:          _adGvizString(c[ix.client]),
               agent:           ix.agent >= 0 ? _adGvizString(c[ix.agent]) : '',
               stage:           ix.stage >= 0 ? _adGvizString(c[ix.stage]) : '',
@@ -18249,8 +18255,24 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               nextAction:      ix.nextAction >= 0 ? _adGvizString(c[ix.nextAction]) : '',
               notes:           ix.notes >= 0 ? _adGvizString(c[ix.notes]) : ''
             };
-          })
-            .filter(p => p.client)
+          }).filter(p => p.client);
+
+          // Dedupe by client name (an Edit resubmits with the same client; latest wins)
+          const byName = new Map();
+          rawAll.forEach(p => {
+            const key = p.client.trim().toLowerCase();
+            const ex = byName.get(key);
+            if (!ex) { byName.set(key, p); return; }
+            const pt = p.timestamp?.getTime?.() || 0;
+            const et = ex.timestamp?.getTime?.() || 0;
+            if (pt >= et) byName.set(key, p);
+          });
+          const dedupedAll = Array.from(byName.values());
+          // Global registry — edit handler looks up by lowercased client name
+          window._nurturingByName = new Map();
+          dedupedAll.forEach(p => window._nurturingByName.set(p.client.trim().toLowerCase(), p));
+
+          const prospects = dedupedAll
             // Hide graduated (Signed) and Lost — they're no longer nurturing
             .filter(p => !/^(signed|lost)$/i.test(p.stage));
           // Sort: stale (longest since touch) first, then by stage priority
@@ -20337,6 +20359,52 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         if (!p) { alert('Project data not loaded yet. Try again in a moment.'); return; }
         _fillCustomrepModal(p);
         _openCustomrepModal();
+      });
+
+      // -------- Nurturing (In Conversation) Edit --------
+      function _openNurturingModal() {
+        const overlay = document.getElementById('nurturing-modal-overlay');
+        if (!overlay) return;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+      }
+      function _fillNurturingModal(p) {
+        _setVal('nu-agent',    p.agent);
+        _setVal('nu-client',   p.client);
+        _setVal('nu-stage',    p.stage);
+        _setVal('nu-source',   p.source);
+        _setVal('nu-property', p.propertyAddress);
+        _setVal('nu-budget',   p.budgetRange);
+        _setVal('nu-location', p.targetLocation);
+        _setDate('nu-touch',   p.lastTouch);
+        _setVal('nu-next',     p.nextAction);
+        _setVal('nu-notes',    p.notes);
+        const title = document.getElementById('nurturing-modal-title');
+        if (title) title.textContent = 'Edit Prospect';
+        const sub = document.getElementById('submit-nurturing');
+        if (sub) sub.textContent = 'Save Changes';
+      }
+      // Reset modal when opened via "+ Log a Nurturing Client" for fresh add
+      const openNurturingBtn = document.getElementById('open-nurturing-modal');
+      if (openNurturingBtn) openNurturingBtn.addEventListener('click', () => {
+        const form = document.getElementById('nurturing-form');
+        if (form) form.reset();
+        const title = document.getElementById('nurturing-modal-title');
+        if (title) title.textContent = 'Log a Nurturing Client';
+        const sub = document.getElementById('submit-nurturing');
+        if (sub) sub.textContent = 'Log Prospect';
+      });
+      // Delegated click for Nurturing edit buttons
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest && e.target.closest('.nurturing-edit-btn');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const key = (btn.getAttribute('data-key') || '').trim().toLowerCase();
+        const p = (window._nurturingByName || new Map()).get(key);
+        if (!p) { alert('Prospect data not loaded yet. Try again in a moment.'); return; }
+        _fillNurturingModal(p);
+        _openNurturingModal();
       });
     })();
 
