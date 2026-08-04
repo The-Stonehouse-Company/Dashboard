@@ -4553,11 +4553,38 @@
 
       <!-- ============= HOT LEADS ============= -->
       <div class="subpanel" id="subpanel-land-hotleads" role="tabpanel" aria-hidden="true" tabindex="0">
-        <p class="subpanel-intro">Properties we're actively chasing before they hit contract — off-market conversations, warm referrals, sellers we've flagged. Awaiting Ryan's spec on fields (source, contact, next action, ranking, etc.).</p>
-        <div class="placeholder">
-          <div class="mark">— Awaiting spec —</div>
-          <h2>Hot Leads coming</h2>
-          <p>Tell me what fields you want on a hot lead (contact + source + property + last touch + ranking?) and I'll wire the sheet + intake modal.</p>
+        <p class="subpanel-intro">Properties we're actively chasing before contract — off-market conversations, warm referrals, sellers we've flagged. Each lead tracks the owner contact, heat level, last touch, and what to do next. Edit any card to log a follow-up or update status.</p>
+
+        <div class="action-grid" style="margin-bottom:16px;">
+          <button class="primary-action" type="button" id="open-hotlead-modal" aria-haspopup="dialog" aria-controls="hotlead-modal">
+            <span class="action-label">+ Add Hot Lead</span>
+            <span class="action-sub">Log a new property we're chasing</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="hl-filters" style="display:grid; grid-template-columns: 1fr 170px 170px 160px; gap:10px; margin-bottom:14px;">
+          <input id="hl-search" type="text" placeholder="Search property, owner, source, notes…" />
+          <select id="hl-filter-agent"><option value="">All Agents</option></select>
+          <select id="hl-filter-heat">
+            <option value="">All Heat Levels</option>
+            <option value="Hot">Hot</option>
+            <option value="Warm">Warm</option>
+            <option value="Cool">Cool</option>
+          </select>
+          <select id="hl-filter-status">
+            <option value="">All Statuses</option>
+            <option value="Active">Active</option>
+            <option value="Under Contract">Under Contract</option>
+            <option value="Passed">Passed</option>
+            <option value="Lost">Lost</option>
+          </select>
+        </div>
+        <div id="hl-count-meta" style="font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase; margin-bottom:10px;">Loading…</div>
+
+        <div id="hotlead-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:14px;">
+          <div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">Loading hot leads…</div>
         </div>
       </div>
 
@@ -7211,6 +7238,138 @@
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="cancel-buybox">Cancel</button>
         <button class="btn" type="submit" form="buybox-form" id="submit-buybox">Save Buy Box</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========================= HOT LEAD MODAL ========================= -->
+  <div class="modal-overlay" id="hotlead-modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="hotlead-modal-title" id="hotlead-modal">
+      <header class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-eyebrow">Land Acquisition · Hot Leads</span>
+          <h2 class="modal-title" id="hotlead-modal-title">Add Hot Lead</h2>
+        </div>
+        <button class="modal-close" type="button" id="close-hotlead-modal" aria-label="Close">×</button>
+      </header>
+
+      <form class="modal-body" id="hotlead-form" autocomplete="off" novalidate>
+        <input type="hidden" id="hl-id" name="lead_id" />
+
+        <fieldset>
+          <legend>Property</legend>
+          <div class="form-grid">
+            <div class="full">
+              <label for="hl-property">Property Address <span class="req">*</span></label>
+              <input id="hl-property" name="property_address" type="text" required placeholder="1234 Cedar Ln, Nashville, TN 37205" />
+            </div>
+            <div>
+              <label for="hl-neighborhood">Neighborhood / Area</label>
+              <input id="hl-neighborhood" name="neighborhood" type="text" placeholder="12South, Sylvan Park…" />
+            </div>
+            <div>
+              <label for="hl-est-value">Estimated Value / Ask</label>
+              <input id="hl-est-value" name="estimated_value" type="text" placeholder="$650K – $800K" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Owner / Contact</legend>
+          <div class="form-grid">
+            <div>
+              <label for="hl-owner-name">Owner / Contact Name</label>
+              <input id="hl-owner-name" name="owner_name" type="text" placeholder="John Doe" />
+            </div>
+            <div>
+              <label for="hl-owner-phone">Phone</label>
+              <input id="hl-owner-phone" name="owner_phone" type="tel" placeholder="(615) 555-0123" />
+            </div>
+            <div class="full">
+              <label for="hl-owner-email">Email</label>
+              <input id="hl-owner-email" name="owner_email" type="email" placeholder="owner@example.com" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Lead Details</legend>
+          <div class="form-grid">
+            <div>
+              <label for="hl-source">Source</label>
+              <select id="hl-source" name="source">
+                <option value="">— Select —</option>
+                <option value="Referral">Referral</option>
+                <option value="Cold Outreach">Cold Outreach</option>
+                <option value="Networking">Networking</option>
+                <option value="Off-Market Sign">Off-Market Sign</option>
+                <option value="Public Records">Public Records</option>
+                <option value="Family / Personal">Family / Personal</option>
+                <option value="Realtor Referral">Realtor Referral</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label for="hl-referred-by">Referred By (if applicable)</label>
+              <input id="hl-referred-by" name="referred_by" type="text" placeholder="Who sent it our way" />
+            </div>
+            <div>
+              <label for="hl-heat">Heat Level <span class="req">*</span></label>
+              <select id="hl-heat" name="heat_level" required>
+                <option value="" disabled selected>Select…</option>
+                <option value="Hot">Hot</option>
+                <option value="Warm">Warm</option>
+                <option value="Cool">Cool</option>
+              </select>
+            </div>
+            <div>
+              <label for="hl-status">Status <span class="req">*</span></label>
+              <select id="hl-status" name="status" required>
+                <option value="Active" selected>Active</option>
+                <option value="Under Contract">Under Contract</option>
+                <option value="Passed">Passed</option>
+                <option value="Lost">Lost</option>
+              </select>
+            </div>
+            <div class="full">
+              <label for="hl-agent">Land Agent <span class="req">*</span></label>
+              <select id="hl-agent" name="land_agent" required>
+                <option value="" disabled selected>Select agent…</option>
+                <option value="Ryan Stonehouse">Ryan Stonehouse</option>
+                <option value="Kneeland Hibbett">Kneeland Hibbett</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Follow-Up</legend>
+          <div class="form-grid">
+            <div>
+              <label for="hl-last-touch">Last Touch Date</label>
+              <input id="hl-last-touch" name="last_touch" type="date" />
+            </div>
+            <div>
+              <label for="hl-next-date">Next Action Date</label>
+              <input id="hl-next-date" name="next_action_date" type="date" />
+            </div>
+            <div class="full">
+              <label for="hl-next-action">Next Action</label>
+              <input id="hl-next-action" name="next_action" type="text" placeholder="Call Tuesday, drop off written offer" />
+            </div>
+            <div class="full">
+              <label for="hl-notes">Notes / Conversation Log</label>
+              <textarea id="hl-notes" name="notes" rows="4" placeholder="Running log of conversations, decisions, flags. Newest at top."></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="form-status" id="hotlead-form-status" aria-live="polite"></div>
+      </form>
+
+      <footer class="modal-foot">
+        <button class="btn ghost" type="button" id="cancel-hotlead">Cancel</button>
+        <button class="btn" type="submit" form="hotlead-form" id="submit-hotlead">Save Hot Lead</button>
       </footer>
     </div>
   </div>
@@ -21194,6 +21353,382 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       // Also trigger contacts load (they only load when the Contacts subpanel is opened
       // via passcode gate — but the buy box dropdown needs them earlier)
       if (typeof _ctLoad === 'function' && !_contactsLoaded) _ctLoad();
+    })();
+
+    // ============================================================
+    // LAND ACQUISITION — HOT LEADS
+    //
+    // Properties we're chasing before contract. Same edit-in-place
+    // append-only pattern as Buy Boxes: each row has a stable lead_id;
+    // editing submits a new row with the same id and the parser keeps
+    // only the latest. Sheet/Form setup lives in docs/hotleads-setup.md.
+    // ============================================================
+    const HOTLEAD_CONFIG = {
+      SHEET_ID:  "1Ms0tc8nfwkR2h5Kd45qoBAQa0yxDt6BWL-pcUSR9i1U",
+      SHEET_TAB: "Form Responses 1",
+      FORM_URL:  "https://docs.google.com/forms/d/e/1FAIpQLScWy0nWqwDgL1w-jKIhGS5be3UDLcOaBGWIW-a1XSZk5X8cDQ/formResponse",
+      FIELD_MAP: {
+        lead_id:          "entry.291200275",
+        property_address: "entry.1984008242",
+        neighborhood:     "entry.1821165108",
+        estimated_value:  "entry.490726122",
+        owner_name:       "entry.804207928",
+        owner_phone:      "entry.1448884889",
+        owner_email:      "entry.765425665",
+        source:           "entry.1537712599",
+        referred_by:      "entry.1527182080",
+        heat_level:       "entry.1920898389",
+        status:           "entry.722485795",
+        land_agent:       "entry.1626956243",
+        last_touch:       "entry.790662111",
+        next_action_date: "entry.1203406933",
+        next_action:      "entry.331176128",
+        notes:            "entry.478377521"
+      }
+    };
+
+    let _hotLeadRows = [];
+    let _hotLeadsLoaded = false;
+
+    function _hlEsc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function _hlFmtDate(d) {
+      if (!(d instanceof Date) || isNaN(d)) return '';
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+    }
+    function _hlNewId() {
+      return 'hl-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+    }
+
+    function _parseHotLeadSheet(table) {
+      const cols = table.cols || [];
+      const ix = {
+        timestamp:  _adFindCol(cols, 'Timestamp'),
+        id:         _adFindCol(cols, 'lead_id', 'Lead ID'),
+        property:   _adFindCol(cols, 'property_address', 'Property Address'),
+        neigh:      _adFindCol(cols, 'neighborhood', 'Neighborhood'),
+        estValue:   _adFindCol(cols, 'estimated_value', 'Estimated Value'),
+        ownerName:  _adFindCol(cols, 'owner_name', 'Owner Name'),
+        ownerPhone: _adFindCol(cols, 'owner_phone', 'Owner Phone'),
+        ownerEmail: _adFindCol(cols, 'owner_email', 'Owner Email'),
+        source:     _adFindCol(cols, 'source', 'Source'),
+        referredBy: _adFindCol(cols, 'referred_by', 'Referred By'),
+        heat:       _adFindCol(cols, 'heat_level', 'Heat Level'),
+        status:     _adFindCol(cols, 'status', 'Status'),
+        agent:      _adFindCol(cols, 'land_agent', 'Land Agent', 'Agent'),
+        lastTouch:  _adFindCol(cols, 'last_touch', 'Last Touch'),
+        nextDate:   _adFindCol(cols, 'next_action_date', 'Next Action Date'),
+        nextAction: _adFindCol(cols, 'next_action', 'Next Action'),
+        notes:      _adFindCol(cols, 'notes', 'Notes')
+      };
+      const rows = (table.rows || []).map(r => {
+        const c = r.c || [];
+        return {
+          timestamp:  ix.timestamp >= 0 ? _adGvizDate(c[ix.timestamp]) : null,
+          id:         ix.id >= 0 ? _adGvizString(c[ix.id]) : '',
+          property:   ix.property >= 0 ? _adGvizString(c[ix.property]) : '',
+          neigh:      ix.neigh >= 0 ? _adGvizString(c[ix.neigh]) : '',
+          estValue:   ix.estValue >= 0 ? _adGvizString(c[ix.estValue]) : '',
+          ownerName:  ix.ownerName >= 0 ? _adGvizString(c[ix.ownerName]) : '',
+          ownerPhone: ix.ownerPhone >= 0 ? _adGvizString(c[ix.ownerPhone]) : '',
+          ownerEmail: ix.ownerEmail >= 0 ? _adGvizString(c[ix.ownerEmail]) : '',
+          source:     ix.source >= 0 ? _adGvizString(c[ix.source]) : '',
+          referredBy: ix.referredBy >= 0 ? _adGvizString(c[ix.referredBy]) : '',
+          heat:       ix.heat >= 0 ? _adGvizString(c[ix.heat]) : '',
+          status:     ix.status >= 0 ? _adGvizString(c[ix.status]) : '',
+          agent:      ix.agent >= 0 ? _adGvizString(c[ix.agent]) : '',
+          lastTouch:  ix.lastTouch >= 0 ? _adGvizDate(c[ix.lastTouch]) : null,
+          nextDate:   ix.nextDate >= 0 ? _adGvizDate(c[ix.nextDate]) : null,
+          nextAction: ix.nextAction >= 0 ? _adGvizString(c[ix.nextAction]) : '',
+          notes:      ix.notes >= 0 ? _adGvizString(c[ix.notes]) : ''
+        };
+      }).filter(r => r.id || r.property);
+
+      // Dedupe by lead_id (edit-in-place — latest Timestamp wins)
+      const latest = new Map();
+      rows.forEach(r => {
+        const key = r.id || r.property;
+        const existing = latest.get(key);
+        if (!existing || (r.timestamp && (!existing.timestamp || r.timestamp > existing.timestamp))) {
+          latest.set(key, r);
+        }
+      });
+      return Array.from(latest.values());
+    }
+
+    function _hlLoad() {
+      const gridEl = document.getElementById('hotlead-grid');
+      if (!gridEl) return Promise.resolve();
+      if (!HOTLEAD_CONFIG.SHEET_ID) {
+        _hotLeadRows = [];
+        _hotLeadsLoaded = true;
+        _hlRender();
+        return Promise.resolve();
+      }
+      return fetch(_adGvizUrl(HOTLEAD_CONFIG), { cache: 'no-store' })
+        .then(r => r.text())
+        .then(t => _adParseEnvelope(t))
+        .then(table => { _hotLeadRows = _parseHotLeadSheet(table); _hotLeadsLoaded = true; _hlRender(); })
+        .catch(err => { console.warn('[HOTLEADS] sheet failed:', err); _hotLeadRows = []; _hotLeadsLoaded = true; _hlRender(); });
+    }
+
+    function _hlPopulateAgentFilter() {
+      const sel = document.getElementById('hl-filter-agent');
+      if (!sel) return;
+      const agents = Array.from(new Set(_hotLeadRows.map(r => r.agent).filter(Boolean)))
+        .sort((a, b) => a.localeCompare(b));
+      const prev = sel.value;
+      sel.innerHTML = '<option value="">All Agents</option>' +
+        agents.map(a => '<option value="' + _hlEsc(a) + '">' + _hlEsc(a) + '</option>').join('');
+      sel.value = prev;
+    }
+
+    function _hlFilteredRows() {
+      const q  = ((document.getElementById('hl-search') || {}).value || '').toLowerCase().trim();
+      const fA = ((document.getElementById('hl-filter-agent') || {}).value || '').trim();
+      const fH = ((document.getElementById('hl-filter-heat') || {}).value || '').trim();
+      const fS = ((document.getElementById('hl-filter-status') || {}).value || '').trim();
+      return _hotLeadRows.filter(r => {
+        if (fA && r.agent !== fA) return false;
+        if (fH && r.heat !== fH) return false;
+        if (fS && r.status !== fS) return false;
+        if (q) {
+          const blob = [r.property, r.neigh, r.ownerName, r.source, r.referredBy, r.notes, r.nextAction].join(' ').toLowerCase();
+          if (blob.indexOf(q) < 0) return false;
+        }
+        return true;
+      });
+    }
+
+    function _hlHeatPill(h) {
+      if (!h) return '';
+      const bg = h === 'Hot' ? '#3a1c1c' : h === 'Warm' ? '#3a301c' : '#1c2a3a';
+      const fg = h === 'Hot' ? '#d99' : h === 'Warm' ? '#e8c068' : '#8fb1d9';
+      return '<span style="display:inline-block; padding:2px 8px; font-size:9px; letter-spacing:.14em; text-transform:uppercase; background:' + bg + '; color:' + fg + '; border-radius:2px;">' + _hlEsc(h) + '</span>';
+    }
+    function _hlStatusPill(s) {
+      const st = (s || 'Active').trim();
+      const bg = st === 'Active' ? '#1c3a1c' :
+                 st === 'Under Contract' ? '#1c2a3a' :
+                 st === 'Passed' ? '#2a2a2a' :
+                 st === 'Lost' ? '#3a1c1c' : '#2a2a2a';
+      const fg = st === 'Active' ? '#9ec39e' :
+                 st === 'Under Contract' ? '#8fb1d9' :
+                 st === 'Passed' ? '#888' :
+                 st === 'Lost' ? '#d99' : '#888';
+      return '<span style="display:inline-block; padding:2px 8px; font-size:9px; letter-spacing:.14em; text-transform:uppercase; background:' + bg + '; color:' + fg + '; border-radius:2px; margin-left:6px;">' + _hlEsc(st) + '</span>';
+    }
+    function _hlDaysSince(d) {
+      if (!(d instanceof Date) || isNaN(d)) return null;
+      const today = new Date(); today.setHours(0,0,0,0);
+      return Math.max(0, Math.round((today - d) / 86400000));
+    }
+    function _hlCardHtml(r) {
+      const daysSince = _hlDaysSince(r.lastTouch);
+      const staleWarn = (daysSince != null && daysSince > 14)
+        ? '<span style="color:#e8c068; font-size:9px; letter-spacing:.14em; text-transform:uppercase; margin-left:6px;">' + daysSince + 'd stale</span>' : '';
+      const phone = r.ownerPhone ? '<a href="tel:' + _hlEsc(r.ownerPhone.replace(/\D+/g,'')) + '" style="color:#ddd;">' + _hlEsc(r.ownerPhone) + '</a>' : '';
+      const email = r.ownerEmail ? '<a href="mailto:' + _hlEsc(r.ownerEmail) + '" style="color:#ddd;">' + _hlEsc(r.ownerEmail) + '</a>' : '';
+      const contactLine = [phone, email].filter(Boolean).join(' · ');
+      return `
+        <article class="bb-card" data-id="${_hlEsc(r.id)}" style="background:var(--panel); border:1px solid var(--panel-edge); padding:14px 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:8px;">
+            <div style="min-width:0; flex:1;">
+              <div style="font-family:var(--font-display); font-size:14px; letter-spacing:.14em; text-transform:uppercase; color:#fff; margin-bottom:2px;">${_hlEsc(r.property) || 'Unknown property'}</div>
+              <div style="font-size:11px; color:var(--text-dim);">${_hlEsc(r.neigh)}${r.estValue ? ' &nbsp;·&nbsp; ' + _hlEsc(r.estValue) : ''}</div>
+            </div>
+            <div style="text-align:right; white-space:nowrap;">
+              ${_hlHeatPill(r.heat)}${_hlStatusPill(r.status)}
+            </div>
+          </div>
+
+          ${r.ownerName ? `<div style="font-size:12px; color:#ddd; margin:8px 0 2px;"><b>${_hlEsc(r.ownerName)}</b></div>` : ''}
+          ${contactLine ? `<div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">${contactLine}</div>` : ''}
+
+          ${r.source ? `<div style="font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-dim); margin:8px 0 4px;">Source: <span style="color:#bbb;">${_hlEsc(r.source)}${r.referredBy ? ' — ' + _hlEsc(r.referredBy) : ''}</span></div>` : ''}
+
+          <div style="border-top:1px solid #222; margin-top:8px; padding-top:8px;">
+            <div style="font-size:11px; margin-bottom:4px;">
+              <span style="color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; font-size:9px;">Last Touch</span>
+              <span style="color:#ccc; margin-left:8px;">${_hlFmtDate(r.lastTouch) || '—'}</span>
+              ${staleWarn}
+            </div>
+            ${r.nextAction ? `<div style="font-size:11px; color:#fff;">
+              <span style="color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; font-size:9px;">Next</span>
+              <span style="margin-left:8px;">${_hlEsc(r.nextAction)}${r.nextDate ? ' <span style="color:var(--text-dim);">(' + _hlFmtDate(r.nextDate) + ')</span>' : ''}</span>
+            </div>` : ''}
+          </div>
+
+          ${r.notes ? `<div style="font-size:11px; color:var(--text-dim); margin-top:8px; padding-top:8px; border-top:1px solid #222; white-space:pre-wrap; line-height:1.4;">${_hlEsc(r.notes)}</div>` : ''}
+
+          <div style="margin-top:10px; padding-top:8px; border-top:1px solid #222; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:10px; color:#666; letter-spacing:.1em; text-transform:uppercase;">
+              ${r.agent ? 'Agent: ' + _hlEsc(r.agent) : ''}
+            </span>
+            <button type="button" class="hl-edit-btn" data-id="${_hlEsc(r.id)}"
+                    style="font-size:10px; letter-spacing:.14em; text-transform:uppercase; padding:5px 10px; border:1px solid var(--panel-edge); background:transparent; color:#fff; cursor:pointer;">Edit</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function _hlRender() {
+      const gridEl = document.getElementById('hotlead-grid');
+      const metaEl = document.getElementById('hl-count-meta');
+      if (!gridEl) return;
+      _hlPopulateAgentFilter();
+      const rows = _hlFilteredRows();
+      if (metaEl) metaEl.textContent = rows.length + ' of ' + _hotLeadRows.length + ' hot leads';
+      if (!_hotLeadsLoaded) {
+        gridEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">Loading…</div>';
+        return;
+      }
+      if (_hotLeadRows.length === 0) {
+        gridEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">' +
+          (HOTLEAD_CONFIG.SHEET_ID
+            ? 'No hot leads yet. Click <b>+ Add Hot Lead</b> to log the first.'
+            : 'Hot Leads sheet not connected yet. See docs/hotleads-setup.md.') +
+          '</div>';
+        return;
+      }
+      if (rows.length === 0) {
+        gridEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">No leads match the current filters.</div>';
+        return;
+      }
+      // Sort: Active/Hot first, then by lastTouch descending
+      const heatOrder = { 'Hot':0, 'Warm':1, 'Cool':2 };
+      rows.sort((a, b) => {
+        const ha = heatOrder[a.heat] ?? 9;
+        const hb = heatOrder[b.heat] ?? 9;
+        if (ha !== hb) return ha - hb;
+        const ta = a.lastTouch ? a.lastTouch.getTime() : 0;
+        const tb = b.lastTouch ? b.lastTouch.getTime() : 0;
+        return tb - ta;
+      });
+      gridEl.innerHTML = rows.map(_hlCardHtml).join('');
+      // Wire edit buttons
+      gridEl.querySelectorAll('.hl-edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = btn.getAttribute('data-id');
+          const row = _hotLeadRows.find(r => r.id === id);
+          if (row) _hlOpenEdit(row);
+        });
+      });
+    }
+
+    // ---- Modal open/close/fill/submit ----
+    function _hlOpenModal(mode) {
+      const overlay = document.getElementById('hotlead-modal-overlay');
+      const title   = document.getElementById('hotlead-modal-title');
+      if (!overlay) return;
+      title.textContent = mode === 'edit' ? 'Edit Hot Lead' : 'Add Hot Lead';
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+    }
+    function _hlCloseModal() {
+      const overlay = document.getElementById('hotlead-modal-overlay');
+      if (!overlay) return;
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+    }
+    function _hlResetForm() {
+      const form = document.getElementById('hotlead-form');
+      if (!form) return;
+      form.reset();
+      document.getElementById('hl-id').value = _hlNewId();
+      document.getElementById('hl-status').value = 'Active';
+      const status = document.getElementById('hotlead-form-status');
+      if (status) { status.className = 'form-status'; status.textContent = ''; }
+    }
+    function _hlFillForm(row) {
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val == null ? '' : val; };
+      const setDate = (id, d) => { const el = document.getElementById(id); if (!el) return; if (d instanceof Date && !isNaN(d)) el.value = d.toISOString().slice(0,10); else el.value = ''; };
+      set('hl-id',           row.id || _hlNewId());
+      set('hl-property',     row.property);
+      set('hl-neighborhood', row.neigh);
+      set('hl-est-value',    row.estValue);
+      set('hl-owner-name',   row.ownerName);
+      set('hl-owner-phone',  row.ownerPhone);
+      set('hl-owner-email',  row.ownerEmail);
+      set('hl-source',       row.source);
+      set('hl-referred-by',  row.referredBy);
+      set('hl-heat',         row.heat);
+      set('hl-status',       row.status || 'Active');
+      set('hl-agent',        row.agent);
+      setDate('hl-last-touch', row.lastTouch);
+      setDate('hl-next-date',  row.nextDate);
+      set('hl-next-action',  row.nextAction);
+      set('hl-notes',        row.notes);
+    }
+    function _hlOpenAdd()  { _hlResetForm(); _hlOpenModal('add'); }
+    function _hlOpenEdit(r){ _hlFillForm(r); _hlOpenModal('edit'); }
+
+    async function _hlSubmit(e) {
+      e.preventDefault();
+      const form   = document.getElementById('hotlead-form');
+      const btn    = document.getElementById('submit-hotlead');
+      const status = document.getElementById('hotlead-form-status');
+      status.className = 'form-status'; status.textContent = '';
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+      if (!HOTLEAD_CONFIG.FORM_URL || !Object.values(HOTLEAD_CONFIG.FIELD_MAP).some(v => v)) {
+        status.className = 'form-status show warn';
+        status.textContent = "Sheet/Form isn't wired yet — see docs/hotleads-setup.md.";
+        return;
+      }
+      btn.disabled = true;
+      const orig = btn.textContent;
+      btn.textContent = 'Saving…';
+      try {
+        const fd = new FormData(form);
+        const body = new URLSearchParams();
+        for (const [k, v] of fd.entries()) {
+          const key = HOTLEAD_CONFIG.FIELD_MAP[k];
+          if (key) body.append(key, v);
+        }
+        await fetch(HOTLEAD_CONFIG.FORM_URL, { method: 'POST', mode: 'no-cors', body });
+        status.className = 'form-status show ok';
+        status.textContent = '✅ Saved. Reloading list…';
+        setTimeout(() => { _hlCloseModal(); _hlLoad(); }, 900);
+      } catch (err) {
+        status.className = 'form-status show err';
+        status.textContent = 'Network error: ' + (err.message || err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = orig;
+      }
+    }
+
+    (function _hlBoot() {
+      const openBtn   = document.getElementById('open-hotlead-modal');
+      const closeBtn  = document.getElementById('close-hotlead-modal');
+      const cancelBtn = document.getElementById('cancel-hotlead');
+      const form      = document.getElementById('hotlead-form');
+      const overlay   = document.getElementById('hotlead-modal-overlay');
+      if (!openBtn || !form) return;
+
+      openBtn.addEventListener('click', _hlOpenAdd);
+      if (closeBtn) closeBtn.addEventListener('click', _hlCloseModal);
+      if (cancelBtn) cancelBtn.addEventListener('click', _hlCloseModal);
+      if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) _hlCloseModal(); });
+      document.addEventListener('keydown', (e) => {
+        if (overlay && overlay.getAttribute('aria-hidden') === 'false' && e.key === 'Escape') {
+          e.preventDefault(); _hlCloseModal();
+        }
+      });
+      form.addEventListener('submit', _hlSubmit);
+
+      ['hl-search','hl-filter-agent','hl-filter-heat','hl-filter-status'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', _hlRender);
+      });
+
+      const hlTab = document.querySelector('[aria-controls="subpanel-land-hotleads"]');
+      if (hlTab) hlTab.addEventListener('click', () => _hlLoad());
+      _hlLoad();
     })();
   </script>
 </body>
