@@ -1748,7 +1748,6 @@
           .catch(err => { console.warn('FEMA query failed:', err); return null; })
       ]);
 
-      statusEl.className = '';
       statusEl.style.color = '#9ec39e';
       statusEl.textContent = '✓ Loaded — ' + (geo.address || address);
       resultsEl.innerHTML = _plRenderHTML(geo, parcel, flood, city);
@@ -1870,7 +1869,7 @@
           e.preventDefault();
           const address = input.value.trim();
           if (!address) return;
-          statusEl.className = ''; statusEl.style.color = '';
+          statusEl.style.color = '';
           try {
             await _plLookup(container, address);
           } catch (err) {
