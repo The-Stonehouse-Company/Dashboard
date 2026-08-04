@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Land Acquisition · The Stonehouse Company</title>
+  <meta name="theme-color" content="#000000" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icon-arch-transparent.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Mulish:wght@200;300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:              #000;
+      --bg-elev:         #0a0a0a;
+      --panel:           #0f0f0f;
+      --panel-edge:      #2a2a2a;
+      --rule:            #2a2a2a;
+      --rule-strong:     #3a3a3a;
+      --text:            #ffffff;
+      --text-muted:      #b8b8b8;
+      --text-dim:        #6a6a6a;
+      --accent:          #eae2d3;
+
+      --font-body:       'Mulish', 'Helvetica Neue', Arial, sans-serif;
+      --font-display:    'Aboreto', 'Cormorant Garamond', serif;
+      --font-ui:         'Inter', 'Helvetica Neue', Arial, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+    body {
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    button { font: inherit; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ==================== Top bar ==================== */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: #000; border-bottom: 1px solid var(--panel-edge);
+      display: flex; align-items: center; gap: 22px;
+      padding: 20px 28px;
+    }
+    .topbar .brand { display: flex; align-items: center; gap: 20px; }
+    .topbar .brand img.arch {
+      width: 60px; height: 60px; object-fit: contain; background: transparent;
+    }
+    .topbar .brand .name {
+      font-family: var(--font-display);
+      font-size: 22px; letter-spacing: .32em; text-transform: uppercase; color: #fff;
+    }
+    .topbar .brand .name small {
+      display: block; font-family: var(--font-body); font-size: 9px;
+      letter-spacing: .28em; color: var(--text-dim); font-weight: 600; margin-top: 4px;
+    }
+    .topbar .spacer { flex: 1; }
+    .topbar .parent-link {
+      font-family: var(--font-body); font-size: 10px;
+      letter-spacing: .22em; text-transform: uppercase; color: var(--text-muted);
+      padding: 6px 12px; border: 1px solid var(--panel-edge);
+    }
+    .topbar .parent-link:hover { color: #fff; border-color: #fff; }
+
+    /* ==================== Layout ==================== */
+    .shell {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - 100px);
+    }
+
+    /* ==================== Side nav ==================== */
+    .sidenav {
+      background: #0a0a0a;
+      border-right: 1px solid var(--panel-edge);
+      padding: 22px 18px;
+      position: sticky; top: 100px;
+      height: calc(100vh - 100px); overflow-y: auto;
+    }
+    .sidenav .section-label {
+      font-size: 9px; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--text-dim); font-weight: 600; margin: 4px 0 10px;
+    }
+    .sidenav .nav-item {
+      display: block; width: 100%; text-align: left;
+      background: transparent; border: 0; color: var(--text-muted);
+      font-family: var(--font-body); font-size: 12px;
+      letter-spacing: .16em; text-transform: uppercase;
+      padding: 10px 12px; margin: 2px 0; cursor: pointer;
+    }
+    .sidenav .nav-item:hover { color: #fff; background: #141414; }
+    .sidenav .nav-item.is-active {
+      color: #fff; background: #141414;
+      border-left: 2px solid var(--accent); padding-left: 10px;
+    }
+    .sidenav .nav-group-title {
+      font-family: var(--font-display);
+      font-size: 10px; letter-spacing: .28em; text-transform: uppercase;
+      color: #fff; margin: 22px 0 8px 12px;
+    }
+
+    /* ==================== Content ==================== */
+    .content {
+      padding: 40px 48px 80px;
+      max-width: 1500px;
+    }
+    .division-eyebrow {
+      font-size: 10px; letter-spacing: .32em; text-transform: uppercase;
+      color: var(--text-dim); font-weight: 600; margin-bottom: 10px;
+    }
+    h1.division-title {
+      font-family: var(--font-display);
+      font-size: 52px; letter-spacing: .12em; text-transform: uppercase;
+      color: #fff; margin: 0 0 14px; font-weight: 400; line-height: 1;
+    }
+    h1.division-title small {
+      display: block; font-family: var(--font-body);
+      font-size: 12px; letter-spacing: .3em; color: var(--text-muted);
+      font-weight: 500; margin-top: 14px; text-transform: uppercase;
+    }
+
+    /* ==================== Agent tabs (top of content) ==================== */
+    .agent-tabs {
+      display: flex; gap: 4px; margin: 28px 0 24px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .agent-tab {
+      background: transparent; border: 0; color: var(--text-muted);
+      font-family: var(--font-body); font-size: 12px;
+      letter-spacing: .2em; text-transform: uppercase; font-weight: 500;
+      padding: 14px 24px; cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+    .agent-tab:hover { color: #fff; }
+    .agent-tab.is-active {
+      color: #fff; border-bottom-color: var(--accent);
+      font-weight: 600;
+    }
+    .agent-tab .initial {
+      display: inline-block; width: 22px; height: 22px;
+      border-radius: 50%; background: #141414;
+      border: 1px solid var(--rule-strong); color: var(--text-muted);
+      font-family: var(--font-display); font-size: 11px;
+      line-height: 20px; text-align: center; margin-right: 8px;
+      vertical-align: middle;
+    }
+    .agent-tab.is-active .initial {
+      background: var(--accent); color: #000; border-color: var(--accent);
+    }
+
+    /* Panels — one active at a time */
+    .panel { display: none; margin-top: 8px; }
+    .panel.is-active { display: block; }
+    .panel-intro {
+      font-size: 13px; line-height: 1.6; color: var(--text-muted);
+      max-width: 720px; margin: 0 0 22px;
+    }
+
+    /* Placeholder (per-panel awaiting spec) */
+    .placeholder {
+      border: 1px dashed var(--rule-strong); background: var(--panel);
+      padding: 40px 32px; text-align: center;
+    }
+    .placeholder .mark {
+      font-size: 10px; letter-spacing: .28em; text-transform: uppercase;
+      color: var(--text-dim); font-weight: 600; margin-bottom: 10px;
+    }
+    .placeholder h2 {
+      font-family: var(--font-display); font-size: 14px;
+      letter-spacing: .22em; text-transform: uppercase; margin: 0 0 8px;
+    }
+    .placeholder p {
+      font-size: 12px; color: var(--text-muted); line-height: 1.6;
+      max-width: 520px; margin: 0 auto;
+    }
+    .agent-name-inline {
+      color: var(--accent); font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a href="index.html?hub=1" class="brand" title="Back to hub">
+      <img class="arch" src="assets/icon-arch-transparent.png" alt="" />
+      <div class="name">Land Acquisition<small>The Stonehouse Company</small></div>
+    </a>
+    <div class="spacer"></div>
+    <a href="index.html?hub=1" class="parent-link">◫ Switch Division</a>
+  </div>
+
+  <div class="shell">
+
+    <!-- ==================== Side nav ==================== -->
+    <aside class="sidenav" role="tablist" aria-label="Land Acquisition sections">
+      <div class="section-label">Land Acquisition</div>
+      <button type="button" class="nav-item is-active" data-panel="overview">Overview</button>
+      <button type="button" class="nav-item" data-panel="pipeline">Active Pipeline</button>
+      <button type="button" class="nav-item" data-panel="hotleads">Hot Leads</button>
+      <button type="button" class="nav-item" data-panel="buyboxes">Buy Boxes</button>
+
+      <div class="nav-group-title">Tools</div>
+      <button type="button" class="nav-item" data-panel="tools">Fee Calc · Intake · One-Pager</button>
+
+      <div class="nav-group-title">Files</div>
+      <button type="button" class="nav-item" data-panel="files">Assignment · Commission Docs</button>
+
+      <div class="nav-group-title">Company</div>
+      <button type="button" class="nav-item" data-panel="settings">Settings</button>
+    </aside>
+
+    <!-- ==================== Content ==================== -->
+    <main class="content">
+      <div class="division-eyebrow">Division · Land Acquisition</div>
+      <h1 class="division-title">Land Acquisition<small>Sourcing, contracting, assigning</small></h1>
+
+      <!-- Agent tabs -->
+      <div class="agent-tabs" role="tablist" aria-label="Filter by agent">
+        <button type="button" class="agent-tab is-active" data-agent="Ryan Stonehouse">
+          <span class="initial">R</span>Ryan Stonehouse
+        </button>
+        <button type="button" class="agent-tab" data-agent="Gabe Jeudy">
+          <span class="initial">G</span>Gabe Jeudy
+        </button>
+        <button type="button" class="agent-tab" data-agent="Kneeland Hibbett">
+          <span class="initial">K</span>Kneeland Hibbett
+        </button>
+      </div>
+
+      <div class="scoped-note" style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-dim); margin-bottom:22px;">
+        Showing data for: <span class="agent-name-inline" id="current-agent-label">Ryan Stonehouse</span>
+      </div>
+
+      <!-- Overview -->
+      <section class="panel is-active" id="panel-overview" role="tabpanel">
+        <p class="panel-intro">Snapshot for <span class="agent-name-inline" data-current-agent>Ryan Stonehouse</span> — active pipeline count, hot leads, active buy boxes, MTD activity.</p>
+        <div class="placeholder">
+          <div class="mark">— Awaiting spec —</div>
+          <h2>Overview coming</h2>
+          <p>Tell me which KPIs to surface (active deals, hot leads count, closing this month, etc.).</p>
+        </div>
+      </section>
+
+      <!-- Pipeline -->
+      <section class="panel" id="panel-pipeline" role="tabpanel">
+        <p class="panel-intro">Every property <span class="agent-name-inline" data-current-agent>Ryan Stonehouse</span> currently has under contract, on first-right-of-refusal, or that fell out.</p>
+        <div class="placeholder">
+          <div class="mark">— Awaiting wire —</div>
+          <h2>Agent-scoped Pipeline coming</h2>
+          <p>Reads from the same Land Intake sheet as admin, filtered to the selected agent. Will render the same Under Contract / FRoR / Fell Out sections with edit buttons.</p>
+        </div>
+      </section>
+
+      <!-- Hot Leads -->
+      <section class="panel" id="panel-hotleads" role="tabpanel">
+        <p class="panel-intro">Properties <span class="agent-name-inline" data-current-agent>Ryan Stonehouse</span> is actively chasing before contract.</p>
+        <div class="placeholder">
+          <div class="mark">— Awaiting wire —</div>
+          <h2>Agent-scoped Hot Leads coming</h2>
+          <p>Same sheet as admin, filtered to the selected agent. Cards with edit + add.</p>
+        </div>
+      </section>
+
+      <!-- Buy Boxes -->
+      <section class="panel" id="panel-buyboxes" role="tabpanel">
+        <p class="panel-intro">Builder and developer acquisition criteria <span class="agent-name-inline" data-current-agent>Ryan Stonehouse</span> is working against.</p>
+        <div class="placeholder">
+          <div class="mark">— Awaiting wire —</div>
+          <h2>Agent-scoped Buy Boxes coming</h2>
+          <p>Same sheet as admin, filtered to buy boxes logged by the selected agent (or shared to all agents — we'll figure out ownership rules).</p>
+        </div>
+      </section>
+
+      <!-- Tools -->
+      <section class="panel" id="panel-tools" role="tabpanel">
+        <p class="panel-intro">Fee Calculator · Property Intake · One-Pager Generator.</p>
+        <div class="placeholder">
+          <div class="mark">— Awaiting wire —</div>
+          <h2>Tools coming</h2>
+          <p>Direct-link buttons that open the admin dashboard modals (Fee Calc, Submit Intake, Generate One-Pager) so agents don't need to switch dashboards to use them.</p>
+        </div>
+      </section>
+
+      <!-- Files -->
+      <section class="panel" id="panel-files" role="tabpanel">
+        <p class="panel-intro">Reference documents for the Land division.</p>
+        <div class="placeholder">
+          <div class="mark">— Awaiting wire —</div>
+          <h2>Files coming</h2>
+          <p>Assignment Form · Land Commission One-Pager · anything else Ryan wants standardized here.</p>
+        </div>
+      </section>
+
+      <!-- Settings -->
+      <section class="panel" id="panel-settings" role="tabpanel">
+        <p class="panel-intro">Land-specific settings, MRC schedule, fee tiers.</p>
+        <div class="placeholder">
+          <div class="mark">— Awaiting spec —</div>
+          <h2>Settings coming</h2>
+          <p>Anything division-wide Ryan wants configurable.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    /* ==== Side-nav → panel switch (mirrors apeiron.html) ==== */
+    (function () {
+      const nav = document.querySelector('.sidenav');
+      const panels = document.querySelectorAll('.content .panel');
+      if (!nav) return;
+      nav.addEventListener('click', (e) => {
+        const btn = e.target.closest('.nav-item');
+        if (!btn) return;
+        const key = btn.getAttribute('data-panel');
+        nav.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('is-active', b === btn));
+        panels.forEach(p => p.classList.toggle('is-active', p.id === 'panel-' + key));
+        history.replaceState(null, '', '#' + key);
+      });
+      const hash = (location.hash || '').replace(/^#/, '');
+      if (hash) {
+        const btn = nav.querySelector('[data-panel="' + hash + '"]');
+        if (btn) btn.click();
+      }
+    })();
+
+    /* ==== Agent tabs — swap the "current agent" everywhere ==== */
+    window.CURRENT_LAND_AGENT = 'Ryan Stonehouse';
+    (function () {
+      const tabs = document.querySelectorAll('.agent-tab');
+      tabs.forEach(t => t.addEventListener('click', () => {
+        const agent = t.getAttribute('data-agent');
+        window.CURRENT_LAND_AGENT = agent;
+        tabs.forEach(x => x.classList.toggle('is-active', x === t));
+        // Update every inline "current agent" mention on the page
+        document.getElementById('current-agent-label').textContent = agent;
+        document.querySelectorAll('[data-current-agent]').forEach(el => el.textContent = agent);
+        // Dispatch event so panels can re-render filtered data
+        window.dispatchEvent(new CustomEvent('landagentchange', { detail: { agent } }));
+      }));
+    })();
+  </script>
+</body>
+</html>

@@ -3229,13 +3229,13 @@
           <div class="hub-name">Property Management</div>
           <div class="hub-role">Coming soon</div>
         </button>
-        <button type="button" class="hub-card is-soon" data-target="land">
+        <button type="button" class="hub-card" data-target="land">
           <div class="hub-avatar" data-slug="land">
             <img src="assets/hub/land.jpg" alt="" onerror="this.style.display='none';" />
             <span class="hub-initial">L</span>
           </div>
           <div class="hub-name">Land Acquisition</div>
-          <div class="hub-role">Coming soon</div>
+          <div class="hub-role">Sourcing + assigning</div>
         </button>
         <button type="button" class="hub-card is-soon" data-target="development">
           <div class="hub-avatar" data-slug="development">
@@ -3529,6 +3529,10 @@
           }
           if (target === 'apeiron') {
             window.location.href = 'apeiron.html';
+            return;
+          }
+          if (target === 'land') {
+            window.location.href = 'land.html';
             return;
           }
           // Coming soon — subtle shake to signal it's not wired yet
@@ -4380,6 +4384,7 @@
           <select id="client-filter-agent">
             <option value="">All Agents</option>
             <option value="Ryan Stonehouse">Ryan Stonehouse</option>
+                <option value="Gabe Jeudy">Gabe Jeudy</option>
           </select>
           <select id="client-filter-category">
             <option value="">All Categories</option>
@@ -5479,6 +5484,7 @@
               <select id="cf-agent" name="agent" required>
                 <option value="" disabled selected>Select agent…</option>
                 <option value="Ryan Stonehouse">Ryan Stonehouse</option>
+                <option value="Gabe Jeudy">Gabe Jeudy</option>
               </select>
             </div>
 
@@ -5682,6 +5688,7 @@
               <select id="bd-agent" name="agent" required>
                 <option value="" disabled selected>Select agent…</option>
                 <option value="Ryan Stonehouse">Ryan Stonehouse</option>
+                <option value="Gabe Jeudy">Gabe Jeudy</option>
               </select>
             </div>
             <div>
@@ -5858,6 +5865,7 @@
               <select id="ls-agent" name="agent" required>
                 <option value="" disabled selected>Select agent…</option>
                 <option value="Ryan Stonehouse">Ryan Stonehouse</option>
+                <option value="Gabe Jeudy">Gabe Jeudy</option>
               </select>
             </div>
             <div>
@@ -6038,6 +6046,7 @@
               <select id="cl-agent" name="agent" required>
                 <option value="" disabled selected>Select agent…</option>
                 <option value="Ryan Stonehouse">Ryan Stonehouse</option>
+                <option value="Gabe Jeudy">Gabe Jeudy</option>
               </select>
             </div>
             <div>
@@ -6197,6 +6206,7 @@
               <select id="nu-agent" name="agent" required>
                 <option value="" disabled selected>Select agent…</option>
                 <option value="Ryan Stonehouse">Ryan Stonehouse</option>
+                <option value="Gabe Jeudy">Gabe Jeudy</option>
               </select>
             </div>
             <div>
@@ -6386,6 +6396,7 @@
               <select id="if-agent" name="agent" required>
                 <option value="" disabled selected>Select agent…</option>
                 <option value="Ryan Stonehouse">Ryan Stonehouse</option>
+                <option value="Gabe Jeudy">Gabe Jeudy</option>
                 <option value="Kneeland Hibbett">Kneeland Hibbett (unlicensed)</option>
               </select>
             </div>
@@ -7336,6 +7347,7 @@
               <select id="hl-agent" name="land_agent" required>
                 <option value="" disabled selected>Select agent…</option>
                 <option value="Ryan Stonehouse">Ryan Stonehouse</option>
+                <option value="Gabe Jeudy">Gabe Jeudy</option>
                 <option value="Kneeland Hibbett">Kneeland Hibbett</option>
               </select>
             </div>
