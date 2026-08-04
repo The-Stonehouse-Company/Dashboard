@@ -3520,6 +3520,38 @@
           if (!card) return;
           const target = card.getAttribute('data-target');
           if (target === 'admin') {
+            // Admin-only passcode gate on top of the employee-wide code.
+            // Unlock persists for 24 hours per browser.
+            const ADMIN_CODE = '1522';
+            const ADMIN_KEY  = 'stonehouse.adminUnlock';
+            const ADMIN_MS   = 24 * 60 * 60 * 1000;
+            function adminIsUnlocked() {
+              try {
+                const raw = localStorage.getItem(ADMIN_KEY);
+                if (!raw) return false;
+                const t = JSON.parse(raw);
+                return t && t.ok && (Date.now() - t.ts) < ADMIN_MS;
+              } catch (_) { return false; }
+            }
+            function adminMarkUnlocked() {
+              try { localStorage.setItem(ADMIN_KEY, JSON.stringify({ ok: true, ts: Date.now() })); } catch (_) {}
+            }
+            if (!adminIsUnlocked()) {
+              const entered = prompt('Enter admin passcode to open the master dashboard.');
+              if (entered == null) return;                  // user cancelled
+              if (entered.trim() !== ADMIN_CODE) {
+                // Subtle shake to signal wrong code
+                card.animate([
+                  { transform: 'translateX(-4px)' },
+                  { transform: 'translateX(4px)' },
+                  { transform: 'translateX(-3px)' },
+                  { transform: 'translateX(3px)' },
+                  { transform: 'translateX(0)' }
+                ], { duration: 260, easing: 'ease-out' });
+                return;
+              }
+              adminMarkUnlocked();
+            }
             hub.classList.add('is-leaving');
             setTimeout(() => {
               hub.setAttribute('aria-hidden', 'true');
