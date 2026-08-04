@@ -96,10 +96,39 @@
       color: #fff; background: #141414;
       border-left: 2px solid var(--accent); padding-left: 10px;
     }
-    .sidenav .nav-group-title {
+    /* Collapsible groups (matches admin's <details>/<summary> pattern) */
+    .sidenav .nav-group,
+    .sidenav .nav-subgroup {
+      margin: 12px 0 4px;
+    }
+    .sidenav .nav-group > summary,
+    .sidenav .nav-subgroup > summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 12px;
       font-family: var(--font-display);
       font-size: 10px; letter-spacing: .28em; text-transform: uppercase;
-      color: #fff; margin: 22px 0 8px 12px;
+      color: #fff;
+      user-select: none;
+    }
+    .sidenav .nav-group > summary::-webkit-details-marker,
+    .sidenav .nav-subgroup > summary::-webkit-details-marker { display: none; }
+    .sidenav .nav-group > summary::after,
+    .sidenav .nav-subgroup > summary::after {
+      content: '＋'; color: var(--text-dim); font-size: 12px;
+    }
+    .sidenav .nav-group[open] > summary::after,
+    .sidenav .nav-subgroup[open] > summary::after {
+      content: '−';
+    }
+    .sidenav .nav-subgroup {
+      margin: 4px 0 4px 8px;
+    }
+    .sidenav .nav-subgroup > summary {
+      font-family: var(--font-body); font-size: 11px;
+      letter-spacing: .18em; color: var(--text-muted);
+      padding: 6px 10px;
     }
     /* Nested county → city sub-items in the sidenav */
     .sidenav .nav-sub {
@@ -330,23 +359,31 @@
       <button type="button" class="nav-item" data-panel="hotleads">Hot Leads</button>
       <button type="button" class="nav-item" data-panel="buyboxes">Buy Boxes</button>
 
-      <div class="nav-group-title">Tools</div>
-      <button type="button" class="nav-item" data-panel="tools">Fee Calc · Intake · One-Pager</button>
-      <button type="button" class="nav-item" data-panel="property-lookup">Property Lookup (Nashville)</button>
+      <details class="nav-group">
+        <summary>Tools</summary>
+        <button type="button" class="nav-item" data-panel="tools">Fee Calc · Intake · One-Pager</button>
+      </details>
 
-      <div class="nav-group-title">Research</div>
-      <div class="nav-item nav-item-parent" style="color:var(--text-dim); cursor:default; font-size:11px; padding-top:4px; font-weight:600;">Davidson County</div>
-      <button type="button" class="nav-item nav-sub" data-panel="research-nashville">Nashville</button>
-      <button type="button" class="nav-item nav-sub" data-panel="research-oak-hill">Oak Hill</button>
-      <button type="button" class="nav-item nav-sub" data-panel="research-forest-hills">Forest Hills</button>
-      <div class="nav-item nav-item-parent" style="color:var(--text-dim); cursor:default; font-size:11px; padding-top:4px; font-weight:600;">Williamson County</div>
-      <button type="button" class="nav-item nav-sub" data-panel="research-brentwood">Brentwood</button>
+      <details class="nav-group" open>
+        <summary>Research</summary>
+        <details class="nav-subgroup" open>
+          <summary>Davidson County</summary>
+          <button type="button" class="nav-item nav-sub" data-panel="research-nashville">Nashville</button>
+          <button type="button" class="nav-item nav-sub" data-panel="research-oak-hill">Oak Hill</button>
+          <button type="button" class="nav-item nav-sub" data-panel="research-forest-hills">Forest Hills</button>
+        </details>
+        <details class="nav-subgroup">
+          <summary>Williamson County</summary>
+          <button type="button" class="nav-item nav-sub" data-panel="research-brentwood">Brentwood</button>
+        </details>
+      </details>
 
-      <div class="nav-group-title">Files</div>
-      <button type="button" class="nav-item" data-panel="files">Assignment · Commission Docs</button>
+      <details class="nav-group">
+        <summary>Files</summary>
+        <button type="button" class="nav-item" data-panel="files">Assignment · Commission Docs</button>
+      </details>
 
-      <div class="nav-group-title">Company</div>
-      <button type="button" class="nav-item" data-panel="settings">Settings</button>
+      <button type="button" class="nav-item" data-panel="settings" style="margin-top:14px;">Settings</button>
     </aside>
 
     <!-- ==================== Content ==================== -->
@@ -479,26 +516,6 @@
         </div>
       </section>
 
-      <!-- Property Lookup (Metro Nashville only for now) -->
-      <section class="panel" id="panel-property-lookup" role="tabpanel">
-        <div class="division-eyebrow">Tools · Metro Nashville</div>
-        <h2 style="font-family:var(--font-display); font-size:26px; letter-spacing:.12em; text-transform:uppercase; margin:0 0 8px; font-weight:400; color:#fff;">Property Lookup</h2>
-        <p class="panel-intro">Enter a Nashville address. Live query to Metro's parcel service, zoning layer, and FEMA's flood-hazard map. Standard setbacks looked up from a maintained zone table. Verify with jurisdiction before contracting — overlays (HPZ, contextual, etc.) may override.</p>
-
-        <form id="plookup-form" style="display:flex; gap:10px; margin-bottom:20px;">
-          <input id="plookup-address" type="text" required autocomplete="off"
-                 placeholder="e.g. 1600 West End Ave, Nashville, TN"
-                 style="flex:1; padding:12px 14px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
-          <button type="submit" class="btn" style="padding:12px 24px;">Look up</button>
-        </form>
-
-        <div id="plookup-status" style="font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase; margin-bottom:14px;"></div>
-
-        <div id="plookup-results" hidden style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:14px;">
-          <!-- Result cards rendered here -->
-        </div>
-      </section>
-
       <!-- Files (SHARED) -->
       <section class="panel" id="panel-files" role="tabpanel">
         <p class="panel-intro">Reference documents for the Land division. Same files everyone on the team uses.</p>
@@ -525,6 +542,20 @@
         <div class="division-eyebrow">Research · Davidson County</div>
         <h2 style="font-family:var(--font-display); font-size:28px; letter-spacing:.12em; text-transform:uppercase; margin:0 0 16px; font-weight:400; color:#fff;">Nashville</h2>
         <p class="panel-intro">Metro Nashville zoning framework, standard residential setbacks, and the Metro parcel viewer. Verify current values with Metro Codes before contracting — this is a working reference, not authoritative.</p>
+
+        <!-- Property Lookup — inline at the top of Nashville research -->
+        <div style="background:var(--panel); border:1px solid var(--accent); padding:20px 22px; margin-bottom:24px;">
+          <h3 style="font-family:var(--font-display); font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin:0 0 6px;">Property Lookup</h3>
+          <p style="font-size:12px; color:var(--text-muted); margin:0 0 14px; line-height:1.5;">Enter a Nashville address to pull parcel, lot dimensions, zoning, standard setbacks, and FEMA flood zone in one query.</p>
+          <form id="plookup-form" style="display:flex; gap:10px;">
+            <input id="plookup-address" type="text" required autocomplete="off"
+                   placeholder="e.g. 1600 West End Ave, Nashville, TN"
+                   style="flex:1; padding:12px 14px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
+            <button type="submit" class="btn" style="padding:12px 24px;">Look up</button>
+          </form>
+          <div id="plookup-status" style="font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase; margin-top:12px;"></div>
+          <div id="plookup-results" hidden style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px; margin-top:16px;"></div>
+        </div>
 
         <div class="research-grid">
           <div class="research-card">
