@@ -1931,7 +1931,7 @@
         + '?where=' + encodeURIComponent(where)
         + '&outFields=' + encodeURIComponent('PropAddr,Owner,OwnDate,SalePrice,Acres,Zoning,LUDesc,ImprAppr,LandAppr')
         + '&orderByFields=' + encodeURIComponent('OwnDate DESC')
-        + '&resultRecordCount=25'      // fetch up to 25, we'll display top 5
+        + '&resultRecordCount=50'      // fetch up to 50, we'll display top 20
         + '&returnGeometry=false&f=json';
       const res = await fetch(url);
       if (!res.ok) throw new Error('Metro parcel query HTTP ' + res.status);
@@ -1948,8 +1948,8 @@
           esc(ctx.minAcres) + '&ndash;' + esc(ctx.maxAcres) + '&nbsp;ac. Try widening the range or the look-back.</div>';
         return;
       }
-      // Take top 5 by date
-      const top = rows.slice(0, 5);
+      // Take top 20 by date
+      const top = rows.slice(0, 20);
       const avg = top.reduce((s, r) => s + (r.SalePrice || 0), 0) / top.length;
       const avgPerAcre = top.reduce((s, r) => s + ((r.SalePrice || 0) / (r.Acres || 1)), 0) / top.length;
       const usdFmt = new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', maximumFractionDigits: 0 });
