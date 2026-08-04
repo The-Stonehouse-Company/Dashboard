@@ -543,59 +543,9 @@
         <h2 style="font-family:var(--font-display); font-size:28px; letter-spacing:.12em; text-transform:uppercase; margin:0 0 16px; font-weight:400; color:#fff;">Nashville</h2>
         <p class="panel-intro">Metro Nashville zoning framework, standard residential setbacks, and the Metro parcel viewer. Verify current values with Metro Codes before contracting — this is a working reference, not authoritative.</p>
 
-        <!-- Property Lookup — inline at the top of Nashville research -->
-        <div style="background:var(--panel); border:1px solid var(--accent); padding:20px 22px; margin-bottom:24px;">
-          <h3 style="font-family:var(--font-display); font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin:0 0 6px;">Property Lookup</h3>
-          <p style="font-size:12px; color:var(--text-muted); margin:0 0 14px; line-height:1.5;">Enter a Nashville address to pull parcel, lot dimensions, zoning, standard setbacks, and FEMA flood zone in one query.</p>
-          <form id="plookup-form" style="display:flex; gap:10px;">
-            <input id="plookup-address" type="text" required autocomplete="off"
-                   placeholder="e.g. 1600 West End Ave, Nashville, TN"
-                   style="flex:1; padding:12px 14px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
-            <button type="submit" class="btn" style="padding:12px 24px;">Look up</button>
-          </form>
-          <div id="plookup-status" style="font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase; margin-top:12px;"></div>
-          <div id="plookup-results" hidden style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px; margin-top:16px;"></div>
-        </div>
-
-        <!-- Land Comp Generator -->
-        <div style="background:var(--panel); border:1px solid var(--accent); padding:20px 22px; margin-bottom:24px;">
-          <h3 style="font-family:var(--font-display); font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin:0 0 6px;">Land Comp Generator</h3>
-          <p style="font-size:12px; color:var(--text-muted); margin:0 0 14px; line-height:1.5;">Recent LLC-purchased lots in a ZIP within a target acreage range. Automatically filters out anything above the price cap (usually home sales, not land).</p>
-          <form id="lcomp-form" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:10px; align-items:end;">
-            <label style="display:flex; flex-direction:column; gap:4px;">
-              <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">ZIP Code *</span>
-              <input id="lc-zip" type="text" required pattern="[0-9]{5}" maxlength="5" placeholder="37215"
-                     style="padding:10px 12px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
-            </label>
-            <label style="display:flex; flex-direction:column; gap:4px;">
-              <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Target Acres *</span>
-              <input id="lc-acres" type="number" required step="0.01" min="0.05" placeholder="0.40"
-                     style="padding:10px 12px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
-            </label>
-            <label style="display:flex; flex-direction:column; gap:4px;">
-              <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">± Range</span>
-              <input id="lc-tolerance" type="number" step="0.05" min="0.05" value="0.20"
-                     style="padding:10px 12px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
-            </label>
-            <label style="display:flex; flex-direction:column; gap:4px;">
-              <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Look Back (mo)</span>
-              <input id="lc-months" type="number" step="1" min="1" max="60" value="12"
-                     style="padding:10px 12px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
-            </label>
-            <label style="display:flex; flex-direction:column; gap:4px;">
-              <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Max $ Cap</span>
-              <input id="lc-cap" type="number" step="10000" placeholder="auto by ZIP"
-                     style="padding:10px 12px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
-            </label>
-            <label style="display:flex; align-items:center; gap:8px; padding:10px 0;">
-              <input id="lc-llc-only" type="checkbox" checked style="accent-color:var(--accent);" />
-              <span style="font-size:11px; color:var(--text-muted); letter-spacing:.05em;">LLC buyers only</span>
-            </label>
-            <button type="submit" class="btn" style="padding:11px 20px;">Find Comps</button>
-          </form>
-          <div id="lc-status" style="font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase; margin-top:12px;"></div>
-          <div id="lc-results" hidden style="margin-top:16px;"></div>
-        </div>
+        <!-- Property Lookup + Land Comp Generator mount points (JS injects the UI) -->
+        <div class="plookup-mount" data-city="nashville"></div>
+        <div class="lcomp-mount"   data-city="nashville"></div>
 
         <div class="research-grid">
           <div class="research-card">
@@ -674,6 +624,10 @@
         <div class="division-eyebrow">Research · Davidson County</div>
         <h2 style="font-family:var(--font-display); font-size:28px; letter-spacing:.12em; text-transform:uppercase; margin:0 0 16px; font-weight:400; color:#fff;">Oak Hill</h2>
         <p class="panel-intro">Incorporated satellite city within Davidson County — separate zoning code from Metro Nashville. Large-lot residential character strictly protected; no commercial or multi-family zoning. Verify with Oak Hill Building Commissioner before contracting.</p>
+
+        <!-- Property Lookup + Land Comp Generator -->
+        <div class="plookup-mount" data-city="oak-hill"></div>
+        <div class="lcomp-mount"   data-city="oak-hill"></div>
 
         <div class="research-grid">
           <div class="research-card">
@@ -757,6 +711,10 @@
         <div class="division-eyebrow">Research · Davidson County</div>
         <h2 style="font-family:var(--font-display); font-size:28px; letter-spacing:.12em; text-transform:uppercase; margin:0 0 16px; font-weight:400; color:#fff;">Forest Hills</h2>
         <p class="panel-intro">Incorporated satellite city within Davidson County — own zoning, own building official. Similar large-lot residential character to Oak Hill. Verify all zoning + setbacks with Forest Hills before contracting.</p>
+
+        <!-- Property Lookup + Land Comp Generator -->
+        <div class="plookup-mount" data-city="forest-hills"></div>
+        <div class="lcomp-mount"   data-city="forest-hills"></div>
 
         <div class="research-grid">
           <div class="research-card">
@@ -1748,9 +1706,31 @@
       return lengths;
     }
 
-    async function _plLookup(address) {
-      const statusEl = document.getElementById('plookup-status');
-      const resultsEl = document.getElementById('plookup-results');
+    // City metadata used by mounts + render caveats
+    const CITY_META = {
+      'nashville': {
+        label: 'Nashville',
+        placeholder: 'e.g. 1600 West End Ave, Nashville, TN',
+        zipHint: '37215'
+      },
+      'oak-hill': {
+        label: 'Oak Hill',
+        placeholder: 'e.g. 5540 Franklin Rd, Nashville, TN 37220',
+        zipHint: '37220',
+        zoningCaveat: 'Metro zoning shown for reference only — Oak Hill uses its own code (R-40, R-30). See the Oak Hill Zoning Map PDF above for the actual district and setbacks. Email cityadmin@oakhilltn.us to confirm.'
+      },
+      'forest-hills': {
+        label: 'Forest Hills',
+        placeholder: 'e.g. 6300 Hillsboro Pike, Nashville, TN 37215',
+        zipHint: '37215',
+        zoningCaveat: 'Metro zoning shown for reference only — Forest Hills uses its own code. Contact the Forest Hills Building Official to verify actual zoning and setbacks.'
+      }
+    };
+
+    async function _plLookup(container, address) {
+      const statusEl  = container.querySelector('.plookup-status');
+      const resultsEl = container.querySelector('.plookup-results');
+      const city      = container.dataset.city || 'nashville';
       resultsEl.hidden = true;
       statusEl.textContent = 'Geocoding address…';
 
@@ -1759,9 +1739,8 @@
       const point = { x: geo.location.x, y: geo.location.y, spatialReference: { wkid: 4326 } };
       statusEl.textContent = 'Loading parcel + flood zone…';
 
-      // Two queries — the Parcels layer already carries the zoning code
-      // (Metro pre-joins it), so we don't need a separate zoning-layer hit.
-      // Front/Side dimensions come straight off Parcel Viewer's underlying data.
+      // Metro's Parcels layer covers all of Davidson County (including Oak Hill
+      // and Forest Hills). Front/Side dimensions are pre-computed by Metro.
       const [parcel, flood] = await Promise.all([
         _plQueryLayer('https://maps.nashville.gov/arcgis/rest/services/Cadastral/Parcels/MapServer', 0, point, '*')
           .catch(err => { console.warn('Parcel query failed:', err); return null; }),
@@ -1772,7 +1751,7 @@
       statusEl.className = '';
       statusEl.style.color = '#9ec39e';
       statusEl.textContent = '✓ Loaded — ' + (geo.address || address);
-      _plRender(geo, parcel, flood, address);
+      resultsEl.innerHTML = _plRenderHTML(geo, parcel, flood, city);
       resultsEl.hidden = false;
     }
 
@@ -1790,8 +1769,8 @@
               <div style="color:#fff;">${val}</div>`;
     }
 
-    function _plRender(geo, parcel, flood, addressInput) {
-      const resultsEl = document.getElementById('plookup-results');
+    function _plRenderHTML(geo, parcel, flood, city) {
+      const meta = CITY_META[city] || CITY_META['nashville'];
       const cards = [];
 
       // === PARCEL: only the fields Parcel Viewer's General Info shows ===
@@ -1813,23 +1792,31 @@
           _plRow('Side', side != null ? side + ' ft' : '—')
         ));
 
-        // === ZONING (from parcel attribute) + Standard Setbacks ===
-        const setbacks = NASHVILLE_SETBACKS[zoneCode];
-        cards.push(_plCard('Zoning',
-          _plRow('Zone', zoneCode || '—') +
-          (setbacks ? (
-            _plRow('Front setback', setbacks.front + ' ft') +
-            _plRow('Rear setback',  setbacks.rear + ' ft') +
-            _plRow('Side setback',  setbacks.side + ' ft each') +
-            _plRow('Min lot', setbacks.minLot) +
-            _plRow('Max height', setbacks.maxHeight + ' ft')
-          ) : (zoneCode
-            ? _plRow('Setbacks', 'Zone ' + esc(zoneCode) + ' not in our setback table — verify with Metro Codes.')
-            : ''))
-        ));
+        // === ZONING — city-aware ===
+        if (city === 'nashville') {
+          const setbacks = NASHVILLE_SETBACKS[zoneCode];
+          cards.push(_plCard('Zoning',
+            _plRow('Zone', zoneCode || '—') +
+            (setbacks ? (
+              _plRow('Front setback', setbacks.front + ' ft') +
+              _plRow('Rear setback',  setbacks.rear + ' ft') +
+              _plRow('Side setback',  setbacks.side + ' ft each') +
+              _plRow('Min lot', setbacks.minLot) +
+              _plRow('Max height', setbacks.maxHeight + ' ft')
+            ) : (zoneCode
+              ? _plRow('Setbacks', 'Zone ' + esc(zoneCode) + ' not in our setback table — verify with Metro Codes.')
+              : ''))
+          ));
+        } else {
+          // Oak Hill / Forest Hills — Metro's zoning field is not authoritative
+          cards.push(_plCard('Zoning (' + esc(meta.label) + ')',
+            _plRow('Metro Zone (ref)', zoneCode || '—') +
+            `<div style="grid-column:1/-1; font-size:11px; line-height:1.5; color:#e0c98d; padding:8px 10px; margin-top:6px; background:rgba(224,201,141,0.08); border-left:2px solid #e0c98d;">⚠ ${esc(meta.zoningCaveat || '')}</div>`
+          ));
+        }
       } else {
         cards.push(_plCard('Parcel',
-          _plRow('Status', 'No parcel found at this location. The address may not be inside Metro Nashville.')
+          _plRow('Status', 'No parcel found at this location. Address may be outside Davidson County.')
         ));
       }
 
@@ -1852,28 +1839,50 @@
         ));
       }
 
-      resultsEl.innerHTML = cards.join('');
+      return cards.join('');
     }
 
-    (function _plBoot() {
-      const form = document.getElementById('plookup-form');
-      if (!form) return;
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const address = document.getElementById('plookup-address').value.trim();
-        if (!address) return;
-        const statusEl = document.getElementById('plookup-status');
-        statusEl.className = ''; statusEl.style.color = '';
-        try {
-          await _plLookup(address);
-        } catch (err) {
-          console.error(err);
-          statusEl.style.color = '#d99';
-          statusEl.textContent = 'Error: ' + (err.message || err);
-          document.getElementById('plookup-results').hidden = true;
-        }
+    // Mount + bind every .plookup-mount on the page
+    function _plMountAll() {
+      document.querySelectorAll('.plookup-mount').forEach(mount => {
+        const city = mount.dataset.city || 'nashville';
+        const meta = CITY_META[city] || CITY_META['nashville'];
+        mount.innerHTML = `
+          <div class="plookup-tool" data-city="${city}" style="background:var(--panel); border:1px solid var(--accent); padding:20px 22px; margin-bottom:24px;">
+            <h3 style="font-family:var(--font-display); font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin:0 0 6px;">Property Lookup · ${esc(meta.label)}</h3>
+            <p style="font-size:12px; color:var(--text-muted); margin:0 0 14px; line-height:1.5;">Enter a ${esc(meta.label)} address to pull parcel, lot dimensions, zoning, and FEMA flood zone in one query. Parcel data from Metro Nashville Assessor (covers all of Davidson County).</p>
+            <form class="plookup-form" style="display:flex; gap:10px;">
+              <input class="plookup-address" type="text" required autocomplete="off"
+                     placeholder="${esc(meta.placeholder)}"
+                     style="flex:1; padding:12px 14px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
+              <button type="submit" class="btn" style="padding:12px 24px;">Look up</button>
+            </form>
+            <div class="plookup-status" style="font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase; margin-top:12px;"></div>
+            <div class="plookup-results" hidden style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px; margin-top:16px;"></div>
+          </div>
+        `;
+        const container = mount.querySelector('.plookup-tool');
+        const form      = container.querySelector('.plookup-form');
+        const input     = container.querySelector('.plookup-address');
+        const statusEl  = container.querySelector('.plookup-status');
+        const resultsEl = container.querySelector('.plookup-results');
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const address = input.value.trim();
+          if (!address) return;
+          statusEl.className = ''; statusEl.style.color = '';
+          try {
+            await _plLookup(container, address);
+          } catch (err) {
+            console.error(err);
+            statusEl.style.color = '#d99';
+            statusEl.textContent = 'Error: ' + (err.message || err);
+            resultsEl.hidden = true;
+          }
+        });
       });
-    })();
+    }
+    _plMountAll();
 
     /* =========================================================
        LAND COMP GENERATOR — Nashville
@@ -1931,8 +1940,8 @@
       return (data.features || []).map(f => f.attributes);
     }
 
-    function _lcRender(rows, ctx) {
-      const el = document.getElementById('lc-results');
+    function _lcRender(container, rows, ctx) {
+      const el = container.querySelector('.lc-results');
       if (rows.length === 0) {
         el.innerHTML = '<div style="padding:24px; text-align:center; color:var(--text-dim); font-size:12px; border:1px dashed var(--rule);">' +
           'No comps found for ZIP <b style="color:#fff;">' + esc(ctx.zip) + '</b> in the ' + esc(ctx.months) + '-month window at ' +
@@ -1985,44 +1994,92 @@
       `;
     }
 
-    (function _lcBoot() {
-      const form = document.getElementById('lcomp-form');
-      if (!form) return;
-      const capInput = document.getElementById('lc-cap');
-      const zipInput = document.getElementById('lc-zip');
-      // Auto-fill cap when ZIP changes
-      zipInput.addEventListener('input', () => {
-        const z = zipInput.value.trim();
-        if (z.length === 5 && LAND_PRICE_CAPS[z]) capInput.placeholder = '' + LAND_PRICE_CAPS[z] + ' (default)';
-        else capInput.placeholder = 'auto by ZIP';
+    function _lcMountAll() {
+      document.querySelectorAll('.lcomp-mount').forEach(mount => {
+        const city = mount.dataset.city || 'nashville';
+        const meta = CITY_META[city] || CITY_META['nashville'];
+        const cityHint = city === 'nashville'
+          ? ''
+          : `<p style="font-size:11px; color:#e0c98d; margin:0 0 12px; line-height:1.5;">⚠ Note: ZIP ${esc(meta.zipHint)} covers parts of Nashville and other satellite cities. Comps returned are from the entire ZIP — check the address column to confirm which city each is in.</p>`;
+        mount.innerHTML = `
+          <div class="lcomp-tool" data-city="${city}" style="background:var(--panel); border:1px solid var(--accent); padding:20px 22px; margin-bottom:24px;">
+            <h3 style="font-family:var(--font-display); font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin:0 0 6px;">Land Comp Generator · ${esc(meta.label)}</h3>
+            <p style="font-size:12px; color:var(--text-muted); margin:0 0 14px; line-height:1.5;">Recent LLC-purchased lots in a ZIP within a target acreage range. Automatically filters out anything above the price cap (usually home sales, not land).</p>
+            ${cityHint}
+            <form class="lcomp-form" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:10px; align-items:end;">
+              <label style="display:flex; flex-direction:column; gap:4px;">
+                <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">ZIP Code *</span>
+                <input class="lc-zip" type="text" required pattern="[0-9]{5}" maxlength="5" placeholder="${esc(meta.zipHint)}"
+                       style="padding:10px 12px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
+              </label>
+              <label style="display:flex; flex-direction:column; gap:4px;">
+                <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Target Acres *</span>
+                <input class="lc-acres" type="number" required step="0.01" min="0.05" placeholder="0.40"
+                       style="padding:10px 12px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
+              </label>
+              <label style="display:flex; flex-direction:column; gap:4px;">
+                <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">± Range</span>
+                <input class="lc-tolerance" type="number" step="0.05" min="0.05" value="0.20"
+                       style="padding:10px 12px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
+              </label>
+              <label style="display:flex; flex-direction:column; gap:4px;">
+                <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Look Back (mo)</span>
+                <input class="lc-months" type="number" step="1" min="1" max="60" value="12"
+                       style="padding:10px 12px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
+              </label>
+              <label style="display:flex; flex-direction:column; gap:4px;">
+                <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Max $ Cap</span>
+                <input class="lc-cap" type="number" step="10000" placeholder="auto by ZIP"
+                       style="padding:10px 12px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
+              </label>
+              <label style="display:flex; align-items:center; gap:8px; padding:10px 0;">
+                <input class="lc-llc-only" type="checkbox" checked style="accent-color:var(--accent);" />
+                <span style="font-size:11px; color:var(--text-muted); letter-spacing:.05em;">LLC buyers only</span>
+              </label>
+              <button type="submit" class="btn" style="padding:11px 20px;">Find Comps</button>
+            </form>
+            <div class="lc-status" style="font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase; margin-top:12px;"></div>
+            <div class="lc-results" hidden style="margin-top:16px;"></div>
+          </div>
+        `;
+        const container = mount.querySelector('.lcomp-tool');
+        const form     = container.querySelector('.lcomp-form');
+        const capInput = container.querySelector('.lc-cap');
+        const zipInput = container.querySelector('.lc-zip');
+        zipInput.addEventListener('input', () => {
+          const z = zipInput.value.trim();
+          if (z.length === 5 && LAND_PRICE_CAPS[z]) capInput.placeholder = '' + LAND_PRICE_CAPS[z] + ' (default)';
+          else capInput.placeholder = 'auto by ZIP';
+        });
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const ctx = {
+            zip:       zipInput.value.trim(),
+            acres:     parseFloat(container.querySelector('.lc-acres').value),
+            tolerance: parseFloat(container.querySelector('.lc-tolerance').value) || 0.2,
+            months:    parseInt(container.querySelector('.lc-months').value, 10) || 12,
+            cap:       parseFloat(capInput.value) || _lcDefaultCap(zipInput.value.trim()),
+            llcOnly:   container.querySelector('.lc-llc-only').checked
+          };
+          const status  = container.querySelector('.lc-status');
+          const results = container.querySelector('.lc-results');
+          results.hidden = true;
+          status.style.color = ''; status.textContent = 'Searching Metro Nashville parcels…';
+          try {
+            const rows = await _lcFindComps(ctx);
+            _lcRender(container, rows, ctx);
+            status.style.color = '#9ec39e';
+            status.textContent = '✓ Found ' + rows.length + ' comp' + (rows.length === 1 ? '' : 's') + ' · cap $' + ctx.cap.toLocaleString();
+            results.hidden = false;
+          } catch (err) {
+            console.error(err);
+            status.style.color = '#d99';
+            status.textContent = 'Error: ' + (err.message || err);
+          }
+        });
       });
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const ctx = {
-          zip:       zipInput.value.trim(),
-          acres:     parseFloat(document.getElementById('lc-acres').value),
-          tolerance: parseFloat(document.getElementById('lc-tolerance').value) || 0.2,
-          months:    parseInt(document.getElementById('lc-months').value, 10) || 12,
-          cap:       parseFloat(capInput.value) || _lcDefaultCap(zipInput.value.trim()),
-          llcOnly:   document.getElementById('lc-llc-only').checked
-        };
-        const status = document.getElementById('lc-status');
-        const results = document.getElementById('lc-results');
-        results.hidden = true;
-        status.style.color = ''; status.textContent = 'Searching Metro Nashville parcels…';
-        try {
-          const rows = await _lcFindComps(ctx);
-          _lcRender(rows, ctx);
-          status.style.color = '#9ec39e';
-          status.textContent = '✓ Found ' + rows.length + ' comp' + (rows.length === 1 ? '' : 's') + ' · cap $' + ctx.cap.toLocaleString();
-          results.hidden = false;
-        } catch (err) {
-          console.error(err);
-          status.style.color = '#d99';
-          status.textContent = 'Error: ' + (err.message || err);
-        }
-      });
-    })();
+    }
+    _lcMountAll();
 
     // Re-render Hot Leads + Overview whenever the agent tab changes
     window.addEventListener('landagentchange', () => { _hlUpdateGate(); _renderOverview(); });
