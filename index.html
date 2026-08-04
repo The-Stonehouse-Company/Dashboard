@@ -4445,9 +4445,10 @@
 
       <div class="division-shell">
         <aside class="division-subnav" role="tablist" aria-label="Land Acquisition sections" data-subtab-parent="land">
-          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-land-overview" aria-selected="true"  data-subkey="overview">Overview</button>
-          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-land-pipeline" aria-selected="false" data-subkey="pipeline">Pipeline</button>
-          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-land-buyboxes" aria-selected="false" data-subkey="buyboxes">Buy Boxes</button>
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-land-overview"    aria-selected="true"  data-subkey="overview">Overview</button>
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-land-pipeline"    aria-selected="false" data-subkey="pipeline">Active Pipeline</button>
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-land-hotleads"    aria-selected="false" data-subkey="hotleads">Hot Leads</button>
+          <button class="subtab subnav-item" role="tab" aria-controls="subpanel-land-buyboxes"    aria-selected="false" data-subkey="buyboxes">Buy Boxes</button>
 
           <details class="subnav-group">
             <summary>Tools</summary>
@@ -4477,23 +4478,7 @@
       </div>
 
       <div class="subpanel" id="subpanel-land-pipeline" role="tabpanel" aria-hidden="true" tabindex="0">
-        <div class="action-grid">
-          <button class="primary-action" type="button" id="open-feecalc-modal" aria-haspopup="dialog" aria-controls="feecalc-modal">
-            <span class="action-label">Fee Calculator</span>
-            <span class="action-sub">Run a deal through the MRC class & commission schedule</span>
-            <span class="action-arrow" aria-hidden="true">→</span>
-          </button>
-          <button class="primary-action" type="button" id="open-intake-modal" aria-haspopup="dialog" aria-controls="intake-modal">
-            <span class="action-label">Submit Property Intake</span>
-            <span class="action-sub">Log a property under evaluation for acquisition</span>
-            <span class="action-arrow" aria-hidden="true">→</span>
-          </button>
-          <button class="primary-action" type="button" id="open-land-onepager-modal" aria-haspopup="dialog" aria-controls="land-onepager-modal">
-            <span class="action-label">Generate One-Pager</span>
-            <span class="action-sub">Auto-populate from the Intake sheet by property address</span>
-            <span class="action-arrow" aria-hidden="true">→</span>
-          </button>
-        </div>
+        <p class="subpanel-intro">Every property currently under contract, on first-right-of-refusal, or that fell out. Use the <b>Tools</b> menu in the side-nav to log a new intake or run a fee calc.</p>
 
         <section class="pipeline-section" aria-labelledby="land-pipeline-title">
           <header class="pipeline-head">
@@ -4563,6 +4548,16 @@
               Download PDF <span class="arrow">↓</span>
             </a>
           </article>
+        </div>
+      </div>
+
+      <!-- ============= HOT LEADS ============= -->
+      <div class="subpanel" id="subpanel-land-hotleads" role="tabpanel" aria-hidden="true" tabindex="0">
+        <p class="subpanel-intro">Properties we're actively chasing before they hit contract — off-market conversations, warm referrals, sellers we've flagged. Awaiting Ryan's spec on fields (source, contact, next action, ranking, etc.).</p>
+        <div class="placeholder">
+          <div class="mark">— Awaiting spec —</div>
+          <h2>Hot Leads coming</h2>
+          <p>Tell me what fields you want on a hot lead (contact + source + property + last touch + ranking?) and I'll wire the sheet + intake modal.</p>
         </div>
       </div>
 
