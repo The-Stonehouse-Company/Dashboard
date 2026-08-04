@@ -180,6 +180,61 @@
     .agent-name-inline {
       color: var(--accent); font-weight: 700;
     }
+
+    /* ==================== Mini modals (inline forms) ==================== */
+    .mini-modal {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.75);
+      display: flex; align-items: flex-start; justify-content: center;
+      padding: 40px 20px;
+      overflow-y: auto;
+    }
+    .mini-modal[hidden] { display: none; }
+    .mini-modal-inner {
+      background: #0a0a0a; border: 1px solid var(--rule-strong);
+      width: 100%; max-width: 720px;
+      color: #fff;
+    }
+    .mini-modal-head {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .mini-modal-close {
+      background: transparent; border: 0; color: var(--text-muted);
+      font-size: 24px; line-height: 1; cursor: pointer; padding: 0 4px;
+    }
+    .mini-modal-close:hover { color: #fff; }
+    .mini-modal-body { padding: 20px 24px; }
+    .mm-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px;
+    }
+    .mm-field { display: flex; flex-direction: column; }
+    .mm-field.full { grid-column: 1 / -1; }
+    .mm-field span {
+      font-size: 9px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--text-dim); font-weight: 700; margin-bottom: 5px;
+    }
+    .mm-field input, .mm-field select, .mm-field textarea {
+      font-family: var(--font-body); font-size: 13px;
+      padding: 9px 11px;
+      background: #000; color: #fff;
+      border: 1px solid var(--rule-strong);
+    }
+    .mm-field input:focus, .mm-field select:focus, .mm-field textarea:focus {
+      outline: 1px solid var(--accent); outline-offset: -1px;
+    }
+    .mm-field textarea { resize: vertical; min-height: 60px; line-height: 1.4; }
+    .mini-modal-foot {
+      display: flex; align-items: center; gap: 10px;
+      padding: 16px 24px 20px;
+      border-top: 1px solid var(--rule); margin-top: 8px;
+    }
+    .form-status {
+      font-size: 11px; padding: 4px 0;
+    }
+    .form-status.ok { color: #9ec39e; }
+    .form-status.err { color: #d99; }
   </style>
 </head>
 <body>
@@ -218,22 +273,8 @@
       <div class="division-eyebrow">Division · Land Acquisition</div>
       <h1 class="division-title">Land Acquisition<small>Sourcing, contracting, assigning</small></h1>
 
-      <!-- Agent tabs -->
-      <div class="agent-tabs" role="tablist" aria-label="Filter by agent">
-        <button type="button" class="agent-tab is-active" data-agent="Ryan Stonehouse">
-          <span class="initial">R</span>Ryan Stonehouse
-        </button>
-        <button type="button" class="agent-tab" data-agent="Gabe Jeudy">
-          <span class="initial">G</span>Gabe Jeudy
-        </button>
-        <button type="button" class="agent-tab" data-agent="Kneeland Hibbett">
-          <span class="initial">K</span>Kneeland Hibbett
-        </button>
-      </div>
-
-      <div class="scoped-note" style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-dim); margin-bottom:22px;">
-        Viewing as: <span class="agent-name-inline" id="current-agent-label">Ryan Stonehouse</span> · Only <b style="color:var(--text-muted);">Hot Leads</b> is scoped to this agent — everything else is shared.
-      </div>
+      <!-- Agent tabs moved into Hot Leads panel where they matter -->
+      <div style="height:24px;"></div>
 
       <!-- Overview -->
       <section class="panel is-active" id="panel-overview" role="tabpanel">
@@ -267,19 +308,60 @@
         </div>
       </section>
 
-      <!-- Hot Leads (AGENT-SCOPED) -->
+      <!-- Hot Leads (AGENT-SCOPED with passcode gate) -->
       <section class="panel" id="panel-hotleads" role="tabpanel">
-        <p class="panel-intro">Properties <span class="agent-name-inline" data-current-agent>Ryan Stonehouse</span> is actively chasing. Only leads assigned to this agent are shown. To add a new one, use <b>+ Add Hot Lead</b> in the admin dashboard.</p>
-        <div style="margin-bottom:12px; font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase;" id="land-hotleads-count">Loading…</div>
-        <div id="land-hotleads-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:12px;">
-          <div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">Loading hot leads…</div>
+        <p class="panel-intro">Each agent's hot lead book is protected by a passcode. Pick your tab, enter your code once (24 hr unlock), then you'll see and manage only your leads.</p>
+
+        <!-- Agent tabs — moved here from top of page -->
+        <div class="agent-tabs" role="tablist" aria-label="Select your agent">
+          <button type="button" class="agent-tab is-active" data-agent="Ryan Stonehouse">
+            <span class="initial">R</span>Ryan Stonehouse
+          </button>
+          <button type="button" class="agent-tab" data-agent="Gabe Jeudy">
+            <span class="initial">G</span>Gabe Jeudy
+          </button>
+          <button type="button" class="agent-tab" data-agent="Kneeland Hibbett">
+            <span class="initial">K</span>Kneeland Hibbett
+          </button>
+        </div>
+
+        <!-- Lock screen — shown until agent enters correct passcode -->
+        <div id="hl-lock" style="display:none; padding:60px 32px; text-align:center; background:var(--panel); border:1px solid var(--rule);">
+          <div style="font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--text-dim); font-weight:700; margin-bottom:14px;">Restricted</div>
+          <div style="font-family:var(--font-display); font-size:20px; letter-spacing:.14em; text-transform:uppercase; margin-bottom:8px;" id="hl-lock-title">Hot Leads Locked</div>
+          <p style="font-size:12px; color:var(--text-muted); max-width:400px; margin:0 auto 20px;">Enter your passcode to view leads for <b id="hl-lock-agent" style="color:var(--accent);">Ryan Stonehouse</b>. Codes are managed in the Team Roster.</p>
+          <input id="hl-code-input" type="password" autocomplete="off" placeholder="Enter passcode"
+                 style="width:220px; padding:12px 16px; text-align:center; font-family:var(--font-body); font-size:14px; letter-spacing:.3em; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
+          <div id="hl-code-status" style="font-size:11px; color:#d99; margin-top:10px; min-height:16px;"></div>
+          <button type="button" id="hl-code-submit"
+                  style="margin-top:8px; padding:10px 24px; font-family:var(--font-body); font-size:11px; letter-spacing:.2em; text-transform:uppercase; font-weight:700; background:var(--accent); color:#000; border:0; cursor:pointer;">Unlock</button>
+        </div>
+
+        <!-- Unlocked view -->
+        <div id="hl-unlocked" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div style="font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase;" id="land-hotleads-count">—</div>
+            <div style="display:flex; gap:8px;">
+              <button type="button" id="hl-add-btn"
+                      style="padding:8px 16px; font-family:var(--font-body); font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:600; background:var(--accent); color:#000; border:0; cursor:pointer;">+ Add Hot Lead</button>
+              <button type="button" id="hl-lock-btn"
+                      style="padding:8px 14px; font-family:var(--font-body); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--text-muted); background:transparent; border:1px solid var(--panel-edge); cursor:pointer;">Lock</button>
+            </div>
+          </div>
+          <div id="land-hotleads-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:12px;">
+            <div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">Loading hot leads…</div>
+          </div>
         </div>
       </section>
 
       <!-- Buy Boxes (SHARED) -->
       <section class="panel" id="panel-buyboxes" role="tabpanel">
         <p class="panel-intro">Builder + developer acquisition criteria. Shared across the whole Land team — everyone can match incoming lots to any active buy box.</p>
-        <div style="margin-bottom:12px; font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase;" id="land-buyboxes-count">Loading…</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <div style="font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase;" id="land-buyboxes-count">Loading…</div>
+          <button type="button" id="bb-add-btn"
+                  style="padding:8px 16px; font-family:var(--font-body); font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:600; background:var(--accent); color:#000; border:0; cursor:pointer;">+ Add Buy Box</button>
+        </div>
         <div id="land-buyboxes-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:12px;">
           <div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">Loading buy boxes…</div>
         </div>
@@ -287,8 +369,14 @@
 
       <!-- Tools (SHARED — all link back to admin) -->
       <section class="panel" id="panel-tools" role="tabpanel">
-        <p class="panel-intro">Fee Calculator · Property Intake · One-Pager Generator. Everyone on the Land team has access — same tools as the admin dashboard.</p>
+        <p class="panel-intro">Fee Calculator · Property Intake · One-Pager · Underwriting Model. Everyone on the Land team has access.</p>
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
+          <a class="tool-tile" href="underwriting-model.html" target="_blank" rel="noopener"
+             style="display:flex; flex-direction:column; gap:6px; padding:22px 24px; background:var(--panel); border:1px solid var(--accent); color:#fff;">
+            <div style="font-family:var(--font-display); font-size:14px; letter-spacing:.16em; text-transform:uppercase;">Underwriting Model</div>
+            <div style="font-size:11px; color:var(--text-muted); letter-spacing:.05em;">Project costs, returns, draw schedule, sensitivity — interactive calculator (no logging).</div>
+            <div style="margin-top:8px; font-size:10px; letter-spacing:.2em; color:var(--accent); text-transform:uppercase;">Open Calculator →</div>
+          </a>
           <a class="tool-tile" href="index.html?openModal=feecalc" target="_blank" rel="noopener"
              style="display:flex; flex-direction:column; gap:6px; padding:22px 24px; background:var(--panel); border:1px solid var(--rule); color:#fff;">
             <div style="font-family:var(--font-display); font-size:14px; letter-spacing:.16em; text-transform:uppercase;">Fee Calculator</div>
@@ -331,6 +419,103 @@
         </div>
       </section>
 
+      <!-- ==================== Inline modals ==================== -->
+      <!-- Add Hot Lead -->
+      <div class="mini-modal" id="hl-modal" hidden>
+        <div class="mini-modal-inner">
+          <div class="mini-modal-head">
+            <div>
+              <div style="font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:var(--text-dim);">Land Acq · Hot Leads</div>
+              <div style="font-family:var(--font-display); font-size:18px; letter-spacing:.14em; text-transform:uppercase; margin-top:4px;">Add Hot Lead <span id="hl-modal-agent" style="color:var(--accent); font-size:14px; margin-left:8px;">— Ryan Stonehouse</span></div>
+            </div>
+            <button type="button" class="mini-modal-close" data-close-modal="hl-modal">×</button>
+          </div>
+          <form id="hl-form" class="mini-modal-body">
+            <input type="hidden" name="lead_id" id="hl-form-id" />
+            <input type="hidden" name="land_agent" id="hl-form-agent" />
+            <input type="hidden" name="status" value="Active" />
+            <div class="mm-grid">
+              <label class="mm-field full"><span>Property Address *</span><input name="property_address" type="text" required placeholder="1234 Cedar Ln, Nashville, TN" /></label>
+              <label class="mm-field"><span>Neighborhood</span><input name="neighborhood" type="text" placeholder="12South" /></label>
+              <label class="mm-field"><span>Estimated Value</span><input name="estimated_value" type="text" placeholder="$650K – $800K" /></label>
+              <label class="mm-field"><span>Owner Name</span><input name="owner_name" type="text" placeholder="John Doe" /></label>
+              <label class="mm-field"><span>Owner Phone</span><input name="owner_phone" type="tel" placeholder="(615) 555-0123" /></label>
+              <label class="mm-field full"><span>Owner Email</span><input name="owner_email" type="email" placeholder="owner@example.com" /></label>
+              <label class="mm-field"><span>Source</span>
+                <select name="source">
+                  <option value="">— Select —</option>
+                  <option>Referral</option><option>Cold Outreach</option><option>Networking</option>
+                  <option>Off-Market Sign</option><option>Public Records</option>
+                  <option>Family / Personal</option><option>Realtor Referral</option><option>Other</option>
+                </select>
+              </label>
+              <label class="mm-field"><span>Referred By</span><input name="referred_by" type="text" /></label>
+              <label class="mm-field"><span>Heat Level *</span>
+                <select name="heat_level" required><option value="" disabled selected>Select…</option><option>Hot</option><option>Warm</option><option>Cool</option></select>
+              </label>
+              <label class="mm-field"><span>Last Touch</span><input name="last_touch" type="date" /></label>
+              <label class="mm-field"><span>Next Action Date</span><input name="next_action_date" type="date" /></label>
+              <label class="mm-field full"><span>Next Action</span><input name="next_action" type="text" placeholder="Call Tuesday" /></label>
+              <label class="mm-field full"><span>Notes</span><textarea name="notes" rows="3"></textarea></label>
+            </div>
+            <div class="mini-modal-foot">
+              <div class="form-status" id="hl-form-status"></div>
+              <div style="flex:1;"></div>
+              <button type="button" class="btn ghost" data-close-modal="hl-modal">Cancel</button>
+              <button type="submit" class="btn">Save Hot Lead</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Add Buy Box -->
+      <div class="mini-modal" id="bb-modal" hidden>
+        <div class="mini-modal-inner">
+          <div class="mini-modal-head">
+            <div>
+              <div style="font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:var(--text-dim);">Land Acq · Buy Boxes</div>
+              <div style="font-family:var(--font-display); font-size:18px; letter-spacing:.14em; text-transform:uppercase; margin-top:4px;">Add Buy Box</div>
+            </div>
+            <button type="button" class="mini-modal-close" data-close-modal="bb-modal">×</button>
+          </div>
+          <form id="bb-form" class="mini-modal-body">
+            <input type="hidden" name="buy_box_id" id="bb-form-id" />
+            <input type="hidden" name="status" value="Active" />
+            <div class="mm-grid">
+              <label class="mm-field full"><span>Builder / Developer *</span>
+                <input name="builder_name" list="bb-builders-datalist" type="text" required placeholder="Type or pick a builder from Contacts…" />
+                <datalist id="bb-builders-datalist"></datalist>
+              </label>
+              <label class="mm-field"><span>Priority</span>
+                <select name="priority"><option value="">—</option><option>High</option><option>Medium</option><option>Low</option></select>
+              </label>
+              <label class="mm-field"><span>City *</span><input name="city" type="text" required placeholder="Nashville" /></label>
+              <label class="mm-field"><span>State</span><input name="state" type="text" maxlength="2" value="TN" /></label>
+              <label class="mm-field full"><span>Neighborhoods / Suburbs</span><textarea name="suburbs" rows="2" placeholder="East Nashville, 12South, Germantown"></textarea></label>
+              <label class="mm-field"><span>Min Price ($)</span><input name="min_price" type="number" min="0" step="1000" /></label>
+              <label class="mm-field"><span>Max Price ($)</span><input name="max_price" type="number" min="0" step="1000" /></label>
+              <label class="mm-field full"><span>Per-Suburb Pricing (optional)</span><textarea name="suburb_pricing" rows="2" placeholder="12South: $700K–$900K · East Nash: $400K–$600K"></textarea></label>
+              <label class="mm-field"><span>Min Lot (sq ft)</span><input name="min_lot_sqft" type="number" min="0" /></label>
+              <label class="mm-field"><span>Max Lot (sq ft)</span><input name="max_lot_sqft" type="number" min="0" /></label>
+              <label class="mm-field"><span>Min Frontage (ft)</span><input name="min_frontage_ft" type="number" min="0" /></label>
+              <label class="mm-field"><span>Max Frontage (ft)</span><input name="max_frontage_ft" type="number" min="0" /></label>
+              <label class="mm-field"><span>Min Depth (ft)</span><input name="min_depth_ft" type="number" min="0" /></label>
+              <label class="mm-field"><span>Max Depth (ft)</span><input name="max_depth_ft" type="number" min="0" /></label>
+              <label class="mm-field full"><span>Must-Haves</span><textarea name="must_haves" rows="2" placeholder="Flat lot, city water, no easements"></textarea></label>
+              <label class="mm-field full"><span>Deal Breakers</span><textarea name="deal_breakers" rows="2" placeholder="Flood zone, HPZ overlay, alley access only"></textarea></label>
+              <label class="mm-field full"><span>Notes</span><textarea name="notes" rows="2"></textarea></label>
+              <label class="mm-field full"><span>Logged By *</span><input name="logged_by" type="text" required placeholder="Your name" /></label>
+            </div>
+            <div class="mini-modal-foot">
+              <div class="form-status" id="bb-form-status"></div>
+              <div style="flex:1;"></div>
+              <button type="button" class="btn ghost" data-close-modal="bb-modal">Cancel</button>
+              <button type="submit" class="btn">Save Buy Box</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
       <!-- Settings -->
       <section class="panel" id="panel-settings" role="tabpanel">
         <p class="panel-intro">Land-specific settings, MRC schedule, fee tiers.</p>
@@ -364,19 +549,283 @@
       }
     })();
 
-    /* ==== Agent tabs — swap the "current agent" everywhere ==== */
+    /* ==== Agent tabs (inside Hot Leads panel) + per-agent lock ==== */
     window.CURRENT_LAND_AGENT = 'Ryan Stonehouse';
+    const TEAM_ROSTER_SHEET_ID = '18TAk4nYhNACQao-X2VelyraVq-xWUIPeD12I2w3hF4Q';
+    const HL_UNLOCK_KEY = 'stonehouse.landHotLeadsUnlock';
+    const HL_UNLOCK_HOURS = 24;
+    let _teamPasscodes = {}; // { 'Ryan Stonehouse': '1234', ... }
+
+    async function _loadPasscodes() {
+      try {
+        const url = 'https://docs.google.com/spreadsheets/d/' + TEAM_ROSTER_SHEET_ID +
+          '/gviz/tq?tqx=out:json&headers=1&sheet=Form%20Responses%201&t=' + Date.now();
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) return;
+        const text = await res.text();
+        const m = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
+        if (!m) return;
+        const data = JSON.parse(m[1]);
+        if (data.status !== 'ok') return;
+        const cols = data.table.cols || [];
+        const rows = data.table.rows || [];
+        const norm = s => String(s || '').toLowerCase().trim();
+        const nameIx = cols.findIndex(c => norm(c.label) === 'name');
+        const codeIx = cols.findIndex(c => /passcode|passcod|code/i.test(c.label || ''));
+        if (nameIx < 0 || codeIx < 0) return;
+        rows.forEach(r => {
+          const c = r.c || [];
+          const name = c[nameIx]?.v ? String(c[nameIx].v).trim() : '';
+          const code = c[codeIx]?.v != null ? String(c[codeIx].v).trim() : '';
+          if (name && code) _teamPasscodes[name] = code;
+        });
+      } catch (err) {
+        console.warn('[Land] passcode load failed:', err);
+      }
+    }
+
+    function _hlIsUnlocked(agent) {
+      try {
+        const raw = localStorage.getItem(HL_UNLOCK_KEY);
+        if (!raw) return false;
+        const entry = JSON.parse(raw);
+        if (entry.agent !== agent) return false;
+        return (Date.now() - entry.ts) < HL_UNLOCK_HOURS * 60 * 60 * 1000;
+      } catch (_) { return false; }
+    }
+    function _hlUnlock(agent) {
+      try { localStorage.setItem(HL_UNLOCK_KEY, JSON.stringify({ agent, ts: Date.now() })); } catch (_) {}
+    }
+    function _hlLock() {
+      try { localStorage.removeItem(HL_UNLOCK_KEY); } catch (_) {}
+    }
+
+    function _hlUpdateGate() {
+      const agent = window.CURRENT_LAND_AGENT;
+      const lockEl = document.getElementById('hl-lock');
+      const unlockedEl = document.getElementById('hl-unlocked');
+      const agentLbl = document.getElementById('hl-lock-agent');
+      const inputEl = document.getElementById('hl-code-input');
+      const statusEl = document.getElementById('hl-code-status');
+      if (agentLbl) agentLbl.textContent = agent;
+      if (inputEl) inputEl.value = '';
+      if (statusEl) statusEl.textContent = '';
+      const modalAgent = document.getElementById('hl-modal-agent');
+      const formAgent  = document.getElementById('hl-form-agent');
+      if (modalAgent) modalAgent.textContent = '— ' + agent;
+      if (formAgent)  formAgent.value = agent;
+
+      if (_hlIsUnlocked(agent)) {
+        lockEl.style.display = 'none';
+        unlockedEl.style.display = 'block';
+        _renderHotLeads();
+      } else {
+        lockEl.style.display = 'block';
+        unlockedEl.style.display = 'none';
+      }
+    }
+
     (function () {
       const tabs = document.querySelectorAll('.agent-tab');
       tabs.forEach(t => t.addEventListener('click', () => {
         const agent = t.getAttribute('data-agent');
         window.CURRENT_LAND_AGENT = agent;
         tabs.forEach(x => x.classList.toggle('is-active', x === t));
-        document.getElementById('current-agent-label').textContent = agent;
-        document.querySelectorAll('[data-current-agent]').forEach(el => el.textContent = agent);
+        _hlUpdateGate();
         window.dispatchEvent(new CustomEvent('landagentchange', { detail: { agent } }));
       }));
+
+      const submitBtn = document.getElementById('hl-code-submit');
+      const inputEl = document.getElementById('hl-code-input');
+      const statusEl = document.getElementById('hl-code-status');
+      function tryUnlock() {
+        const agent = window.CURRENT_LAND_AGENT;
+        const entered = (inputEl.value || '').trim();
+        const expected = (_teamPasscodes[agent] || '').trim();
+        if (!expected) {
+          statusEl.textContent = 'No passcode set for ' + agent + ' in the Team Roster.';
+          return;
+        }
+        if (entered === expected) {
+          _hlUnlock(agent);
+          _hlUpdateGate();
+        } else {
+          statusEl.textContent = 'Wrong code. Try again.';
+        }
+      }
+      if (submitBtn) submitBtn.addEventListener('click', tryUnlock);
+      if (inputEl) inputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); tryUnlock(); }
+      });
+
+      const lockBtn = document.getElementById('hl-lock-btn');
+      if (lockBtn) lockBtn.addEventListener('click', () => { _hlLock(); _hlUpdateGate(); });
     })();
+
+    /* ==== Inline modals — open/close + form submit ==== */
+    const HOTLEAD_FORM = {
+      URL: 'https://docs.google.com/forms/d/e/1FAIpQLScWy0nWqwDgL1w-jKIhGS5be3UDLcOaBGWIW-a1XSZk5X8cDQ/formResponse',
+      MAP: {
+        lead_id:          'entry.291200275',
+        property_address: 'entry.1984008242',
+        neighborhood:     'entry.1821165108',
+        estimated_value:  'entry.490726122',
+        owner_name:       'entry.804207928',
+        owner_phone:      'entry.1448884889',
+        owner_email:      'entry.765425665',
+        source:           'entry.1537712599',
+        referred_by:      'entry.1527182080',
+        heat_level:       'entry.1920898389',
+        status:           'entry.722485795',
+        land_agent:       'entry.1626956243',
+        last_touch:       'entry.790662111',
+        next_action_date: 'entry.1203406933',
+        next_action:      'entry.331176128',
+        notes:            'entry.478377521'
+      }
+    };
+    const BUYBOX_FORM = {
+      URL: 'https://docs.google.com/forms/d/e/1FAIpQLSfGB32gOHYNj7syvMmUAp91rPcrfgZXOKTkYVB04h8bnHuxqA/formResponse',
+      MAP: {
+        buy_box_id:       'entry.795908468',
+        builder_name:     'entry.1300019770',
+        status:           'entry.1529921140',
+        priority:         'entry.1512519823',
+        city:             'entry.1924244242',
+        state:            'entry.1054798501',
+        suburbs:          'entry.86669680',
+        min_price:        'entry.319787932',
+        max_price:        'entry.624652553',
+        suburb_pricing:   'entry.2072242054',
+        min_lot_sqft:     'entry.1205892179',
+        max_lot_sqft:     'entry.1373049132',
+        min_frontage_ft:  'entry.21264700',
+        max_frontage_ft:  'entry.1139799128',
+        min_depth_ft:     'entry.401848341',
+        max_depth_ft:     'entry.109297835',
+        must_haves:       'entry.1415481583',
+        deal_breakers:    'entry.1825351676',
+        notes:            'entry.2039447586',
+        logged_by:        'entry.887775077'
+      }
+    };
+    function _newId(prefix) {
+      return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+    }
+    function _openMiniModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.hidden = false;
+    }
+    function _closeMiniModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.hidden = true;
+    }
+    // Delegated close buttons
+    document.addEventListener('click', (e) => {
+      const closer = e.target.closest && e.target.closest('[data-close-modal]');
+      if (closer) _closeMiniModal(closer.getAttribute('data-close-modal'));
+      // Click outside inner also closes
+      if (e.target && e.target.classList.contains('mini-modal')) _closeMiniModal(e.target.id);
+    });
+
+    // + Add Hot Lead
+    const hlAddBtn = document.getElementById('hl-add-btn');
+    if (hlAddBtn) hlAddBtn.addEventListener('click', () => {
+      const form = document.getElementById('hl-form');
+      form.reset();
+      document.getElementById('hl-form-id').value = _newId('hl');
+      document.getElementById('hl-form-agent').value = window.CURRENT_LAND_AGENT;
+      document.getElementById('hl-form-status').textContent = '';
+      _openMiniModal('hl-modal');
+    });
+    const hlForm = document.getElementById('hl-form');
+    if (hlForm) hlForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const status = document.getElementById('hl-form-status');
+      status.className = 'form-status'; status.textContent = 'Saving…';
+      try {
+        const fd = new FormData(hlForm);
+        const body = new URLSearchParams();
+        for (const [k, v] of fd.entries()) {
+          const key = HOTLEAD_FORM.MAP[k];
+          if (key) body.append(key, v);
+        }
+        await fetch(HOTLEAD_FORM.URL, { method: 'POST', mode: 'no-cors', body });
+        status.className = 'form-status ok'; status.textContent = '✓ Saved — reloading…';
+        setTimeout(() => { _closeMiniModal('hl-modal'); loadHotLeads(); }, 800);
+      } catch (err) {
+        status.className = 'form-status err'; status.textContent = 'Error: ' + (err.message || err);
+      }
+    });
+
+    // + Add Buy Box (+ builder autocomplete from Contacts)
+    async function _populateBuilderDatalist() {
+      try {
+        const url = 'https://docs.google.com/spreadsheets/d/1wmXxSO0qF8OSkkx6iqmHuepX0QrxbQRb4Iw4-jybeww' +
+          '/gviz/tq?tqx=out:json&headers=1&sheet=Form%20Responses%201&t=' + Date.now();
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) return;
+        const text = await res.text();
+        const m = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
+        if (!m) return;
+        const data = JSON.parse(m[1]);
+        if (data.status !== 'ok') return;
+        const cols = data.table.cols || [];
+        const rows = data.table.rows || [];
+        const norm = s => String(s || '').toLowerCase().trim();
+        const catIx  = cols.findIndex(c => norm(c.label) === 'category');
+        const nameIx = cols.findIndex(c => norm(c.label) === 'name');
+        const compIx = cols.findIndex(c => norm(c.label) === 'company');
+        if (nameIx < 0) return;
+        const matches = rows
+          .map(r => {
+            const c = r.c || [];
+            return {
+              cat:  catIx >= 0 && c[catIx]?.v ? String(c[catIx].v).trim() : '',
+              name: c[nameIx]?.v ? String(c[nameIx].v).trim() : '',
+              comp: compIx >= 0 && c[compIx]?.v ? String(c[compIx].v).trim() : ''
+            };
+          })
+          .filter(r => r.name && (r.cat === 'Builders' || r.cat === 'Developers'))
+          .sort((a, b) => a.name.localeCompare(b.name));
+        const dl = document.getElementById('bb-builders-datalist');
+        if (dl) dl.innerHTML = matches.map(r =>
+          '<option value="' + esc(r.name) + '">' + esc(r.name + (r.comp ? ' — ' + r.comp : '')) + '</option>'
+        ).join('');
+      } catch (err) {
+        console.warn('[Land] builder datalist fetch failed:', err);
+      }
+    }
+    const bbAddBtn = document.getElementById('bb-add-btn');
+    if (bbAddBtn) bbAddBtn.addEventListener('click', () => {
+      const form = document.getElementById('bb-form');
+      form.reset();
+      document.getElementById('bb-form-id').value = _newId('bb');
+      document.getElementById('bb-form-status').textContent = '';
+      // Pre-fill Logged By with current agent (whichever tab was last active — falls back gracefully)
+      const loggedBy = form.querySelector('[name="logged_by"]');
+      if (loggedBy && !loggedBy.value) loggedBy.value = window.CURRENT_LAND_AGENT;
+      _openMiniModal('bb-modal');
+    });
+    const bbForm = document.getElementById('bb-form');
+    if (bbForm) bbForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const status = document.getElementById('bb-form-status');
+      status.className = 'form-status'; status.textContent = 'Saving…';
+      try {
+        const fd = new FormData(bbForm);
+        const body = new URLSearchParams();
+        for (const [k, v] of fd.entries()) {
+          const key = BUYBOX_FORM.MAP[k];
+          if (key) body.append(key, v);
+        }
+        await fetch(BUYBOX_FORM.URL, { method: 'POST', mode: 'no-cors', body });
+        status.className = 'form-status ok'; status.textContent = '✓ Saved — reloading…';
+        setTimeout(() => { _closeMiniModal('bb-modal'); loadBuyBoxes(); }, 800);
+      } catch (err) {
+        status.className = 'form-status err'; status.textContent = 'Error: ' + (err.message || err);
+      }
+    });
 
     /* =========================================================
        Sheet fetches — same sheets as admin dashboard.
@@ -735,12 +1184,14 @@
     }
 
     // Re-render Hot Leads + Overview whenever the agent tab changes
-    window.addEventListener('landagentchange', () => { _renderHotLeads(); _renderOverview(); });
+    window.addEventListener('landagentchange', () => { _hlUpdateGate(); _renderOverview(); });
 
-    // Boot: kick off all three loads in parallel
+    // Boot: passcodes + all three sheet loads + builder datalist, in parallel
+    _loadPasscodes().then(_hlUpdateGate);
     loadPipeline().then(_renderOverview);
     loadBuyBoxes().then(_renderOverview);
     loadHotLeads();
+    _populateBuilderDatalist();
   </script>
 </body>
 </html>
