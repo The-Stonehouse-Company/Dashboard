@@ -332,6 +332,7 @@
 
       <div class="nav-group-title">Tools</div>
       <button type="button" class="nav-item" data-panel="tools">Fee Calc · Intake · One-Pager</button>
+      <button type="button" class="nav-item" data-panel="property-lookup">Property Lookup (Nashville)</button>
 
       <div class="nav-group-title">Research</div>
       <div class="nav-item nav-item-parent" style="color:var(--text-dim); cursor:default; font-size:11px; padding-top:4px; font-weight:600;">Davidson County</div>
@@ -478,6 +479,26 @@
         </div>
       </section>
 
+      <!-- Property Lookup (Metro Nashville only for now) -->
+      <section class="panel" id="panel-property-lookup" role="tabpanel">
+        <div class="division-eyebrow">Tools · Metro Nashville</div>
+        <h2 style="font-family:var(--font-display); font-size:26px; letter-spacing:.12em; text-transform:uppercase; margin:0 0 8px; font-weight:400; color:#fff;">Property Lookup</h2>
+        <p class="panel-intro">Enter a Nashville address. Live query to Metro's parcel service, zoning layer, and FEMA's flood-hazard map. Standard setbacks looked up from a maintained zone table. Verify with jurisdiction before contracting — overlays (HPZ, contextual, etc.) may override.</p>
+
+        <form id="plookup-form" style="display:flex; gap:10px; margin-bottom:20px;">
+          <input id="plookup-address" type="text" required autocomplete="off"
+                 placeholder="e.g. 1600 West End Ave, Nashville, TN"
+                 style="flex:1; padding:12px 14px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
+          <button type="submit" class="btn" style="padding:12px 24px;">Look up</button>
+        </form>
+
+        <div id="plookup-status" style="font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase; margin-bottom:14px;"></div>
+
+        <div id="plookup-results" hidden style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:14px;">
+          <!-- Result cards rendered here -->
+        </div>
+      </section>
+
       <!-- Files (SHARED) -->
       <section class="panel" id="panel-files" role="tabpanel">
         <p class="panel-intro">Reference documents for the Land division. Same files everyone on the team uses.</p>
@@ -536,6 +557,7 @@
               </tbody>
             </table>
             <p class="research-note">Overlays (HPZ, UDO, DTC, NCZO) impose additional restrictions. Contextual overlays match neighboring setbacks.</p>
+            <p class="research-note" style="margin-top:6px; font-style:normal; color:var(--text-muted);"><b>Not sure?</b> Email <a href="mailto:zoninghelpdesk@nashville.gov" style="color:var(--accent); border-bottom:1px solid var(--accent);">zoninghelpdesk@nashville.gov</a></p>
           </div>
 
           <div class="research-card">
@@ -556,8 +578,9 @@
               <li><a href="https://www.nashville.gov/departments/codes" target="_blank" rel="noopener">Metro Codes Department</a></li>
               <li><a href="https://www.nashville.gov/departments/planning" target="_blank" rel="noopener">Metro Planning Department</a></li>
               <li><a href="https://library.municode.com/tn/metro_government_of_nashville_and_davidson_county" target="_blank" rel="noopener">Metro Zoning Code (Municode)</a></li>
+              <li><a href="https://www.padctn.org/prc/" target="_blank" rel="noopener">Davidson County Tax Records (PADCTN)</a> — search by address to see assessment + flood zone</li>
+              <li><a href="https://msc.fema.gov/portal/search" target="_blank" rel="noopener">FEMA Flood Map Service</a> — official flood-zone lookup</li>
               <li><a href="https://maps.nashville.gov/ParcelViewer/" target="_blank" rel="noopener">Metro Parcel Viewer (opens below)</a></li>
-              <li><em>Ryan will add more references here.</em></li>
             </ul>
           </div>
         </div>
@@ -607,6 +630,7 @@
               </tbody>
             </table>
             <p class="research-note">Setbacks are significantly larger than Metro Nashville. Some historic lots may be non-conforming.</p>
+            <p class="research-note" style="margin-top:6px; font-style:normal; color:var(--text-muted);"><b>Not sure?</b> Email <a href="mailto:cityadmin@oakhilltn.us" style="color:var(--accent); border-bottom:1px solid var(--accent);">cityadmin@oakhilltn.us</a></p>
           </div>
 
           <div class="research-card">
@@ -625,8 +649,9 @@
             <ul class="research-list">
               <li><a href="https://www.oakhilltn.us/" target="_blank" rel="noopener">City of Oak Hill</a></li>
               <li><a href="https://maps.nashville.gov/ParcelViewer/" target="_blank" rel="noopener">Metro Parcel Viewer (Oak Hill is in Davidson)</a></li>
+              <li><a href="https://www.padctn.org/prc/" target="_blank" rel="noopener">Davidson County Tax Records (PADCTN)</a> — search for flood zone + assessment</li>
+              <li><a href="https://msc.fema.gov/portal/search" target="_blank" rel="noopener">FEMA Flood Map Service</a></li>
               <li><a href="assets/land-research/oak-hill/oak-hill-zoning-map.pdf" target="_blank" rel="noopener">Oak Hill Zoning Map (PDF)</a></li>
-              <li><em>Ryan will add zoning code + application links.</em></li>
             </ul>
           </div>
         </div>
@@ -705,7 +730,8 @@
             <ul class="research-list">
               <li><a href="https://www.cityofforesthills.com/" target="_blank" rel="noopener">City of Forest Hills</a></li>
               <li><a href="https://maps.nashville.gov/ParcelViewer/" target="_blank" rel="noopener">Metro Parcel Viewer (Forest Hills is in Davidson)</a></li>
-              <li><em>Ryan will add zoning code + planning links.</em></li>
+              <li><a href="https://www.padctn.org/prc/" target="_blank" rel="noopener">Davidson County Tax Records (PADCTN)</a> — search for flood zone + assessment</li>
+              <li><a href="https://msc.fema.gov/portal/search" target="_blank" rel="noopener">FEMA Flood Map Service</a></li>
             </ul>
           </div>
         </div>
@@ -775,11 +801,23 @@
             <h3>Links &amp; Reference</h3>
             <ul class="research-list">
               <li><a href="https://www.brentwoodtn.gov/departments/planning" target="_blank" rel="noopener">Brentwood Planning &amp; Codes</a></li>
-              <li><a href="https://www.brentwoodtn.gov/city-services/gis" target="_blank" rel="noopener">Brentwood GIS Maps</a></li>
-              <li><a href="https://gis.williamsonproperty.us/parcelviewer/" target="_blank" rel="noopener">Williamson County Parcel Viewer</a></li>
-              <li><em>Ryan will add zoning code + subdivision regs.</em></li>
+              <li><a href="https://williamsontn.maps.arcgis.com/apps/webappviewer/index.html?id=70ae32b7255e48cdad65792ffb2bbf2a" target="_blank" rel="noopener">Williamson County GIS Viewer</a></li>
+              <li><a href="https://www.williamsonpropertyassessor.com/" target="_blank" rel="noopener">Williamson County Tax Records (Property Assessor)</a> — search for flood zone + assessment</li>
+              <li><a href="https://msc.fema.gov/portal/search" target="_blank" rel="noopener">FEMA Flood Map Service</a></li>
             </ul>
           </div>
+        </div>
+
+        <!-- Williamson County GIS Viewer -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin:32px 0 12px;">
+          <h3 style="font-family:var(--font-display); font-size:14px; letter-spacing:.18em; text-transform:uppercase; margin:0; color:#fff;">Williamson County GIS Viewer</h3>
+          <a href="https://williamsontn.maps.arcgis.com/apps/webappviewer/index.html?id=70ae32b7255e48cdad65792ffb2bbf2a" target="_blank" rel="noopener"
+             style="font-family:var(--font-body); font-size:10px; letter-spacing:.18em; text-transform:uppercase; padding:8px 14px; border:1px solid var(--panel-edge); color:var(--text-muted); text-decoration:none;">Open in new tab ↗</a>
+        </div>
+        <div style="position:relative; width:100%; height:calc(100vh - 200px); min-height:520px; background:#0a0a0a; border:1px solid var(--rule);">
+          <iframe src="https://williamsontn.maps.arcgis.com/apps/webappviewer/index.html?id=70ae32b7255e48cdad65792ffb2bbf2a"
+                  style="position:absolute; inset:0; width:100%; height:100%; border:0; background:#fff;"
+                  loading="lazy" allow="geolocation" title="Williamson County GIS Viewer"></iframe>
         </div>
       </section>
 
@@ -1559,6 +1597,226 @@
       setTxt('tile-firm-bb', _landBuyBoxes.length);
       setTxt('tile-firm-hotleads', _landHotLeads.length);
     }
+
+    /* =========================================================
+       PROPERTY LOOKUP — Nashville (Metro/Davidson)
+       Address → geocoded → Metro parcel + zoning + FEMA flood
+       ========================================================= */
+
+    // Standard setbacks by Metro zone code (working reference — verify with
+    // jurisdiction; overlays adjust). Ryan edits this table as needed.
+    const NASHVILLE_SETBACKS = {
+      'RS40':  { front: 40, rear: 20, side: 20, minLot: '40,000 sf', maxHeight: 45 },
+      'RS30':  { front: 40, rear: 20, side: 20, minLot: '30,000 sf', maxHeight: 45 },
+      'RS20':  { front: 30, rear: 20, side: 15, minLot: '20,000 sf', maxHeight: 45 },
+      'RS15':  { front: 30, rear: 20, side: 10, minLot: '15,000 sf', maxHeight: 45 },
+      'RS10':  { front: 25, rear: 20, side: 10, minLot: '10,000 sf', maxHeight: 45 },
+      'RS7.5': { front: 20, rear: 20, side:  5, minLot: '7,500 sf',  maxHeight: 45 },
+      'RS5':   { front: 20, rear: 20, side:  5, minLot: '5,000 sf',  maxHeight: 45 },
+      'R6':    { front: 20, rear: 20, side:  5, minLot: '6,000 sf',  maxHeight: 45 },
+      'R8':    { front: 20, rear: 20, side:  5, minLot: '8,000 sf',  maxHeight: 45 },
+      'R10':   { front: 25, rear: 20, side: 10, minLot: '10,000 sf', maxHeight: 45 },
+      'R15':   { front: 30, rear: 20, side: 10, minLot: '15,000 sf', maxHeight: 45 },
+      'R20':   { front: 30, rear: 20, side: 15, minLot: '20,000 sf', maxHeight: 45 },
+      'R40':   { front: 40, rear: 20, side: 20, minLot: '40,000 sf', maxHeight: 45 }
+    };
+
+    async function _plGeocode(address) {
+      // Metro Nashville geocoder — returns lat/lng candidates
+      const url = 'https://maps.nashville.gov/arcgis/rest/services/Locators/CompositeGeocoder/GeocodeServer/findAddressCandidates'
+        + '?SingleLine=' + encodeURIComponent(address)
+        + '&outSR=4326&maxLocations=3&f=json';
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Geocoder HTTP ' + res.status);
+      const data = await res.json();
+      if (!data.candidates || data.candidates.length === 0) return null;
+      // Return best-scoring candidate
+      return data.candidates.sort((a, b) => (b.score || 0) - (a.score || 0))[0];
+    }
+
+    async function _plQueryLayer(baseUrl, layerId, geom, outFields) {
+      const url = baseUrl + '/' + layerId + '/query'
+        + '?geometry=' + encodeURIComponent(JSON.stringify(geom))
+        + '&geometryType=esriGeometryPoint&inSR=4326&outSR=4326'
+        + '&spatialRel=esriSpatialRelIntersects'
+        + '&returnGeometry=true&outFields=' + encodeURIComponent(outFields || '*')
+        + '&f=json';
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Layer ' + layerId + ' HTTP ' + res.status);
+      const data = await res.json();
+      return data.features && data.features[0] || null;
+    }
+
+    // Compute polygon side lengths in feet from lat/lng vertices.
+    // Uses local-linear approximation valid for small lots at ~36°N.
+    function _plSideLengths(rings) {
+      if (!rings || !rings[0]) return [];
+      const outer = rings[0];
+      const FT_PER_DEG_LAT = 364000;                       // ≈ 111,120 m
+      const FT_PER_DEG_LNG = 288200;                       // ≈ cos(36°) × 111,120 m
+      const lengths = [];
+      for (let i = 0; i < outer.length - 1; i++) {
+        const [x1, y1] = outer[i];
+        const [x2, y2] = outer[i + 1];
+        const dx = (x2 - x1) * FT_PER_DEG_LNG;
+        const dy = (y2 - y1) * FT_PER_DEG_LAT;
+        lengths.push(Math.sqrt(dx * dx + dy * dy));
+      }
+      return lengths;
+    }
+
+    async function _plLookup(address) {
+      const statusEl = document.getElementById('plookup-status');
+      const resultsEl = document.getElementById('plookup-results');
+      resultsEl.hidden = true;
+      statusEl.textContent = 'Geocoding address…';
+
+      const geo = await _plGeocode(address);
+      if (!geo) throw new Error('Address not found by Metro geocoder — try a fuller form (with city + state).');
+      const point = { x: geo.location.x, y: geo.location.y, spatialReference: { wkid: 4326 } };
+      statusEl.textContent = 'Found parcel · looking up zone + flood zone…';
+
+      // Parallel queries
+      const [parcel, zoning, flood] = await Promise.all([
+        _plQueryLayer('https://maps.nashville.gov/arcgis/rest/services/Cadastral/Parcels/MapServer', 0, point, '*')
+          .catch(err => { console.warn('Parcel query failed:', err); return null; }),
+        _plQueryLayer('https://maps.nashville.gov/arcgis/rest/services/Planning/Zoning/MapServer', 0, point, 'ZONE_DESC,GENERAL_LU,ORDINANCE')
+          .catch(err => { console.warn('Zoning query failed:', err); return null; }),
+        _plQueryLayer('https://hazards.fema.gov/gis/nfhl/services/public/NFHL/MapServer', 28, point, 'FLD_ZONE,ZONE_SUBTY,STATIC_BFE')
+          .catch(err => { console.warn('FEMA query failed:', err); return null; })
+      ]);
+
+      statusEl.className = '';
+      statusEl.style.color = '#9ec39e';
+      statusEl.textContent = '✓ Loaded — ' + (geo.address || address);
+      _plRender(geo, parcel, zoning, flood, address);
+      resultsEl.hidden = false;
+    }
+
+    function _plCard(title, rowsHtml) {
+      return `
+        <article style="background:var(--panel); border:1px solid var(--rule); padding:18px 20px;">
+          <h3 style="font-family:var(--font-display); font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin:0 0 12px; padding-bottom:8px; border-bottom:1px solid var(--rule);">${title}</h3>
+          <div style="display:grid; grid-template-columns:auto 1fr; gap:6px 14px; font-size:12px;">${rowsHtml}</div>
+        </article>
+      `;
+    }
+    function _plRow(k, v) {
+      const val = v == null || v === '' ? '<span style="color:var(--text-dim);">—</span>' : esc(String(v));
+      return `<div style="color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; font-size:9.5px; font-weight:700;">${k}</div>
+              <div style="color:#fff;">${val}</div>`;
+    }
+
+    function _plRender(geo, parcel, zoning, flood, addressInput) {
+      const resultsEl = document.getElementById('plookup-results');
+      const cards = [];
+
+      // Parcel
+      if (parcel) {
+        const a = parcel.attributes || {};
+        // Common Metro attribute names — fall back gracefully if renamed
+        const parcelId  = a.APN || a.PARCELID || a.PIN || a.MAP_PARCEL || '';
+        const owner     = a.OWNER || a.OWNER1 || '';
+        const address   = a.ADDR || a.SITEADDR || a.PROPADDR || (a.HSE_NUM ? (a.HSE_NUM + ' ' + (a.STR_NAME || '')) : '');
+        const acres     = a.ACRES || a.CALCACRES || '';
+        const sqft      = a.SQ_FT || (acres ? (Number(acres) * 43560).toFixed(0) : '');
+        const mailAddr  = a.MAIL_ADDR || '';
+        cards.push(_plCard('Parcel',
+          _plRow('Parcel ID', parcelId) +
+          _plRow('Owner', owner) +
+          _plRow('Situs', address) +
+          _plRow('Acres', acres ? Number(acres).toFixed(3) : '') +
+          _plRow('Sq Ft', sqft ? Math.round(Number(sqft)).toLocaleString() : '') +
+          _plRow('Mail Addr', mailAddr)
+        ));
+
+        // Side lengths from polygon
+        const geom = parcel.geometry;
+        if (geom && geom.rings) {
+          const sides = _plSideLengths(geom.rings);
+          const rows = sides.map((len, i) =>
+            _plRow('Side ' + (i + 1), Math.round(len) + ' ft')
+          ).join('');
+          const perimeter = sides.reduce((s, x) => s + x, 0);
+          cards.push(_plCard('Lot Dimensions',
+            rows +
+            _plRow('Perimeter', Math.round(perimeter) + ' ft') +
+            _plRow('Sides', sides.length + '')
+          ));
+        }
+      } else {
+        cards.push(_plCard('Parcel',
+          _plRow('Status', 'No parcel found at this location. The address may not be inside Metro Nashville.')
+        ));
+      }
+
+      // Zoning + setbacks
+      if (zoning) {
+        const z = zoning.attributes || {};
+        const zoneCode = z.ZONE_DESC || z.ZONE || '';
+        const generalLu = z.GENERAL_LU || '';
+        const setbacks = NASHVILLE_SETBACKS[zoneCode];
+        cards.push(_plCard('Zoning',
+          _plRow('Zone', zoneCode) +
+          _plRow('General Use', generalLu) +
+          (z.ORDINANCE ? _plRow('Ordinance', z.ORDINANCE) : '')
+        ));
+        cards.push(_plCard('Standard Setbacks',
+          setbacks ? (
+            _plRow('Front', setbacks.front + ' ft') +
+            _plRow('Rear',  setbacks.rear + ' ft') +
+            _plRow('Sides', setbacks.side + ' ft each') +
+            _plRow('Min Lot', setbacks.minLot) +
+            _plRow('Max Height', setbacks.maxHeight + ' ft')
+          ) : _plRow('Status', 'Zone ' + esc(zoneCode) + ' not in our lookup table — verify with Metro Codes.')
+        ));
+      } else {
+        cards.push(_plCard('Zoning',
+          _plRow('Status', 'No zoning layer match at this point.')
+        ));
+      }
+
+      // FEMA flood zone
+      if (flood) {
+        const f = flood.attributes || {};
+        const zone = f.FLD_ZONE || '';
+        const subty = f.ZONE_SUBTY || '';
+        const bfe = f.STATIC_BFE;
+        const isFlood = zone && !/^X/i.test(zone);
+        cards.push(_plCard('FEMA Flood Zone',
+          _plRow('Zone', zone) +
+          (subty ? _plRow('Subtype', subty) : '') +
+          (bfe && bfe !== -9999 ? _plRow('Base Flood Elevation', bfe + ' ft') : '') +
+          _plRow('Flood risk', isFlood ? '⚠ Yes — Special Flood Hazard Area' : '✓ No — outside SFHA')
+        ));
+      } else {
+        cards.push(_plCard('FEMA Flood Zone',
+          _plRow('Zone', 'X (assumed — outside mapped floodplain, no NFHL polygon returned)')
+        ));
+      }
+
+      resultsEl.innerHTML = cards.join('');
+    }
+
+    (function _plBoot() {
+      const form = document.getElementById('plookup-form');
+      if (!form) return;
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const address = document.getElementById('plookup-address').value.trim();
+        if (!address) return;
+        const statusEl = document.getElementById('plookup-status');
+        statusEl.className = ''; statusEl.style.color = '';
+        try {
+          await _plLookup(address);
+        } catch (err) {
+          console.error(err);
+          statusEl.style.color = '#d99';
+          statusEl.textContent = 'Error: ' + (err.message || err);
+          document.getElementById('plookup-results').hidden = true;
+        }
+      });
+    })();
 
     // Re-render Hot Leads + Overview whenever the agent tab changes
     window.addEventListener('landagentchange', () => { _hlUpdateGate(); _renderOverview(); });
