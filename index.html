@@ -3562,11 +3562,60 @@
             }, 600);
             return;
           }
+          // Apeiron is Ryan-only — same gate pattern as Admin
           if (target === 'apeiron') {
+            const APEIRON_KEY = 'stonehouse.apeironUnlock';
+            const ONE_DAY = 24 * 60 * 60 * 1000;
+            function apeironUnlocked() {
+              try {
+                const raw = localStorage.getItem(APEIRON_KEY);
+                if (!raw) return false;
+                const t = JSON.parse(raw);
+                return t && t.ok && (Date.now() - t.ts) < ONE_DAY;
+              } catch (_) { return false; }
+            }
+            if (!apeironUnlocked()) {
+              const entered = prompt('Enter passcode to open Apeiron (Ryan-only).');
+              if (entered == null) return;
+              if (entered.trim() !== '0000') {
+                card.animate([
+                  { transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' },
+                  { transform: 'translateX(-3px)' }, { transform: 'translateX(3px)' },
+                  { transform: 'translateX(0)' }
+                ], { duration: 260, easing: 'ease-out' });
+                return;
+              }
+              try { localStorage.setItem(APEIRON_KEY, JSON.stringify({ ok: true, ts: Date.now() })); } catch (_) {}
+            }
             window.location.href = 'apeiron.html';
             return;
           }
+          // Land Acquisition — any of the 3 Land agents can enter with their own code
           if (target === 'land') {
+            const LAND_KEY = 'stonehouse.landUnlock';
+            const ONE_DAY = 24 * 60 * 60 * 1000;
+            const LAND_CODES = ['0000', '5555', '0101']; // Ryan / Gabe / Kneeland
+            function landUnlocked() {
+              try {
+                const raw = localStorage.getItem(LAND_KEY);
+                if (!raw) return false;
+                const t = JSON.parse(raw);
+                return t && t.ok && (Date.now() - t.ts) < ONE_DAY;
+              } catch (_) { return false; }
+            }
+            if (!landUnlocked()) {
+              const entered = prompt('Enter your Land Acquisition passcode.');
+              if (entered == null) return;
+              if (LAND_CODES.indexOf(entered.trim()) < 0) {
+                card.animate([
+                  { transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' },
+                  { transform: 'translateX(-3px)' }, { transform: 'translateX(3px)' },
+                  { transform: 'translateX(0)' }
+                ], { duration: 260, easing: 'ease-out' });
+                return;
+              }
+              try { localStorage.setItem(LAND_KEY, JSON.stringify({ ok: true, ts: Date.now() })); } catch (_) {}
+            }
             window.location.href = 'land.html';
             return;
           }
