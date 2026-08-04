@@ -232,66 +232,102 @@
       </div>
 
       <div class="scoped-note" style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-dim); margin-bottom:22px;">
-        Showing data for: <span class="agent-name-inline" id="current-agent-label">Ryan Stonehouse</span>
+        Viewing as: <span class="agent-name-inline" id="current-agent-label">Ryan Stonehouse</span> · Only <b style="color:var(--text-muted);">Hot Leads</b> is scoped to this agent — everything else is shared.
       </div>
 
       <!-- Overview -->
       <section class="panel is-active" id="panel-overview" role="tabpanel">
-        <p class="panel-intro">Snapshot for <span class="agent-name-inline" data-current-agent>Ryan Stonehouse</span> — active pipeline count, hot leads, active buy boxes, MTD activity.</p>
-        <div class="placeholder">
-          <div class="mark">— Awaiting spec —</div>
-          <h2>Overview coming</h2>
-          <p>Tell me which KPIs to surface (active deals, hot leads count, closing this month, etc.).</p>
+        <p class="panel-intro">Snapshot for <span class="agent-name-inline" data-current-agent>Ryan Stonehouse</span> — hot lead count (theirs), plus firm-wide active pipeline + buy box totals.</p>
+        <div id="land-overview-tiles" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
+          <div class="pl-tile" style="padding:20px 22px; background:var(--panel); border:1px solid var(--rule);">
+            <div style="font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">My Hot Leads</div>
+            <div style="font-family:var(--font-display); font-size:32px; color:#fff; margin-top:6px;" id="tile-my-hotleads">—</div>
+          </div>
+          <div class="pl-tile" style="padding:20px 22px; background:var(--panel); border:1px solid var(--rule);">
+            <div style="font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Firm · Under Contract</div>
+            <div style="font-family:var(--font-display); font-size:32px; color:#fff; margin-top:6px;" id="tile-firm-uc">—</div>
+          </div>
+          <div class="pl-tile" style="padding:20px 22px; background:var(--panel); border:1px solid var(--rule);">
+            <div style="font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Firm · Active Buy Boxes</div>
+            <div style="font-family:var(--font-display); font-size:32px; color:#fff; margin-top:6px;" id="tile-firm-bb">—</div>
+          </div>
+          <div class="pl-tile" style="padding:20px 22px; background:var(--panel); border:1px solid var(--rule);">
+            <div style="font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Firm · Total Hot Leads</div>
+            <div style="font-family:var(--font-display); font-size:32px; color:#fff; margin-top:6px;" id="tile-firm-hotleads">—</div>
+          </div>
         </div>
       </section>
 
-      <!-- Pipeline -->
+      <!-- Pipeline (SHARED) -->
       <section class="panel" id="panel-pipeline" role="tabpanel">
-        <p class="panel-intro">Every property <span class="agent-name-inline" data-current-agent>Ryan Stonehouse</span> currently has under contract, on first-right-of-refusal, or that fell out.</p>
-        <div class="placeholder">
-          <div class="mark">— Awaiting wire —</div>
-          <h2>Agent-scoped Pipeline coming</h2>
-          <p>Reads from the same Land Intake sheet as admin, filtered to the selected agent. Will render the same Under Contract / FRoR / Fell Out sections with edit buttons.</p>
+        <p class="panel-intro">Firm-wide active pipeline — every property under contract, on FRoR, or that fell out. Shared across all Land agents.</p>
+        <div style="margin-bottom:12px; font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase;" id="land-pipeline-count">Loading…</div>
+        <div id="land-pipeline-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:12px;">
+          <div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">Loading deals…</div>
         </div>
       </section>
 
-      <!-- Hot Leads -->
+      <!-- Hot Leads (AGENT-SCOPED) -->
       <section class="panel" id="panel-hotleads" role="tabpanel">
-        <p class="panel-intro">Properties <span class="agent-name-inline" data-current-agent>Ryan Stonehouse</span> is actively chasing before contract.</p>
-        <div class="placeholder">
-          <div class="mark">— Awaiting wire —</div>
-          <h2>Agent-scoped Hot Leads coming</h2>
-          <p>Same sheet as admin, filtered to the selected agent. Cards with edit + add.</p>
+        <p class="panel-intro">Properties <span class="agent-name-inline" data-current-agent>Ryan Stonehouse</span> is actively chasing. Only leads assigned to this agent are shown. To add a new one, use <b>+ Add Hot Lead</b> in the admin dashboard.</p>
+        <div style="margin-bottom:12px; font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase;" id="land-hotleads-count">Loading…</div>
+        <div id="land-hotleads-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:12px;">
+          <div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">Loading hot leads…</div>
         </div>
       </section>
 
-      <!-- Buy Boxes -->
+      <!-- Buy Boxes (SHARED) -->
       <section class="panel" id="panel-buyboxes" role="tabpanel">
-        <p class="panel-intro">Builder and developer acquisition criteria <span class="agent-name-inline" data-current-agent>Ryan Stonehouse</span> is working against.</p>
-        <div class="placeholder">
-          <div class="mark">— Awaiting wire —</div>
-          <h2>Agent-scoped Buy Boxes coming</h2>
-          <p>Same sheet as admin, filtered to buy boxes logged by the selected agent (or shared to all agents — we'll figure out ownership rules).</p>
+        <p class="panel-intro">Builder + developer acquisition criteria. Shared across the whole Land team — everyone can match incoming lots to any active buy box.</p>
+        <div style="margin-bottom:12px; font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase;" id="land-buyboxes-count">Loading…</div>
+        <div id="land-buyboxes-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:12px;">
+          <div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">Loading buy boxes…</div>
         </div>
       </section>
 
-      <!-- Tools -->
+      <!-- Tools (SHARED — all link back to admin) -->
       <section class="panel" id="panel-tools" role="tabpanel">
-        <p class="panel-intro">Fee Calculator · Property Intake · One-Pager Generator.</p>
-        <div class="placeholder">
-          <div class="mark">— Awaiting wire —</div>
-          <h2>Tools coming</h2>
-          <p>Direct-link buttons that open the admin dashboard modals (Fee Calc, Submit Intake, Generate One-Pager) so agents don't need to switch dashboards to use them.</p>
+        <p class="panel-intro">Fee Calculator · Property Intake · One-Pager Generator. Everyone on the Land team has access — same tools as the admin dashboard.</p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
+          <a class="tool-tile" href="index.html?openModal=feecalc" target="_blank" rel="noopener"
+             style="display:flex; flex-direction:column; gap:6px; padding:22px 24px; background:var(--panel); border:1px solid var(--rule); color:#fff;">
+            <div style="font-family:var(--font-display); font-size:14px; letter-spacing:.16em; text-transform:uppercase;">Fee Calculator</div>
+            <div style="font-size:11px; color:var(--text-muted); letter-spacing:.05em;">Run a deal through the MRC class &amp; commission schedule</div>
+            <div style="margin-top:8px; font-size:10px; letter-spacing:.2em; color:var(--accent); text-transform:uppercase;">Open →</div>
+          </a>
+          <a class="tool-tile" href="index.html?openModal=intake" target="_blank" rel="noopener"
+             style="display:flex; flex-direction:column; gap:6px; padding:22px 24px; background:var(--panel); border:1px solid var(--rule); color:#fff;">
+            <div style="font-family:var(--font-display); font-size:14px; letter-spacing:.16em; text-transform:uppercase;">Submit Property Intake</div>
+            <div style="font-size:11px; color:var(--text-muted); letter-spacing:.05em;">Log a property under evaluation for acquisition</div>
+            <div style="margin-top:8px; font-size:10px; letter-spacing:.2em; color:var(--accent); text-transform:uppercase;">Open →</div>
+          </a>
+          <a class="tool-tile" href="index.html?openModal=onepager" target="_blank" rel="noopener"
+             style="display:flex; flex-direction:column; gap:6px; padding:22px 24px; background:var(--panel); border:1px solid var(--rule); color:#fff;">
+            <div style="font-family:var(--font-display); font-size:14px; letter-spacing:.16em; text-transform:uppercase;">Generate One-Pager</div>
+            <div style="font-size:11px; color:var(--text-muted); letter-spacing:.05em;">Auto-populate from the Intake sheet by property address</div>
+            <div style="margin-top:8px; font-size:10px; letter-spacing:.2em; color:var(--accent); text-transform:uppercase;">Open →</div>
+          </a>
         </div>
       </section>
 
-      <!-- Files -->
+      <!-- Files (SHARED) -->
       <section class="panel" id="panel-files" role="tabpanel">
-        <p class="panel-intro">Reference documents for the Land division.</p>
-        <div class="placeholder">
-          <div class="mark">— Awaiting wire —</div>
-          <h2>Files coming</h2>
-          <p>Assignment Form · Land Commission One-Pager · anything else Ryan wants standardized here.</p>
+        <p class="panel-intro">Reference documents for the Land division. Same files everyone on the team uses.</p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
+          <a class="tool-tile" href="assets/land-files/assignment-form.pdf" download="Stonehouse-Assignment-Form.pdf" target="_blank" rel="noopener"
+             style="display:flex; flex-direction:column; gap:6px; padding:22px 24px; background:var(--panel); border:1px solid var(--rule); color:#fff;">
+            <div style="font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Form</div>
+            <div style="font-family:var(--font-display); font-size:14px; letter-spacing:.16em; text-transform:uppercase;">Assignment Form</div>
+            <div style="font-size:11px; color:var(--text-muted); letter-spacing:.05em;">Assign a property under contract to a builder, custom client, or Development.</div>
+            <div style="margin-top:8px; font-size:10px; letter-spacing:.2em; color:var(--accent); text-transform:uppercase;">Download ↓</div>
+          </a>
+          <a class="tool-tile" href="assets/land-files/commission-one-pager.pdf" download="Stonehouse-Land-Commission-One-Pager.pdf" target="_blank" rel="noopener"
+             style="display:flex; flex-direction:column; gap:6px; padding:22px 24px; background:var(--panel); border:1px solid var(--rule); color:#fff;">
+            <div style="font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Reference</div>
+            <div style="font-family:var(--font-display); font-size:14px; letter-spacing:.16em; text-transform:uppercase;">Commission One-Pager</div>
+            <div style="font-size:11px; color:var(--text-muted); letter-spacing:.05em;">MRC classes, commission schedule, agent payout by tier.</div>
+            <div style="margin-top:8px; font-size:10px; letter-spacing:.2em; color:var(--accent); text-transform:uppercase;">Download ↓</div>
+          </a>
         </div>
       </section>
 
@@ -336,13 +372,375 @@
         const agent = t.getAttribute('data-agent');
         window.CURRENT_LAND_AGENT = agent;
         tabs.forEach(x => x.classList.toggle('is-active', x === t));
-        // Update every inline "current agent" mention on the page
         document.getElementById('current-agent-label').textContent = agent;
         document.querySelectorAll('[data-current-agent]').forEach(el => el.textContent = agent);
-        // Dispatch event so panels can re-render filtered data
         window.dispatchEvent(new CustomEvent('landagentchange', { detail: { agent } }));
       }));
     })();
+
+    /* =========================================================
+       Sheet fetches — same sheets as admin dashboard.
+       Only Hot Leads filters by CURRENT_LAND_AGENT.
+       ========================================================= */
+    const SHEETS = {
+      LAND_INTAKE: '1pA82pl93-fhGpSoBmU4coJbkLf8KtJlMesc2p5XcKTA',
+      BUYBOX:      '1012o5cpaVQ1nf9uk0xxbv8NxH_exkM2C3FaN9NIDfr0',
+      HOTLEAD:     '1Ms0tc8nfwkR2h5Kd45qoBAQa0yxDt6BWL-pcUSR9i1U'
+    };
+
+    const esc = (s) => String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const usdFmt = new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', maximumFractionDigits:0 });
+    const fmtUSD = n => (isFinite(n) && n) ? usdFmt.format(n) : '';
+    function fmtDate(d) {
+      if (!(d instanceof Date) || isNaN(d)) return '';
+      return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'2-digit' });
+    }
+    function daysBetween(a, b) {
+      if (!a || !b) return 0;
+      return Math.round((b.getTime() - a.getTime()) / 86400000);
+    }
+    function parseGvizStr(cell) {
+      if (!cell) return '';
+      if (cell.f != null) return String(cell.f);
+      if (cell.v != null) return String(cell.v);
+      return '';
+    }
+    function parseGvizNum(cell) {
+      if (!cell || cell.v == null) return 0;
+      if (typeof cell.v === 'number') return cell.v;
+      const n = parseFloat(String(cell.v).replace(/[$,\s]/g,''));
+      return isNaN(n) ? 0 : n;
+    }
+    function parseGvizDate(cell) {
+      if (!cell || cell.v == null) return null;
+      const v = cell.v;
+      if (typeof v === 'string' && /^Date\(/.test(v)) {
+        const m = v.match(/Date\((\d+),(\d+),(\d+)/);
+        if (m) return new Date(+m[1], +m[2], +m[3]);
+      }
+      const d = new Date(v);
+      return isNaN(d.getTime()) ? null : d;
+    }
+    function parseEnv(text) {
+      const m = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
+      if (!m) throw new Error('bad envelope');
+      const d = JSON.parse(m[1]);
+      if (d.status !== 'ok') throw new Error(d.errors?.[0]?.detailed_message || d.status);
+      return d.table || { cols:[], rows:[] };
+    }
+    function findCol(cols, ...names) {
+      const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+      const labels = cols.map(c => norm(c.label));
+      for (const n of names) {
+        const t = norm(n);
+        const i = labels.findIndex(l => l === t);
+        if (i >= 0) return i;
+      }
+      for (const n of names) {
+        const t = norm(n);
+        const i = labels.findIndex(l => l.indexOf(t) >= 0 || t.indexOf(l) >= 0);
+        if (i >= 0) return i;
+      }
+      return -1;
+    }
+    async function gviz(sheetId, tab) {
+      const url = 'https://docs.google.com/spreadsheets/d/' + sheetId +
+        '/gviz/tq?tqx=out:json&headers=1&sheet=' + encodeURIComponent(tab) + '&t=' + Date.now();
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return parseEnv(await res.text());
+    }
+
+    /* ---- Pipeline (shared) ---- */
+    let _landDeals = [];
+    async function loadPipeline() {
+      const listEl = document.getElementById('land-pipeline-list');
+      const countEl = document.getElementById('land-pipeline-count');
+      try {
+        const table = await gviz(SHEETS.LAND_INTAKE, 'Form Responses 1');
+        const cols = table.cols || [];
+        const ix = {
+          ts:            findCol(cols, 'Timestamp'),
+          agent:         findCol(cols, 'Agent Name', 'Agent'),
+          address:       findCol(cols, 'Property Address'),
+          neigh:         findCol(cols, 'Neighborhood / Area', 'Neighborhood'),
+          contract:      findCol(cols, 'Contract Price'),
+          asking:        findCol(cols, 'Asking Price'),
+          uc:            findCol(cols, 'Date Under Contract'),
+          ddEnd:         findCol(cols, 'Due Diligence End'),
+          closing:       findCol(cols, 'Closing Date'),
+          status:        findCol(cols, 'Status'),
+          llc:           findCol(cols, 'LLC Formation Deadline'),
+          em:            findCol(cols, 'Earnest Money Deadline')
+        };
+        // Dedupe by address (latest wins)
+        const rawRows = (table.rows || []).map(r => {
+          const c = r.c || [];
+          return {
+            ts:       parseGvizDate(c[ix.ts]),
+            agent:    ix.agent >= 0 ? parseGvizStr(c[ix.agent]) : '',
+            address:  parseGvizStr(c[ix.address]),
+            neigh:    parseGvizStr(c[ix.neigh]),
+            contract: parseGvizNum(c[ix.contract]),
+            asking:   parseGvizNum(c[ix.asking]),
+            uc:       parseGvizDate(c[ix.uc]),
+            ddEnd:    parseGvizDate(c[ix.ddEnd]),
+            closing:  parseGvizDate(c[ix.closing]),
+            status:   parseGvizStr(c[ix.status]),
+            llc:      parseGvizDate(c[ix.llc]),
+            em:       parseGvizDate(c[ix.em])
+          };
+        }).filter(d => d.address);
+        const byAddr = new Map();
+        rawRows.forEach(r => {
+          const k = r.address.trim().toLowerCase();
+          const ex = byAddr.get(k);
+          if (!ex || (r.ts && (!ex.ts || r.ts > ex.ts))) byAddr.set(k, r);
+        });
+        _landDeals = Array.from(byAddr.values());
+        // Filter to active (not closed / killed / withdrawn)
+        const active = _landDeals.filter(d => {
+          const s = (d.status || '').toLowerCase();
+          if (/closed|killed|dead|archive/.test(s)) return false;
+          return true;
+        });
+        countEl.textContent = active.length + ' active · firm-wide';
+        if (active.length === 0) {
+          listEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">No active deals in the pipeline right now.</div>';
+          return;
+        }
+        // Sort by closing date ascending
+        active.sort((a, b) => {
+          const ac = a.closing ? a.closing.getTime() : Infinity;
+          const bc = b.closing ? b.closing.getTime() : Infinity;
+          return ac - bc;
+        });
+        listEl.innerHTML = active.map(d => `
+          <article style="background:var(--panel); border:1px solid var(--rule); padding:14px 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:start; gap:10px;">
+              <div style="min-width:0; flex:1;">
+                <div style="font-family:var(--font-display); font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:#fff;">${esc(d.address)}</div>
+                <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">${esc(d.neigh)}${d.agent ? ' &nbsp;·&nbsp; ' + esc(d.agent) : ''}</div>
+              </div>
+              ${d.contract ? `<div style="font-family:var(--font-display); font-size:14px; color:#fff; white-space:nowrap;">${esc(fmtUSD(d.contract))}</div>` : ''}
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px 12px; margin-top:10px; padding-top:10px; border-top:1px solid #222; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim);">
+              <div>Under Contract</div><div style="color:#ccc;">${esc(fmtDate(d.uc))}</div>
+              <div>Closing</div><div style="color:#ccc;">${esc(fmtDate(d.closing))}</div>
+              ${d.status ? `<div>Status</div><div style="color:#ccc;">${esc(d.status)}</div>` : ''}
+            </div>
+          </article>
+        `).join('');
+      } catch (err) {
+        countEl.textContent = 'Could not load';
+        listEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:#d99; font-size:13px;">Error: ' + esc(err.message || err) + '</div>';
+      }
+    }
+
+    /* ---- Buy Boxes (shared) ---- */
+    let _landBuyBoxes = [];
+    async function loadBuyBoxes() {
+      const listEl = document.getElementById('land-buyboxes-list');
+      const countEl = document.getElementById('land-buyboxes-count');
+      try {
+        const table = await gviz(SHEETS.BUYBOX, 'Form Responses 1');
+        const cols = table.cols || [];
+        const ix = {
+          ts:       findCol(cols, 'Timestamp'),
+          id:       findCol(cols, 'buy_box_id'),
+          builder:  findCol(cols, 'builder_name'),
+          status:   findCol(cols, 'status'),
+          priority: findCol(cols, 'priority'),
+          city:     findCol(cols, 'city'),
+          state:    findCol(cols, 'state'),
+          suburbs:  findCol(cols, 'suburbs'),
+          minPrice: findCol(cols, 'min_price'),
+          maxPrice: findCol(cols, 'max_price'),
+          mustHave: findCol(cols, 'must_haves'),
+          notes:    findCol(cols, 'notes')
+        };
+        const rawRows = (table.rows || []).map(r => {
+          const c = r.c || [];
+          return {
+            ts:       parseGvizDate(c[ix.ts]),
+            id:       parseGvizStr(c[ix.id]),
+            builder:  parseGvizStr(c[ix.builder]),
+            status:   parseGvizStr(c[ix.status]),
+            priority: parseGvizStr(c[ix.priority]),
+            city:     parseGvizStr(c[ix.city]),
+            state:    parseGvizStr(c[ix.state]),
+            suburbs:  parseGvizStr(c[ix.suburbs]),
+            minPrice: parseGvizNum(c[ix.minPrice]),
+            maxPrice: parseGvizNum(c[ix.maxPrice]),
+            mustHave: parseGvizStr(c[ix.mustHave]),
+            notes:    parseGvizStr(c[ix.notes])
+          };
+        }).filter(r => r.id || r.builder);
+        // Dedupe by id
+        const byId = new Map();
+        rawRows.forEach(r => {
+          const k = r.id || (r.builder + '|' + r.city);
+          const ex = byId.get(k);
+          if (!ex || (r.ts && (!ex.ts || r.ts > ex.ts))) byId.set(k, r);
+        });
+        _landBuyBoxes = Array.from(byId.values()).filter(r => (r.status || '').toLowerCase() !== 'archived');
+        countEl.textContent = _landBuyBoxes.length + ' active buy boxes · firm-wide';
+        if (_landBuyBoxes.length === 0) {
+          listEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">No active buy boxes. Add one from the admin dashboard.</div>';
+          return;
+        }
+        _landBuyBoxes.sort((a, b) => (a.builder || '').localeCompare(b.builder || ''));
+        listEl.innerHTML = _landBuyBoxes.map(r => {
+          const price = (r.minPrice && r.maxPrice) ? fmtUSD(r.minPrice) + ' – ' + fmtUSD(r.maxPrice) : (fmtUSD(r.minPrice) || fmtUSD(r.maxPrice) || '');
+          const suburbs = (r.suburbs || '').split(',').map(s => s.trim()).filter(Boolean);
+          return `
+            <article style="background:var(--panel); border:1px solid var(--rule); padding:14px 16px;">
+              <div style="font-family:var(--font-display); font-size:14px; letter-spacing:.14em; text-transform:uppercase; color:#fff;">${esc(r.builder)}</div>
+              <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">${esc(r.city)}${r.state ? ', ' + esc(r.state) : ''}</div>
+              ${price ? `<div style="font-size:14px; color:#fff; margin-top:8px;"><b>${esc(price)}</b></div>` : ''}
+              ${suburbs.length ? `<div style="margin:8px 0;">${suburbs.map(s => '<span style="display:inline-block; padding:2px 8px; margin:2px 3px 0 0; font-size:10px; border:1px solid #2a2a2a; background:#141414; color:#ddd;">' + esc(s) + '</span>').join('')}</div>` : ''}
+              ${r.mustHave ? `<div style="font-size:11px; color:#9ec39e; margin-top:6px;"><b>Must:</b> <span style="color:#ccc;">${esc(r.mustHave)}</span></div>` : ''}
+            </article>
+          `;
+        }).join('');
+      } catch (err) {
+        countEl.textContent = 'Could not load';
+        listEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:#d99; font-size:13px;">Error: ' + esc(err.message || err) + '</div>';
+      }
+    }
+
+    /* ---- Hot Leads (agent-scoped) ---- */
+    let _landHotLeads = [];
+    async function loadHotLeads() {
+      const listEl = document.getElementById('land-hotleads-list');
+      const countEl = document.getElementById('land-hotleads-count');
+      try {
+        const table = await gviz(SHEETS.HOTLEAD, 'Form Responses 1');
+        const cols = table.cols || [];
+        const ix = {
+          ts:         findCol(cols, 'Timestamp'),
+          id:         findCol(cols, 'lead_id'),
+          property:   findCol(cols, 'property_address'),
+          neigh:      findCol(cols, 'neighborhood'),
+          estVal:     findCol(cols, 'estimated_value'),
+          ownerName:  findCol(cols, 'owner_name'),
+          ownerPhone: findCol(cols, 'owner_phone'),
+          ownerEmail: findCol(cols, 'owner_email'),
+          source:     findCol(cols, 'source'),
+          heat:       findCol(cols, 'heat_level'),
+          status:     findCol(cols, 'status'),
+          agent:      findCol(cols, 'land_agent'),
+          lastTouch:  findCol(cols, 'last_touch'),
+          nextAction: findCol(cols, 'next_action'),
+          nextDate:   findCol(cols, 'next_action_date'),
+          notes:      findCol(cols, 'notes')
+        };
+        const rawRows = (table.rows || []).map(r => {
+          const c = r.c || [];
+          return {
+            ts:         parseGvizDate(c[ix.ts]),
+            id:         parseGvizStr(c[ix.id]),
+            property:   parseGvizStr(c[ix.property]),
+            neigh:      parseGvizStr(c[ix.neigh]),
+            estVal:     parseGvizStr(c[ix.estVal]),
+            ownerName:  parseGvizStr(c[ix.ownerName]),
+            ownerPhone: parseGvizStr(c[ix.ownerPhone]),
+            ownerEmail: parseGvizStr(c[ix.ownerEmail]),
+            source:     parseGvizStr(c[ix.source]),
+            heat:       parseGvizStr(c[ix.heat]),
+            status:     parseGvizStr(c[ix.status]),
+            agent:      parseGvizStr(c[ix.agent]),
+            lastTouch:  parseGvizDate(c[ix.lastTouch]),
+            nextAction: parseGvizStr(c[ix.nextAction]),
+            nextDate:   parseGvizDate(c[ix.nextDate]),
+            notes:      parseGvizStr(c[ix.notes])
+          };
+        }).filter(r => r.id || r.property);
+        // Dedupe by lead_id
+        const byId = new Map();
+        rawRows.forEach(r => {
+          const k = r.id || r.property;
+          const ex = byId.get(k);
+          if (!ex || (r.ts && (!ex.ts || r.ts > ex.ts))) byId.set(k, r);
+        });
+        _landHotLeads = Array.from(byId.values());
+        _renderHotLeads();
+      } catch (err) {
+        countEl.textContent = 'Could not load';
+        listEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:#d99; font-size:13px;">Error: ' + esc(err.message || err) + '</div>';
+      }
+    }
+    function _renderHotLeads() {
+      const listEl = document.getElementById('land-hotleads-list');
+      const countEl = document.getElementById('land-hotleads-count');
+      if (!listEl) return;
+      const agent = window.CURRENT_LAND_AGENT;
+      const mine = _landHotLeads.filter(r => (r.agent || '').trim() === agent);
+      countEl.textContent = mine.length + ' of ' + _landHotLeads.length + ' hot leads · scoped to ' + agent;
+      if (mine.length === 0) {
+        listEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">No hot leads assigned to ' + esc(agent) + ' yet.</div>';
+        return;
+      }
+      const heatOrder = { 'Hot':0, 'Warm':1, 'Cool':2 };
+      mine.sort((a, b) => {
+        const ha = heatOrder[a.heat] ?? 9;
+        const hb = heatOrder[b.heat] ?? 9;
+        if (ha !== hb) return ha - hb;
+        const ta = a.lastTouch ? a.lastTouch.getTime() : 0;
+        const tb = b.lastTouch ? b.lastTouch.getTime() : 0;
+        return tb - ta;
+      });
+      const heatPill = (h) => {
+        if (!h) return '';
+        const bg = h==='Hot'?'#3a1c1c':h==='Warm'?'#3a301c':'#1c2a3a';
+        const fg = h==='Hot'?'#d99':h==='Warm'?'#e8c068':'#8fb1d9';
+        return '<span style="padding:2px 8px; font-size:9px; letter-spacing:.14em; text-transform:uppercase; background:'+bg+'; color:'+fg+';">'+esc(h)+'</span>';
+      };
+      listEl.innerHTML = mine.map(r => `
+        <article style="background:var(--panel); border:1px solid var(--rule); padding:14px 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:start; gap:10px;">
+            <div style="min-width:0; flex:1;">
+              <div style="font-family:var(--font-display); font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:#fff;">${esc(r.property)}</div>
+              <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">${esc(r.neigh)}${r.estVal ? ' · ' + esc(r.estVal) : ''}</div>
+            </div>
+            ${heatPill(r.heat)}
+          </div>
+          ${r.ownerName ? `<div style="font-size:12px; color:#ddd; margin:8px 0 2px;"><b>${esc(r.ownerName)}</b></div>` : ''}
+          ${r.ownerPhone ? `<div style="font-size:11px; color:var(--text-muted);"><a href="tel:${esc(r.ownerPhone.replace(/\D+/g,''))}" style="color:#ddd;">${esc(r.ownerPhone)}</a></div>` : ''}
+          <div style="border-top:1px solid #222; margin-top:10px; padding-top:8px; font-size:11px;">
+            <div><span style="color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; font-size:9px;">Last Touch</span> <span style="color:#ccc; margin-left:6px;">${esc(fmtDate(r.lastTouch)) || '—'}</span></div>
+            ${r.nextAction ? `<div style="margin-top:4px;"><span style="color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; font-size:9px;">Next</span> <span style="color:#fff; margin-left:6px;">${esc(r.nextAction)}${r.nextDate ? ' <span style="color:var(--text-dim);">(' + esc(fmtDate(r.nextDate)) + ')</span>' : ''}</span></div>` : ''}
+          </div>
+          ${r.notes ? `<div style="font-size:11px; color:var(--text-dim); margin-top:8px; padding-top:8px; border-top:1px solid #222; white-space:pre-wrap;">${esc(r.notes)}</div>` : ''}
+        </article>
+      `).join('');
+      _renderOverview();
+    }
+
+    /* ---- Overview tiles ---- */
+    function _renderOverview() {
+      const agent = window.CURRENT_LAND_AGENT;
+      const mine = _landHotLeads.filter(r => (r.agent || '').trim() === agent);
+      const uc = _landDeals.filter(d => {
+        const s = (d.status || '').toLowerCase();
+        return !/closed|killed|dead|archive/.test(s);
+      });
+      const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = String(v); };
+      setTxt('tile-my-hotleads', mine.length);
+      setTxt('tile-firm-uc', uc.length);
+      setTxt('tile-firm-bb', _landBuyBoxes.length);
+      setTxt('tile-firm-hotleads', _landHotLeads.length);
+    }
+
+    // Re-render Hot Leads + Overview whenever the agent tab changes
+    window.addEventListener('landagentchange', () => { _renderHotLeads(); _renderOverview(); });
+
+    // Boot: kick off all three loads in parallel
+    loadPipeline().then(_renderOverview);
+    loadBuyBoxes().then(_renderOverview);
+    loadHotLeads();
   </script>
 </body>
 </html>
