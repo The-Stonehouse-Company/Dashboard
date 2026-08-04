@@ -1622,16 +1622,28 @@
     };
 
     async function _plGeocode(address) {
-      // Metro Nashville geocoder — returns lat/lng candidates
-      const url = 'https://maps.nashville.gov/arcgis/rest/services/Locators/CompositeGeocoder/GeocodeServer/findAddressCandidates'
+      // Try Metro Nashville geocoder first (LocNashComp — the Nashville-
+      // specific composite locator). Fall back to ArcGIS World Geocoder
+      // if Metro returns nothing (handles addresses outside Metro's list).
+      async function tryLocator(url) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) return null;
+          const data = await res.json();
+          const candidates = (data.candidates || []).sort((a, b) => (b.score || 0) - (a.score || 0));
+          return candidates[0] || null;
+        } catch (_) { return null; }
+      }
+      const metroUrl = 'https://maps.nashville.gov/arcgis/rest/services/Locators/LocNashComp/GeocodeServer/findAddressCandidates'
         + '?SingleLine=' + encodeURIComponent(address)
         + '&outSR=4326&maxLocations=3&f=json';
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Geocoder HTTP ' + res.status);
-      const data = await res.json();
-      if (!data.candidates || data.candidates.length === 0) return null;
-      // Return best-scoring candidate
-      return data.candidates.sort((a, b) => (b.score || 0) - (a.score || 0))[0];
+      let hit = await tryLocator(metroUrl);
+      if (hit) return hit;
+      const worldUrl = 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates'
+        + '?SingleLine=' + encodeURIComponent(address)
+        + '&outFields=StAddr,City,Region,Postal&outSR=4326&maxLocations=3&f=json';
+      hit = await tryLocator(worldUrl);
+      return hit;
     }
 
     async function _plQueryLayer(baseUrl, layerId, geom, outFields) {
