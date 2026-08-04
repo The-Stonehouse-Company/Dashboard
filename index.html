@@ -3468,8 +3468,11 @@
     // Friction barrier. Edit ACCESS_CODE to change the team code; bump
     // ACCESS_VERSION to force everyone to re-enter after a code change.
     (function () {
-      const ACCESS_CODE    = '051999';           // ← edit this to change the code (6 digits)
-      const ACCESS_VERSION = 3;                  // ← bump this to invalidate existing sessions
+      // Any agent's 4-digit code opens the dashboard. Ryan is master (0000);
+      // Gabe (5555) and Kneeland (0101) get in with their own codes.
+      const ACCESS_CODES   = ['0000', '5555', '0101'];
+      const ACCESS_LEN     = 4;
+      const ACCESS_VERSION = 4;                  // ← bump this to invalidate existing sessions
       const STORAGE_KEY    = 'stonehouse-employee-gate';
       const VALID_MS       = 30 * 24 * 60 * 60 * 1000; // 30 days
 
@@ -3520,9 +3523,9 @@
           if (!card) return;
           const target = card.getAttribute('data-target');
           if (target === 'admin') {
-            // Admin-only passcode gate on top of the employee-wide code.
+            // Admin dashboard is Ryan-only. His code (0000) unlocks it.
             // Unlock persists for 24 hours per browser.
-            const ADMIN_CODE = '1522';
+            const ADMIN_CODE = '0000';
             const ADMIN_KEY  = 'stonehouse.adminUnlock';
             const ADMIN_MS   = 24 * 60 * 60 * 1000;
             function adminIsUnlocked() {
@@ -3599,9 +3602,9 @@
       const btn     = document.getElementById('gate-submit');
       if (!gate || !row || !btn) return;
 
-      // Build six per-digit input boxes (2FA-style).
+      // Build four per-digit input boxes (2FA-style).
       const inputs = [];
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0; i < ACCESS_LEN; i++) {
         const inp = document.createElement('input');
         inp.type = 'tel';                    // shows number pad on mobile, no spinner
         inp.inputMode = 'numeric';
@@ -3644,8 +3647,8 @@
       }
       function tryEnter() {
         const entered = collectEntered();
-        if (entered.length !== 6) return;        // wait for all six digits
-        if (entered === ACCESS_CODE) {
+        if (entered.length !== ACCESS_LEN) return;    // wait for all digits
+        if (ACCESS_CODES.indexOf(entered) >= 0) {
           try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify({
               v:  ACCESS_VERSION,
@@ -19328,6 +19331,14 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       function tryUnlock(code) {
         const codeT = (code || '').trim();
         if (!codeT) { setStatus('err', 'Enter your passcode'); return; }
+        // Ryan's master (0000) always unlocks as Ryan Stonehouse
+        if (codeT === '0000') {
+          setUnlock('Ryan Stonehouse');
+          setStatus('ok', '✓ Unlocked as Ryan Stonehouse');
+          if (inputEl) inputEl.value = '';
+          applyState();
+          return;
+        }
         const roster = window.STONEHOUSE_TEAM || [];
         if (roster.length === 0) {
           setStatus('err', 'Roster still loading — try again in a moment');
@@ -20461,7 +20472,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           const input = form.querySelector('.contacts-lock-input');
           const status = form.querySelector('.commissions-lock-status');
           const val = input ? (input.value || '').trim() : '';
-          if (val === _ctExpectedCode()) {
+          // Ryan's master (0000) always works; otherwise use his roster code
+          if (val === '0000' || val === _ctExpectedCode()) {
             _ctSetUnlocked();
             if (status) { status.className = 'commissions-lock-status ok'; status.textContent = '✓ Unlocked'; }
             if (input) input.value = '';

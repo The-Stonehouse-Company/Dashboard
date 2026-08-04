@@ -665,16 +665,15 @@
         const agent = window.CURRENT_LAND_AGENT;
         const entered = (inputEl.value || '').trim();
         const expected = (_teamPasscodes[agent] || '').trim();
-        if (!expected) {
-          statusEl.textContent = 'No passcode set for ' + agent + ' in the Team Roster.';
-          return;
-        }
-        if (entered === expected) {
+        // Ryan's master (0000) opens any agent's tab
+        if (entered === '0000' || (expected && entered === expected)) {
           _hlUnlock(agent);
           _hlUpdateGate();
-        } else {
-          statusEl.textContent = 'Wrong code. Try again.';
+          return;
         }
+        statusEl.textContent = expected
+          ? 'Wrong code. Try again.'
+          : 'No passcode set for ' + agent + ' — ask Ryan.';
       }
       if (submitBtn) submitBtn.addEventListener('click', tryUnlock);
       if (inputEl) inputEl.addEventListener('keydown', (e) => {
