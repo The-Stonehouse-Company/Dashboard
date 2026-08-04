@@ -1782,9 +1782,11 @@
         const front    = a.Front != null && a.Front > 0 ? a.Front : null;
         const side     = a.Side  != null && a.Side  > 0 ? a.Side  : null;
         const zoneCode = (a.Zoning || '').trim();
+        const fullAddress = (geo && geo.address) ? geo.address : '';
         cards.push(_plCard('Parcel',
           _plRow('Parcel ID', parcelId) +
           _plRow('Situs', address) +
+          _plRow('Full Address', fullAddress) +
           _plRow('Owner', owner) +
           _plRow('Acres', acres != null ? acres.toFixed(3) : '') +
           _plRow('Frontage', front != null ? front + ' ft' : '—') +
