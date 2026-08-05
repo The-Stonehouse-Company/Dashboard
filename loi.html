@@ -190,35 +190,38 @@
       line-height: 1.65;
     }
 
-    /* Signature area — tightened so the seller block doesn't clip off
-       the bottom of the page. Visual rhythm matches a printed letter. */
-    .loi-page .sign-block {
-      margin-top: 28px;
+    /* Signature area — two columns (Buyer left, Seller right).
+       Standard LOI/contract convention. Fits on the page even when the
+       Additional Terms block is populated. */
+    .loi-page .sig-columns {
+      margin-top: 30px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
     }
-    .loi-page .sign-block .name {
+    .loi-page .sig-col .sig-label {
+      font-weight: 700;
+      text-decoration: underline;
+      margin-bottom: 10px;
+    }
+    .loi-page .sig-col .sig-entity {
       font-weight: 500;
-      margin-bottom: 36px;
+      margin-bottom: 34px;    /* space for hand-signature above the line */
+      min-height: 16px;
     }
-    .loi-page .sign-line {
-      width: 280px;
+    .loi-page .sig-col .sig-line {
       border-bottom: 1.2px solid var(--ink);
       margin-bottom: 6px;
     }
-    .loi-page .sign-block .meta {
+    .loi-page .sig-col .sig-by {
       font-size: 12.5px;
       color: var(--ink-muted);
       margin-bottom: 4px;
     }
-    .loi-page .seller-block {
-      margin-top: 28px;
-    }
-    .loi-page .seller-block .name {
-      font-weight: 500;
-      margin-bottom: 36px;
-    }
-    .loi-page .seller-block .label {
+    .loi-page .sig-col .sig-date {
       font-size: 12.5px;
       color: var(--ink-muted);
+      margin-top: 10px;
     }
 
     @page { size: letter portrait; margin: 0; }
@@ -369,28 +372,32 @@
 
         '<p>We do not intend to waste your time, and I&rsquo;d appreciate knowing your thoughts on the terms above. Please don&rsquo;t hesitate to contact me with any questions, comments, or if you would like me to formalize this in a written offer for your review.</p>' +
 
-        // "Ryan Stonehouse · Founder" only shows when the LOI is actually from
-        // Ryan. We treat the LOI as Ryan's if (a) the sender contact fields
-        // are left blank (default), or (b) the sender email starts with
-        // "ryan@" (any Stonehouse domain variant). Any other agent's email
-        // hides the Ryan attribution.
+        // Side-by-side Buyer / Seller signature blocks. Ryan is treated
+        // as the signer when the sender email is blank or starts with "ryan@".
         (function () {
           const rawEmail = (p && p.senderEmail) ? String(p.senderEmail).toLowerCase() : '';
           const isRyan = !rawEmail || rawEmail.startsWith('ryan@');
-          return '<div class="sign-block">' +
-            '<div class="name">The Stonehouse Company</div>' +
-            '<div class="sign-line"></div>' +
-            (isRyan ? '<div class="meta">Ryan Stonehouse · Founder</div>' : '') +
-            (sPhone ? '<div class="meta">' + sPhone + '</div>' : '') +
-            (sEmail ? '<div class="meta">' + sEmail + '</div>' : '') +
+          return '<div class="sig-columns">' +
+            // Buyer (left)
+            '<div class="sig-col">' +
+              '<div class="sig-label">Buyer:</div>' +
+              '<div class="sig-entity">The Stonehouse Company</div>' +
+              '<div class="sig-line"></div>' +
+              (isRyan ? '<div class="sig-by">Ryan Stonehouse &middot; Founder</div>' : '<div class="sig-by">Authorized Signatory</div>') +
+              (sPhone ? '<div class="sig-by">' + sPhone + '</div>' : '') +
+              (sEmail ? '<div class="sig-by">' + sEmail + '</div>' : '') +
+              '<div class="sig-date">Date: ____________________</div>' +
+            '</div>' +
+            // Seller (right)
+            '<div class="sig-col">' +
+              '<div class="sig-label">Seller:</div>' +
+              '<div class="sig-entity">&nbsp;</div>' +
+              '<div class="sig-line"></div>' +
+              '<div class="sig-by">Print name</div>' +
+              '<div class="sig-date">Date: ____________________</div>' +
+            '</div>' +
           '</div>';
         })() +
-
-        '<div class="seller-block">' +
-          '<div class="name">' + propAddr + '</div>' +
-          '<div class="sign-line"></div>' +
-          '<div class="label">Seller Signature</div>' +
-        '</div>' +
       '</section>'
     );
   }
