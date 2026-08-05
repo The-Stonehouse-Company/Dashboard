@@ -3484,7 +3484,10 @@
         if (!splash) return;
         // Skip the animation if agents are switching divisions from
         // apeiron.html (or any other division link back to the hub).
-        const skipSplash = new URLSearchParams(location.search).get('hub') === '1';
+        // Skip splash when coming back from a division dashboard (?hub=1)
+        // OR when a tool link asks to auto-open a modal (?openModal=…).
+        const _sp = new URLSearchParams(location.search);
+        const skipSplash = _sp.get('hub') === '1' || !!_sp.get('openModal');
         if (skipSplash) {
           if (splash.parentNode) splash.parentNode.removeChild(splash);
           const hub = document.getElementById('division-hub');
@@ -3631,6 +3634,58 @@
         });
       };
 
+      // Auto-open a specific modal when the URL contains ?openModal=<key>.
+      // Used by Tools deep-links from division dashboards (e.g. Land Acq's
+      // "Letter of Intent" tile opens admin and jumps straight to the LOI
+      // form). The key maps to a button id defined on the admin dashboard.
+      window._autoOpenModalFromURL = function () {
+        const key = new URLSearchParams(location.search).get('openModal');
+        if (!key) return;
+        const MODAL_MAP = {
+          loi:       'open-loi-modal',
+          feecalc:   'open-feecalc-modal',
+          intake:    'open-intake-modal',
+          onepager:  'open-onepager-modal',
+          uw:        'open-uw-modal',
+          engagement:'open-engagement-modal',
+          hotlead:   'open-hotlead-modal',
+          buybox:    'open-buybox-modal',
+          devintake: 'open-devintake-modal',
+          om:        'open-om-modal',
+          cma:       'open-cma-modal'
+        };
+        const btnId = MODAL_MAP[key];
+        if (!btnId) return;
+        // Give the dashboard a beat to fully render before clicking.
+        setTimeout(() => {
+          const btn = document.getElementById(btnId);
+          if (btn) btn.click();
+        }, 250);
+      };
+
+      // If the admin is already unlocked and the user lands with ?openModal=X,
+      // the hub click handler below won't fire (no interaction). Kick the
+      // auto-opener from showStonehouseIntro's final step in that case —
+      // but only when the URL param is present AND admin unlock is fresh.
+      (function _preAutoOpen() {
+        const key = new URLSearchParams(location.search).get('openModal');
+        if (!key) return;
+        try {
+          const raw = localStorage.getItem('stonehouse.adminUnlock');
+          if (!raw) return;                              // needs passcode → hub flow
+          const t = JSON.parse(raw);
+          if (!t || !t.ok || (Date.now() - t.ts) > 24 * 60 * 60 * 1000) return;
+        } catch (_) { return; }
+        // Admin is unlocked. Wait for the hub to appear, then simulate the
+        // admin card click so the hub dismisses and the dashboard shows.
+        const waitAndClick = () => {
+          const adminCard = document.querySelector('.hub-card[data-target="admin"]');
+          if (adminCard) adminCard.click();
+          else setTimeout(waitAndClick, 100);
+        };
+        setTimeout(waitAndClick, 300);
+      })();
+
       // Hub circle clicks — Admin enters the dashboard, "coming soon"
       // cards give a subtle flash so the user knows they're not broken.
       (function () {
@@ -3670,6 +3725,9 @@
             setTimeout(() => {
               hub.setAttribute('aria-hidden', 'true');
               hub.classList.remove('is-leaving');
+              // If the user arrived via a Tools deep-link (?openModal=…),
+              // auto-open the matching modal now that the dashboard is visible.
+              _autoOpenModalFromURL();
             }, 600);
             return;
           }
