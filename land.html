@@ -1166,6 +1166,65 @@
       if (e.target && e.target.classList.contains('mini-modal')) _closeMiniModal(e.target.id);
     });
 
+    // Helper: swap the modal title between Add / Edit mode.
+    function _hlSetModalTitle(mode, agentName) {
+      const el = document.getElementById('hl-modal');
+      if (!el) return;
+      const titleEl = el.querySelector('.mini-modal-head > div > div:last-child');
+      if (!titleEl) return;
+      const label = mode === 'edit' ? 'Edit Hot Lead' : 'Add Hot Lead';
+      titleEl.innerHTML = label + ' <span id="hl-modal-agent" style="color:var(--accent); font-size:14px; margin-left:8px;">— ' + esc(agentName || '') + '</span>';
+    }
+
+    // Format a Date object as YYYY-MM-DD for <input type="date">.
+    function _hlISODate(d) {
+      if (!d || !(d instanceof Date) || isNaN(d)) return '';
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return y + '-' + m + '-' + day;
+    }
+
+    // Open the Hot Lead modal in EDIT mode — pre-fill from the shared sheet
+    // and preserve the lead_id so the appended row overwrites (latest wins).
+    function _hlOpenEdit(leadId) {
+      const lead = _landHotLeads.find(r => r.id === leadId);
+      if (!lead) return;
+      const form = document.getElementById('hl-form');
+      form.reset();
+      document.getElementById('hl-form-id').value    = lead.id;
+      document.getElementById('hl-form-agent').value = lead.agent || window.CURRENT_LAND_AGENT;
+      document.getElementById('hl-form-status').textContent = '';
+      const setField = (name, val) => {
+        const inp = form.querySelector('[name="' + name + '"]');
+        if (inp && val != null) inp.value = val;
+      };
+      setField('property_address', lead.property);
+      setField('neighborhood',     lead.neigh);
+      setField('estimated_value',  lead.estVal);
+      setField('owner_name',       lead.ownerName);
+      setField('owner_phone',      lead.ownerPhone);
+      setField('owner_email',      lead.ownerEmail);
+      setField('source',           lead.source);
+      setField('referred_by',      lead.referredBy);
+      setField('heat_level',       lead.heat);
+      setField('status',           lead.status || 'Active');
+      setField('last_touch',       _hlISODate(lead.lastTouch));
+      setField('next_action_date', _hlISODate(lead.nextDate));
+      setField('next_action',      lead.nextAction);
+      setField('notes',            lead.notes);
+      _hlSetModalTitle('edit', lead.agent || window.CURRENT_LAND_AGENT);
+      _openMiniModal('hl-modal');
+    }
+
+    // Delegated click handler for Edit buttons on the Hot Lead cards.
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest && e.target.closest('[data-hl-edit]');
+      if (!btn) return;
+      const id = btn.getAttribute('data-hl-edit');
+      if (id) _hlOpenEdit(id);
+    });
+
     // + Add Hot Lead
     const hlAddBtn = document.getElementById('hl-add-btn');
     if (hlAddBtn) hlAddBtn.addEventListener('click', () => {
@@ -1173,7 +1232,11 @@
       form.reset();
       document.getElementById('hl-form-id').value = _newId('hl');
       document.getElementById('hl-form-agent').value = window.CURRENT_LAND_AGENT;
+      // Reset the hidden status back to Active for new leads.
+      const statusInp = form.querySelector('[name="status"]');
+      if (statusInp) statusInp.value = 'Active';
       document.getElementById('hl-form-status').textContent = '';
+      _hlSetModalTitle('add', window.CURRENT_LAND_AGENT);
       _openMiniModal('hl-modal');
     });
     const hlForm = document.getElementById('hl-form');
@@ -1520,6 +1583,7 @@
           ownerPhone: findCol(cols, 'owner_phone'),
           ownerEmail: findCol(cols, 'owner_email'),
           source:     findCol(cols, 'source'),
+          referredBy: findCol(cols, 'referred_by'),
           heat:       findCol(cols, 'heat_level'),
           status:     findCol(cols, 'status'),
           agent:      findCol(cols, 'land_agent'),
@@ -1540,6 +1604,7 @@
             ownerPhone: parseGvizStr(c[ix.ownerPhone]),
             ownerEmail: parseGvizStr(c[ix.ownerEmail]),
             source:     parseGvizStr(c[ix.source]),
+            referredBy: parseGvizStr(c[ix.referredBy]),
             heat:       parseGvizStr(c[ix.heat]),
             status:     parseGvizStr(c[ix.status]),
             agent:      parseGvizStr(c[ix.agent]),
@@ -1590,7 +1655,7 @@
         return '<span style="padding:2px 8px; font-size:9px; letter-spacing:.14em; text-transform:uppercase; background:'+bg+'; color:'+fg+';">'+esc(h)+'</span>';
       };
       listEl.innerHTML = mine.map(r => `
-        <article style="background:var(--panel); border:1px solid var(--rule); padding:14px 16px;">
+        <article style="background:var(--panel); border:1px solid var(--rule); padding:14px 16px; position:relative;">
           <div style="display:flex; justify-content:space-between; align-items:start; gap:10px;">
             <div style="min-width:0; flex:1;">
               <div style="font-family:var(--font-display); font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:#fff;">${esc(r.property)}</div>
@@ -1605,6 +1670,9 @@
             ${r.nextAction ? `<div style="margin-top:4px;"><span style="color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; font-size:9px;">Next</span> <span style="color:#fff; margin-left:6px;">${esc(r.nextAction)}${r.nextDate ? ' <span style="color:var(--text-dim);">(' + esc(fmtDate(r.nextDate)) + ')</span>' : ''}</span></div>` : ''}
           </div>
           ${r.notes ? `<div style="font-size:11px; color:var(--text-dim); margin-top:8px; padding-top:8px; border-top:1px solid #222; white-space:pre-wrap;">${esc(r.notes)}</div>` : ''}
+          <div style="display:flex; justify-content:flex-end; margin-top:10px; padding-top:8px; border-top:1px solid #222;">
+            <button type="button" data-hl-edit="${esc(r.id)}" style="font-family:var(--font-body); font-size:10px; letter-spacing:.18em; text-transform:uppercase; padding:6px 14px; background:transparent; color:var(--text-muted); border:1px solid var(--rule-strong); cursor:pointer; transition:color .15s, border-color .15s;">Edit</button>
+          </div>
         </article>
       `).join('');
       _renderOverview();
