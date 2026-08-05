@@ -8597,6 +8597,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
               <label for="loi-postocc">Post-Occupancy Period</label>
               <input id="loi-postocc" name="post_occupancy" type="text" placeholder="Negotiable" value="Negotiable" />
             </div>
+            <div class="full">
+              <label for="loi-notes">Additional Terms / Notes <span class="legend-hint" style="font-weight:400;">(optional — appears on the LOI under a &ldquo;Additional Terms&rdquo; heading. Use for anything not covered above: assignment rights, financing terms, subject to X, seller concessions, etc.)</span></label>
+              <textarea id="loi-notes" name="notes" rows="4" placeholder="e.g. Buyer to have the right to assign contract. Sale contingent on satisfactory feasibility review within 30 days. Seller to leave existing survey and plans."></textarea>
+            </div>
           </div>
         </fieldset>
 
@@ -12931,6 +12935,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             closing:         document.getElementById('loi-closing').value.trim() || 'Negotiable',
             contingencies:   document.getElementById('loi-contingencies').value.trim() || 'Negotiable',
             postOccupancy:   document.getElementById('loi-postocc').value.trim() || 'Negotiable',
+            notes:           document.getElementById('loi-notes').value.trim(),
             senderPhone:     document.getElementById('loi-sender-phone').value.trim(),
             senderEmail:     document.getElementById('loi-sender-email').value.trim(),
           };

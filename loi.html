@@ -174,6 +174,22 @@
       text-decoration: underline;
     }
 
+    /* Additional Terms / Notes — free-form section below the terms grid.
+       Preserves user line breaks (whitespace: pre-wrap) so a bulleted list
+       or numbered items typed in the form come out with their formatting. */
+    .loi-page .notes-block {
+      margin: 18px 0 8px;
+    }
+    .loi-page .notes-block .notes-head {
+      font-weight: 700;
+      text-decoration: underline;
+      margin-bottom: 6px;
+    }
+    .loi-page .notes-block .notes-body {
+      white-space: pre-wrap;
+      line-height: 1.65;
+    }
+
     /* Signature area — tightened so the seller block doesn't clip off
        the bottom of the page. Visual rhythm matches a printed letter. */
     .loi-page .sign-block {
@@ -312,6 +328,7 @@
     const closing  = esc(p && p.closing)          || 'Negotiable';
     const conting  = esc(p && p.contingencies)    || 'Negotiable';
     const postOcc  = esc(p && p.postOccupancy)    || 'Negotiable';
+    const notes    = esc(p && p.notes)            || '';
     const sPhone   = esc(p && p.senderPhone)      || '';
     const sEmail   = esc(p && p.senderEmail)      || '';
 
@@ -341,6 +358,14 @@
         '</div>' +
 
         '<div class="post-occ"><span class="label">Post-Occupancy Period:</span> ' + postOcc + '.</div>' +
+
+        // Additional Terms block — only rendered when the user provided notes.
+        (notes
+          ? ('<div class="notes-block">' +
+               '<div class="notes-head">Additional Terms:</div>' +
+               '<div class="notes-body">' + notes + '</div>' +
+             '</div>')
+          : '') +
 
         '<p>We do not intend to waste your time, and I&rsquo;d appreciate knowing your thoughts on the terms above. Please don&rsquo;t hesitate to contact me with any questions, comments, or if you would like me to formalize this in a written offer for your review.</p>' +
 
