@@ -380,7 +380,11 @@
   </style>
 </head>
 <body>
-  <div class="page-shell">
+  <!-- These two IDs (uw-modal-overlay, uw-modal) are required by the shared
+       UW controller script (extracted from the admin dashboard's modal).
+       The script bails at `if (!overlay || !modal) return;` without them. -->
+  <div id="uw-modal-overlay" aria-hidden="false">
+  <div class="page-shell" id="uw-modal">
     <div class="page-toolbar">
       <a href="land.html" class="brand">
         <img src="assets/icon-arch-transparent.png" alt="" />
@@ -390,7 +394,7 @@
       <a href="land.html" class="back">← Land Acquisition</a>
     </div>
 
-    
+
       <header class="modal-head">
         <div class="modal-title-group">
           <span class="modal-eyebrow">Development</span>
@@ -608,8 +612,9 @@
         <button class="btn ghost" type="button" id="uw-reset">Reset to Defaults</button>
         <button class="btn" type="button" onclick="window.print()">Print / Save PDF</button>
       </footer>
-    
-  </div>
+
+  </div><!-- /page-shell #uw-modal -->
+  </div><!-- /#uw-modal-overlay -->
 
   <script>
     (function () {
