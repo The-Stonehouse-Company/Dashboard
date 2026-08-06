@@ -3645,7 +3645,7 @@
           loi:       'open-loi-modal',
           feecalc:   'open-feecalc-modal',
           intake:    'open-intake-modal',
-          onepager:  'open-onepager-modal',
+          onepager:  'open-land-onepager-modal',   // Land Acq one-pager (Sales version = open-onepager-modal)
           uw:        'open-uw-modal',
           engagement:'open-engagement-modal',
           hotlead:   'open-hotlead-modal',
@@ -3656,9 +3656,12 @@
         };
         const btnId = MODAL_MAP[key];
         if (!btnId) return;
-        // Give the dashboard a beat to fully render before clicking.
+        // Give the dashboard a beat to render, then click the modal opener.
+        // Some openers live only as launcher buttons (data-launches attr) —
+        // fall back to querySelector when there's no direct #id match.
         setTimeout(() => {
-          const btn = document.getElementById(btnId);
+          const btn = document.getElementById(btnId)
+                   || document.querySelector('[data-launches="' + btnId + '"]');
           if (btn) btn.click();
         }, 250);
       };
@@ -10146,7 +10149,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const overlay   = document.getElementById('feecalc-modal-overlay');
       const modal     = document.getElementById('feecalc-modal');
       const form      = document.getElementById('feecalc-form');
-      const openBtn   = document.getElementById('open-feecalc-modal');
+      const openBtn   = document.getElementById('open-feecalc-modal') || document.querySelector('[data-launches="open-feecalc-modal"]');
       const closeBtn  = document.getElementById('close-feecalc-modal');
       const doneBtn   = document.getElementById('close-feecalc-done');
       const clearBtn  = document.getElementById('clear-feecalc');
@@ -12308,7 +12311,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const modal     = document.getElementById('cma-sales-modal');
       const form      = document.getElementById('cma-sales-form');
       const statusEl  = document.getElementById('cma-sales-status');
-      const openBtn   = document.getElementById('open-cma-sales-modal');
+      const openBtn   = document.getElementById('open-cma-sales-modal') || document.querySelector('[data-launches="open-cma-sales-modal"]');
       const closeBtn  = document.getElementById('close-cma-sales-modal');
       const cancelBtn = document.getElementById('cancel-cma-sales');
       const submitBtn = document.getElementById('submit-cma-sales');
@@ -14770,7 +14773,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
     (function () {
       const overlay   = document.getElementById('che-modal-overlay');
       const modal     = document.getElementById('che-modal');
-      const openBtn   = document.getElementById('open-che-modal');
+      const openBtn   = document.getElementById('open-che-modal') || document.querySelector('[data-launches="open-che-modal"]');
       const closeBtn  = document.getElementById('close-che-modal');
       const doneBtn   = document.getElementById('che-close-btn');
       const resetBtn  = document.getElementById('che-reset-btn');
@@ -15231,7 +15234,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const modal     = document.getElementById('customrep-intake-modal');
       const form      = document.getElementById('customrep-intake-form');
       const statusEl  = document.getElementById('customrep-intake-status');
-      const openBtn   = document.getElementById('open-customrep-intake-modal');
+      const openBtn   = document.getElementById('open-customrep-intake-modal') || document.querySelector('[data-launches="open-customrep-intake-modal"]');
       const closeBtn  = document.getElementById('close-customrep-intake-modal');
       const cancelBtn = document.getElementById('cancel-customrep-intake');
       const submitBtn = document.getElementById('submit-customrep-intake');
@@ -15426,7 +15429,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const modal     = document.getElementById('intake-modal');
       const form      = document.getElementById('intake-form');
       const statusEl  = document.getElementById('intake-form-status');
-      const openBtn   = document.getElementById('open-intake-modal');
+      const openBtn   = document.getElementById('open-intake-modal') || document.querySelector('[data-launches="open-intake-modal"]');
       const closeBtn  = document.getElementById('close-intake-modal');
       const cancelBtn = document.getElementById('cancel-intake');
       const submitBtn = document.getElementById('submit-intake');
@@ -15568,7 +15571,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const modal     = document.getElementById('land-onepager-modal');
       const form      = document.getElementById('land-onepager-form');
       const statusEl  = document.getElementById('land-onepager-status');
-      const openBtn   = document.getElementById('open-land-onepager-modal');
+      const openBtn   = document.getElementById('open-land-onepager-modal') || document.querySelector('[data-launches="open-land-onepager-modal"]');
       const closeBtn  = document.getElementById('close-land-onepager-modal');
       const cancelBtn = document.getElementById('cancel-land-onepager');
       const generateBtn = document.getElementById('generate-land-onepager');
