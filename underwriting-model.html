@@ -372,177 +372,222 @@
     }
 
     /* ==================================================================
-       PRINT — clean report layout for Save as PDF.
-       The screen UI uses dark form fields with borders + prefixes.
-       For print we strip all form chrome, render inputs as plain text
-       (Label — Value), and lay everything out on US Letter portrait.
+       PRINT — presentation-style dark PDF that matches the dashboard.
+       Full-bleed black pages, ivory accents, Aboreto for display type.
+       Strips form-field chrome so inputs read as clean data points.
        ================================================================== */
     @media print {
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      @page { size: letter portrait; margin: 0; }
       html, body {
-        background: #fff !important; color: #000 !important;
+        background: #000 !important; color: #fff !important;
         font-family: 'Mulish', 'Helvetica Neue', Arial, sans-serif;
         font-size: 10pt;
       }
-      @page { size: letter portrait; margin: 0.45in 0.5in; }
+      /* Hide chrome + inactive tabs */
       .page-toolbar, .modal-foot, .uw-tabbar, .uw-error-row { display: none !important; }
-      /* Only print the currently-visible tab. */
       .uw-panel[aria-hidden="true"] { display: none !important; }
-      .page-shell { max-width: none !important; margin: 0 !important; padding: 0 !important; }
-      #uw-modal-overlay { background: #fff !important; }
-
-      /* --- Header --- */
-      .modal-head {
-        border-bottom: 2px solid #000 !important;
-        padding: 0 0 8px !important;
-        margin: 0 0 14px !important;
-        display: flex; justify-content: space-between; align-items: baseline;
+      /* Full-bleed dark background */
+      #uw-modal-overlay { background: #000 !important; padding: 0 !important; }
+      .page-shell {
+        max-width: none !important; margin: 0 !important;
+        padding: 0.55in 0.55in 0.55in !important;
+        background: #000 !important;
       }
+
+      /* --- COVER HEADER — brand-forward slide banner --- */
+      .modal-head {
+        border-bottom: 1px solid #eae2d3 !important;
+        padding: 0 0 16px !important;
+        margin: 0 0 20px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+      }
+      .modal-title-group { text-align: center !important; }
       .modal-title-group .modal-eyebrow {
-        color: #666 !important; font-size: 8pt !important;
-        letter-spacing: .22em; font-weight: 600;
+        color: #eae2d3 !important;
+        font-size: 8pt !important;
+        letter-spacing: .32em !important;
+        font-weight: 600;
+        text-transform: uppercase;
       }
       .modal-title {
-        color: #000 !important; font-family: 'Aboreto', serif !important;
-        font-size: 18pt !important; margin: 2px 0 0 !important;
-        letter-spacing: .1em;
+        color: #fff !important;
+        font-family: 'Aboreto', 'Times New Roman', serif !important;
+        font-size: 22pt !important;
+        margin: 8px 0 0 !important;
+        letter-spacing: .16em;
+        font-weight: 400;
       }
 
-      /* --- Property banner (first .uw-section holds address + neighborhood) --- */
+      /* --- PROPERTY BANNER (address + neighborhood) — presentation-style hero --- */
       .uw-panel > .uw-section:first-child {
-        background: #f4f2ed !important;
-        padding: 10px 14px !important;
-        border: 1px solid #666 !important;
-        margin-bottom: 16px !important;
+        background: #0f0f0f !important;
+        border: 1px solid #eae2d3 !important;
+        padding: 16px 22px !important;
+        margin-bottom: 22px !important;
         display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 20px !important;
+        grid-template-columns: 2fr 1fr !important;
+        gap: 24px !important;
       }
-      .uw-panel > .uw-section:first-child .uw-field { border: 0 !important; padding: 0 !important; display: block !important; }
+      .uw-panel > .uw-section:first-child .uw-field {
+        border: 0 !important; padding: 0 !important; display: block !important;
+      }
       .uw-panel > .uw-section:first-child label {
-        color: #666 !important; font-size: 8pt !important; font-weight: 700;
-        text-transform: uppercase !important; letter-spacing: .18em !important;
-        margin-bottom: 3px !important;
+        color: #8a8579 !important; font-size: 8pt !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important; letter-spacing: .28em !important;
+        margin-bottom: 6px !important; display: block !important;
       }
       .uw-panel > .uw-section:first-child input {
         background: transparent !important; border: 0 !important; padding: 0 !important;
-        color: #000 !important; font-family: 'Aboreto', serif !important;
-        font-size: 14pt !important; font-weight: 400; text-align: left !important;
-        letter-spacing: .04em; width: 100% !important;
+        color: #fff !important;
+        font-family: 'Aboreto', 'Times New Roman', serif !important;
+        font-size: 16pt !important; font-weight: 400 !important;
+        text-align: left !important; letter-spacing: .06em;
+        width: 100% !important;
       }
 
-      /* --- Body: 2 columns (inputs | outputs) --- */
+      /* --- BODY: 2 columns (inputs | outputs) --- */
       .uw-grid {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
-        gap: 18px !important;
+        gap: 22px !important;
       }
-      .uw-section { margin-bottom: 12px !important; break-inside: avoid; }
+      .uw-section { margin-bottom: 16px !important; break-inside: avoid; }
       .uw-section-head {
-        font-weight: 700 !important; font-size: 9pt !important; color: #000 !important;
-        text-transform: uppercase; letter-spacing: .18em;
-        border-bottom: 1px solid #000 !important;
-        padding-bottom: 3px !important; margin-bottom: 6px !important;
+        font-family: 'Aboreto', 'Times New Roman', serif !important;
+        font-weight: 400 !important; font-size: 11pt !important;
+        color: #eae2d3 !important;
+        text-transform: uppercase; letter-spacing: .22em;
+        border-bottom: 1px solid #eae2d3 !important;
+        padding-bottom: 5px !important; margin-bottom: 10px !important;
       }
-      .uw-section-grid { gap: 0 16px !important; }
+      .uw-section-grid { gap: 0 18px !important; }
 
-      /* --- Inputs → plain-text Label : Value rows --- */
+      /* --- INPUTS → Label : Value rows, dark, no form chrome --- */
       .uw-field {
         display: grid !important;
         grid-template-columns: 1fr auto !important;
-        gap: 10px !important;
+        gap: 12px !important;
         align-items: baseline !important;
-        padding: 3px 0 !important;
-        border-bottom: 1px dotted #cfcfcf !important;
+        padding: 4px 0 !important;
+        border-bottom: 1px solid #2a2a2a !important;
       }
       .uw-field.full { grid-column: 1 / -1 !important; }
       .uw-field label {
-        color: #333 !important; font-size: 9pt !important;
-        text-transform: none !important; letter-spacing: 0 !important;
-        margin: 0 !important; font-weight: 400;
+        color: #8a8579 !important; font-size: 8.5pt !important;
+        text-transform: uppercase !important; letter-spacing: .12em !important;
+        margin: 0 !important; font-weight: 500 !important;
       }
       .uw-field input, .uw-field select {
         background: transparent !important; border: 0 !important; padding: 0 !important;
-        color: #000 !important; font-family: 'Mulish', sans-serif !important;
-        font-size: 10pt !important; font-weight: 700 !important;
+        color: #fff !important;
+        font-family: 'Mulish', sans-serif !important;
+        font-size: 11pt !important; font-weight: 600 !important;
         text-align: right !important; width: auto !important; min-width: 0 !important;
         -webkit-appearance: none !important; appearance: none !important;
         font-variant-numeric: tabular-nums;
+        letter-spacing: .02em;
       }
-      /* Prefix $ and suffix % — flatten to inline text */
+      /* Prefix $ / suffix % — inline with the number, ivory */
       .uw-field .prefix-dollar { display: inline !important; position: static !important; padding: 0 !important; }
       .uw-field .prefix-dollar::before {
         position: static !important; transform: none !important;
-        color: #000 !important; font-size: 10pt !important; margin-right: 1px;
+        color: #eae2d3 !important; font-size: 10pt !important; margin-right: 2px;
       }
       .uw-field .prefix-dollar input { padding: 0 !important; display: inline !important; width: auto !important; }
       .uw-field .suffix { display: inline !important; position: static !important; padding: 0 !important; }
       .uw-field .suffix::after {
         position: static !important; transform: none !important;
-        color: #000 !important; font-size: 9pt !important; margin-left: 1px;
+        color: #eae2d3 !important; font-size: 9pt !important; margin-left: 2px;
       }
       .uw-field .suffix input { padding: 0 !important; display: inline !important; width: auto !important; }
 
       /* Derived capital line under Capital Structure */
       #uw-cap-derived {
         grid-column: 1 / -1 !important;
-        background: #f4f2ed !important;
-        padding: 5px 8px !important; margin-top: 6px !important;
-        border-bottom: 0 !important;
+        background: #0f0f0f !important;
+        border: 1px solid #2a2a2a !important;
+        padding: 6px 10px !important; margin-top: 8px !important;
+        border-bottom: 1px solid #2a2a2a !important;
       }
       #uw-cap-derived > div {
-        color: #000 !important; font-size: 8.5pt !important;
-        letter-spacing: .08em; line-height: 1.6 !important;
+        color: #eae2d3 !important; font-size: 8.5pt !important;
+        letter-spacing: .1em; line-height: 1.6 !important;
       }
 
-      /* --- Output cards → clean printed report sections --- */
+      /* --- OUTPUT CARDS → dark presentation cards with ivory accents --- */
       .uw-outcard {
-        border: 1px solid #000 !important;
-        background: #fff !important;
-        margin-bottom: 12px !important;
+        border: 1px solid #eae2d3 !important;
+        background: #0a0a0a !important;
+        margin-bottom: 14px !important;
         break-inside: avoid;
       }
       .uw-outcard .out-head {
-        background: #000 !important; color: #fff !important;
-        padding: 5px 12px !important;
-        font-size: 9pt !important; font-weight: 700;
-        letter-spacing: .18em; border-bottom: 0 !important;
+        background: #eae2d3 !important; color: #000 !important;
+        padding: 6px 14px !important;
+        font-family: 'Aboreto', serif !important;
+        font-size: 10pt !important; font-weight: 400 !important;
+        letter-spacing: .24em; border-bottom: 0 !important;
+        text-transform: uppercase;
       }
-      .uw-outcard .out-body { padding: 4px 12px 8px !important; }
+      .uw-outcard .out-body { padding: 6px 14px 10px !important; }
       .uw-outcard .out-row {
-        padding: 4px 0 !important;
-        border-bottom: 1px dotted #cfcfcf !important;
+        padding: 5px 0 !important;
+        border-bottom: 1px solid #2a2a2a !important;
       }
       .uw-outcard .out-row .k {
-        color: #333 !important; font-size: 9pt !important;
-        text-transform: none !important; letter-spacing: 0 !important;
-        font-weight: 400;
+        color: #8a8579 !important; font-size: 8.5pt !important;
+        text-transform: uppercase !important; letter-spacing: .12em !important;
+        font-weight: 500;
       }
       .uw-outcard .out-row .v {
-        font-family: 'Mulish', sans-serif !important; font-size: 10pt !important;
-        font-weight: 700; color: #000 !important; letter-spacing: 0 !important;
+        font-family: 'Mulish', sans-serif !important;
+        font-size: 11pt !important; font-weight: 600 !important;
+        color: #fff !important; letter-spacing: .02em !important;
       }
       /* Highlighted totals — Gross Profit / Net Revenue / Total Project Cost */
       .uw-outcard .out-row.hi {
-        background: #f4f2ed !important;
-        margin: 4px -12px !important;
-        padding: 7px 12px !important;
-        border-top: 1px solid #000 !important;
-        border-bottom: 1px solid #000 !important;
+        background: #14120e !important;
+        margin: 6px -14px !important;
+        padding: 10px 14px !important;
+        border-top: 1px solid #eae2d3 !important;
+        border-bottom: 1px solid #eae2d3 !important;
       }
-      .uw-outcard .out-row.hi .k { font-weight: 700; color: #000 !important; }
-      .uw-outcard .out-row.hi .v { font-size: 12pt !important; }
+      .uw-outcard .out-row.hi .k { color: #eae2d3 !important; font-weight: 700 !important; }
+      .uw-outcard .out-row.hi .v {
+        font-family: 'Aboreto', serif !important;
+        font-size: 16pt !important; font-weight: 400 !important;
+        letter-spacing: .04em;
+      }
 
-      /* --- Draw Schedule + Sensitivity tabs (if printed while active) --- */
+      /* --- DRAW SCHEDULE + SENSITIVITY (if printed while active) --- */
       .uw-draw-summary {
-        background: #f4f2ed !important; border: 1px solid #666 !important;
-        padding: 10px 14px !important; margin-bottom: 12px !important;
-        gap: 10px !important;
+        background: #0f0f0f !important;
+        border: 1px solid #eae2d3 !important;
+        padding: 14px 18px !important; margin-bottom: 14px !important;
+        gap: 12px !important;
       }
-      .uw-draw-summary .ds-cell .k { color: #333 !important; font-size: 8pt !important; }
-      .uw-draw-summary .ds-cell .v { color: #000 !important; font-size: 11pt !important; }
-      .uw-draw-table { font-size: 8pt !important; color: #000 !important; }
-      .uw-draw-table th { color: #333 !important; font-size: 7.5pt !important; }
+      .uw-draw-summary .ds-cell .k {
+        color: #8a8579 !important; font-size: 8pt !important;
+        letter-spacing: .18em !important;
+      }
+      .uw-draw-summary .ds-cell .v {
+        color: #fff !important; font-family: 'Aboreto', serif !important;
+        font-size: 13pt !important;
+      }
+      .uw-draw-table {
+        font-size: 8.5pt !important; color: #fff !important;
+        border-color: #2a2a2a !important;
+      }
+      .uw-draw-table th {
+        color: #eae2d3 !important; font-size: 8pt !important;
+        letter-spacing: .16em !important;
+      }
+      .uw-draw-table td { border-color: #2a2a2a !important; }
     }
   </style>
 </head>
