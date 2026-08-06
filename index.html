@@ -3897,7 +3897,7 @@
           if (errEl.textContent) errEl.textContent = '';
           // Move focus to the next empty box (or trigger submit).
           const filled = collectEntered();
-          if (filled.length === 6) { tryEnter(); }
+          if (filled.length === ACCESS_LEN) { tryEnter(); }
           else {
             const next = Math.min(idx + Math.max(raw.length, 1), inputs.length - 1);
             inputs[next].focus();
@@ -3917,16 +3917,16 @@
             e.preventDefault(); tryEnter();
           }
         });
-        // Paste handler — paste 6 digits anywhere, they fill every box.
+        // Paste handler — paste all digits anywhere, they fill every box.
         inp.addEventListener('paste', (e) => {
           const text = (e.clipboardData || window.clipboardData).getData('text');
-          const digits = (text || '').replace(/\D/g, '').slice(0, 6);
+          const digits = (text || '').replace(/\D/g, '').slice(0, ACCESS_LEN);
           if (!digits) return;
           e.preventDefault();
-          for (let j = 0; j < 6; j++) inputs[j].value = digits[j] || '';
-          const lastFilled = Math.min(digits.length, 6) - 1;
+          for (let j = 0; j < inputs.length; j++) inputs[j].value = digits[j] || '';
+          const lastFilled = Math.min(digits.length, inputs.length) - 1;
           inputs[Math.max(0, lastFilled)].focus();
-          if (digits.length === 6) tryEnter();
+          if (digits.length === ACCESS_LEN) tryEnter();
         });
       });
 
@@ -21035,7 +21035,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         if (sub) sub.textContent = 'Save Changes';
       }
       // Reset intake modal when opened via the "+ Submit Property Intake" flow
-      const openIntakeBtn = document.getElementById('open-intake-modal');
+      const openIntakeBtn = document.getElementById('open-intake-modal') || document.querySelector('[data-launches="open-intake-modal"]');
       if (openIntakeBtn) openIntakeBtn.addEventListener('click', () => {
         const form = document.getElementById('intake-form');
         if (form) form.reset();

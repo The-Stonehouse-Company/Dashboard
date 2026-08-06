@@ -1154,13 +1154,16 @@
         document.body.classList.remove('modal-open');
         if (lastFocus && lastFocus.focus) lastFocus.focus();
       }
-      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') closeModal();
-      });
-      // (no open button in standalone — page always visible)
-      // (no close in standalone)
-      doneBtn  && doneBtn.addEventListener('click', closeModal);
+      // Skip the modal open/close plumbing on the standalone page — closeModal()
+      // would hide the entire page shell (since the overlay wraps it). Only wire
+      // these if we're actually running inside the admin modal (has a close btn).
+      if (closeBtn) {
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') closeModal();
+        });
+        doneBtn && doneBtn.addEventListener('click', closeModal);
+      }
 
       // ---- Log This Deal → posts current snapshot to Google Form ----
       // Each click captures: every input + every computed output + an
