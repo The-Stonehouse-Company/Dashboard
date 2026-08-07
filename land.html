@@ -1231,6 +1231,101 @@
       if (id) _hlOpenEdit(id);
     });
 
+    // Delete a Hot Lead — soft-delete via append-only pattern.
+    // Submits a new row with the lead's fields + status="Deleted"; the loader
+    // filters those out. Both admin and land dashboards share the same sheet,
+    // so a delete on either side propagates to both on next load.
+    async function _hlDelete(leadId) {
+      const lead = _landHotLeads.find(r => r.id === leadId);
+      if (!lead) return;
+      const propertyLabel = lead.property || lead.ownerName || leadId;
+      if (!window.confirm('Delete this hot lead?\n\n' + propertyLabel + '\n\nThe row will be marked Deleted in the shared sheet (append-only history — the past rows stay for audit).')) return;
+      const body = new URLSearchParams();
+      const M = HOTLEAD_FORM.MAP;
+      const set = (k, v) => { const key = M[k]; if (key && v != null) body.append(key, String(v)); };
+      set('lead_id',          lead.id);
+      set('property_address', lead.property);
+      set('neighborhood',     lead.neigh);
+      set('estimated_value',  lead.estVal);
+      set('owner_name',       lead.ownerName);
+      set('owner_phone',      lead.ownerPhone);
+      set('owner_email',      lead.ownerEmail);
+      set('source',           lead.source);
+      set('referred_by',      lead.referredBy);
+      set('heat_level',       lead.heat);
+      set('status',           'Deleted');
+      set('land_agent',       lead.agent);
+      set('last_touch',       _hlISODate(lead.lastTouch));
+      set('next_action_date', _hlISODate(lead.nextDate));
+      set('next_action',      lead.nextAction);
+      set('notes',            lead.notes);
+      try {
+        await fetch(HOTLEAD_FORM.URL, { method: 'POST', mode: 'no-cors', body });
+        // Optimistic remove — then re-fetch to confirm
+        _landHotLeads = _landHotLeads.filter(r => r.id !== leadId);
+        _renderHotLeads();
+        setTimeout(loadHotLeads, 1200);
+      } catch (err) {
+        alert('Delete failed: ' + (err.message || err));
+      }
+    }
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest && e.target.closest('[data-hl-delete]');
+      if (!btn) return;
+      const id = btn.getAttribute('data-hl-delete');
+      if (id) _hlDelete(id);
+    });
+
+    // ---- Buy Box edit (mirrors the Hot Lead edit pattern) ----
+    function _bbSetModalTitle(mode) {
+      const el = document.getElementById('bb-modal');
+      if (!el) return;
+      const titleEl = el.querySelector('.mini-modal-head > div > div:last-child');
+      if (!titleEl) return;
+      titleEl.textContent = mode === 'edit' ? 'Edit Buy Box' : 'Add Buy Box';
+    }
+    function _bbOpenEdit(id) {
+      const bb = _landBuyBoxes.find(r => r.id === id);
+      if (!bb) return;
+      const form = document.getElementById('bb-form');
+      form.reset();
+      document.getElementById('bb-form-id').value = bb.id;
+      document.getElementById('bb-form-status').textContent = '';
+      const setField = (name, val) => {
+        const inp = form.querySelector('[name="' + name + '"]');
+        if (inp && val != null) inp.value = val;
+      };
+      setField('builder_name',    bb.builder);
+      setField('priority',        bb.priority);
+      setField('city',            bb.city);
+      setField('state',           bb.state);
+      setField('suburbs',         bb.suburbs);
+      setField('min_price',       bb.minPrice);
+      setField('max_price',       bb.maxPrice);
+      setField('suburb_pricing',  bb.suburbPricing);
+      setField('min_lot_sqft',    bb.minLotSqft);
+      setField('max_lot_sqft',    bb.maxLotSqft);
+      setField('min_frontage_ft', bb.minFrontage);
+      setField('max_frontage_ft', bb.maxFrontage);
+      setField('min_depth_ft',    bb.minDepth);
+      setField('max_depth_ft',    bb.maxDepth);
+      setField('must_haves',      bb.mustHave);
+      setField('deal_breakers',   bb.dealBreakers);
+      setField('notes',           bb.notes);
+      setField('logged_by',       bb.loggedBy);
+      // Preserve the row's existing status (default Active for new rows)
+      const statusInp = form.querySelector('[name="status"]');
+      if (statusInp) statusInp.value = bb.status || 'Active';
+      _bbSetModalTitle('edit');
+      _openMiniModal('bb-modal');
+    }
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest && e.target.closest('[data-bb-edit]');
+      if (!btn) return;
+      const id = btn.getAttribute('data-bb-edit');
+      if (id) _bbOpenEdit(id);
+    });
+
     // + Add Hot Lead
     const hlAddBtn = document.getElementById('hl-add-btn');
     if (hlAddBtn) hlAddBtn.addEventListener('click', () => {
@@ -1312,6 +1407,10 @@
       // Pre-fill Logged By with current agent (whichever tab was last active — falls back gracefully)
       const loggedBy = form.querySelector('[name="logged_by"]');
       if (loggedBy && !loggedBy.value) loggedBy.value = window.CURRENT_LAND_AGENT;
+      // Reset hidden status back to Active for new buy boxes
+      const statusInp = form.querySelector('[name="status"]');
+      if (statusInp) statusInp.value = 'Active';
+      _bbSetModalTitle('add');
       _openMiniModal('bb-modal');
     });
     const bbForm = document.getElementById('bb-form');
@@ -1508,44 +1607,65 @@
         const table = await gviz(SHEETS.BUYBOX, 'Form Responses 1');
         const cols = table.cols || [];
         const ix = {
-          ts:       findCol(cols, 'Timestamp'),
-          id:       findCol(cols, 'buy_box_id'),
-          builder:  findCol(cols, 'builder_name'),
-          status:   findCol(cols, 'status'),
-          priority: findCol(cols, 'priority'),
-          city:     findCol(cols, 'city'),
-          state:    findCol(cols, 'state'),
-          suburbs:  findCol(cols, 'suburbs'),
-          minPrice: findCol(cols, 'min_price'),
-          maxPrice: findCol(cols, 'max_price'),
-          mustHave: findCol(cols, 'must_haves'),
-          notes:    findCol(cols, 'notes')
+          ts:            findCol(cols, 'Timestamp'),
+          id:            findCol(cols, 'buy_box_id'),
+          builder:       findCol(cols, 'builder_name'),
+          status:        findCol(cols, 'status'),
+          priority:      findCol(cols, 'priority'),
+          city:          findCol(cols, 'city'),
+          state:         findCol(cols, 'state'),
+          suburbs:       findCol(cols, 'suburbs'),
+          minPrice:      findCol(cols, 'min_price'),
+          maxPrice:      findCol(cols, 'max_price'),
+          suburbPricing: findCol(cols, 'suburb_pricing'),
+          minLotSqft:    findCol(cols, 'min_lot_sqft'),
+          maxLotSqft:    findCol(cols, 'max_lot_sqft'),
+          minFrontage:   findCol(cols, 'min_frontage_ft'),
+          maxFrontage:   findCol(cols, 'max_frontage_ft'),
+          minDepth:      findCol(cols, 'min_depth_ft'),
+          maxDepth:      findCol(cols, 'max_depth_ft'),
+          mustHave:      findCol(cols, 'must_haves'),
+          dealBreakers:  findCol(cols, 'deal_breakers'),
+          notes:         findCol(cols, 'notes'),
+          loggedBy:      findCol(cols, 'logged_by')
         };
         const rawRows = (table.rows || []).map(r => {
           const c = r.c || [];
           return {
-            ts:       parseGvizDate(c[ix.ts]),
-            id:       parseGvizStr(c[ix.id]),
-            builder:  parseGvizStr(c[ix.builder]),
-            status:   parseGvizStr(c[ix.status]),
-            priority: parseGvizStr(c[ix.priority]),
-            city:     parseGvizStr(c[ix.city]),
-            state:    parseGvizStr(c[ix.state]),
-            suburbs:  parseGvizStr(c[ix.suburbs]),
-            minPrice: parseGvizNum(c[ix.minPrice]),
-            maxPrice: parseGvizNum(c[ix.maxPrice]),
-            mustHave: parseGvizStr(c[ix.mustHave]),
-            notes:    parseGvizStr(c[ix.notes])
+            ts:            parseGvizDate(c[ix.ts]),
+            id:            parseGvizStr(c[ix.id]),
+            builder:       parseGvizStr(c[ix.builder]),
+            status:        parseGvizStr(c[ix.status]),
+            priority:      parseGvizStr(c[ix.priority]),
+            city:          parseGvizStr(c[ix.city]),
+            state:         parseGvizStr(c[ix.state]),
+            suburbs:       parseGvizStr(c[ix.suburbs]),
+            minPrice:      parseGvizNum(c[ix.minPrice]),
+            maxPrice:      parseGvizNum(c[ix.maxPrice]),
+            suburbPricing: parseGvizStr(c[ix.suburbPricing]),
+            minLotSqft:    parseGvizNum(c[ix.minLotSqft]),
+            maxLotSqft:    parseGvizNum(c[ix.maxLotSqft]),
+            minFrontage:   parseGvizNum(c[ix.minFrontage]),
+            maxFrontage:   parseGvizNum(c[ix.maxFrontage]),
+            minDepth:      parseGvizNum(c[ix.minDepth]),
+            maxDepth:      parseGvizNum(c[ix.maxDepth]),
+            mustHave:      parseGvizStr(c[ix.mustHave]),
+            dealBreakers:  parseGvizStr(c[ix.dealBreakers]),
+            notes:         parseGvizStr(c[ix.notes]),
+            loggedBy:      parseGvizStr(c[ix.loggedBy])
           };
         }).filter(r => r.id || r.builder);
-        // Dedupe by id
+        // Dedupe by id (latest row wins)
         const byId = new Map();
         rawRows.forEach(r => {
           const k = r.id || (r.builder + '|' + r.city);
           const ex = byId.get(k);
           if (!ex || (r.ts && (!ex.ts || r.ts > ex.ts))) byId.set(k, r);
         });
-        _landBuyBoxes = Array.from(byId.values()).filter(r => (r.status || '').toLowerCase() !== 'archived');
+        _landBuyBoxes = Array.from(byId.values()).filter(r => {
+          const s = (r.status || '').toLowerCase();
+          return s !== 'archived' && s !== 'deleted';
+        });
         countEl.textContent = _landBuyBoxes.length + ' active buy boxes · firm-wide';
         if (_landBuyBoxes.length === 0) {
           listEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">No active buy boxes. Add one from the admin dashboard.</div>';
@@ -1562,6 +1682,9 @@
               ${price ? `<div style="font-size:14px; color:#fff; margin-top:8px;"><b>${esc(price)}</b></div>` : ''}
               ${suburbs.length ? `<div style="margin:8px 0;">${suburbs.map(s => '<span style="display:inline-block; padding:2px 8px; margin:2px 3px 0 0; font-size:10px; border:1px solid #2a2a2a; background:#141414; color:#ddd;">' + esc(s) + '</span>').join('')}</div>` : ''}
               ${r.mustHave ? `<div style="font-size:11px; color:#9ec39e; margin-top:6px;"><b>Must:</b> <span style="color:#ccc;">${esc(r.mustHave)}</span></div>` : ''}
+              <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:10px; padding-top:8px; border-top:1px solid #222;">
+                <button type="button" data-bb-edit="${esc(r.id)}" style="font-family:var(--font-body); font-size:10px; letter-spacing:.18em; text-transform:uppercase; padding:6px 14px; background:transparent; color:var(--text-muted); border:1px solid var(--rule-strong); cursor:pointer;">Edit</button>
+              </div>
             </article>
           `;
         }).join('');
@@ -1627,7 +1750,7 @@
           const ex = byId.get(k);
           if (!ex || (r.ts && (!ex.ts || r.ts > ex.ts))) byId.set(k, r);
         });
-        _landHotLeads = Array.from(byId.values());
+        _landHotLeads = Array.from(byId.values()).filter(r => (r.status || '').toLowerCase() !== 'deleted');
         _renderHotLeads();
       } catch (err) {
         countEl.textContent = 'Could not load';
@@ -1676,8 +1799,9 @@
             ${r.nextAction ? `<div style="margin-top:4px;"><span style="color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; font-size:9px;">Next</span> <span style="color:#fff; margin-left:6px;">${esc(r.nextAction)}${r.nextDate ? ' <span style="color:var(--text-dim);">(' + esc(fmtDate(r.nextDate)) + ')</span>' : ''}</span></div>` : ''}
           </div>
           ${r.notes ? `<div style="font-size:11px; color:var(--text-dim); margin-top:8px; padding-top:8px; border-top:1px solid #222; white-space:pre-wrap;">${esc(r.notes)}</div>` : ''}
-          <div style="display:flex; justify-content:flex-end; margin-top:10px; padding-top:8px; border-top:1px solid #222;">
+          <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:10px; padding-top:8px; border-top:1px solid #222;">
             <button type="button" data-hl-edit="${esc(r.id)}" style="font-family:var(--font-body); font-size:10px; letter-spacing:.18em; text-transform:uppercase; padding:6px 14px; background:transparent; color:var(--text-muted); border:1px solid var(--rule-strong); cursor:pointer; transition:color .15s, border-color .15s;">Edit</button>
+            <button type="button" data-hl-delete="${esc(r.id)}" style="font-family:var(--font-body); font-size:10px; letter-spacing:.18em; text-transform:uppercase; padding:6px 14px; background:transparent; color:#d99; border:1px solid #5a2a2a; cursor:pointer; transition:color .15s, border-color .15s;">Delete</button>
           </div>
         </article>
       `).join('');

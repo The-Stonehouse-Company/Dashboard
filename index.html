@@ -21730,7 +21730,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           latest.set(key, r);
         }
       });
-      return Array.from(latest.values());
+      // Filter out soft-deleted leads (append-only pattern — the row is kept
+      // in the sheet for audit, but hidden from the card grid).
+      return Array.from(latest.values()).filter(r => (r.status || '').toLowerCase() !== 'deleted');
     }
 
     function _hlLoad() {
@@ -21842,8 +21844,12 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             <span style="font-size:10px; color:#666; letter-spacing:.1em; text-transform:uppercase;">
               ${r.agent ? 'Agent: ' + _hlEsc(r.agent) : ''}
             </span>
-            <button type="button" class="hl-edit-btn" data-id="${_hlEsc(r.id)}"
-                    style="font-size:10px; letter-spacing:.14em; text-transform:uppercase; padding:5px 10px; border:1px solid var(--panel-edge); background:transparent; color:#fff; cursor:pointer;">Edit</button>
+            <div style="display:flex; gap:6px;">
+              <button type="button" class="hl-edit-btn" data-id="${_hlEsc(r.id)}"
+                      style="font-size:10px; letter-spacing:.14em; text-transform:uppercase; padding:5px 10px; border:1px solid var(--panel-edge); background:transparent; color:#fff; cursor:pointer;">Edit</button>
+              <button type="button" class="hl-delete-btn" data-id="${_hlEsc(r.id)}"
+                      style="font-size:10px; letter-spacing:.14em; text-transform:uppercase; padding:5px 10px; border:1px solid #5a2a2a; background:transparent; color:#d99; cursor:pointer;">Delete</button>
+            </div>
           </div>
         </article>
       `;
@@ -21892,6 +21898,53 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           if (row) _hlOpenEdit(row);
         });
       });
+      // Wire delete buttons (soft-delete via append-only pattern)
+      gridEl.querySelectorAll('.hl-delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = btn.getAttribute('data-id');
+          const row = _hotLeadRows.find(r => r.id === id);
+          if (row) _hlDeleteAdmin(row);
+        });
+      });
+    }
+
+    // Admin-side delete — appends a Deleted-status row so the parser hides it.
+    // Land Acquisition dashboard reads the same sheet and honors the same flag.
+    async function _hlDeleteAdmin(row) {
+      const label = row.property || row.ownerName || row.id;
+      if (!window.confirm('Delete this hot lead?\n\n' + label + '\n\nThe row will be marked Deleted in the shared sheet (append-only history — past rows stay for audit).')) return;
+      if (!HOTLEAD_CONFIG.FORM_URL || !HOTLEAD_CONFIG.FIELD_MAP) return;
+      const M = HOTLEAD_CONFIG.FIELD_MAP;
+      const body = new URLSearchParams();
+      const set = (k, v) => { const key = M[k]; if (key && v != null && v !== '') body.append(key, String(v)); };
+      const iso = (d) => (d instanceof Date && !isNaN(d))
+        ? d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
+        : '';
+      set('lead_id',          row.id);
+      set('property_address', row.property);
+      set('neighborhood',     row.neigh);
+      set('estimated_value',  row.estValue);
+      set('owner_name',       row.ownerName);
+      set('owner_phone',      row.ownerPhone);
+      set('owner_email',      row.ownerEmail);
+      set('source',           row.source);
+      set('referred_by',      row.referredBy);
+      set('heat_level',       row.heat);
+      set('status',           'Deleted');
+      set('land_agent',       row.agent);
+      set('last_touch',       iso(row.lastTouch));
+      set('next_action_date', iso(row.nextDate));
+      set('next_action',      row.nextAction);
+      set('notes',            row.notes);
+      try {
+        await fetch(HOTLEAD_CONFIG.FORM_URL, { method: 'POST', mode: 'no-cors', body });
+        _hotLeadRows = _hotLeadRows.filter(r => r.id !== row.id);
+        _hlRender();
+        setTimeout(_hlLoad, 1200);
+      } catch (err) {
+        alert('Delete failed: ' + (err.message || err));
+      }
     }
 
     // ---- Modal open/close/fill/submit ----
