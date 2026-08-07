@@ -953,6 +953,51 @@
         </div>
       </div>
 
+      <!-- Update Pipeline Deal — status, dates, price. All other intake
+           fields (topography, zoning, dims, comps, etc.) pass through as
+           hidden inputs so the append-only Google Form doesn't wipe them
+           when latest-wins picks up the new row. -->
+      <div class="mini-modal" id="pipe-modal" hidden>
+        <div class="mini-modal-inner">
+          <div class="mini-modal-head">
+            <div>
+              <div style="font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:var(--text-dim);">Land Acq · Pipeline</div>
+              <div style="font-family:var(--font-display); font-size:18px; letter-spacing:.14em; text-transform:uppercase; margin-top:4px;">Update Deal <span id="pipe-modal-addr" style="color:var(--accent); font-size:13px; margin-left:8px;"></span></div>
+            </div>
+            <button type="button" class="mini-modal-close" data-close-modal="pipe-modal">×</button>
+          </div>
+          <form id="pipe-form" class="mini-modal-body">
+            <div id="pipe-form-hidden"></div>
+            <div class="mm-grid">
+              <label class="mm-field"><span>Status *</span>
+                <select name="status" required>
+                  <option value="Under Contract">Under Contract</option>
+                  <option value="Sold">Sold / Closed</option>
+                  <option value="Fell Out">Fell Out</option>
+                  <option value="Killed">Killed</option>
+                  <option value="Passed">Passed</option>
+                  <option value="Cancelled">Cancelled</option>
+                  <option value="Active">Active (looking)</option>
+                </select>
+              </label>
+              <label class="mm-field"><span>Contract Price</span><input name="contract_price" type="number" step="1" min="0" /></label>
+              <label class="mm-field"><span>Date Under Contract</span><input name="date_under_contract" type="date" /></label>
+              <label class="mm-field"><span>Closing Date</span><input name="closing_date" type="date" /></label>
+              <label class="mm-field"><span>Due Diligence End</span><input name="due_diligence_end" type="date" /></label>
+              <label class="mm-field"><span>LLC Formation Deadline</span><input name="llc_formation_deadline" type="date" /></label>
+              <label class="mm-field"><span>Earnest Money Deadline</span><input name="earnest_money_deadline" type="date" /></label>
+              <label class="mm-field full"><span>Add to Notes</span><textarea name="_notes_append" rows="2" placeholder="(optional) — appended to existing notes with a date stamp"></textarea></label>
+            </div>
+            <div class="mini-modal-foot">
+              <div class="form-status" id="pipe-form-status"></div>
+              <div style="flex:1;"></div>
+              <button type="button" class="btn ghost" data-close-modal="pipe-modal">Cancel</button>
+              <button type="submit" class="btn">Save Update</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
       <!-- Settings -->
       <section class="panel" id="panel-settings" role="tabpanel">
         <p class="panel-intro">Land-specific settings, MRC schedule, fee tiers.</p>
@@ -1126,6 +1171,44 @@
         next_action_date: 'entry.1203406933',
         next_action:      'entry.331176128',
         notes:            'entry.478377521'
+      }
+    };
+    // Land Intake form — same URL/field IDs as the admin dashboard's
+    // "Submit Property Intake" modal. Used by the pipeline Update flow.
+    const INTAKE_FORM = {
+      URL: 'https://docs.google.com/forms/d/e/1FAIpQLSfvLPQwKnBIFfKhoYGea0QJc9eVJ2PTi0ajDFv9q4AHBuYnQQ/formResponse',
+      MAP: {
+        agent:                  'entry.1406468642',
+        date_submitted:         'entry.811071528',
+        status:                 'entry.625853108',
+        property_address:       'entry.2060471301',
+        neighborhood:           'entry.497192192',
+        asking_price:           'entry.26953202',
+        contract_price:         'entry.1151681388',
+        first_contact_date:     'entry.279169809',
+        date_under_contract:    'entry.1544531142',
+        llc_formation_deadline: 'entry.1127281078',
+        earnest_money_deadline: 'entry.697653472',
+        due_diligence_end:      'entry.1539335063',
+        closing_date:           'entry.1158654140',
+        lot_size:               'entry.1752724272',
+        topography:             'entry.948257365',
+        zoning:                 'entry.1130006636',
+        flood_zone:             'entry.2062074012',
+        needs_variance:         'entry.1523033016',
+        setback_front:          'entry.1250603440',
+        setback_rear:           'entry.239126080',
+        setback_interior:       'entry.478428742',
+        setback_road_side:      'entry.1590227857',
+        dim_front:              'entry.600692936',
+        dim_side_left:          'entry.1792671877',
+        dim_rear:               'entry.1463933808',
+        dim_side_right:         'entry.1275076615',
+        comps_in_area:          'entry.1112465023',
+        best_comp:              'entry.62013106',
+        cma:                    'entry.584799947',
+        land_comps:             'entry.1974105103',
+        additional_notes:       'entry.981491876'
       }
     };
     const BUYBOX_FORM = {
@@ -1326,6 +1409,104 @@
       if (id) _bbOpenEdit(id);
     });
 
+    // ---- Pipeline Update (status, dates, price) ----
+    // Format Date → YYYY-MM-DD for <input type="date">, plain string passthrough.
+    function _pipeISODate(d) {
+      if (!(d instanceof Date) || isNaN(d)) return '';
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function _pipeOpenEdit(address) {
+      const deal = _landDeals.find(d => (d.address || '').trim().toLowerCase() === (address || '').trim().toLowerCase());
+      if (!deal) return;
+      const form = document.getElementById('pipe-form');
+      form.reset();
+      document.getElementById('pipe-form-status').textContent = '';
+      const addrEl = document.getElementById('pipe-modal-addr');
+      if (addrEl) addrEl.textContent = '· ' + deal.address;
+      // Visible fields
+      const setField = (name, val) => {
+        const inp = form.querySelector('[name="' + name + '"]');
+        if (inp && val != null && val !== '') inp.value = val;
+      };
+      setField('status',                 deal.status || 'Under Contract');
+      setField('contract_price',         deal.contract);
+      setField('date_under_contract',    _pipeISODate(deal.uc));
+      setField('closing_date',           _pipeISODate(deal.closing));
+      setField('due_diligence_end',      _pipeISODate(deal.ddEnd));
+      setField('llc_formation_deadline', _pipeISODate(deal.llc));
+      setField('earnest_money_deadline', _pipeISODate(deal.em));
+      // Cache the deal on the form so submit can build the full pass-through row
+      form.__deal = deal;
+      _openMiniModal('pipe-modal');
+    }
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest && e.target.closest('[data-pipe-edit]');
+      if (!btn) return;
+      const addr = btn.getAttribute('data-pipe-edit');
+      if (addr) _pipeOpenEdit(addr);
+    });
+    const pipeForm = document.getElementById('pipe-form');
+    if (pipeForm) pipeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const status = document.getElementById('pipe-form-status');
+      status.className = 'form-status'; status.textContent = 'Saving…';
+      try {
+        const deal = pipeForm.__deal || {};
+        // Read edited values (visible fields)
+        const readVal = (name) => (pipeForm.querySelector('[name="' + name + '"]') || {}).value || '';
+        const notesAppend = readVal('_notes_append').trim();
+        const stamp = new Date().toISOString().slice(0, 10);
+        const composedNotes = notesAppend
+          ? ((deal.notes ? deal.notes + '\n\n' : '') + '[' + stamp + '] ' + notesAppend)
+          : (deal.notes || '');
+        // Build the pass-through submission — every original field preserved,
+        // edited fields overridden with the new values.
+        const payload = {
+          agent:                  deal.agent || '',
+          date_submitted:         _pipeISODate(deal.dateSubmitted),
+          status:                 readVal('status'),
+          property_address:       deal.address || '',
+          neighborhood:           deal.neigh || '',
+          asking_price:           deal.asking != null ? String(deal.asking) : '',
+          contract_price:         readVal('contract_price'),
+          first_contact_date:     _pipeISODate(deal.firstContact),
+          date_under_contract:    readVal('date_under_contract'),
+          llc_formation_deadline: readVal('llc_formation_deadline'),
+          earnest_money_deadline: readVal('earnest_money_deadline'),
+          due_diligence_end:      readVal('due_diligence_end'),
+          closing_date:           readVal('closing_date'),
+          lot_size:               deal.lotSize || '',
+          topography:             deal.topography || '',
+          zoning:                 deal.zoning || '',
+          flood_zone:             deal.floodZone || '',
+          needs_variance:         deal.needsVariance || '',
+          setback_front:          deal.setbackFront || '',
+          setback_rear:           deal.setbackRear || '',
+          setback_interior:       deal.setbackInterior || '',
+          setback_road_side:      deal.setbackRoadSide || '',
+          dim_front:              deal.dimFront || '',
+          dim_side_left:          deal.dimSideLeft || '',
+          dim_rear:               deal.dimRear || '',
+          dim_side_right:         deal.dimSideRight || '',
+          comps_in_area:          deal.compsInArea || '',
+          best_comp:              deal.bestComp || '',
+          cma:                    deal.cma || '',
+          land_comps:             deal.landComps || '',
+          additional_notes:       composedNotes
+        };
+        const body = new URLSearchParams();
+        Object.keys(payload).forEach(k => {
+          const key = INTAKE_FORM.MAP[k];
+          if (key && payload[k] !== '' && payload[k] != null) body.append(key, String(payload[k]));
+        });
+        await fetch(INTAKE_FORM.URL, { method: 'POST', mode: 'no-cors', body });
+        status.className = 'form-status ok'; status.textContent = '✓ Saved — reloading…';
+        setTimeout(() => { _closeMiniModal('pipe-modal'); loadPipeline().then(_renderOverview); }, 900);
+      } catch (err) {
+        status.className = 'form-status err'; status.textContent = 'Error: ' + (err.message || err);
+      }
+    });
+
     // + Add Hot Lead
     const hlAddBtn = document.getElementById('hl-add-btn');
     if (hlAddBtn) hlAddBtn.addEventListener('click', () => {
@@ -1517,35 +1698,75 @@
         const table = await gviz(SHEETS.LAND_INTAKE, 'Form Responses 1');
         const cols = table.cols || [];
         const ix = {
-          ts:            findCol(cols, 'Timestamp'),
-          agent:         findCol(cols, 'Agent Name', 'Agent'),
-          address:       findCol(cols, 'Property Address'),
-          neigh:         findCol(cols, 'Neighborhood / Area', 'Neighborhood'),
-          contract:      findCol(cols, 'Contract Price'),
-          asking:        findCol(cols, 'Asking Price'),
-          uc:            findCol(cols, 'Date Under Contract'),
-          ddEnd:         findCol(cols, 'Due Diligence End'),
-          closing:       findCol(cols, 'Closing Date'),
-          status:        findCol(cols, 'Status'),
-          llc:           findCol(cols, 'LLC Formation Deadline'),
-          em:            findCol(cols, 'Earnest Money Deadline')
+          ts:               findCol(cols, 'Timestamp'),
+          agent:            findCol(cols, 'Agent Name', 'Agent'),
+          dateSubmitted:    findCol(cols, 'Date Submitted'),
+          address:          findCol(cols, 'Property Address'),
+          neigh:            findCol(cols, 'Neighborhood / Area', 'Neighborhood'),
+          contract:         findCol(cols, 'Contract Price'),
+          asking:           findCol(cols, 'Asking Price'),
+          firstContact:     findCol(cols, 'First Contact Date'),
+          uc:               findCol(cols, 'Date Under Contract'),
+          ddEnd:            findCol(cols, 'Due Diligence End'),
+          closing:          findCol(cols, 'Closing Date'),
+          status:           findCol(cols, 'Status'),
+          llc:              findCol(cols, 'LLC Formation Deadline'),
+          em:               findCol(cols, 'Earnest Money Deadline'),
+          lotSize:          findCol(cols, 'Lot Size'),
+          topography:       findCol(cols, 'Topography'),
+          zoning:           findCol(cols, 'Zoning'),
+          floodZone:        findCol(cols, 'Flood Zone'),
+          needsVariance:    findCol(cols, 'Needs Variance'),
+          setbackFront:     findCol(cols, 'Setback — Front (ft)', 'Setback - Front (ft)'),
+          setbackRear:      findCol(cols, 'Setback — Rear (ft)', 'Setback - Rear (ft)'),
+          setbackInterior:  findCol(cols, 'Setback — Interior (ft)', 'Setback - Interior (ft)'),
+          setbackRoadSide:  findCol(cols, 'Setback — Road Side (ft)', 'Setback - Road Side (ft)'),
+          dimFront:         findCol(cols, 'Lot Dimension — Front (ft)', 'Lot Dimension - Front (ft)'),
+          dimSideLeft:      findCol(cols, 'Lot Dimension — Side Left (ft)', 'Lot Dimension - Side Left (ft)'),
+          dimRear:          findCol(cols, 'Lot Dimension — Rear (ft)', 'Lot Dimension - Rear (ft)'),
+          dimSideRight:     findCol(cols, 'Lot Dimension — Side Right (ft)', 'Lot Dimension - Side Right (ft)'),
+          compsInArea:      findCol(cols, 'Comps in Area'),
+          bestComp:         findCol(cols, 'Best Comp'),
+          cma:              findCol(cols, 'CMA'),
+          landComps:        findCol(cols, 'Land Comps'),
+          notes:            findCol(cols, 'Additional Notes')
         };
         // Dedupe by address (latest wins)
         const rawRows = (table.rows || []).map(r => {
           const c = r.c || [];
           return {
-            ts:       parseGvizDate(c[ix.ts]),
-            agent:    ix.agent >= 0 ? parseGvizStr(c[ix.agent]) : '',
-            address:  parseGvizStr(c[ix.address]),
-            neigh:    parseGvizStr(c[ix.neigh]),
-            contract: parseGvizNum(c[ix.contract]),
-            asking:   parseGvizNum(c[ix.asking]),
-            uc:       parseGvizDate(c[ix.uc]),
-            ddEnd:    parseGvizDate(c[ix.ddEnd]),
-            closing:  parseGvizDate(c[ix.closing]),
-            status:   parseGvizStr(c[ix.status]),
-            llc:      parseGvizDate(c[ix.llc]),
-            em:       parseGvizDate(c[ix.em])
+            ts:              parseGvizDate(c[ix.ts]),
+            agent:           ix.agent >= 0 ? parseGvizStr(c[ix.agent]) : '',
+            dateSubmitted:   parseGvizDate(c[ix.dateSubmitted]),
+            address:         parseGvizStr(c[ix.address]),
+            neigh:           parseGvizStr(c[ix.neigh]),
+            contract:        parseGvizNum(c[ix.contract]),
+            asking:          parseGvizNum(c[ix.asking]),
+            firstContact:    parseGvizDate(c[ix.firstContact]),
+            uc:              parseGvizDate(c[ix.uc]),
+            ddEnd:           parseGvizDate(c[ix.ddEnd]),
+            closing:         parseGvizDate(c[ix.closing]),
+            status:          parseGvizStr(c[ix.status]),
+            llc:             parseGvizDate(c[ix.llc]),
+            em:              parseGvizDate(c[ix.em]),
+            lotSize:         parseGvizStr(c[ix.lotSize]),
+            topography:      parseGvizStr(c[ix.topography]),
+            zoning:          parseGvizStr(c[ix.zoning]),
+            floodZone:       parseGvizStr(c[ix.floodZone]),
+            needsVariance:   parseGvizStr(c[ix.needsVariance]),
+            setbackFront:    parseGvizStr(c[ix.setbackFront]),
+            setbackRear:     parseGvizStr(c[ix.setbackRear]),
+            setbackInterior: parseGvizStr(c[ix.setbackInterior]),
+            setbackRoadSide: parseGvizStr(c[ix.setbackRoadSide]),
+            dimFront:        parseGvizStr(c[ix.dimFront]),
+            dimSideLeft:     parseGvizStr(c[ix.dimSideLeft]),
+            dimRear:         parseGvizStr(c[ix.dimRear]),
+            dimSideRight:    parseGvizStr(c[ix.dimSideRight]),
+            compsInArea:     parseGvizStr(c[ix.compsInArea]),
+            bestComp:        parseGvizStr(c[ix.bestComp]),
+            cma:             parseGvizStr(c[ix.cma]),
+            landComps:       parseGvizStr(c[ix.landComps]),
+            notes:           parseGvizStr(c[ix.notes])
           };
         }).filter(d => d.address);
         const byAddr = new Map();
@@ -1589,6 +1810,9 @@
               <div>Under Contract</div><div style="color:#ccc;">${esc(fmtDate(d.uc))}</div>
               <div>Closing</div><div style="color:#ccc;">${esc(fmtDate(d.closing))}</div>
               ${d.status ? `<div>Status</div><div style="color:#ccc;">${esc(d.status)}</div>` : ''}
+            </div>
+            <div style="display:flex; justify-content:flex-end; margin-top:10px; padding-top:8px; border-top:1px solid #222;">
+              <button type="button" data-pipe-edit="${esc(d.address)}" style="font-family:var(--font-body); font-size:10px; letter-spacing:.18em; text-transform:uppercase; padding:6px 14px; background:transparent; color:var(--text-muted); border:1px solid var(--rule-strong); cursor:pointer;">Update</button>
             </div>
           </article>
         `).join('');
