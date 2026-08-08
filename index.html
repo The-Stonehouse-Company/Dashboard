@@ -3304,11 +3304,19 @@
     /* Admin, Apeiron, and Land all use a transparent PNG logo — object-fit:
        contain so the logo shows at natural proportions inside the circle
        ring, and the letter fallback is hidden so transparent parts of the
-       PNG don't reveal a grey initial underneath. */
+       PNG don't reveal a grey initial underneath. Padding differs per logo
+       because the arch PNG is nearly square while Apeiron's is tall/narrow —
+       matched visual size, not matched pixel padding. */
     .hub-avatar[data-slug="admin"] img,
     .hub-avatar[data-slug="apeiron"] img,
     .hub-avatar[data-slug="land"] img {
       object-fit: contain;
+    }
+    .hub-avatar[data-slug="admin"] img,
+    .hub-avatar[data-slug="land"] img {
+      padding: 46px;
+    }
+    .hub-avatar[data-slug="apeiron"] img {
       padding: 14px;
     }
     .hub-avatar[data-slug="admin"] .hub-initial,
