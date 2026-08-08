@@ -86,6 +86,23 @@
       font-size: 10px;
       text-transform: uppercase; letter-spacing: var(--tracking-x-wide);
       color: var(--text-dim);
+      display: flex; align-items: center; gap: 16px;
+    }
+    .switch-division-btn {
+      font-family: var(--font-body);
+      font-size: 10px;
+      letter-spacing: var(--tracking-x-wide);
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: transparent;
+      border: 1px solid var(--panel-edge);
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: color .15s, border-color .15s, background .15s;
+      text-decoration: none;
+    }
+    .switch-division-btn:hover {
+      color: #fff; border-color: var(--accent); background: rgba(234,226,211,0.06);
     }
 
     /* =========================================================
@@ -3689,6 +3706,18 @@
         setTimeout(waitAndClick, 300);
       })();
 
+      // "Switch Division" button in the admin header — re-shows the hub so
+      // the user can jump to Land / Apeiron / etc without a full page load.
+      (function () {
+        const btn = document.getElementById('switch-division-btn');
+        const hub = document.getElementById('division-hub');
+        if (!btn || !hub) return;
+        btn.addEventListener('click', () => {
+          hub.classList.remove('is-leaving');
+          hub.setAttribute('aria-hidden', 'false');
+        });
+      })();
+
       // Hub circle clicks — Admin enters the dashboard, "coming soon"
       // cards give a subtle flash so the user knows they're not broken.
       (function () {
@@ -3945,7 +3974,10 @@
         <span class="mark">stonehouse</span>
         <span class="below">Company</span>
       </div>
-      <div class="header-meta">Internal Dashboard</div>
+      <div class="header-meta">
+        <span>Internal Dashboard</span>
+        <button type="button" class="switch-division-btn" id="switch-division-btn" title="Back to the division hub">◫ Switch Division</button>
+      </div>
     </div>
   </header>
 
