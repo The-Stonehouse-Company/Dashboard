@@ -1718,6 +1718,23 @@
         setTimeout(() => { location.href = 'sms:' + RYAN_NUM; }, 400);
       }
 
+      // Detect true mobile (iPhone / iPad / Android). Desktop macOS Chrome
+      // technically supports navigator.share, but when the share sheet opens
+      // and the user picks Messages, macOS often silently fails to launch
+      // Messages.app with the file. So on desktop we skip the share sheet
+      // and go straight to the download + sms: flow, which is deterministic.
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      // Small toast to tell the user what happened after download.
+      function toast(msg) {
+        const t = document.createElement('div');
+        t.textContent = msg;
+        t.style.cssText = 'position:fixed;left:50%;bottom:32px;transform:translateX(-50%);background:#eae2d3;color:#000;font-family:Mulish,Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;letter-spacing:.04em;padding:14px 22px;border:1px solid #000;box-shadow:0 12px 40px rgba(0,0,0,.4);z-index:100000;max-width:520px;text-align:center;';
+        document.body.appendChild(t);
+        setTimeout(() => { t.style.transition = 'opacity .3s'; t.style.opacity = '0'; }, 5500);
+        setTimeout(() => { try { document.body.removeChild(t); } catch(_){} }, 6000);
+      }
+
       btn.addEventListener('click', async () => {
         const original = btn.textContent;
         btn.disabled = true;
@@ -1725,15 +1742,23 @@
         try {
           const blob = await buildPdfBlob();
           const filename = 'UW-' + addrTag().replace(/[^\w-]+/g,'-') + '.pdf';
-          const file = new File([blob], filename, { type: 'application/pdf' });
-          const shareText = 'Underwriting Model — ' + addrTag() + '\nText to Ryan: ' + RYAN_FMT;
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file], text: shareText, title: 'Stonehouse UW · ' + addrTag() });
-          } else {
-            fallbackDownloadAndSms(blob);
+          if (isMobile && navigator.canShare) {
+            const file = new File([blob], filename, { type: 'application/pdf' });
+            if (navigator.canShare({ files: [file] })) {
+              const shareText = 'Underwriting Model — ' + addrTag() + '\nText to Ryan: ' + RYAN_FMT;
+              await navigator.share({ files: [file], text: shareText, title: 'Stonehouse UW · ' + addrTag() });
+              return;
+            }
           }
+          // Desktop path — download the PDF, then open Messages.
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = filename;
+          document.body.appendChild(a); a.click();
+          setTimeout(() => { try { document.body.removeChild(a); } catch(_){} URL.revokeObjectURL(url); }, 500);
+          toast('✓ PDF saved to Downloads (' + filename + '). Opening Messages — drag the PDF into the conversation to attach it.');
+          setTimeout(() => { location.href = 'sms:' + RYAN_NUM; }, 800);
         } catch (err) {
-          // AbortError = user closed share sheet, not really an error
           if (err && err.name !== 'AbortError') {
             console.error('Text Ryan failed:', err);
             alert('Could not build PDF: ' + (err.message || err) + '\n\nOpening a plain text to Ryan instead.');
