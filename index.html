@@ -11017,7 +11017,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         ].filter(Boolean).join('<span class="sep" style="margin:0 10px;color:var(--text-dim);">·</span>');
         const editKey = (p.address || p.client || '').trim();
         const editBtn = '<button type="button" class="customrep-edit-btn" data-key="' + esc(editKey) + '" ' +
-          'style="font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px solid var(--panel-edge); background:rgba(20,20,20,.85); color:#fff; cursor:pointer; margin-bottom:8px;">Edit</button>';
+          'style="font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px solid var(--panel-edge); background:rgba(20,20,20,.85); color:#fff; cursor:pointer;">Edit</button>';
+        const deleteBtn = '<button type="button" class="customrep-delete-btn" data-key="' + esc(editKey) + '" ' +
+          'style="font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px solid #5a2a2a; background:rgba(20,20,20,.85); color:#d99; cursor:pointer;">Delete</button>';
+        const actionBtns = '<div style="display:flex; gap:6px; margin-bottom:8px;">' + editBtn + deleteBtn + '</div>';
 
         return (
           '<article class="deal-card">' +
@@ -11028,7 +11031,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
                 (p.stage ? '<div class="deal-stage-chip">Stage · ' + esc(stageLabel) + '</div>' : '') +
               '</div>' +
               '<div style="display:flex; flex-direction:column; align-items:flex-end;">' +
-                editBtn +
+                actionBtns +
                 (p.hardCost
                   ? '<div class="deal-price">' + esc(fmtUSD(p.hardCost)) + '<div style="font-size:9px;color:var(--text-dim);letter-spacing:var(--tracking-wide);text-transform:uppercase;margin-top:4px;text-align:right;">Hard Cost Est.</div></div>'
                   : ''
@@ -11049,6 +11052,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
       // Compact one-row card for completed projects — archival look.
       // Drops the stepper + progress bar; just shows the essentials.
+      // Expose loadPipeline for the delete button (lives in a different IIFE)
+      setTimeout(() => { window._customrepLoadPipeline = () => loadPipeline(); }, 0);
+
       function renderCompletedRow(p) {
         const teamRow = [
           p.architect ? '<strong>Architect</strong><span class="v">' + esc(p.architect) + '</span>' : '',
@@ -11140,7 +11146,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             const et = existing.timestamp?.getTime?.() || 0;
             if (pt >= et) byKey.set(key, p);
           });
-          const allProjects = Array.from(byKey.values());
+          // Soft-delete: rows whose latest current_stage is "Deleted" are hidden.
+          // Row stays in the sheet as an audit trail.
+          const allProjects = Array.from(byKey.values())
+            .filter(p => (p.stage || '').trim().toLowerCase() !== 'deleted');
 
           // Global registry — edit handler looks up by lowercased address
           window._customrepByAddress = new Map();
@@ -15251,6 +15260,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         hard_cost_estimate:    "entry.470369564",
         notes:                 "entry.1371022317",
       };
+      // Expose for the pipeline delete button (lives in a different IIFE)
+      window._customrepIntakeCfg = { FORM_URL, FIELD_MAP };
 
       const overlay   = document.getElementById('customrep-intake-modal-overlay');
       const modal     = document.getElementById('customrep-intake-modal');
@@ -21127,6 +21138,62 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         if (!p) { alert('Project data not loaded yet. Try again in a moment.'); return; }
         _fillCustomrepModal(p);
         _openCustomrepModal();
+      });
+
+      // Delegated click for Custom Rep delete buttons — append-only soft delete.
+      // Submits a new row with the project's fields + current_stage="Deleted";
+      // the parser filters out any row whose latest stage is "deleted".
+      document.addEventListener('click', async (e) => {
+        const btn = e.target.closest && e.target.closest('.customrep-delete-btn');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const key = (btn.getAttribute('data-key') || '').trim().toLowerCase();
+        const p = (window._customrepByAddress || new Map()).get(key);
+        if (!p) { alert('Project data not loaded yet. Try again in a moment.'); return; }
+        const label = p.client || p.address || key;
+        if (!window.confirm('Delete this custom home project?\n\n' + label + '\n\nThe row will be marked Deleted in the shared sheet (append-only history — past rows stay for audit).')) return;
+        // POST config lives in the intake IIFE — grab from window (set below).
+        const CFG = window._customrepIntakeCfg;
+        if (!CFG || !CFG.FORM_URL || !CFG.FIELD_MAP) {
+          alert('Form config not ready — try again in a moment.');
+          return;
+        }
+        const iso = (d) => (d instanceof Date && !isNaN(d))
+          ? d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
+          : '';
+        const body = new URLSearchParams();
+        const set = (k, v) => { const key = CFG.FIELD_MAP[k]; if (key && v != null && v !== '') body.append(key, String(v)); };
+        set('client_name',           p.client);
+        set('address',               p.address);
+        set('architect',             p.architect);
+        set('designer',              p.designer);
+        set('builder',               p.builder);
+        set('engagement_start_date', iso(p.engagementStart));
+        set('projected_start_date',  iso(p.projectedStart));
+        set('projected_co_date',     iso(p.projectedCO));
+        set('current_stage',         'Deleted');
+        set('hard_cost_estimate',    p.hardCost);
+        set('notes',                 p.notes);
+        try {
+          btn.textContent = 'Deleting…';
+          btn.disabled = true;
+          await fetch(CFG.FORM_URL, { method: 'POST', mode: 'no-cors', body });
+          // Optimistic UI: hide the card immediately
+          const card = btn.closest('.deal-card');
+          if (card) {
+            card.style.transition = 'opacity .3s';
+            card.style.opacity = '0';
+            setTimeout(() => { if (card.parentNode) card.parentNode.removeChild(card); }, 300);
+          }
+          // Re-fetch after Google Sheets propagates so the row stays gone
+          setTimeout(() => { if (window._customrepLoadPipeline) window._customrepLoadPipeline(); }, 4500);
+        } catch (err) {
+          console.error('Custom Rep delete failed:', err);
+          alert('Delete failed: ' + (err.message || err));
+          btn.disabled = false;
+          btn.textContent = 'Delete';
+        }
       });
 
       // -------- Nurturing (In Conversation) Edit --------
