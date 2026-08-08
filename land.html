@@ -790,6 +790,9 @@
         <h2 style="font-family:var(--font-display); font-size:28px; letter-spacing:.12em; text-transform:uppercase; margin:0 0 16px; font-weight:400; color:#fff;">Brentwood</h2>
         <p class="panel-intro">City of Brentwood — own zoning code administered by Brentwood Planning &amp; Codes. Large-lot residential ethos with OSRD (Open Space Residential Development) as a common tool for subdivisions.</p>
 
+        <!-- Property Lookup + Slope Analysis (parcel data unavailable — Williamson County) -->
+        <div class="plookup-mount" data-city="brentwood"></div>
+
         <div class="research-grid">
           <div class="research-card">
             <h3>Zoning Districts</h3>
@@ -2190,33 +2193,136 @@
         placeholder: 'e.g. 6300 Hillsboro Pike, Nashville, TN 37215',
         zipHint: '37215',
         zoningCaveat: 'Metro zoning shown for reference only — Forest Hills uses its own code. Contact the Forest Hills Building Official to verify actual zoning and setbacks.'
+      },
+      'brentwood': {
+        label: 'Brentwood',
+        placeholder: 'e.g. 5301 Virginia Way, Brentwood, TN 37027',
+        zipHint: '37027',
+        // Brentwood is in Williamson County — Metro's parcel service doesn't cover it.
+        // We skip the parcel + zoning cards and just show address + slope + FEMA flood.
+        skipMetro: true
       }
     };
+
+    /* =========================================================
+       SLOPE ANALYSIS — USGS 3DEP elevation grid (national coverage)
+       Samples elevation at 9 points in a grid across the lot, computes
+       range and slope %. Works anywhere in the US.
+       ========================================================= */
+
+    // USGS Elevation Point Query Service — single-point elevation lookup.
+    // Returns elevation in feet, or null on failure / no-data sentinel.
+    async function _plQueryElevation(lon, lat) {
+      try {
+        const url = 'https://epqs.nationalmap.gov/v1/json?x=' + lon + '&y=' + lat + '&units=Feet&wkid=4326';
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const data = await res.json();
+        // Current EPQS shape: {"value": 610.87, ...}
+        if (typeof data.value === 'number' && data.value > -1000 && data.value < 30000) return data.value;
+        // Legacy shape (some proxies still return it)
+        const legacy = data && data.USGS_Elevation_Point_Query_Service && data.USGS_Elevation_Point_Query_Service.Elevation_Query;
+        if (legacy && typeof legacy.Elevation === 'number' && legacy.Elevation > -1000) return legacy.Elevation;
+        return null;
+      } catch (_) { return null; }
+    }
+
+    // Sample a 3×3 grid of elevations around (centerLon, centerLat) covering
+    // a square of `sideFt` feet on a side. Returns array of {x, y, elev}.
+    async function _plSampleElevationGrid(centerLon, centerLat, sideFt) {
+      const halfFt = sideFt / 2;
+      // Feet-to-degrees conversion (Nashville-latitude constants — accurate enough locally)
+      const FT_PER_DEG_LAT = 364000;
+      const FT_PER_DEG_LON = 288200;
+      const dLat = halfFt / FT_PER_DEG_LAT;
+      const dLon = halfFt / FT_PER_DEG_LON;
+      const points = [];
+      for (let i = -1; i <= 1; i++) {
+        for (let j = -1; j <= 1; j++) {
+          points.push({ x: centerLon + j * dLon, y: centerLat + i * dLat });
+        }
+      }
+      const elevs = await Promise.all(points.map(p => _plQueryElevation(p.x, p.y)));
+      return points.map((p, i) => ({ ...p, elev: elevs[i] })).filter(p => p.elev != null);
+    }
+
+    // Feet between two lat/lon points (haversine — accurate at short spans).
+    function _plFeetBetween(lat1, lon1, lat2, lon2) {
+      const R = 20925721.784;          // Earth radius in feet
+      const toRad = d => d * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+      return 2 * R * Math.asin(Math.sqrt(a));
+    }
+
+    // Full slope analysis for a geocoded address (+ optional parcel for lot sizing).
+    // Returns { min, max, range, slopePct, spanFt, sideFt, sampleCount, score } or null.
+    async function _plComputeSlope(centerLon, centerLat, acres) {
+      // Size the sample box: default 200 ft, else based on lot acreage (square-lot approx).
+      let sideFt = 200;
+      if (acres && acres > 0) {
+        sideFt = Math.max(80, Math.min(600, Math.sqrt(acres * 43560)));
+      }
+      const samples = await _plSampleElevationGrid(centerLon, centerLat, sideFt);
+      if (samples.length < 3) return null;    // not enough data to trust
+      const elevs = samples.map(s => s.elev);
+      const min = Math.min(...elevs);
+      const max = Math.max(...elevs);
+      const avg = elevs.reduce((s, e) => s + e, 0) / elevs.length;
+      const range = max - min;
+      const lo = samples.find(s => s.elev === min);
+      const hi = samples.find(s => s.elev === max);
+      const spanFt = _plFeetBetween(lo.y, lo.x, hi.y, hi.x);
+      const slopePct = spanFt > 0 ? (range / spanFt) * 100 : 0;
+      return { min, max, avg, range, slopePct, spanFt, sideFt, sampleCount: samples.length, score: _plSlopeScore(slopePct) };
+    }
+
+    // Score a slope percentage — label, color, and build-note guidance.
+    function _plSlopeScore(pct) {
+      if (pct <= 2)  return { label: 'Very Flat',   color: '#a4d5ad', note: 'Ideal build pad. Minimal grading required.' };
+      if (pct <= 5)  return { label: 'Gentle',      color: '#9ec39e', note: 'Standard grading. Easy site design.' };
+      if (pct <= 10) return { label: 'Moderate',    color: '#e8c068', note: 'Some retention or terracing. Manageable cost.' };
+      if (pct <= 15) return { label: 'Notable',     color: '#e29a4a', note: 'Walkout basement candidate. Engineered fill likely.' };
+      if (pct <= 25) return { label: 'Steep',       color: '#d97a7a', note: 'Significant grading + retention. Costs add up.' };
+      return           { label: 'Very Steep',   color: '#d64545', note: 'Geotech required. Expensive foundation + drainage.' };
+    }
 
     async function _plLookup(container, address) {
       const statusEl  = container.querySelector('.plookup-status');
       const resultsEl = container.querySelector('.plookup-results');
       const city      = container.dataset.city || 'nashville';
+      const meta      = CITY_META[city] || CITY_META['nashville'];
       resultsEl.hidden = true;
       statusEl.textContent = 'Geocoding address…';
 
       const geo = await _plGeocode(address);
-      if (!geo) throw new Error('Address not found by Metro geocoder — try a fuller form (with city + state).');
+      if (!geo) throw new Error('Address not found — try a fuller form (with city + state).');
       const point = { x: geo.location.x, y: geo.location.y, spatialReference: { wkid: 4326 } };
-      statusEl.textContent = 'Loading parcel + flood zone…';
+      statusEl.textContent = 'Loading parcel, flood zone, slope…';
 
-      // Metro's Parcels layer covers all of Davidson County (including Oak Hill
-      // and Forest Hills). Front/Side dimensions are pre-computed by Metro.
+      // Metro's Parcels layer covers all of Davidson County (Nashville, Oak Hill,
+      // Forest Hills). Brentwood is in Williamson County so we skip that query.
+      // FEMA + slope work anywhere in the US.
+      const parcelPromise = meta.skipMetro
+        ? Promise.resolve(null)
+        : _plQueryLayer('https://maps.nashville.gov/arcgis/rest/services/Cadastral/Parcels/MapServer', 0, point, '*')
+            .catch(err => { console.warn('Parcel query failed:', err); return null; });
       const [parcel, flood] = await Promise.all([
-        _plQueryLayer('https://maps.nashville.gov/arcgis/rest/services/Cadastral/Parcels/MapServer', 0, point, '*')
-          .catch(err => { console.warn('Parcel query failed:', err); return null; }),
+        parcelPromise,
         _plQueryLayer('https://hazards.fema.gov/gis/nfhl/services/public/NFHL/MapServer', 28, point, 'FLD_ZONE,ZONE_SUBTY,STATIC_BFE')
           .catch(err => { console.warn('FEMA query failed:', err); return null; })
       ]);
 
+      // Slope analysis — sizes its sample box off parcel acres if available.
+      const acres = (parcel && parcel.attributes && parcel.attributes.Acres != null)
+        ? Number(parcel.attributes.Acres) : null;
+      const slope = await _plComputeSlope(geo.location.x, geo.location.y, acres)
+        .catch(err => { console.warn('Slope analysis failed:', err); return null; });
+
       statusEl.style.color = '#9ec39e';
       statusEl.textContent = '✓ Loaded — ' + (geo.address || address);
-      resultsEl.innerHTML = _plRenderHTML(geo, parcel, flood, city);
+      resultsEl.innerHTML = _plRenderHTML(geo, parcel, flood, slope, city);
       resultsEl.hidden = false;
     }
 
@@ -2234,11 +2340,12 @@
               <div style="color:#fff;">${val}</div>`;
     }
 
-    function _plRenderHTML(geo, parcel, flood, city) {
+    function _plRenderHTML(geo, parcel, flood, slope, city) {
       const meta = CITY_META[city] || CITY_META['nashville'];
       const cards = [];
+      const fullAddress = (geo && geo.address) ? geo.address : '';
 
-      // === PARCEL: only the fields Parcel Viewer's General Info shows ===
+      // === PARCEL — only if we're inside Davidson County (Metro has data) ===
       if (parcel) {
         const a = parcel.attributes || {};
         const parcelId = a.APN || '';
@@ -2248,7 +2355,6 @@
         const front    = a.Front != null && a.Front > 0 ? a.Front : null;
         const side     = a.Side  != null && a.Side  > 0 ? a.Side  : null;
         const zoneCode = (a.Zoning || '').trim();
-        const fullAddress = (geo && geo.address) ? geo.address : '';
         cards.push(_plCard('Parcel',
           _plRow('Parcel ID', parcelId) +
           _plRow('Situs', address) +
@@ -2274,16 +2380,48 @@
               ? _plRow('Setbacks', 'Zone ' + esc(zoneCode) + ' not in our setback table — verify with Metro Codes.')
               : ''))
           ));
-        } else {
-          // Oak Hill / Forest Hills — Metro's zoning field is not authoritative
+        } else if (city === 'oak-hill' || city === 'forest-hills') {
           cards.push(_plCard('Zoning (' + esc(meta.label) + ')',
             _plRow('Metro Zone (ref)', zoneCode || '—') +
             `<div style="grid-column:1/-1; font-size:11px; line-height:1.5; color:#e0c98d; padding:8px 10px; margin-top:6px; background:rgba(224,201,141,0.08); border-left:2px solid #e0c98d;">⚠ ${esc(meta.zoningCaveat || '')}</div>`
           ));
         }
-      } else {
+      } else if (!meta.skipMetro) {
         cards.push(_plCard('Parcel',
           _plRow('Status', 'No parcel found at this location. Address may be outside Davidson County.')
+        ));
+      } else if (fullAddress) {
+        // Brentwood / non-Metro city — no parcel data, but show the geocoded address
+        cards.push(_plCard('Address',
+          _plRow('Full Address', fullAddress) +
+          _plRow('City', meta.label)
+        ));
+      }
+
+      // === SLOPE ANALYSIS — USGS 3DEP (works nationally) ===
+      if (slope) {
+        const sc = slope.score;
+        cards.push(`
+          <article style="background:var(--panel); border:1px solid var(--rule); padding:18px 20px;">
+            <h3 style="font-family:var(--font-display); font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin:0 0 12px; padding-bottom:8px; border-bottom:1px solid var(--rule);">Slope Analysis</h3>
+            <div style="display:flex; align-items:baseline; gap:12px; margin-bottom:10px;">
+              <div style="font-family:var(--font-display); font-size:32px; color:#fff; letter-spacing:.04em;">${slope.slopePct.toFixed(1)}<span style="font-size:16px; color:var(--text-dim); margin-left:2px;">%</span></div>
+              <div style="font-family:var(--font-display); font-size:14px; letter-spacing:.14em; text-transform:uppercase; color:${sc.color};">${sc.label}</div>
+            </div>
+            <div style="font-size:11px; color:#eee; line-height:1.55; padding:8px 10px; margin-bottom:12px; background:rgba(255,255,255,0.03); border-left:2px solid ${sc.color};">${esc(sc.note)}</div>
+            <div style="display:grid; grid-template-columns:auto 1fr; gap:6px 14px; font-size:12px;">
+              ${_plRow('Elevation Range', slope.range.toFixed(1) + ' ft')}
+              ${_plRow('Low Point',       slope.min.toFixed(1) + ' ft')}
+              ${_plRow('High Point',      slope.max.toFixed(1) + ' ft')}
+              ${_plRow('Sample Span',     Math.round(slope.spanFt) + ' ft')}
+              ${_plRow('Sample Area',     Math.round(slope.sideFt) + ' × ' + Math.round(slope.sideFt) + ' ft')}
+              ${_plRow('Data',            slope.sampleCount + ' pts · USGS 3DEP LiDAR')}
+            </div>
+          </article>
+        `);
+      } else {
+        cards.push(_plCard('Slope Analysis',
+          _plRow('Status', 'Elevation data unavailable — USGS 3DEP query failed. Try again in a moment.')
         ));
       }
 
