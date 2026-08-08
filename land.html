@@ -1460,12 +1460,13 @@
         const composedNotes = notesAppend
           ? ((deal.notes ? deal.notes + '\n\n' : '') + '[' + stamp + '] ' + notesAppend)
           : (deal.notes || '');
+        const newStatus = readVal('status');
         // Build the pass-through submission — every original field preserved,
         // edited fields overridden with the new values.
         const payload = {
           agent:                  deal.agent || '',
           date_submitted:         _pipeISODate(deal.dateSubmitted),
-          status:                 readVal('status'),
+          status:                 newStatus,
           property_address:       deal.address || '',
           neighborhood:           deal.neigh || '',
           asking_price:           deal.asking != null ? String(deal.asking) : '',
@@ -1500,13 +1501,83 @@
           const key = INTAKE_FORM.MAP[k];
           if (key && payload[k] !== '' && payload[k] != null) body.append(key, String(payload[k]));
         });
+        console.log('[Pipeline Update] Submitting to', INTAKE_FORM.URL, 'with payload:', payload);
         await fetch(INTAKE_FORM.URL, { method: 'POST', mode: 'no-cors', body });
-        status.className = 'form-status ok'; status.textContent = '✓ Saved — reloading…';
-        setTimeout(() => { _closeMiniModal('pipe-modal'); loadPipeline().then(_renderOverview); }, 900);
+
+        // Optimistic local update — mutate _landDeals in memory and re-render
+        // right away so the pipeline reflects the change even before Google
+        // Sheets has propagated the new form submission (can take 3–8 s).
+        const match = _landDeals.find(d => (d.address || '').trim().toLowerCase() === (deal.address || '').trim().toLowerCase());
+        if (match) {
+          match.status = newStatus;
+          match.notes  = composedNotes;
+          const parseD = v => v ? new Date(v + 'T12:00:00') : null;
+          if (readVal('contract_price'))         match.contract = parseFloat(readVal('contract_price')) || match.contract;
+          if (readVal('date_under_contract'))    match.uc       = parseD(readVal('date_under_contract'));
+          if (readVal('closing_date'))           match.closing  = parseD(readVal('closing_date'));
+          if (readVal('due_diligence_end'))      match.ddEnd    = parseD(readVal('due_diligence_end'));
+          if (readVal('llc_formation_deadline')) match.llc      = parseD(readVal('llc_formation_deadline'));
+          if (readVal('earnest_money_deadline')) match.em       = parseD(readVal('earnest_money_deadline'));
+          match.ts = new Date();                 // beat any concurrent stale rows in dedupe
+        }
+        status.className = 'form-status ok';
+        status.textContent = '✓ Saved — status now: ' + newStatus;
+        // Re-render pipeline immediately from the optimistic mutation, then
+        // close the modal after a beat, then re-fetch the sheet a few seconds
+        // later to reconcile with server truth.
+        _renderPipelineFromCache();
+        _renderOverview();
+        setTimeout(() => _closeMiniModal('pipe-modal'), 700);
+        setTimeout(() => loadPipeline().then(_renderOverview), 4500);
       } catch (err) {
+        console.error('[Pipeline Update] Submit failed:', err);
         status.className = 'form-status err'; status.textContent = 'Error: ' + (err.message || err);
       }
     });
+
+    // Re-render the pipeline from the in-memory _landDeals array (used by
+    // the optimistic Update flow so the card drops off Active Pipeline
+    // instantly, before the sheet round-trip finishes).
+    function _renderPipelineFromCache() {
+      const listEl = document.getElementById('land-pipeline-list');
+      const countEl = document.getElementById('land-pipeline-count');
+      if (!listEl || !countEl) return;
+      const active = _landDeals.filter(d => {
+        const s = (d.status || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+        if (s === 'under contract') return true;
+        if ((s === '' || s === 'active') && d.uc instanceof Date && !isNaN(d.uc)) return true;
+        return false;
+      });
+      countEl.textContent = active.length + ' under contract · firm-wide';
+      if (active.length === 0) {
+        listEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">No active deals in the pipeline right now.</div>';
+        return;
+      }
+      active.sort((a, b) => {
+        const ac = a.closing ? a.closing.getTime() : Infinity;
+        const bc = b.closing ? b.closing.getTime() : Infinity;
+        return ac - bc;
+      });
+      listEl.innerHTML = active.map(d => `
+        <article style="background:var(--panel); border:1px solid var(--rule); padding:14px 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:start; gap:10px;">
+            <div style="min-width:0; flex:1;">
+              <div style="font-family:var(--font-display); font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:#fff;">${esc(d.address)}</div>
+              <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">${esc(d.neigh)}${d.agent ? ' &nbsp;·&nbsp; ' + esc(d.agent) : ''}</div>
+            </div>
+            ${d.contract ? `<div style="font-family:var(--font-display); font-size:14px; color:#fff; white-space:nowrap;">${esc(fmtUSD(d.contract))}</div>` : ''}
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px 12px; margin-top:10px; padding-top:10px; border-top:1px solid #222; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim);">
+            <div>Under Contract</div><div style="color:#ccc;">${esc(fmtDate(d.uc))}</div>
+            <div>Closing</div><div style="color:#ccc;">${esc(fmtDate(d.closing))}</div>
+            ${d.status ? `<div>Status</div><div style="color:#ccc;">${esc(d.status)}</div>` : ''}
+          </div>
+          <div style="display:flex; justify-content:flex-end; margin-top:10px; padding-top:8px; border-top:1px solid #222;">
+            <button type="button" data-pipe-edit="${esc(d.address)}" style="font-family:var(--font-body); font-size:10px; letter-spacing:.18em; text-transform:uppercase; padding:6px 14px; background:transparent; color:var(--text-muted); border:1px solid var(--rule-strong); cursor:pointer;">Update</button>
+          </div>
+        </article>
+      `).join('');
+    }
 
     // + Add Hot Lead
     const hlAddBtn = document.getElementById('hl-add-btn');

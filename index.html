@@ -3697,15 +3697,16 @@
 
       // "Switch Division" button in the admin header — re-shows the hub so
       // the user can jump to Land / Apeiron / etc without a full page load.
-      (function () {
-        const btn = document.getElementById('switch-division-btn');
+      // Uses event delegation because this script runs before the header
+      // <button> is parsed into the DOM (script sits above the <header>).
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest && e.target.closest('#switch-division-btn');
+        if (!btn) return;
         const hub = document.getElementById('division-hub');
-        if (!btn || !hub) return;
-        btn.addEventListener('click', () => {
-          hub.classList.remove('is-leaving');
-          hub.setAttribute('aria-hidden', 'false');
-        });
-      })();
+        if (!hub) return;
+        hub.classList.remove('is-leaving');
+        hub.setAttribute('aria-hidden', 'false');
+      });
 
       // Hub circle clicks — Admin enters the dashboard, "coming soon"
       // cards give a subtle flash so the user knows they're not broken.
