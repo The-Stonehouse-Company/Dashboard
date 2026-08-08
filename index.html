@@ -3219,14 +3219,6 @@
           <div class="hub-name">Admin</div>
           <div class="hub-role">Full dashboard access</div>
         </button>
-        <button type="button" class="hub-card is-soon" data-target="petra">
-          <div class="hub-avatar" data-slug="petra">
-            <img src="assets/hub/petra.jpg" alt="" onerror="this.style.display='none';" />
-            <span class="hub-initial">P</span>
-          </div>
-          <div class="hub-name">Petra Luxury Group</div>
-          <div class="hub-role">Coming soon</div>
-        </button>
         <button type="button" class="hub-card" data-target="apeiron">
           <div class="hub-avatar" data-slug="apeiron">
             <img src="assets/apeiron-logo.png" alt=""
@@ -3237,14 +3229,6 @@
           <div class="hub-name">Apeiron</div>
           <div class="hub-role">Custom Home Rep</div>
         </button>
-        <button type="button" class="hub-card is-soon" data-target="propmgmt">
-          <div class="hub-avatar" data-slug="propmgmt">
-            <img src="assets/hub/propmgmt.jpg" alt="" onerror="this.style.display='none';" />
-            <span class="hub-initial">P</span>
-          </div>
-          <div class="hub-name">Property Management</div>
-          <div class="hub-role">Coming soon</div>
-        </button>
         <button type="button" class="hub-card" data-target="land">
           <div class="hub-avatar" data-slug="land">
             <img src="assets/hub/land.jpg" alt="" onerror="this.style.display='none';" />
@@ -3252,14 +3236,6 @@
           </div>
           <div class="hub-name">Land Acquisition</div>
           <div class="hub-role">Sourcing + assigning</div>
-        </button>
-        <button type="button" class="hub-card is-soon" data-target="development">
-          <div class="hub-avatar" data-slug="development">
-            <img src="assets/hub/development.jpg" alt="" onerror="this.style.display='none';" />
-            <span class="hub-initial">D</span>
-          </div>
-          <div class="hub-name">Development</div>
-          <div class="hub-role">Coming soon</div>
         </button>
       </div>
     </div>
@@ -3297,9 +3273,13 @@
       color: #888; margin: 0 0 48px;
     }
     .hub-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      display: grid; grid-template-columns: repeat(3, 1fr);
       gap: 32px 24px;
       max-width: 900px; margin: 0 auto;
+    }
+    @media (max-width: 640px) {
+      /* On narrow phones, stack the three cards */
+      .hub-grid { grid-template-columns: 1fr; }
     }
     .hub-card {
       display: flex; flex-direction: column; align-items: center; gap: 12px;
