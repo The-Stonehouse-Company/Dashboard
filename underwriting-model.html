@@ -378,7 +378,11 @@
        ================================================================== */
     @media print {
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-      @page { size: letter portrait; margin: 0; }
+      /* Use @page margins so EVERY page (not just page 1) gets consistent
+         top/bottom breathing room. Previously we had margin: 0 + shell
+         padding, which only padded page 1 — content on page 2 butted against
+         the top edge of the printable area. */
+      @page { size: letter portrait; margin: 0.6in 0.55in; }
       html, body {
         background: #000 !important; color: #fff !important;
         font-family: 'Mulish', 'Helvetica Neue', Arial, sans-serif;
@@ -387,11 +391,11 @@
       /* Hide chrome + inactive tabs */
       .page-toolbar, .modal-foot, .uw-tabbar, .uw-error-row { display: none !important; }
       .uw-panel[aria-hidden="true"] { display: none !important; }
-      /* Full-bleed dark background */
+      /* Full-bleed dark background inside the page margins */
       #uw-modal-overlay { background: #000 !important; padding: 0 !important; }
       .page-shell {
         max-width: none !important; margin: 0 !important;
-        padding: 0.55in 0.55in 0.55in !important;
+        padding: 0 !important;
         background: #000 !important;
       }
 
@@ -534,9 +538,15 @@
          behavior that made the old print feel unorganized. */
       .uw-outputs {
         margin-top: 24px !important;
+        padding-top: 8px !important;
         break-before: page !important;
         page-break-before: always !important;
       }
+      /* Belt-and-suspenders — make sure the body's black shows through in the
+         @page margins on browsers that respect it (Chrome does with the
+         color-adjust hint above). If a browser paints white margins anyway,
+         the content area is still on-brand and legible. */
+      html { background: #000 !important; }
       .uw-outcard {
         border: 1px solid #eae2d3 !important;
         background: #0a0a0a !important;
