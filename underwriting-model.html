@@ -856,7 +856,7 @@
 
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="uw-reset">Reset to Defaults</button>
-        <button class="btn" type="button" onclick="window.print()">Print / Save PDF</button>
+        <button class="btn" type="button" id="uw-save-pdf">Save PDF</button>
         <button class="btn" type="button" id="uw-text-ryan">Text Ryan</button>
       </footer>
 
@@ -1677,29 +1677,55 @@
         });
       }
 
+      // html2canvas has a well-known issue where <input> values render with
+      // the text baseline shifted a few pixels lower than the browser paints
+      // it — this clips the bottom of digits. We work around by injecting a
+      // print-only style right before snapshotting that adds bottom padding
+      // to every input, then removing the style right after.
+      function _installH2cInputFix() {
+        const s = document.createElement('style');
+        s.id = '_h2c-input-fix';
+        s.textContent =
+          '.uw-field input, .uw-field select, ' +
+          '.uw-panel > .uw-section:first-child input { ' +
+          '  padding-top: 12px !important; padding-bottom: 12px !important; ' +
+          '  line-height: 1.2 !important; ' +
+          '} ' +
+          '.uw-field .prefix-dollar::before, .uw-field .suffix::after { ' +
+          '  top: 46% !important; ' +
+          '}';
+        document.head.appendChild(s);
+      }
+      function _removeH2cInputFix() {
+        const s = document.getElementById('_h2c-input-fix');
+        if (s && s.parentNode) s.parentNode.removeChild(s);
+      }
+
       async function buildPdfBlob() {
         if (!window.html2canvas) await loadScript(H2C_URL);
         if (!window.PDFLib) await loadScript(PDFLIB_URL);
         const source = document.getElementById('uw-modal');
-        // Temporarily hide the footer + toolbar so they don't appear in the shot
         const hides = document.querySelectorAll('.page-toolbar, .modal-foot');
         hides.forEach(el => { el.dataset._prevDisplay = el.style.display; el.style.display = 'none'; });
+        _installH2cInputFix();
         let canvas;
         try {
           canvas = await window.html2canvas(source, {
             scale: 2, backgroundColor: '#000000', useCORS: true, logging: false
           });
         } finally {
+          _removeH2cInputFix();
           hides.forEach(el => { el.style.display = el.dataset._prevDisplay || ''; delete el.dataset._prevDisplay; });
         }
         const { PDFDocument } = window.PDFLib;
         const pdf = await PDFDocument.create();
         const pngBytes = await (await fetch(canvas.toDataURL('image/png'))).arrayBuffer();
         const img = await pdf.embedPng(pngBytes);
-        // Fit to letter portrait, black background
+        // Fit to letter portrait, black background, small margin
         const pageW = 612, pageH = 792;
+        const margin = 20;
         const ratio = img.width / img.height;
-        const contentH = pageH - 40, contentW = pageW - 40;
+        const contentH = pageH - margin * 2, contentW = pageW - margin * 2;
         let drawW = contentW, drawH = contentW / ratio;
         if (drawH > contentH) { drawH = contentH; drawW = contentH * ratio; }
         const page = pdf.addPage([pageW, pageH]);
@@ -1711,6 +1737,8 @@
         const bytes = await pdf.save();
         return new Blob([bytes], { type: 'application/pdf' });
       }
+      window._uwBuildPdfBlob = buildPdfBlob;
+      window._uwAddrTag = () => ((document.getElementById('uw-address') || {}).value || 'Underwriting').trim() || 'Underwriting';
 
       function addrTag() {
         const a = (document.getElementById('uw-address') || {}).value || 'Underwriting';
@@ -1744,6 +1772,30 @@
         setTimeout(() => { t.style.transition = 'opacity .3s'; t.style.opacity = '0'; }, 5500);
         setTimeout(() => { try { document.body.removeChild(t); } catch(_){} }, 6000);
       }
+
+      // Save PDF button — same PDF-snapshot flow as Text Ryan, just download only.
+      const saveBtn = document.getElementById('uw-save-pdf');
+      if (saveBtn) saveBtn.addEventListener('click', async () => {
+        const orig = saveBtn.textContent;
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Preparing PDF…';
+        try {
+          const blob = await buildPdfBlob();
+          const filename = 'UW-' + addrTag().replace(/[^\w-]+/g,'-') + '.pdf';
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = filename;
+          document.body.appendChild(a); a.click();
+          setTimeout(() => { try { document.body.removeChild(a); } catch(_){} URL.revokeObjectURL(url); }, 500);
+          toast('✓ PDF saved to Downloads (' + filename + ')');
+        } catch (err) {
+          console.error('Save PDF failed:', err);
+          alert('Could not build PDF: ' + (err.message || err));
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.textContent = orig;
+        }
+      });
 
       btn.addEventListener('click', async () => {
         const original = btn.textContent;
