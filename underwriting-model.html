@@ -461,29 +461,28 @@
         display: block !important;
         width: 100% !important;
       }
-      .uw-section { margin-bottom: 18px !important; break-inside: avoid; page-break-inside: avoid; }
+      .uw-section { margin-bottom: 22px !important; break-inside: avoid; page-break-inside: avoid; }
       .uw-section-head {
         font-family: 'Aboreto', 'Times New Roman', serif !important;
-        font-weight: 400 !important; font-size: 12pt !important;
+        font-weight: 400 !important; font-size: 13pt !important;
         color: #eae2d3 !important;
-        text-transform: uppercase; letter-spacing: .24em;
+        text-transform: uppercase; letter-spacing: .26em;
         border-bottom: 1px solid #eae2d3 !important;
-        padding-bottom: 6px !important; margin-bottom: 10px !important;
+        padding-bottom: 7px !important; margin-bottom: 12px !important;
       }
-      /* Two label:value pairs per row now that the whole section has full page width */
       .uw-section-grid {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
-        gap: 0 32px !important;
+        gap: 0 40px !important;
       }
 
       /* --- INPUTS → Label : Value rows, dark, no form chrome --- */
       .uw-field {
         display: grid !important;
         grid-template-columns: 1fr auto !important;
-        gap: 14px !important;
+        gap: 16px !important;
         align-items: baseline !important;
-        padding: 5px 0 !important;
+        padding: 7px 0 !important;
         border-bottom: 1px solid #2a2a2a !important;
       }
       .uw-field.full { grid-column: 1 / -1 !important; }
@@ -530,33 +529,40 @@
       }
 
       /* --- OUTPUT CARDS → full-width presentation cards with ivory accents --- */
-      .uw-outputs { margin-top: 22px !important; }
+      /* Force a clean page break before outputs so results start on their own
+         page — prevents the awkward "half of Returns on page 1, half on page 2"
+         behavior that made the old print feel unorganized. */
+      .uw-outputs {
+        margin-top: 24px !important;
+        break-before: page !important;
+        page-break-before: always !important;
+      }
       .uw-outcard {
         border: 1px solid #eae2d3 !important;
         background: #0a0a0a !important;
-        margin-bottom: 14px !important;
+        margin-bottom: 16px !important;
         break-inside: avoid; page-break-inside: avoid;
         width: 100% !important;
       }
+      .uw-outcard .out-head {
+        background: #eae2d3 !important; color: #000 !important;
+        padding: 8px 16px !important;
+        font-family: 'Aboreto', serif !important;
+        font-size: 11pt !important; font-weight: 400 !important;
+        letter-spacing: .24em; border-bottom: 0 !important;
+        text-transform: uppercase;
+      }
       .uw-outcard .out-body {
+        padding: 8px 16px 12px !important;
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
         gap: 0 32px !important;
       }
-      .uw-outcard .out-row.hi { grid-column: 1 / -1 !important; }
-      .uw-outcard .out-head {
-        background: #eae2d3 !important; color: #000 !important;
-        padding: 6px 14px !important;
-        font-family: 'Aboreto', serif !important;
-        font-size: 10pt !important; font-weight: 400 !important;
-        letter-spacing: .24em; border-bottom: 0 !important;
-        text-transform: uppercase;
-      }
-      .uw-outcard .out-body { padding: 6px 14px 10px !important; }
       .uw-outcard .out-row {
-        padding: 5px 0 !important;
+        padding: 6px 0 !important;
         border-bottom: 1px solid #2a2a2a !important;
       }
+      .uw-outcard .out-row.hi { grid-column: 1 / -1 !important; }
       .uw-outcard .out-row .k {
         color: #8a8579 !important; font-size: 8.5pt !important;
         text-transform: uppercase !important; letter-spacing: .12em !important;
@@ -841,7 +847,7 @@
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="uw-reset">Reset to Defaults</button>
         <button class="btn" type="button" onclick="window.print()">Print / Save PDF</button>
-        <a class="btn" href="sms:9093766874" style="text-decoration:none; display:inline-flex; align-items:center;">Text Ryan</a>
+        <button class="btn" type="button" id="uw-text-ryan">Text Ryan</button>
       </footer>
 
   </div><!-- /page-shell #uw-modal -->
@@ -1629,6 +1635,113 @@
       if (saved) applyState(saved);
       render();
     })();
+    })();
+
+    /* =========================================================
+       TEXT RYAN — snapshot the UW view as a PDF, then either:
+       - Share via the OS share sheet with the PDF file attached
+         (iOS/Android: user picks Messages → PDF auto-attaches;
+         phone number 909-376-6874 is in the shared text so they
+         paste it into recipients)
+       - Otherwise: download the PDF locally + open an sms: link
+         so the user can attach manually
+       ========================================================= */
+    (function () {
+      const RYAN_NUM  = '9093766874';
+      const RYAN_FMT  = '(909) 376-6874';
+      const H2C_URL   = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      const PDFLIB_URL = 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js';
+      const btn = document.getElementById('uw-text-ryan');
+      if (!btn) return;
+
+      function loadScript(src) {
+        return new Promise((resolve, reject) => {
+          if (document.querySelector('script[src="' + src + '"]')) return resolve();
+          const s = document.createElement('script');
+          s.src = src; s.async = true;
+          s.onload = () => resolve();
+          s.onerror = () => reject(new Error('Failed to load ' + src));
+          document.head.appendChild(s);
+        });
+      }
+
+      async function buildPdfBlob() {
+        if (!window.html2canvas) await loadScript(H2C_URL);
+        if (!window.PDFLib) await loadScript(PDFLIB_URL);
+        const source = document.getElementById('uw-modal');
+        // Temporarily hide the footer + toolbar so they don't appear in the shot
+        const hides = document.querySelectorAll('.page-toolbar, .modal-foot');
+        hides.forEach(el => { el.dataset._prevDisplay = el.style.display; el.style.display = 'none'; });
+        let canvas;
+        try {
+          canvas = await window.html2canvas(source, {
+            scale: 2, backgroundColor: '#000000', useCORS: true, logging: false
+          });
+        } finally {
+          hides.forEach(el => { el.style.display = el.dataset._prevDisplay || ''; delete el.dataset._prevDisplay; });
+        }
+        const { PDFDocument } = window.PDFLib;
+        const pdf = await PDFDocument.create();
+        const pngBytes = await (await fetch(canvas.toDataURL('image/png'))).arrayBuffer();
+        const img = await pdf.embedPng(pngBytes);
+        // Fit to letter portrait, black background
+        const pageW = 612, pageH = 792;
+        const ratio = img.width / img.height;
+        const contentH = pageH - 40, contentW = pageW - 40;
+        let drawW = contentW, drawH = contentW / ratio;
+        if (drawH > contentH) { drawH = contentH; drawW = contentH * ratio; }
+        const page = pdf.addPage([pageW, pageH]);
+        page.drawRectangle({ x: 0, y: 0, width: pageW, height: pageH, color: window.PDFLib.rgb(0,0,0) });
+        page.drawImage(img, {
+          x: (pageW - drawW) / 2, y: (pageH - drawH) / 2,
+          width: drawW, height: drawH
+        });
+        const bytes = await pdf.save();
+        return new Blob([bytes], { type: 'application/pdf' });
+      }
+
+      function addrTag() {
+        const a = (document.getElementById('uw-address') || {}).value || 'Underwriting';
+        return a.trim() || 'Underwriting';
+      }
+
+      function fallbackDownloadAndSms(blob) {
+        const filename = 'UW-' + addrTag().replace(/[^\w-]+/g,'-') + '.pdf';
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click();
+        setTimeout(() => { try { document.body.removeChild(a); } catch(_){} URL.revokeObjectURL(url); }, 500);
+        // Give the download a beat, then open Messages
+        setTimeout(() => { location.href = 'sms:' + RYAN_NUM; }, 400);
+      }
+
+      btn.addEventListener('click', async () => {
+        const original = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Preparing PDF…';
+        try {
+          const blob = await buildPdfBlob();
+          const filename = 'UW-' + addrTag().replace(/[^\w-]+/g,'-') + '.pdf';
+          const file = new File([blob], filename, { type: 'application/pdf' });
+          const shareText = 'Underwriting Model — ' + addrTag() + '\nText to Ryan: ' + RYAN_FMT;
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], text: shareText, title: 'Stonehouse UW · ' + addrTag() });
+          } else {
+            fallbackDownloadAndSms(blob);
+          }
+        } catch (err) {
+          // AbortError = user closed share sheet, not really an error
+          if (err && err.name !== 'AbortError') {
+            console.error('Text Ryan failed:', err);
+            alert('Could not build PDF: ' + (err.message || err) + '\n\nOpening a plain text to Ryan instead.');
+            location.href = 'sms:' + RYAN_NUM;
+          }
+        } finally {
+          btn.disabled = false;
+          btn.textContent = original;
+        }
+      });
     })();
   </script>
 </body>
