@@ -792,6 +792,8 @@
 
         <!-- Property Lookup + Slope Analysis (parcel data unavailable — Williamson County) -->
         <div class="plookup-mount" data-city="brentwood"></div>
+        <!-- Land Comp Generator — Williamson County parcels within Brentwood city limits -->
+        <div class="lcomp-mount"   data-city="brentwood"></div>
 
         <div class="research-grid">
           <div class="research-card">
@@ -2517,11 +2519,18 @@
       return LAND_PRICE_CAPS[zip] || 1500000;
     }
 
-    async function _lcFindComps({ zip, minAcres, maxAcres, months, cap, llcOnly }) {
+    // Dispatch — Nashville/Oak Hill/Forest Hills use Metro's cadastral service;
+    // Brentwood uses Williamson County's FeatureServer with a spatial filter.
+    // Both variants normalize rows to a common shape for _lcRender.
+    async function _lcFindComps(ctx) {
+      if (ctx.city === 'brentwood') return _lcFindCompsBrentwood(ctx);
+      return _lcFindCompsNashville(ctx);
+    }
+
+    async function _lcFindCompsNashville({ zip, minAcres, maxAcres, months, cap, llcOnly }) {
       const minAc = Math.max(0.01, minAcres);
       const maxAc = maxAcres > minAc ? maxAcres : minAc + 0.01;
       const cutoff = new Date(Date.now() - months * 30 * 24 * 60 * 60 * 1000);
-      // ArcGIS date literal format
       const dateLit = "DATE '" + cutoff.toISOString().slice(0, 10) + "'";
       const parts = [
         "PropZip='" + zip.replace(/'/g, "''") + "'",
@@ -2536,31 +2545,94 @@
         + '?where=' + encodeURIComponent(where)
         + '&outFields=' + encodeURIComponent('PropAddr,Owner,OwnDate,SalePrice,Acres,Zoning,LUDesc,ImprAppr,LandAppr')
         + '&orderByFields=' + encodeURIComponent('OwnDate DESC')
-        + '&resultRecordCount=50'      // fetch up to 50, we'll display top 20
+        + '&resultRecordCount=50'
         + '&returnGeometry=false&f=json';
       const res = await fetch(url);
       if (!res.ok) throw new Error('Metro parcel query HTTP ' + res.status);
       const data = await res.json();
       if (data.error) throw new Error(data.error.message || 'Metro query error');
-      return (data.features || []).map(f => f.attributes);
+      return (data.features || []).map(f => ({
+        soldDate:     f.attributes.OwnDate || null,
+        price:        f.attributes.SalePrice || 0,
+        acres:        f.attributes.Acres || 0,
+        address:      f.attributes.PropAddr || '',
+        zone:         f.attributes.Zoning || '',
+        owner:        f.attributes.Owner || '',
+        improvements: f.attributes.ImprAppr
+      }));
+    }
+
+    // Williamson County parcel service — used for Brentwood comps.
+    // Schema: Calculated=acres, CONSIDER_L=last sale price, IMP_ASSES=improvements.
+    // No sale-date field exists in the public service — results are all-time.
+    let _brentwoodExtent = null;
+    async function _lcGetBrentwoodExtent() {
+      if (_brentwoodExtent) return _brentwoodExtent;
+      const url = 'https://services8.arcgis.com/hkhKI6Qq7rjvBjZU/arcgis/rest/services/Municipalities/FeatureServer/0/query'
+        + "?where=NAME%3D'BRENTWOOD'"
+        + '&outFields=NAME&returnExtentOnly=true&outSR=4326&f=json';
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Municipality extent HTTP ' + res.status);
+      const data = await res.json();
+      _brentwoodExtent = data.extent;
+      return _brentwoodExtent;
+    }
+
+    async function _lcFindCompsBrentwood({ minAcres, maxAcres, cap, llcOnly }) {
+      const minAc = Math.max(0.01, minAcres);
+      const maxAc = maxAcres > minAc ? maxAcres : minAc + 0.01;
+      const extent = await _lcGetBrentwoodExtent();
+      const parts = [
+        'Calculated BETWEEN ' + minAc + ' AND ' + maxAc,
+        'CONSIDER_L > 10000',
+        'CONSIDER_L < ' + cap
+      ];
+      if (llcOnly) parts.push("OWNER_1 LIKE '%LLC%'");
+      const where = parts.join(' AND ');
+      const geometry = JSON.stringify({
+        xmin: extent.xmin, ymin: extent.ymin, xmax: extent.xmax, ymax: extent.ymax,
+        spatialReference: { wkid: 4326 }
+      });
+      const url = 'https://services8.arcgis.com/hkhKI6Qq7rjvBjZU/arcgis/rest/services/Parcels/FeatureServer/0/query'
+        + '?where=' + encodeURIComponent(where)
+        + '&geometry=' + encodeURIComponent(geometry)
+        + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects'
+        + '&outFields=' + encodeURIComponent('ADDRESS,OWNER_1,Calculated,CONSIDER_L,IMP_ASSES,LAND_MARKE,PARCEL_ID')
+        + '&orderByFields=' + encodeURIComponent('CONSIDER_L DESC')
+        + '&resultRecordCount=50'
+        + '&returnGeometry=false&f=json';
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Williamson parcel query HTTP ' + res.status);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message || 'Williamson query error');
+      return (data.features || []).map(f => ({
+        soldDate:     null,               // Williamson doesn't publish sale date
+        price:        f.attributes.CONSIDER_L || 0,
+        acres:        f.attributes.Calculated || 0,
+        address:      f.attributes.ADDRESS || '',
+        zone:         '',                 // Not in Williamson parcel schema
+        owner:        f.attributes.OWNER_1 || '',
+        improvements: f.attributes.IMP_ASSES
+      }));
     }
 
     function _lcRender(container, rows, ctx) {
       const el = container.querySelector('.lc-results');
+      const isBrentwood = ctx.city === 'brentwood';
       if (rows.length === 0) {
+        const scope = isBrentwood ? 'Brentwood city limits' : ('ZIP <b style="color:#fff;">' + esc(ctx.zip) + '</b>');
+        const window = isBrentwood ? '' : (' in the ' + esc(ctx.months) + '-month window');
         el.innerHTML = '<div style="padding:24px; text-align:center; color:var(--text-dim); font-size:12px; border:1px dashed var(--rule);">' +
-          'No comps found for ZIP <b style="color:#fff;">' + esc(ctx.zip) + '</b> in the ' + esc(ctx.months) + '-month window at ' +
-          esc(ctx.minAcres) + '&ndash;' + esc(ctx.maxAcres) + '&nbsp;ac. Try widening the range or the look-back.</div>';
+          'No comps found for ' + scope + window + ' at ' +
+          esc(ctx.minAcres) + '&ndash;' + esc(ctx.maxAcres) + '&nbsp;ac. Try widening the range' + (isBrentwood ? ' or raising the price cap.' : ' or the look-back.') + '</div>';
         return;
       }
-      // Take top 20 by date
       const top = rows.slice(0, 20);
-      const avg = top.reduce((s, r) => s + (r.SalePrice || 0), 0) / top.length;
-      const avgPerAcre = top.reduce((s, r) => s + ((r.SalePrice || 0) / (r.Acres || 1)), 0) / top.length;
+      const avg = top.reduce((s, r) => s + (r.price || 0), 0) / top.length;
+      const avgPerAcre = top.reduce((s, r) => s + ((r.price || 0) / (r.acres || 1)), 0) / top.length;
       const usdFmt = new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', maximumFractionDigits: 0 });
       const fmtUSD = n => n ? usdFmt.format(n) : '—';
       const dateStr = ms => ms ? new Date(ms).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'2-digit' }) : '—';
-      // Summary bar
       const summary = `
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:14px;">
           <div style="padding:12px 14px; background:#141414; border:1px solid var(--rule);">
@@ -2577,23 +2649,36 @@
           </div>
         </div>
       `;
-      // Rows
-      const tableRows = top.map(r => `
-        <tr>
-          <td>${esc(dateStr(r.OwnDate))}</td>
-          <td style="font-family:var(--font-display); color:#fff;">${esc(fmtUSD(r.SalePrice))}</td>
-          <td>${Number(r.Acres || 0).toFixed(2)}</td>
-          <td style="color:var(--text-muted);">${esc(r.PropAddr || '')}</td>
-          <td>${esc(r.Zoning || '')}</td>
-          <td style="color:var(--text-muted); font-size:11px;">${esc(r.Owner || '')}</td>
-          <td style="color:var(--text-dim); font-size:11px;">${r.ImprAppr === 0 || r.ImprAppr === null ? '✓ vacant' : esc(fmtUSD(r.ImprAppr))}</td>
-        </tr>
-      `).join('');
+      // For Brentwood (no date), omit the Sold column and swap Zone for Parcel ID.
+      const cols = isBrentwood
+        ? '<tr><th>Price</th><th>Ac</th><th>Address</th><th>Buyer (LLC)</th><th>Improvements</th></tr>'
+        : '<tr><th>Sold</th><th>Price</th><th>Ac</th><th>Address</th><th>Zone</th><th>Buyer (LLC)</th><th>Improvements</th></tr>';
+      const tableRows = top.map(r => {
+        const impCell = (r.improvements === 0 || r.improvements == null)
+          ? '<span style="color:#9ec39e;">✓ vacant</span>'
+          : esc(fmtUSD(r.improvements));
+        if (isBrentwood) {
+          return `<tr>
+            <td style="font-family:var(--font-display); color:#fff;">${esc(fmtUSD(r.price))}</td>
+            <td>${Number(r.acres || 0).toFixed(2)}</td>
+            <td style="color:var(--text-muted);">${esc(r.address)}</td>
+            <td style="color:var(--text-muted); font-size:11px;">${esc(r.owner)}</td>
+            <td style="color:var(--text-dim); font-size:11px;">${impCell}</td>
+          </tr>`;
+        }
+        return `<tr>
+          <td>${esc(dateStr(r.soldDate))}</td>
+          <td style="font-family:var(--font-display); color:#fff;">${esc(fmtUSD(r.price))}</td>
+          <td>${Number(r.acres || 0).toFixed(2)}</td>
+          <td style="color:var(--text-muted);">${esc(r.address)}</td>
+          <td>${esc(r.zone)}</td>
+          <td style="color:var(--text-muted); font-size:11px;">${esc(r.owner)}</td>
+          <td style="color:var(--text-dim); font-size:11px;">${impCell}</td>
+        </tr>`;
+      }).join('');
       el.innerHTML = summary + `
         <table class="research-table" style="width:100%;">
-          <thead>
-            <tr><th>Sold</th><th>Price</th><th>Ac</th><th>Address</th><th>Zone</th><th>Buyer (LLC)</th><th>Improvements</th></tr>
-          </thead>
+          <thead>${cols}</thead>
           <tbody>${tableRows}</tbody>
         </table>
       `;
@@ -2603,20 +2688,39 @@
       document.querySelectorAll('.lcomp-mount').forEach(mount => {
         const city = mount.dataset.city || 'nashville';
         const meta = CITY_META[city] || CITY_META['nashville'];
-        const cityHint = city === 'nashville'
-          ? ''
-          : `<p style="font-size:11px; color:#e0c98d; margin:0 0 12px; line-height:1.5;">⚠ Note: ZIP ${esc(meta.zipHint)} covers parts of Nashville and other satellite cities. Comps returned are from the entire ZIP — check the address column to confirm which city each is in.</p>`;
+        const isBrentwood = city === 'brentwood';
+        // Intro text + caveats
+        let intro, note = '';
+        if (isBrentwood) {
+          intro = 'Land buys inside Brentwood city limits within a target acreage range. Filters out home sales via price cap.';
+          note = `<p style="font-size:11px; color:#e0c98d; margin:0 0 12px; line-height:1.5;">⚠ Williamson County doesn't publish sale dates in the parcel service, so results are all-time (not date-filtered). Recent activity still surfaces via LLC-owner + low-improvement filters. Cross-check the deed via <a href="https://williamsonpropertyassessor.com/" target="_blank" rel="noopener" style="color:#eae2d3; border-bottom:1px solid #eae2d3;">Williamson Assessor</a> for actual sale date.</p>`;
+        } else if (city !== 'nashville') {
+          intro = 'Recent LLC-purchased lots in a ZIP within a target acreage range. Automatically filters out anything above the price cap (usually home sales, not land).';
+          note = `<p style="font-size:11px; color:#e0c98d; margin:0 0 12px; line-height:1.5;">⚠ Note: ZIP ${esc(meta.zipHint)} covers parts of Nashville and other satellite cities. Comps returned are from the entire ZIP — check the address column to confirm which city each is in.</p>`;
+        } else {
+          intro = 'Recent LLC-purchased lots in a ZIP within a target acreage range. Automatically filters out anything above the price cap (usually home sales, not land).';
+        }
+        // Form fields — Brentwood hides ZIP (city-scoped) and Look Back (no date field).
+        const zipField = isBrentwood ? '' : `
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">ZIP Code *</span>
+            <input class="lc-zip" type="text" required pattern="[0-9]{5}" maxlength="5" placeholder="${esc(meta.zipHint)}"
+                   style="padding:10px 12px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
+          </label>`;
+        const monthsField = isBrentwood ? '' : `
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Look Back (mo)</span>
+            <input class="lc-months" type="number" step="1" min="1" max="60" value="12"
+                   style="padding:10px 12px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
+          </label>`;
+        const capPlaceholder = isBrentwood ? '1200000' : 'auto by ZIP';
         mount.innerHTML = `
           <div class="lcomp-tool" data-city="${city}" style="background:var(--panel); border:1px solid var(--accent); padding:20px 22px; margin-bottom:24px;">
             <h3 style="font-family:var(--font-display); font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin:0 0 6px;">Land Comp Generator · ${esc(meta.label)}</h3>
-            <p style="font-size:12px; color:var(--text-muted); margin:0 0 14px; line-height:1.5;">Recent LLC-purchased lots in a ZIP within a target acreage range. Automatically filters out anything above the price cap (usually home sales, not land).</p>
-            ${cityHint}
+            <p style="font-size:12px; color:var(--text-muted); margin:0 0 14px; line-height:1.5;">${intro}</p>
+            ${note}
             <form class="lcomp-form" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:10px; align-items:end;">
-              <label style="display:flex; flex-direction:column; gap:4px;">
-                <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">ZIP Code *</span>
-                <input class="lc-zip" type="text" required pattern="[0-9]{5}" maxlength="5" placeholder="${esc(meta.zipHint)}"
-                       style="padding:10px 12px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
-              </label>
+              ${zipField}
               <label style="display:flex; flex-direction:column; gap:4px;">
                 <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Min Acres *</span>
                 <input class="lc-min-acres" type="number" required step="0.01" min="0.01" placeholder="1.00"
@@ -2627,14 +2731,10 @@
                 <input class="lc-max-acres" type="number" required step="0.01" min="0.01" placeholder="2.00"
                        style="padding:10px 12px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
               </label>
-              <label style="display:flex; flex-direction:column; gap:4px;">
-                <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Look Back (mo)</span>
-                <input class="lc-months" type="number" step="1" min="1" max="60" value="12"
-                       style="padding:10px 12px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
-              </label>
+              ${monthsField}
               <label style="display:flex; flex-direction:column; gap:4px;">
                 <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Max $ Cap</span>
-                <input class="lc-cap" type="number" step="10000" placeholder="auto by ZIP"
+                <input class="lc-cap" type="number" step="10000" placeholder="${capPlaceholder}"
                        style="padding:10px 12px; font-family:var(--font-body); font-size:14px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
               </label>
               <label style="display:flex; align-items:center; gap:8px; padding:10px 0;">
@@ -2651,25 +2751,31 @@
         const form     = container.querySelector('.lcomp-form');
         const capInput = container.querySelector('.lc-cap');
         const zipInput = container.querySelector('.lc-zip');
-        zipInput.addEventListener('input', () => {
-          const z = zipInput.value.trim();
-          if (z.length === 5 && LAND_PRICE_CAPS[z]) capInput.placeholder = '' + LAND_PRICE_CAPS[z] + ' (default)';
-          else capInput.placeholder = 'auto by ZIP';
-        });
+        if (zipInput) {
+          zipInput.addEventListener('input', () => {
+            const z = zipInput.value.trim();
+            if (z.length === 5 && LAND_PRICE_CAPS[z]) capInput.placeholder = '' + LAND_PRICE_CAPS[z] + ' (default)';
+            else capInput.placeholder = 'auto by ZIP';
+          });
+        }
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
+          const monthsEl = container.querySelector('.lc-months');
+          const zipVal = zipInput ? zipInput.value.trim() : '';
           const ctx = {
-            zip:       zipInput.value.trim(),
+            city:      city,
+            zip:       zipVal,
             minAcres:  parseFloat(container.querySelector('.lc-min-acres').value),
             maxAcres:  parseFloat(container.querySelector('.lc-max-acres').value),
-            months:    parseInt(container.querySelector('.lc-months').value, 10) || 12,
-            cap:       parseFloat(capInput.value) || _lcDefaultCap(zipInput.value.trim()),
+            months:    monthsEl ? (parseInt(monthsEl.value, 10) || 12) : 12,
+            cap:       parseFloat(capInput.value) || (isBrentwood ? 1200000 : _lcDefaultCap(zipVal)),
             llcOnly:   container.querySelector('.lc-llc-only').checked
           };
           const status  = container.querySelector('.lc-status');
           const results = container.querySelector('.lc-results');
           results.hidden = true;
-          status.style.color = ''; status.textContent = 'Searching Metro Nashville parcels…';
+          status.style.color = '';
+          status.textContent = isBrentwood ? 'Searching Williamson County parcels…' : 'Searching Metro Nashville parcels…';
           try {
             const rows = await _lcFindComps(ctx);
             _lcRender(container, rows, ctx);
