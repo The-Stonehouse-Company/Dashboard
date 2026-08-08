@@ -1180,9 +1180,11 @@
           if (typeof s[k] === 'number' && !isNaN(s[k])) {
             // Round to kill JS float-math artifacts like 0.035 * 100 = 3.5000000000000004.
             const raw = mul === 100 ? (s[k] * 100) : s[k];
-            const v = Number(raw.toFixed(6)).toString();
-            // Strip trailing zeros / decimal point for clean display ("3.5" not "3.500000").
-            inputs[inputKey].value = v.replace(/\.?0+$/, '');
+            let v = Number(raw.toFixed(6)).toString();
+            // Strip trailing zeros ONLY when there's a decimal point ("3.500" → "3.5"),
+            // otherwise "7000" would become "7". Then remove any orphan trailing dot.
+            if (v.indexOf('.') >= 0) v = v.replace(/0+$/, '').replace(/\.$/, '');
+            inputs[inputKey].value = v;
           }
         }
         if (s.capMode) inputs.capMode.value = s.capMode;
