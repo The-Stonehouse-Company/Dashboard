@@ -450,30 +450,40 @@
         width: 100% !important;
       }
 
-      /* --- BODY: 2 columns (inputs | outputs) --- */
+      /* --- BODY: SINGLE COLUMN at print (screen keeps 2-col inputs/outputs).
+         Letter portrait is only ~6.5" wide, and a 2-col body with 2-col sub-
+         grids inside was crushing labels into 4 narrow columns and wrapping
+         them across lines. Print stacks everything full-width instead. --- */
       .uw-grid {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 22px !important;
+        display: block !important;
       }
-      .uw-section { margin-bottom: 16px !important; break-inside: avoid; }
+      .uw-inputs, .uw-outputs {
+        display: block !important;
+        width: 100% !important;
+      }
+      .uw-section { margin-bottom: 18px !important; break-inside: avoid; page-break-inside: avoid; }
       .uw-section-head {
         font-family: 'Aboreto', 'Times New Roman', serif !important;
-        font-weight: 400 !important; font-size: 11pt !important;
+        font-weight: 400 !important; font-size: 12pt !important;
         color: #eae2d3 !important;
-        text-transform: uppercase; letter-spacing: .22em;
+        text-transform: uppercase; letter-spacing: .24em;
         border-bottom: 1px solid #eae2d3 !important;
-        padding-bottom: 5px !important; margin-bottom: 10px !important;
+        padding-bottom: 6px !important; margin-bottom: 10px !important;
       }
-      .uw-section-grid { gap: 0 18px !important; }
+      /* Two label:value pairs per row now that the whole section has full page width */
+      .uw-section-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0 32px !important;
+      }
 
       /* --- INPUTS → Label : Value rows, dark, no form chrome --- */
       .uw-field {
         display: grid !important;
         grid-template-columns: 1fr auto !important;
-        gap: 12px !important;
+        gap: 14px !important;
         align-items: baseline !important;
-        padding: 4px 0 !important;
+        padding: 5px 0 !important;
         border-bottom: 1px solid #2a2a2a !important;
       }
       .uw-field.full { grid-column: 1 / -1 !important; }
@@ -519,13 +529,21 @@
         letter-spacing: .1em; line-height: 1.6 !important;
       }
 
-      /* --- OUTPUT CARDS → dark presentation cards with ivory accents --- */
+      /* --- OUTPUT CARDS → full-width presentation cards with ivory accents --- */
+      .uw-outputs { margin-top: 22px !important; }
       .uw-outcard {
         border: 1px solid #eae2d3 !important;
         background: #0a0a0a !important;
         margin-bottom: 14px !important;
-        break-inside: avoid;
+        break-inside: avoid; page-break-inside: avoid;
+        width: 100% !important;
       }
+      .uw-outcard .out-body {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0 32px !important;
+      }
+      .uw-outcard .out-row.hi { grid-column: 1 / -1 !important; }
       .uw-outcard .out-head {
         background: #eae2d3 !important; color: #000 !important;
         padding: 6px 14px !important;
@@ -823,6 +841,7 @@
       <footer class="modal-foot">
         <button class="btn ghost" type="button" id="uw-reset">Reset to Defaults</button>
         <button class="btn" type="button" onclick="window.print()">Print / Save PDF</button>
+        <a class="btn" href="sms:9093766874" style="text-decoration:none; display:inline-flex; align-items:center;">Text Ryan</a>
       </footer>
 
   </div><!-- /page-shell #uw-modal -->
