@@ -1753,6 +1753,21 @@
       }
       return -1;
     }
+    // Same as findCol but returns the LAST match — the Land Intake sheet has
+    // two "Status" columns side-by-side (one is a duplicate stub, the other is
+    // where the form actually writes). Reading the last matching column picks
+    // up the live one regardless of which duplicate came first.
+    function findColLast(cols, ...names) {
+      const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+      const labels = cols.map(c => norm(c.label));
+      for (const n of names) {
+        const t = norm(n);
+        let last = -1;
+        for (let i = 0; i < labels.length; i++) if (labels[i] === t) last = i;
+        if (last >= 0) return last;
+      }
+      return -1;
+    }
     async function gviz(sheetId, tab) {
       const url = 'https://docs.google.com/spreadsheets/d/' + sheetId +
         '/gviz/tq?tqx=out:json&headers=1&sheet=' + encodeURIComponent(tab) + '&t=' + Date.now();
@@ -1781,7 +1796,7 @@
           uc:               findCol(cols, 'Date Under Contract'),
           ddEnd:            findCol(cols, 'Due Diligence End'),
           closing:          findCol(cols, 'Closing Date'),
-          status:           findCol(cols, 'Status'),
+          status:           findColLast(cols, 'Status'),      // sheet has two Status columns; the live one is the last
           llc:              findCol(cols, 'LLC Formation Deadline'),
           em:               findCol(cols, 'Earnest Money Deadline'),
           lotSize:          findCol(cols, 'Lot Size'),
