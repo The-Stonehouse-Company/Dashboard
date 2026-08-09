@@ -933,8 +933,8 @@
             <input type="hidden" name="buy_box_id" id="bb-form-id" />
             <input type="hidden" name="status" value="Active" />
             <div class="mm-grid">
-              <label class="mm-field full"><span>Builder / Developer *</span>
-                <input name="builder_name" list="bb-builders-datalist" type="text" required placeholder="Type or pick a builder from Contacts…" />
+              <label class="mm-field full"><span>Contact / Client Name *</span>
+                <input name="builder_name" list="bb-builders-datalist" type="text" required placeholder="Type or pick from Contacts + Apeiron clients…" />
                 <datalist id="bb-builders-datalist"></datalist>
               </label>
               <label class="mm-field"><span>Priority</span>
@@ -1626,43 +1626,137 @@
       }
     });
 
-    // + Add Buy Box (+ builder autocomplete from Contacts)
+    // Builder / Developer / Custom-Home-Client autocomplete.
+    // Sources: Contacts sheet (Builders + Developers) + Apeiron Custom Home
+    // Rep intake sheet (client names). Combined index is exposed globally so
+    // card renders can look up a name's client-type for the pill badge.
+    // window._landClientIndex: Map<lowercased-name, { name, type, sub }>
+    //   type ∈ 'Builder' | 'Developer' | 'Custom Home Client'
+    //   sub is a subtitle (company or property address)
     async function _populateBuilderDatalist() {
+      const combined = new Map();     // name(lower) → { name, type, sub }
+      // ---- Contacts sheet: Builders + Developers ----
       try {
         const url = 'https://docs.google.com/spreadsheets/d/1wmXxSO0qF8OSkkx6iqmHuepX0QrxbQRb4Iw4-jybeww' +
           '/gviz/tq?tqx=out:json&headers=1&sheet=Form%20Responses%201&t=' + Date.now();
         const res = await fetch(url, { cache: 'no-store' });
-        if (!res.ok) return;
-        const text = await res.text();
-        const m = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
-        if (!m) return;
-        const data = JSON.parse(m[1]);
-        if (data.status !== 'ok') return;
-        const cols = data.table.cols || [];
-        const rows = data.table.rows || [];
-        const norm = s => String(s || '').toLowerCase().trim();
-        const catIx  = cols.findIndex(c => norm(c.label) === 'category');
-        const nameIx = cols.findIndex(c => norm(c.label) === 'name');
-        const compIx = cols.findIndex(c => norm(c.label) === 'company');
-        if (nameIx < 0) return;
-        const matches = rows
-          .map(r => {
-            const c = r.c || [];
-            return {
-              cat:  catIx >= 0 && c[catIx]?.v ? String(c[catIx].v).trim() : '',
-              name: c[nameIx]?.v ? String(c[nameIx].v).trim() : '',
-              comp: compIx >= 0 && c[compIx]?.v ? String(c[compIx].v).trim() : ''
-            };
-          })
-          .filter(r => r.name && (r.cat === 'Builders' || r.cat === 'Developers'))
-          .sort((a, b) => a.name.localeCompare(b.name));
-        const dl = document.getElementById('bb-builders-datalist');
-        if (dl) dl.innerHTML = matches.map(r =>
-          '<option value="' + esc(r.name) + '">' + esc(r.name + (r.comp ? ' — ' + r.comp : '')) + '</option>'
-        ).join('');
+        if (res.ok) {
+          const text = await res.text();
+          const m = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
+          if (m) {
+            const data = JSON.parse(m[1]);
+            if (data.status === 'ok') {
+              const cols = data.table.cols || [];
+              const rows = data.table.rows || [];
+              const norm = s => String(s || '').toLowerCase().trim();
+              const catIx  = cols.findIndex(c => norm(c.label) === 'category');
+              const nameIx = cols.findIndex(c => norm(c.label) === 'name');
+              const compIx = cols.findIndex(c => norm(c.label) === 'company');
+              if (nameIx >= 0) {
+                rows.forEach(r => {
+                  const c = r.c || [];
+                  const cat  = catIx >= 0 && c[catIx]?.v ? String(c[catIx].v).trim() : '';
+                  const name = c[nameIx]?.v ? String(c[nameIx].v).trim() : '';
+                  const comp = compIx >= 0 && c[compIx]?.v ? String(c[compIx].v).trim() : '';
+                  if (!name) return;
+                  let type = null;
+                  if (cat === 'Builders')    type = 'Builder';
+                  else if (cat === 'Developers') type = 'Developer';
+                  if (!type) return;
+                  const k = name.toLowerCase();
+                  if (!combined.has(k)) combined.set(k, { name, type, sub: comp });
+                });
+              }
+            }
+          }
+        }
       } catch (err) {
-        console.warn('[Land] builder datalist fetch failed:', err);
+        console.warn('[Land] Contacts fetch failed:', err);
       }
+      // ---- Apeiron Custom Home Rep intake: Client Name ----
+      try {
+        const url = 'https://docs.google.com/spreadsheets/d/1_KDEUKCkLZZgeKWbio40H-7qqKdvA8K7DZ1URw_8sGQ' +
+          '/gviz/tq?tqx=out:json&headers=1&sheet=Form_Responses&t=' + Date.now();
+        const res = await fetch(url, { cache: 'no-store' });
+        if (res.ok) {
+          const text = await res.text();
+          const m = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
+          if (m) {
+            const data = JSON.parse(m[1]);
+            if (data.status === 'ok') {
+              const cols = data.table.cols || [];
+              const rows = data.table.rows || [];
+              const norm = s => String(s || '').toLowerCase().trim();
+              const nameIx = cols.findIndex(c => /client\s*name|owner\s*name/i.test(c.label || ''));
+              const addrIx = cols.findIndex(c => /property\s*address|address/i.test(c.label || ''));
+              const stageIx = cols.findIndex(c => /current\s*stage|stage/i.test(c.label || ''));
+              if (nameIx >= 0) {
+                rows.forEach(r => {
+                  const c = r.c || [];
+                  const name = c[nameIx]?.v ? String(c[nameIx].v).trim() : '';
+                  const addr = addrIx >= 0 && c[addrIx]?.v ? String(c[addrIx].v).trim() : '';
+                  const stage = stageIx >= 0 && c[stageIx]?.v ? String(c[stageIx].v).trim() : '';
+                  if (!name) return;
+                  if ((stage || '').toLowerCase() === 'deleted') return;
+                  const k = name.toLowerCase();
+                  // Don't overwrite Builder/Developer if same name — but Custom
+                  // Home Client wins if not already present (unique namespaces
+                  // in practice).
+                  if (!combined.has(k)) combined.set(k, { name, type: 'Custom Home Client', sub: addr });
+                });
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[Land] Apeiron fetch failed:', err);
+      }
+      // Sort and expose
+      const entries = Array.from(combined.values()).sort((a, b) => a.name.localeCompare(b.name));
+      window._landClientIndex = combined;
+      // Render into ALL datalists that share this source (Buy Box + Hot Lead)
+      const html = entries.map(r =>
+        '<option value="' + esc(r.name) + '">' + esc(r.name + ' [' + r.type + ']' + (r.sub ? ' — ' + r.sub : '')) + '</option>'
+      ).join('');
+      const targets = document.querySelectorAll('#bb-builders-datalist, #hl-clients-datalist');
+      targets.forEach(dl => { dl.innerHTML = html; });
+      // Re-render cards so any that were loaded before this finished get the badge.
+      if (typeof _renderHotLeads === 'function') _renderHotLeads();
+      if (typeof loadBuyBoxes === 'function') _reRenderBuyBoxesFromCache();
+    }
+    // Small helper — re-render Buy Boxes from the in-memory _landBuyBoxes
+    // so pills appear after the client index finishes loading (no re-fetch).
+    function _reRenderBuyBoxesFromCache() {
+      const listEl = document.getElementById('land-buyboxes-list');
+      if (!listEl || !_landBuyBoxes || _landBuyBoxes.length === 0) return;
+      // Trigger the same render path by re-invoking loadBuyBoxes (fast — gviz is cached).
+      // Only re-render if the current DOM was rendered before the index existed.
+      if (!listEl.dataset.indexReady) {
+        listEl.dataset.indexReady = '1';
+        loadBuyBoxes();
+      }
+    }
+
+    // Look up a name → { type, sub } via the client index. Case-insensitive.
+    function _lookupClient(name) {
+      if (!name) return null;
+      const idx = window._landClientIndex;
+      if (!idx) return null;
+      return idx.get(name.trim().toLowerCase()) || null;
+    }
+
+    // Small colored pill for the client type — reused on Buy Box + Hot Lead cards.
+    function _clientTypePill(type) {
+      if (!type) return '';
+      const bg = type === 'Builder' ? '#1c2a3a'
+               : type === 'Developer' ? '#3a301c'
+               : type === 'Custom Home Client' ? '#2a1c3a'
+               : '#2a2a2a';
+      const fg = type === 'Builder' ? '#8fb1d9'
+               : type === 'Developer' ? '#e8c068'
+               : type === 'Custom Home Client' ? '#c99fe8'
+               : '#888';
+      return '<span style="display:inline-block; padding:2px 8px; margin-left:6px; font-size:9px; letter-spacing:.14em; text-transform:uppercase; background:' + bg + '; color:' + fg + ';">' + esc(type) + '</span>';
     }
     const bbAddBtn = document.getElementById('bb-add-btn');
     if (bbAddBtn) bbAddBtn.addEventListener('click', () => {
@@ -2027,11 +2121,15 @@
                </div>`
             : '';
 
+          // Client-type pill — inferred by looking up r.builder in the combined
+          // Contacts + Apeiron index (Builder / Developer / Custom Home Client).
+          const clientMeta = _lookupClient(r.builder);
+          const clientPill = clientMeta ? _clientTypePill(clientMeta.type) : '';
           return `
             <article style="background:var(--panel); border:1px solid var(--rule); padding:16px 18px;">
               <div style="display:flex; justify-content:space-between; align-items:start; gap:10px;">
                 <div style="min-width:0; flex:1;">
-                  <div style="font-family:var(--font-display); font-size:15px; letter-spacing:.14em; text-transform:uppercase; color:#fff;">${esc(r.builder)}</div>
+                  <div style="font-family:var(--font-display); font-size:15px; letter-spacing:.14em; text-transform:uppercase; color:#fff;">${esc(r.builder)}${clientPill}</div>
                   <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">${esc(r.city)}${r.state ? ', ' + esc(r.state) : ''}</div>
                 </div>
                 ${priPill}
