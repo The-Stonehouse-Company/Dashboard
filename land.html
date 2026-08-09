@@ -470,11 +470,52 @@
 
       <!-- Buy Boxes (SHARED) -->
       <section class="panel" id="panel-buyboxes" role="tabpanel">
-        <p class="panel-intro">Builder + developer acquisition criteria. Shared across the whole Land team — everyone can match incoming lots to any active buy box.</p>
+        <p class="panel-intro">Builder, developer, and custom home client acquisition criteria. Shared across the whole Land team — everyone can match incoming lots to any active buy box.</p>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
           <div style="font-size:11px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase;" id="land-buyboxes-count">Loading…</div>
           <button type="button" id="bb-add-btn"
                   style="padding:8px 16px; font-family:var(--font-body); font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:600; background:var(--accent); color:#000; border:0; cursor:pointer;">+ Add Buy Box</button>
+        </div>
+        <!-- Filter bar -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:10px; padding:12px 14px; margin-bottom:14px; background:var(--panel); border:1px solid var(--rule);">
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">City</span>
+            <select id="bb-filter-city" style="padding:8px 10px; font-family:var(--font-body); font-size:13px; background:#000; color:#fff; border:1px solid var(--rule-strong);">
+              <option value="">All Cities</option>
+            </select>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Client Type</span>
+            <select id="bb-filter-type" style="padding:8px 10px; font-family:var(--font-body); font-size:13px; background:#000; color:#fff; border:1px solid var(--rule-strong);">
+              <option value="">All Types</option>
+              <option value="Builder">Builder</option>
+              <option value="Developer">Developer</option>
+              <option value="Custom Home Client">Custom Home Client</option>
+            </select>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Priority</span>
+            <select id="bb-filter-priority" style="padding:8px 10px; font-family:var(--font-body); font-size:13px; background:#000; color:#fff; border:1px solid var(--rule-strong);">
+              <option value="">All Priorities</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Search</span>
+            <input id="bb-filter-search" type="text" placeholder="Builder, suburb, notes…"
+                   style="padding:8px 10px; font-family:var(--font-body); font-size:13px; background:#000; color:#fff; border:1px solid var(--rule-strong);" />
+          </label>
+          <label style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Group By</span>
+            <select id="bb-filter-groupby" style="padding:8px 10px; font-family:var(--font-body); font-size:13px; background:#000; color:#fff; border:1px solid var(--rule-strong);">
+              <option value="">— None (flat) —</option>
+              <option value="city" selected>City</option>
+              <option value="type">Client Type</option>
+              <option value="priority">Priority</option>
+            </select>
+          </label>
         </div>
         <div id="land-buyboxes-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(420px, 1fr)); gap:14px;">
           <div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">Loading buy boxes…</div>
@@ -2049,14 +2090,124 @@
           const s = (r.status || '').toLowerCase();
           return s !== 'archived' && s !== 'deleted';
         });
-        countEl.textContent = _landBuyBoxes.length + ' active buy boxes · firm-wide';
-        if (_landBuyBoxes.length === 0) {
-          listEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">No active buy boxes. Add one from the admin dashboard.</div>';
-          return;
-        }
         _landBuyBoxes.sort((a, b) => (a.builder || '').localeCompare(b.builder || ''));
-        listEl.innerHTML = _landBuyBoxes.map(r => {
-          // Formatters
+        _bbPopulateCityFilter();
+        _renderBuyBoxes();
+      } catch (err) {
+        countEl.textContent = 'Could not load';
+        listEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:#d99; font-size:13px;">Error: ' + esc(err.message || err) + '</div>';
+      }
+    }
+
+    // Populate the City filter dropdown with unique cities from _landBuyBoxes.
+    function _bbPopulateCityFilter() {
+      const sel = document.getElementById('bb-filter-city');
+      if (!sel) return;
+      const prev = sel.value;
+      // Case-insensitive dedupe of city names
+      const seen = new Map();
+      _landBuyBoxes.forEach(r => {
+        const c = (r.city || '').trim();
+        if (!c) return;
+        const k = c.toLowerCase();
+        if (!seen.has(k)) seen.set(k, c);
+      });
+      const cities = Array.from(seen.values()).sort((a, b) => a.localeCompare(b));
+      sel.innerHTML = '<option value="">All Cities</option>' +
+        cities.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join('');
+      // Preserve prior selection if still valid
+      if (prev && cities.some(c => c.toLowerCase() === prev.toLowerCase())) sel.value = prev;
+    }
+
+    // Read the current filter values and re-render the Buy Box grid from
+    // _landBuyBoxes in-memory. Supports grouping (header per group).
+    function _renderBuyBoxes() {
+      const listEl = document.getElementById('land-buyboxes-list');
+      const countEl = document.getElementById('land-buyboxes-count');
+      if (!listEl || !countEl) return;
+      const filterCity  = ((document.getElementById('bb-filter-city') || {}).value || '').trim().toLowerCase();
+      const filterType  = ((document.getElementById('bb-filter-type') || {}).value || '').trim();
+      const filterPri   = ((document.getElementById('bb-filter-priority') || {}).value || '').trim();
+      const filterSearch = ((document.getElementById('bb-filter-search') || {}).value || '').trim().toLowerCase();
+      const groupBy     = ((document.getElementById('bb-filter-groupby') || {}).value || '').trim();
+
+      // Apply filters
+      const rows = _landBuyBoxes.filter(r => {
+        if (filterCity && (r.city || '').trim().toLowerCase() !== filterCity) return false;
+        if (filterPri && (r.priority || '').trim() !== filterPri) return false;
+        if (filterType) {
+          const meta = _lookupClient(r.builder);
+          const t = meta ? meta.type : '';
+          if (t !== filterType) return false;
+        }
+        if (filterSearch) {
+          const blob = [r.builder, r.city, r.state, r.suburbs, r.notes, r.mustHave, r.dealBreakers, r.loggedBy].join(' ').toLowerCase();
+          if (blob.indexOf(filterSearch) < 0) return false;
+        }
+        return true;
+      });
+
+      // Meta counter
+      const totalCount = _landBuyBoxes.length;
+      if (rows.length === totalCount) {
+        countEl.textContent = totalCount + ' active buy boxes · firm-wide';
+      } else {
+        countEl.textContent = rows.length + ' of ' + totalCount + ' shown · filtered';
+      }
+      if (totalCount === 0) {
+        listEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">No active buy boxes. Add one via + Add Buy Box above.</div>';
+        return;
+      }
+      if (rows.length === 0) {
+        listEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">No buy boxes match the current filters. Loosen the filters to see more.</div>';
+        return;
+      }
+
+      // Group rows if requested
+      const groupKeyFor = (r) => {
+        if (groupBy === 'city') return (r.city || 'Unspecified').trim() || 'Unspecified';
+        if (groupBy === 'type') {
+          const m = _lookupClient(r.builder);
+          return m ? m.type : 'Uncategorized';
+        }
+        if (groupBy === 'priority') return (r.priority || '').trim() || 'No Priority';
+        return '';
+      };
+      const cardHtml = _bbRenderCard;
+      if (!groupBy) {
+        // Flat grid — same layout as before
+        listEl.style.gridTemplateColumns = 'repeat(auto-fill, minmax(420px, 1fr))';
+        listEl.style.display = 'grid';
+        listEl.innerHTML = rows.map(cardHtml).join('');
+      } else {
+        // Grouped — sections stacked, each header spanning full width
+        const groups = new Map();
+        rows.forEach(r => {
+          const k = groupKeyFor(r);
+          if (!groups.has(k)) groups.set(k, []);
+          groups.get(k).push(r);
+        });
+        const orderedKeys = Array.from(groups.keys()).sort((a, b) => a.localeCompare(b));
+        listEl.style.display = 'block';
+        listEl.style.gridTemplateColumns = '';
+        listEl.innerHTML = orderedKeys.map(k => {
+          const grp = groups.get(k);
+          return '<div style="margin-bottom:24px;">' +
+                   '<div style="display:flex; align-items:baseline; gap:10px; padding:8px 0; margin-bottom:10px; border-bottom:1px solid var(--accent);">' +
+                     '<div style="font-family:var(--font-display); font-size:14px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent);">' + esc(k) + '</div>' +
+                     '<div style="font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-dim);">' + grp.length + ' buy box' + (grp.length === 1 ? '' : 'es') + '</div>' +
+                   '</div>' +
+                   '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(420px, 1fr)); gap:14px;">' +
+                     grp.map(cardHtml).join('') +
+                   '</div>' +
+                 '</div>';
+        }).join('');
+      }
+    }
+
+    // Render a single Buy Box card (extracted so both the flat and grouped
+    // layouts can use the exact same markup).
+    function _bbRenderCard(r) {
           const fmtNum = (n) => (n != null && !isNaN(n)) ? Number(n).toLocaleString() : '';
           const price = (r.minPrice && r.maxPrice)
             ? fmtUSD(r.minPrice) + ' – ' + fmtUSD(r.maxPrice)
@@ -2118,12 +2269,18 @@
               </div>
             </article>
           `;
-        }).join('');
-      } catch (err) {
-        countEl.textContent = 'Could not load';
-        listEl.innerHTML = '<div style="grid-column:1 / -1; padding:40px; text-align:center; color:#d99; font-size:13px;">Error: ' + esc(err.message || err) + '</div>';
-      }
     }
+
+    // Wire filter events → re-render on any change (once at boot).
+    (function _bbFilterBoot() {
+      const ids = ['bb-filter-city', 'bb-filter-type', 'bb-filter-priority', 'bb-filter-search', 'bb-filter-groupby'];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const evt = (el.tagName === 'SELECT') ? 'change' : 'input';
+        el.addEventListener(evt, () => _renderBuyBoxes());
+      });
+    })();
 
     /* ---- Hot Leads (agent-scoped) ---- */
     let _landHotLeads = [];
