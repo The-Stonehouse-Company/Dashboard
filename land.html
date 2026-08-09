@@ -1627,15 +1627,14 @@
     });
 
     // Builder / Developer / Custom-Home-Client autocomplete.
-    // Sources: Contacts sheet (Builders + Developers) + Apeiron Custom Home
-    // Rep intake sheet (client names). Combined index is exposed globally so
-    // card renders can look up a name's client-type for the pill badge.
+    // Single source: Development Contacts sheet, filtered to three categories.
+    // Combined index is exposed globally so card renders can look up a name's
+    // client-type for the pill badge.
     // window._landClientIndex: Map<lowercased-name, { name, type, sub }>
     //   type ∈ 'Builder' | 'Developer' | 'Custom Home Client'
-    //   sub is a subtitle (company or property address)
+    //   sub is a subtitle (company)
     async function _populateBuilderDatalist() {
       const combined = new Map();     // name(lower) → { name, type, sub }
-      // ---- Contacts sheet: Builders + Developers ----
       try {
         const url = 'https://docs.google.com/spreadsheets/d/1wmXxSO0qF8OSkkx6iqmHuepX0QrxbQRb4Iw4-jybeww' +
           '/gviz/tq?tqx=out:json&headers=1&sheet=Form%20Responses%201&t=' + Date.now();
@@ -1653,15 +1652,19 @@
               const nameIx = cols.findIndex(c => norm(c.label) === 'name');
               const compIx = cols.findIndex(c => norm(c.label) === 'company');
               if (nameIx >= 0) {
+                // Map sheet category → display type
+                const CAT_TO_TYPE = {
+                  'Builders': 'Builder',
+                  'Developers': 'Developer',
+                  'Custom Home Clients': 'Custom Home Client'
+                };
                 rows.forEach(r => {
                   const c = r.c || [];
                   const cat  = catIx >= 0 && c[catIx]?.v ? String(c[catIx].v).trim() : '';
                   const name = c[nameIx]?.v ? String(c[nameIx].v).trim() : '';
                   const comp = compIx >= 0 && c[compIx]?.v ? String(c[compIx].v).trim() : '';
                   if (!name) return;
-                  let type = null;
-                  if (cat === 'Builders')    type = 'Builder';
-                  else if (cat === 'Developers') type = 'Developer';
+                  const type = CAT_TO_TYPE[cat];
                   if (!type) return;
                   const k = name.toLowerCase();
                   if (!combined.has(k)) combined.set(k, { name, type, sub: comp });
@@ -1672,44 +1675,6 @@
         }
       } catch (err) {
         console.warn('[Land] Contacts fetch failed:', err);
-      }
-      // ---- Apeiron Custom Home Rep intake: Client Name ----
-      try {
-        const url = 'https://docs.google.com/spreadsheets/d/1_KDEUKCkLZZgeKWbio40H-7qqKdvA8K7DZ1URw_8sGQ' +
-          '/gviz/tq?tqx=out:json&headers=1&sheet=Form_Responses&t=' + Date.now();
-        const res = await fetch(url, { cache: 'no-store' });
-        if (res.ok) {
-          const text = await res.text();
-          const m = text.match(/setResponse\(([\s\S]+)\)\s*;?\s*$/);
-          if (m) {
-            const data = JSON.parse(m[1]);
-            if (data.status === 'ok') {
-              const cols = data.table.cols || [];
-              const rows = data.table.rows || [];
-              const norm = s => String(s || '').toLowerCase().trim();
-              const nameIx = cols.findIndex(c => /client\s*name|owner\s*name/i.test(c.label || ''));
-              const addrIx = cols.findIndex(c => /property\s*address|address/i.test(c.label || ''));
-              const stageIx = cols.findIndex(c => /current\s*stage|stage/i.test(c.label || ''));
-              if (nameIx >= 0) {
-                rows.forEach(r => {
-                  const c = r.c || [];
-                  const name = c[nameIx]?.v ? String(c[nameIx].v).trim() : '';
-                  const addr = addrIx >= 0 && c[addrIx]?.v ? String(c[addrIx].v).trim() : '';
-                  const stage = stageIx >= 0 && c[stageIx]?.v ? String(c[stageIx].v).trim() : '';
-                  if (!name) return;
-                  if ((stage || '').toLowerCase() === 'deleted') return;
-                  const k = name.toLowerCase();
-                  // Don't overwrite Builder/Developer if same name — but Custom
-                  // Home Client wins if not already present (unique namespaces
-                  // in practice).
-                  if (!combined.has(k)) combined.set(k, { name, type: 'Custom Home Client', sub: addr });
-                });
-              }
-            }
-          }
-        }
-      } catch (err) {
-        console.warn('[Land] Apeiron fetch failed:', err);
       }
       // Sort and expose
       const entries = Array.from(combined.values()).sort((a, b) => a.name.localeCompare(b.name));
