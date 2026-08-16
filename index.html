@@ -4129,19 +4129,6 @@
             <h2 style="font-family:var(--font-display); font-size:22px; letter-spacing:.08em; text-transform:uppercase; margin:4px 0 0;">Listing Side</h2>
           </header>
 
-          <section class="pipeline-section" aria-labelledby="listings-cs-title">
-            <header class="pipeline-head">
-              <div>
-                <div class="eyebrow" style="margin-bottom:8px;">Listings · Pre-Launch</div>
-                <h2 class="pipeline-title" id="listings-cs-title">Coming Soon</h2>
-              </div>
-              <div class="pipeline-meta" id="listings-cs-meta">Loading…</div>
-            </header>
-            <div class="deal-list" id="listings-cs-list">
-              <div class="deal-empty">Loading listings…</div>
-            </div>
-          </section>
-
           <section class="pipeline-section" aria-labelledby="listings-active-title">
             <header class="pipeline-head">
               <div>
@@ -4151,6 +4138,19 @@
               <div class="pipeline-meta" id="listings-active-meta">Loading…</div>
             </header>
             <div class="deal-list" id="listings-active-list">
+              <div class="deal-empty">Loading listings…</div>
+            </div>
+          </section>
+
+          <section class="pipeline-section" aria-labelledby="listings-cs-title">
+            <header class="pipeline-head">
+              <div>
+                <div class="eyebrow" style="margin-bottom:8px;">Listings · Pre-Launch</div>
+                <h2 class="pipeline-title" id="listings-cs-title">Coming Soon</h2>
+              </div>
+              <div class="pipeline-meta" id="listings-cs-meta">Loading…</div>
+            </header>
+            <div class="deal-list" id="listings-cs-list">
               <div class="deal-empty">Loading listings…</div>
             </div>
           </section>
@@ -17768,8 +17768,41 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         const n = Math.max(0, _adDaysBetween(d.listDate, ref));
         dom = n + ' day' + (n === 1 ? '' : 's') + ' on market';
       }
+      // Timeline bars — mirror the buyer card. Show them only when the
+      // corresponding dates are populated. Once Under Contract, the deal
+      // moves through EM → Inspection → Resolution → Closing just like a
+      // buyer-side deal.
       const bars = [];
-      if (d.dateUC && d.closing) bars.push(_adProgressBar('Closing', d.dateUC, d.closing, today, d.address));
+      const addr = d.address;
+      const inspMarkers  = d.inspectionDate ? [{ label: 'Inspected', date: d.inspectionDate }] : [];
+      const closeMarkers = d.appraisalDate  ? [{ label: 'Appraisal', date: d.appraisalDate  }] : [];
+      if (d.dateUC && d.emDue)         bars.push(_adProgressBar('Earnest Money',     d.dateUC, d.emDue,         today, addr));
+      if (d.dateUC && d.inspectionEnd) bars.push(_adProgressBar('Inspection Period', d.dateUC, d.inspectionEnd, today, addr, inspMarkers));
+      if (d.dateUC && d.resolutionEnd) bars.push(_adProgressBar('Resolution Period', d.dateUC, d.resolutionEnd, today, addr));
+      if (d.dateUC && d.closing)       bars.push(_adProgressBar('Closing',           d.dateUC, d.closing,       today, addr, closeMarkers));
+
+      // Closing + inspection company contacts — same grid as buyer card.
+      const cells = [];
+      const mkCell = (label, val) => cells.push(
+        '<div>' +
+          '<div style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-muted); font-weight:600; margin-bottom:2px;">' + label + '</div>' +
+          '<div style="font-size:12px; color:var(--text); line-height:1.35;">' + _adEsc(val) + '</div>' +
+        '</div>'
+      );
+      if (d.closingAttorney) {
+        let val = d.closingAttorney;
+        if (d.closingAttorneyPhone) val += ' · ' + d.closingAttorneyPhone;
+        mkCell('Closing Attorney', val);
+      }
+      if (d.closingCompany)    mkCell('Closing Company', d.closingCompany);
+      if (d.closingLocation)   mkCell('Closing Location', d.closingLocation);
+      if (d.inspectionCompany) mkCell('Inspection Company', d.inspectionCompany);
+      if (d.buyerAgent)        mkCell("Buyer's Agent", d.buyerAgent);
+      const contactRow = cells.length
+        ? '<div class="deal-extra" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:14px 20px; margin-top:14px; padding-top:12px; border-top:1px solid var(--rule);">' +
+            cells.join('') +
+          '</div>'
+        : '';
       return (
         '<article class="deal-card has-photo">' +
           _adPhotoTile(d.address) +
@@ -17788,6 +17821,7 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             '</div>' +
           '</header>' +
           bars.join('') +
+          contactRow +
         '</article>'
       );
     }
@@ -18037,36 +18071,59 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           const table = _adParseEnvelope(await res.text());
           const cols = table.cols || [];
           const ix = {
-            timestamp:   _adFindCol(cols, 'Timestamp'),
-            address:     _adFindCol(cols, 'Property Address'),
-            seller:      _adFindCol(cols, 'Seller', 'Seller Name'),
-            agent:       _adFindCol(cols, 'Agent', 'Listing Agent', 'Stonehouse Agent'),
-            stage:       _adFindCol(cols, 'Stage', 'Current Stage'),
-            listPrice:   _adFindCol(cols, 'List Price', 'Price'),
-            listDate:    _adFindCol(cols, 'List Date'),
-            dateUC:      _adFindCol(cols, 'Date Under Contract', 'Under Contract'),
-            closing:     _adFindCol(cols, 'Closing Date', 'Closing'),
-            soldPrice:   _adFindCol(cols, 'Sold Price'),
-            buyerAgent:  _adFindCol(cols, "Buyer's Agent", 'Buyer Agent'),
-            notes:       _adFindCol(cols, 'Notes')
+            timestamp:              _adFindCol(cols, 'Timestamp'),
+            address:                _adFindCol(cols, 'Property Address'),
+            seller:                 _adFindCol(cols, 'Seller', 'Seller Name'),
+            agent:                  _adFindCol(cols, 'Agent', 'Listing Agent', 'Stonehouse Agent'),
+            stage:                  _adFindCol(cols, 'Stage', 'Current Stage'),
+            listPrice:              _adFindCol(cols, 'List Price', 'Price'),
+            listDate:               _adFindCol(cols, 'List Date'),
+            dateUC:                 _adFindCol(cols, 'Date Under Contract', 'Under Contract'),
+            closing:                _adFindCol(cols, 'Closing Date', 'Closing'),
+            soldPrice:              _adFindCol(cols, 'Sold Price'),
+            buyerAgent:             _adFindCol(cols, "Buyer's Agent", 'Buyer Agent'),
+            notes:                  _adFindCol(cols, 'Notes'),
+            // Transaction milestones (mirror the buyer sheet). Sheet may not have
+            // these columns yet — findCol returns -1 and the reader gracefully
+            // skips them, so nothing breaks until the form fields are added.
+            emDue:                  _adFindCol(cols, 'Earnest Money Deadline', 'EM Deadline'),
+            inspectionEnd:          _adFindCol(cols, 'Inspection Period End', 'Inspection End'),
+            resolutionEnd:          _adFindCol(cols, 'Resolution Period End', 'Resolution End'),
+            inspectionDate:         _adFindCol(cols, 'Inspection Date'),
+            appraisalDate:          _adFindCol(cols, 'Appraisal Date'),
+            closingAttorney:        _adFindCol(cols, 'Closing Attorney'),
+            closingAttorneyPhone:   _adFindCol(cols, 'Closing Attorney Phone'),
+            closingCompany:         _adFindCol(cols, 'Closing Company'),
+            closingLocation:        _adFindCol(cols, 'Closing Company Location', 'Closing Location'),
+            inspectionCompany:      _adFindCol(cols, 'Inspection Company')
           };
           if (ix.address < 0) throw new Error('Sheet missing "Property Address" column.');
           const today = new Date(); today.setHours(0, 0, 0, 0);
           const rawRows = (table.rows || []).map(r => {
             const c = r.c || [];
             return {
-              timestamp:  ix.timestamp >= 0 ? _adGvizDate(c[ix.timestamp]) : null,
-              address:    _adGvizString(c[ix.address]),
-              seller:     ix.seller >= 0 ? _adGvizString(c[ix.seller]) : '',
-              agent:      ix.agent >= 0 ? _adGvizString(c[ix.agent]) : '',
-              stage:      ix.stage >= 0 ? _adGvizString(c[ix.stage]) : '',
-              listPrice:  ix.listPrice >= 0 ? _adGvizNumber(c[ix.listPrice]) : 0,
-              listDate:   ix.listDate >= 0 ? _adGvizDate(c[ix.listDate]) : null,
-              dateUC:     ix.dateUC >= 0 ? _adGvizDate(c[ix.dateUC]) : null,
-              closing:    ix.closing >= 0 ? _adGvizDate(c[ix.closing]) : null,
-              soldPrice:  ix.soldPrice >= 0 ? _adGvizNumber(c[ix.soldPrice]) : 0,
-              buyerAgent: ix.buyerAgent >= 0 ? _adGvizString(c[ix.buyerAgent]) : '',
-              notes:      ix.notes >= 0 ? _adGvizString(c[ix.notes]) : ''
+              timestamp:              ix.timestamp >= 0 ? _adGvizDate(c[ix.timestamp]) : null,
+              address:                _adGvizString(c[ix.address]),
+              seller:                 ix.seller >= 0 ? _adGvizString(c[ix.seller]) : '',
+              agent:                  ix.agent >= 0 ? _adGvizString(c[ix.agent]) : '',
+              stage:                  ix.stage >= 0 ? _adGvizString(c[ix.stage]) : '',
+              listPrice:              ix.listPrice >= 0 ? _adGvizNumber(c[ix.listPrice]) : 0,
+              listDate:               ix.listDate >= 0 ? _adGvizDate(c[ix.listDate]) : null,
+              dateUC:                 ix.dateUC >= 0 ? _adGvizDate(c[ix.dateUC]) : null,
+              closing:                ix.closing >= 0 ? _adGvizDate(c[ix.closing]) : null,
+              soldPrice:              ix.soldPrice >= 0 ? _adGvizNumber(c[ix.soldPrice]) : 0,
+              buyerAgent:             ix.buyerAgent >= 0 ? _adGvizString(c[ix.buyerAgent]) : '',
+              notes:                  ix.notes >= 0 ? _adGvizString(c[ix.notes]) : '',
+              emDue:                  ix.emDue >= 0 ? _adGvizDate(c[ix.emDue]) : null,
+              inspectionEnd:          ix.inspectionEnd >= 0 ? _adGvizDate(c[ix.inspectionEnd]) : null,
+              resolutionEnd:          ix.resolutionEnd >= 0 ? _adGvizDate(c[ix.resolutionEnd]) : null,
+              inspectionDate:         ix.inspectionDate >= 0 ? _adGvizDate(c[ix.inspectionDate]) : null,
+              appraisalDate:          ix.appraisalDate >= 0 ? _adGvizDate(c[ix.appraisalDate]) : null,
+              closingAttorney:        ix.closingAttorney >= 0 ? _adGvizString(c[ix.closingAttorney]) : '',
+              closingAttorneyPhone:   ix.closingAttorneyPhone >= 0 ? _adGvizString(c[ix.closingAttorneyPhone]) : '',
+              closingCompany:         ix.closingCompany >= 0 ? _adGvizString(c[ix.closingCompany]) : '',
+              closingLocation:        ix.closingLocation >= 0 ? _adGvizString(c[ix.closingLocation]) : '',
+              inspectionCompany:      ix.inspectionCompany >= 0 ? _adGvizString(c[ix.inspectionCompany]) : ''
             };
           }).filter(d => d.address);
           // Dedupe by address (edits overwrite by keeping latest Timestamp)
@@ -18084,7 +18141,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
           // Sort each: within Active use stage priority, then list date desc.
           // Coming Soon: sort by list date asc (earliest launch first).
-          const stagePriority = { 'Active': 0, 'Showing': 1, 'Pending': 2, 'Under Contract': 3 };
+          // Under Contract sits at the TOP — those need the most attention
+          // (deadlines, appraisal, closing coordination).
+          const stagePriority = { 'Under Contract': 0, 'Pending': 1, 'Showing': 2, 'Active': 3 };
           active.sort((a, b) => {
             const pa = stagePriority[a.stage] ?? 99;
             const pb = stagePriority[b.stage] ?? 99;
