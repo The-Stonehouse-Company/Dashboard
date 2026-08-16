@@ -6209,6 +6209,58 @@
         </fieldset>
 
         <fieldset>
+          <legend>Milestones (once under contract)</legend>
+          <div class="form-grid">
+            <div>
+              <label for="ls-em-deadline">Earnest Money Deadline</label>
+              <input id="ls-em-deadline" name="earnest_money_deadline" type="date" />
+            </div>
+            <div>
+              <label for="ls-insp-end">Inspection Period End</label>
+              <input id="ls-insp-end" name="inspection_period_end" type="date" />
+            </div>
+            <div>
+              <label for="ls-res-end">Resolution Period End</label>
+              <input id="ls-res-end" name="resolution_period_end" type="date" />
+            </div>
+            <div>
+              <label for="ls-insp-date">Inspection Date (actual)</label>
+              <input id="ls-insp-date" name="inspection_date" type="date" />
+            </div>
+            <div>
+              <label for="ls-appr-date">Appraisal Date (actual)</label>
+              <input id="ls-appr-date" name="appraisal_date" type="date" />
+            </div>
+            <div>
+              <label for="ls-insp-co">Inspection Company</label>
+              <input id="ls-insp-co" name="inspection_company" type="text" placeholder="e.g. Premier Home Inspections" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Closing Contacts (once under contract)</legend>
+          <div class="form-grid">
+            <div>
+              <label for="ls-closing-company">Closing Company</label>
+              <input id="ls-closing-company" name="closing_company" type="text" placeholder="e.g. Premier Escrow" />
+            </div>
+            <div>
+              <label for="ls-closing-attorney">Closing Attorney</label>
+              <input id="ls-closing-attorney" name="closing_attorney" type="text" placeholder="Attorney name" />
+            </div>
+            <div>
+              <label for="ls-closing-attorney-phone">Closing Attorney Phone</label>
+              <input id="ls-closing-attorney-phone" name="closing_attorney_phone" type="tel" placeholder="(615) 555-0123" />
+            </div>
+            <div>
+              <label for="ls-closing-location">Closing Company Location</label>
+              <input id="ls-closing-location" name="closing_company_location" type="text" placeholder="Full address" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
           <legend>Property Photo (optional)</legend>
           <div class="form-grid">
             <div class="full">
@@ -17504,17 +17556,28 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       SHEET_TAB: "Form Responses 1",
       FORM_URL:  "https://docs.google.com/forms/d/e/1FAIpQLScxyGBXXLzPWv_XMGAqZtcpG3bAwgYJOYzXVuOVUg2IZv0s1w/formResponse",
       FIELD_MAP: {
-        agent:                "entry.251603968",
-        seller:               "entry.1734021521",
-        property_address:     "entry.143973978",
-        list_price:           "entry.1915684860",
-        list_date:            "entry.1895165848",
-        stage:                "entry.83480207",
-        date_under_contract:  "entry.260387748",
-        closing_date:         "entry.986148422",
-        sold_price:           "entry.1238483747",
-        buyer_agent:          "entry.613300627",
-        notes:                "entry.1813743443"
+        agent:                    "entry.251603968",
+        seller:                   "entry.1734021521",
+        property_address:         "entry.143973978",
+        list_price:               "entry.1915684860",
+        list_date:                "entry.1895165848",
+        stage:                    "entry.83480207",
+        date_under_contract:      "entry.260387748",
+        closing_date:             "entry.986148422",
+        sold_price:               "entry.1238483747",
+        buyer_agent:              "entry.613300627",
+        notes:                    "entry.1813743443",
+        // Transaction milestones + closing/inspection contacts (mirror buyer form)
+        earnest_money_deadline:   "entry.68294374",
+        inspection_period_end:    "entry.239091900",
+        resolution_period_end:    "entry.1313191413",
+        inspection_date:          "entry.164789501",
+        appraisal_date:           "entry.1490895817",
+        inspection_company:       "entry.835240777",
+        closing_attorney:         "entry.465866746",
+        closing_attorney_phone:   "entry.578606421",
+        closing_company:          "entry.712269604",
+        closing_company_location: "entry.647856890"
       }
     };
 
@@ -21061,6 +21124,17 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         _setDate('ls-close',      d.closing);
         _setVal('ls-sold',        d.soldPrice || '');
         _setVal('ls-notes',       d.notes);
+        // Milestones + closing contacts (only populated once under contract)
+        _setDate('ls-em-deadline',      d.emDue);
+        _setDate('ls-insp-end',         d.inspectionEnd);
+        _setDate('ls-res-end',          d.resolutionEnd);
+        _setDate('ls-insp-date',        d.inspectionDate);
+        _setDate('ls-appr-date',        d.appraisalDate);
+        _setVal('ls-insp-co',           d.inspectionCompany);
+        _setVal('ls-closing-company',   d.closingCompany);
+        _setVal('ls-closing-attorney',  d.closingAttorney);
+        _setVal('ls-closing-attorney-phone', d.closingAttorneyPhone);
+        _setVal('ls-closing-location',  d.closingLocation);
         const title = document.querySelector('#listing-modal .modal-title');
         if (title) title.textContent = 'Edit Listing';
         const sub = document.getElementById('submit-listing');
