@@ -4129,6 +4129,19 @@
             <h2 style="font-family:var(--font-display); font-size:22px; letter-spacing:.08em; text-transform:uppercase; margin:4px 0 0;">Listing Side</h2>
           </header>
 
+          <section class="pipeline-section" aria-labelledby="listings-uc-title">
+            <header class="pipeline-head">
+              <div>
+                <div class="eyebrow" style="margin-bottom:8px;">Listings · Under Contract</div>
+                <h2 class="pipeline-title" id="listings-uc-title">Under Contract</h2>
+              </div>
+              <div class="pipeline-meta" id="listings-uc-meta">Loading…</div>
+            </header>
+            <div class="deal-list" id="listings-uc-list">
+              <div class="deal-empty">Loading listings…</div>
+            </div>
+          </section>
+
           <section class="pipeline-section" aria-labelledby="listings-active-title">
             <header class="pipeline-head">
               <div>
@@ -18048,6 +18061,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
       const csMetaEl     = document.getElementById('listings-cs-meta');
       const activeListEl = document.getElementById('listings-active-list');
       const activeMetaEl = document.getElementById('listings-active-meta');
+      const ucListEl     = document.getElementById('listings-uc-list');
+      const ucMetaEl     = document.getElementById('listings-uc-meta');
       if (!csListEl || !activeListEl) return;
 
       function setMeta(el, t) { if (el) el.textContent = t; }
@@ -18059,6 +18074,8 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         setEmpty(csListEl, 'Listings sheet not yet connected. See docs/active-deals-setup.md.');
         setMeta(activeMetaEl, 'Setup pending');
         setEmpty(activeListEl, 'Listings sheet not yet connected.');
+        if (ucMetaEl) setMeta(ucMetaEl, 'Setup pending');
+        if (ucListEl) setEmpty(ucListEl, 'Listings sheet not yet connected.');
         return;
       }
 
@@ -18134,16 +18151,27 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           // Filter active pipeline: hide archive states
           const listings = dedupedAll.filter(d => !/^(closed|withdrawn|expired)$/i.test(d.stage));
 
-          // ---- Split by stage ----
-          const isComingSoon = (d) => /^coming\s*soon$/i.test(d.stage);
-          const comingSoon = listings.filter(isComingSoon);
-          const active     = listings.filter(d => !isComingSoon(d));
+          // ---- Split by stage into three buckets ----
+          // Under Contract | Pending are treated as "under contract" — those
+          // are the deals with active deadlines needing coordination and
+            // deserve their own top section.
+          const isComingSoon    = (d) => /^coming\s*soon$/i.test(d.stage);
+          const isUnderContract = (d) => /^(under\s*contract|pending)$/i.test(d.stage);
+          const underContract = listings.filter(isUnderContract);
+          const comingSoon    = listings.filter(isComingSoon);
+          const active        = listings.filter(d => !isComingSoon(d) && !isUnderContract(d));
 
-          // Sort each: within Active use stage priority, then list date desc.
-          // Coming Soon: sort by list date asc (earliest launch first).
-          // Under Contract sits at the TOP — those need the most attention
-          // (deadlines, appraisal, closing coordination).
-          const stagePriority = { 'Under Contract': 0, 'Pending': 1, 'Showing': 2, 'Active': 3 };
+          // Under Contract: earliest closing first (most urgent), fallback to list date desc
+          underContract.sort((a, b) => {
+            const ac = a.closing ? a.closing.getTime() : Infinity;
+            const bc = b.closing ? b.closing.getTime() : Infinity;
+            if (ac !== bc) return ac - bc;
+            const la = a.listDate ? a.listDate.getTime() : 0;
+            const lb = b.listDate ? b.listDate.getTime() : 0;
+            return lb - la;
+          });
+          // Active on market: Showing → Active, then list date desc
+          const stagePriority = { 'Showing': 0, 'Active': 1 };
           active.sort((a, b) => {
             const pa = stagePriority[a.stage] ?? 99;
             const pb = stagePriority[b.stage] ?? 99;
@@ -18164,6 +18192,24 @@ It has become a major relocation center for large companies like Amazon, Oracle,
           window._salesCounts.listingVolume = listings.reduce((sum, d) => sum + (d.listPrice || 0), 0);
           _adRefreshSalesHomeTile();
 
+          // Render Under Contract (new section — top of the pipeline)
+          if (ucListEl) {
+            if (underContract.length === 0) {
+              setMeta(ucMetaEl, '0'); setEmpty(ucListEl, 'No listings under contract.');
+            } else {
+              setMeta(ucMetaEl, underContract.length + ' listing' + (underContract.length === 1 ? '' : 's'));
+              ucListEl.innerHTML = underContract.map(d => _adListingCard(d, today)).join('');
+            }
+          }
+
+          // Render Active (on market — no offer yet)
+          if (active.length === 0) {
+            setMeta(activeMetaEl, '0'); setEmpty(activeListEl, 'No listings on market.');
+          } else {
+            setMeta(activeMetaEl, active.length + ' listing' + (active.length === 1 ? '' : 's'));
+            activeListEl.innerHTML = active.map(d => _adListingCard(d, today)).join('');
+          }
+
           // Render Coming Soon
           if (comingSoon.length === 0) {
             setMeta(csMetaEl, '0'); setEmpty(csListEl, 'No listings coming soon.');
@@ -18171,18 +18217,11 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             setMeta(csMetaEl, comingSoon.length + ' listing' + (comingSoon.length === 1 ? '' : 's'));
             csListEl.innerHTML = comingSoon.map(d => _adListingCard(d, today)).join('');
           }
-
-          // Render Active
-          if (active.length === 0) {
-            setMeta(activeMetaEl, '0'); setEmpty(activeListEl, 'No listings on market.');
-          } else {
-            setMeta(activeMetaEl, active.length + ' listing' + (active.length === 1 ? '' : 's'));
-            activeListEl.innerHTML = active.map(d => _adListingCard(d, today)).join('');
-          }
         } catch (err) {
           console.error('[LISTINGS] load failed:', err);
           setMeta(csMetaEl, 'Could not load'); setError(csListEl, 'Could not load: ' + (err.message || err));
           setMeta(activeMetaEl, 'Could not load'); setError(activeListEl, 'Could not load: ' + (err.message || err));
+          if (ucListEl) { setMeta(ucMetaEl, 'Could not load'); setError(ucListEl, 'Could not load: ' + (err.message || err)); }
         }
       }
       load();
