@@ -4768,10 +4768,11 @@
       <div class="subpanel" id="subpanel-land-pipeline" role="tabpanel" aria-hidden="true" tabindex="0">
         <p class="subpanel-intro">Every property currently under contract, on first-right-of-refusal, or that fell out.</p>
 
-        <div style="display:flex; justify-content:flex-end; margin-bottom:14px;">
-          <button type="button" data-launches="open-intake-modal"
-                  style="padding:10px 18px; font-family:var(--font-body); font-size:11px; letter-spacing:.18em; text-transform:uppercase; font-weight:600; background:var(--accent); color:#000; border:0; cursor:pointer;">
-            + Log a Land Deal
+        <div class="action-grid" style="margin-bottom:16px;">
+          <button class="primary-action" type="button" id="open-intake-modal" aria-haspopup="dialog" aria-controls="intake-modal">
+            <span class="action-label">+ Log a Land Deal</span>
+            <span class="action-sub">Log a new property intake — under contract, FRoR, or evaluation</span>
+            <span class="action-arrow" aria-hidden="true">→</span>
           </button>
         </div>
 
