@@ -2654,7 +2654,10 @@
             .catch(err => { console.warn('Parcel query failed:', err); return null; });
       const [parcel, flood] = await Promise.all([
         parcelPromise,
-        _plQueryLayer('https://hazards.fema.gov/gis/nfhl/services/public/NFHL/MapServer', 28, point, 'FLD_ZONE,ZONE_SUBTY,STATIC_BFE')
+        // FEMA moved the NFHL service URL — the old /gis/nfhl/services/ path
+        // returns 404 (IBM WebSEAL "Not Found"). Current path is /arcgis/rest/.
+        // Layer 28 is still "Flood Hazard Zones" with FLD_ZONE / ZONE_SUBTY / STATIC_BFE.
+        _plQueryLayer('https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer', 28, point, 'FLD_ZONE,ZONE_SUBTY,STATIC_BFE')
           .catch(err => { console.warn('FEMA query failed:', err); return null; })
       ]);
 
