@@ -4766,7 +4766,14 @@
       </div>
 
       <div class="subpanel" id="subpanel-land-pipeline" role="tabpanel" aria-hidden="true" tabindex="0">
-        <p class="subpanel-intro">Every property currently under contract, on first-right-of-refusal, or that fell out. Use the <b>Tools</b> menu in the side-nav to log a new intake or run a fee calc.</p>
+        <p class="subpanel-intro">Every property currently under contract, on first-right-of-refusal, or that fell out.</p>
+
+        <div style="display:flex; justify-content:flex-end; margin-bottom:14px;">
+          <button type="button" data-launches="open-intake-modal"
+                  style="padding:10px 18px; font-family:var(--font-body); font-size:11px; letter-spacing:.18em; text-transform:uppercase; font-weight:600; background:var(--accent); color:#000; border:0; cursor:pointer;">
+            + Log a Land Deal
+          </button>
+        </div>
 
         <section class="pipeline-section" aria-labelledby="land-pipeline-title">
           <header class="pipeline-head">
@@ -10549,6 +10556,21 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         }
         return -1;
       }
+      // Same as findCol but returns the LAST match — the Land Intake sheet
+      // has two "Status" columns (one is a duplicate stub from an old form
+      // edit; the live one is where the form actually writes). Reading the
+      // last matching column picks up the live one regardless of order.
+      function findColLast(cols, ...candidates) {
+        const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+        const labels = cols.map((c) => norm(c.label));
+        for (const cand of candidates) {
+          const t = norm(cand);
+          let last = -1;
+          for (let i = 0; i < labels.length; i++) if (labels[i] === t) last = i;
+          if (last >= 0) return last;
+        }
+        return -1;
+      }
 
       // ---------- Bar rendering ----------
       // Renders a single milestone bar (Due Diligence or Closing).
@@ -10701,7 +10723,9 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             emDeadline:     findCol(cols, 'Earnest Money Deadline', 'earnest_money_deadline'),
             ddEnd:          findCol(cols, 'Due Diligence End', 'Due Diligence Deadline', 'DD End'),
             closing:        findCol(cols, 'Closing Date', 'Closing'),
-            status:         findCol(cols, 'Status', 'Pipeline Status', 'Stage'),
+            // Use LAST match — the sheet has two "Status" columns (duplicate
+            // from an old form edit); the live one is the last one.
+            status:         findColLast(cols, 'Status'),
             lotSize:        findCol(cols, 'Lot Size'),
             topography:     findCol(cols, 'Topography'),
             zoning:         findCol(cols, 'Zoning'),
