@@ -10557,20 +10557,29 @@ It has become a major relocation center for large companies like Amazon, Oracle,
         }
         return -1;
       }
-      // Same as findCol but returns the LAST match — the Land Intake sheet
-      // has two "Status" columns (one is a duplicate stub from an old form
-      // edit; the live one is where the form actually writes). Reading the
-      // last matching column picks up the live one regardless of order.
-      function findColLast(cols, ...candidates) {
+      // Return ALL column indexes matching any candidate label. Used when
+      // the sheet has duplicate "Status" columns (from a form edit at some
+      // point) — we then read each row's value from ALL matching columns
+      // and prefer whichever one is non-empty.
+      function findColAll(cols, ...candidates) {
         const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
         const labels = cols.map((c) => norm(c.label));
+        const out = [];
         for (const cand of candidates) {
           const t = norm(cand);
-          let last = -1;
-          for (let i = 0; i < labels.length; i++) if (labels[i] === t) last = i;
-          if (last >= 0) return last;
+          labels.forEach((l, i) => { if (l === t && out.indexOf(i) < 0) out.push(i); });
         }
-        return -1;
+        return out;
+      }
+      // Read a row cell from the FIRST non-empty of an array of column
+      // indexes. Handles duplicate-column sheets cleanly.
+      function readFirstNonEmpty(rowCells, colIndexes, parseFn) {
+        for (const i of colIndexes) {
+          if (i < 0 || i >= rowCells.length) continue;
+          const v = parseFn(rowCells[i]);
+          if (v != null && v !== '' && !(typeof v === 'number' && v === 0 && parseFn === parseGvizNumber)) return v;
+        }
+        return parseFn(null);
       }
 
       // ---------- Bar rendering ----------
@@ -10724,9 +10733,10 @@ It has become a major relocation center for large companies like Amazon, Oracle,
             emDeadline:     findCol(cols, 'Earnest Money Deadline', 'earnest_money_deadline'),
             ddEnd:          findCol(cols, 'Due Diligence End', 'Due Diligence Deadline', 'DD End'),
             closing:        findCol(cols, 'Closing Date', 'Closing'),
-            // Use LAST match — the sheet has two "Status" columns (duplicate
-            // from an old form edit); the live one is the last one.
-            status:         findColLast(cols, 'Status'),
+            // Sheet has TWO "Status" columns (duplicate from a form edit).
+            // Different rows have the value in different columns depending on
+            // when they were written. We read ALL and pick the non-empty one.
+            statusAll:      findColAll(cols, 'Status', 'Pipeline Status', 'Stage'),
             lotSize:        findCol(cols, 'Lot Size'),
             topography:     findCol(cols, 'Topography'),
             zoning:         findCol(cols, 'Zoning'),
@@ -10772,7 +10782,14 @@ It has become a major relocation center for large companies like Amazon, Oracle,
 
           const rawAll = rawRows.map((r) => {
             const c = r.c || [];
-            const statusRaw = ix.status >= 0 ? parseGvizString(c[ix.status]) : '';
+            // Read status from any of the duplicate Status columns — first
+            // non-empty wins. Rows written by older form versions may have
+            // it in one column while newer rows have it in another.
+            let statusRaw = '';
+            for (const si of (ix.statusAll || [])) {
+              const v = si >= 0 && si < c.length ? parseGvizString(c[si]) : '';
+              if (v && v.trim()) { statusRaw = v; break; }
+            }
             return {
               timestamp:     ix.timestamp >= 0 ? parseGvizDate(c[ix.timestamp]) : null,
               agent:         ix.agent >= 0 ? parseGvizString(c[ix.agent]) : '',

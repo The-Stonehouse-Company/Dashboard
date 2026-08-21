@@ -1887,6 +1887,20 @@
       }
       return -1;
     }
+    // Return ALL matching column indexes — used for the duplicate Status
+    // columns in the Land Intake sheet. Rows may have the value in either
+    // column depending on when they were written; we read all and prefer
+    // the first non-empty.
+    function findColAll(cols, ...names) {
+      const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+      const labels = cols.map(c => norm(c.label));
+      const out = [];
+      for (const n of names) {
+        const t = norm(n);
+        labels.forEach((l, i) => { if (l === t && out.indexOf(i) < 0) out.push(i); });
+      }
+      return out;
+    }
     async function gviz(sheetId, tab) {
       const url = 'https://docs.google.com/spreadsheets/d/' + sheetId +
         '/gviz/tq?tqx=out:json&headers=1&sheet=' + encodeURIComponent(tab) + '&t=' + Date.now();
@@ -1915,7 +1929,7 @@
           uc:               findCol(cols, 'Date Under Contract'),
           ddEnd:            findCol(cols, 'Due Diligence End'),
           closing:          findCol(cols, 'Closing Date'),
-          status:           findColLast(cols, 'Status'),      // sheet has two Status columns; the live one is the last
+          statusAll:        findColAll(cols, 'Status'),      // sheet has two Status columns; read all, pick non-empty per row
           llc:              findCol(cols, 'LLC Formation Deadline'),
           em:               findCol(cols, 'Earnest Money Deadline'),
           lotSize:          findCol(cols, 'Lot Size'),
@@ -1952,7 +1966,14 @@
             uc:              parseGvizDate(c[ix.uc]),
             ddEnd:           parseGvizDate(c[ix.ddEnd]),
             closing:         parseGvizDate(c[ix.closing]),
-            status:          parseGvizStr(c[ix.status]),
+            status:          (() => {
+              // Read from any of the duplicate Status columns; first non-empty wins.
+              for (const si of (ix.statusAll || [])) {
+                const v = si >= 0 && si < c.length ? parseGvizStr(c[si]) : '';
+                if (v && v.trim()) return v;
+              }
+              return '';
+            })(),
             llc:             parseGvizDate(c[ix.llc]),
             em:              parseGvizDate(c[ix.em]),
             lotSize:         parseGvizStr(c[ix.lotSize]),
