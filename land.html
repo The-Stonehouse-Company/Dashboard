@@ -944,6 +944,51 @@
       </section>
 
       <!-- ==================== Inline modals ==================== -->
+      <!-- Email Zoning to Verify — reusable across all research panels -->
+      <div class="mini-modal" id="ez-modal" hidden>
+        <div class="mini-modal-inner">
+          <div class="mini-modal-head">
+            <div>
+              <div style="font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:var(--text-dim);">Land Acq · Research</div>
+              <div style="font-family:var(--font-display); font-size:18px; letter-spacing:.14em; text-transform:uppercase; margin-top:4px;">Email Zoning · <span id="ez-city-label" style="color:var(--accent);">—</span></div>
+            </div>
+            <button type="button" class="mini-modal-close" data-close-modal="ez-modal">×</button>
+          </div>
+          <form id="ez-form" class="mini-modal-body">
+            <div class="mm-grid">
+              <label class="mm-field"><span>Which agent are you? *</span>
+                <select id="ez-agent" required>
+                  <option value="" disabled selected>Select…</option>
+                  <option value="Ryan Stonehouse">Ryan Stonehouse</option>
+                  <option value="Gabe Jeudy">Gabe Jeudy</option>
+                  <option value="Kneeland Hibbett">Kneeland Hibbett</option>
+                </select>
+              </label>
+              <label class="mm-field"><span>To (zoning contact) *</span>
+                <input id="ez-to" type="email" required />
+              </label>
+              <label class="mm-field full"><span>Property Address *</span>
+                <input id="ez-address" type="text" required />
+              </label>
+              <label class="mm-field full"><span>Subject (auto)</span>
+                <input id="ez-subject" type="text" readonly style="opacity:0.85;" />
+              </label>
+              <label class="mm-field full"><span>Body preview (auto)</span>
+                <textarea id="ez-body" rows="6" readonly style="opacity:0.85; white-space:pre-wrap;"></textarea>
+              </label>
+            </div>
+            <div style="font-size:11px; color:var(--text-dim); margin-top:6px; line-height:1.5;">
+              Clicking Send opens your default mail app (Mail, Outlook, or Gmail if you've set it as the browser handler) with the recipient, subject, and body pre-filled. Double-check the recipient before sending — Forest Hills / Brentwood contacts are best-guess and may need updating.
+            </div>
+            <div class="mini-modal-foot">
+              <div style="flex:1;"></div>
+              <button type="button" class="btn ghost" data-close-modal="ez-modal">Cancel</button>
+              <button type="submit" class="btn">✉ Open in Mail App</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
       <!-- Add Hot Lead -->
       <div class="mini-modal" id="hl-modal" hidden>
         <div class="mini-modal-inner">
@@ -2550,19 +2595,23 @@
       'nashville': {
         label: 'Nashville',
         placeholder: 'e.g. 1600 West End Ave, Nashville, TN',
-        zipHint: '37215'
+        zipHint: '37215',
+        zoningEmail: 'zoninghelpdesk@nashville.gov'
       },
       'oak-hill': {
         label: 'Oak Hill',
         placeholder: 'e.g. 5540 Franklin Rd, Nashville, TN 37220',
         zipHint: '37220',
-        zoningCaveat: 'Metro zoning shown for reference only — Oak Hill uses its own code (R-40, R-30). See the Oak Hill Zoning Map PDF above for the actual district and setbacks. Email cityadmin@oakhilltn.us to confirm.'
+        zoningCaveat: 'Metro zoning shown for reference only — Oak Hill uses its own code (R-40, R-30). See the Oak Hill Zoning Map PDF above for the actual district and setbacks. Email cityadmin@oakhilltn.us to confirm.',
+        zoningEmail: 'cityadmin@oakhilltn.us'
       },
       'forest-hills': {
         label: 'Forest Hills',
         placeholder: 'e.g. 6300 Hillsboro Pike, Nashville, TN 37215',
         zipHint: '37215',
-        zoningCaveat: 'Metro zoning shown for reference only — Forest Hills uses its own code. Contact the Forest Hills Building Official to verify actual zoning and setbacks.'
+        zoningCaveat: 'Metro zoning shown for reference only — Forest Hills uses its own code. Contact the Forest Hills Building Official to verify actual zoning and setbacks.',
+        // Best guess — update in the modal if wrong. City site: cityofforesthills.com
+        zoningEmail: 'admin@cityofforesthills.com'
       },
       'brentwood': {
         label: 'Brentwood',
@@ -2570,9 +2619,39 @@
         zipHint: '37027',
         // Brentwood is in Williamson County — Metro's parcel service doesn't cover it.
         // We skip the parcel + zoning cards and just show address + slope + FEMA flood.
-        skipMetro: true
+        skipMetro: true,
+        // Best guess — update in the modal if wrong. City site: brentwoodtn.gov/departments/planning
+        zoningEmail: 'planning@brentwoodtn.gov'
       }
     };
+
+    // Agent name → email (used to sign the outgoing zoning email).
+    const LAND_AGENT_EMAILS = {
+      'Ryan Stonehouse':  'ryan@thestonehouseco.com',
+      'Gabe Jeudy':       'gabe@thestonehouseco.com',
+      'Kneeland Hibbett': 'kneeland@thestonehouseco.com'
+    };
+
+    // Compose the zoning-verification email body from the modal fields.
+    function _ezComposeBody(agentName, address) {
+      const email = LAND_AGENT_EMAILS[agentName] || '';
+      const sig = agentName + (email ? '\n' + email : '');
+      return 'Hi,\n\n' +
+             'My name is ' + agentName + '. I\'m looking to obtain the setbacks for ' + address + '.\n\n' +
+             'Thank you,\n' + sig;
+    }
+    function _ezComposeSubject(address) {
+      return address + ' - Setbacks';
+    }
+
+    // Refresh the readonly subject + body previews in the modal from
+    // whatever the agent + address inputs currently hold.
+    function _ezRefreshPreview() {
+      const agent = document.getElementById('ez-agent').value || '[Agent Name]';
+      const addr  = document.getElementById('ez-address').value.trim() || '[Property Address]';
+      document.getElementById('ez-subject').value = _ezComposeSubject(addr);
+      document.getElementById('ez-body').value    = _ezComposeBody(agent, addr);
+    }
 
     /* =========================================================
        SLOPE ANALYSIS — USGS 3DEP elevation grid (national coverage)
@@ -2817,6 +2896,21 @@
         ));
       }
 
+      // Bottom action row — Email Zoning to Verify
+      const fullAddrForEmail = (geo && geo.address) ? geo.address : '';
+      cards.push(`
+        <article style="grid-column:1/-1; background:var(--panel); border:1px solid var(--accent); padding:14px 18px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+          <div>
+            <div style="font-family:var(--font-display); font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:2px;">Verify with the City</div>
+            <div style="font-size:11px; color:var(--text-muted);">Auto-drafts a zoning-verification email to ${esc(meta.label)} using the address above.</div>
+          </div>
+          <button type="button" data-email-zoning="${esc(city)}" data-address="${esc(fullAddrForEmail)}"
+                  style="padding:10px 18px; font-family:var(--font-body); font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:700; background:var(--accent); color:#000; border:0; cursor:pointer;">
+            ✉ Email Zoning to Verify
+          </button>
+        </article>
+      `);
+
       return cards.join('');
     }
 
@@ -2861,6 +2955,55 @@
       });
     }
     _plMountAll();
+
+    /* =========================================================
+       EMAIL ZONING TO VERIFY — click a lookup result's Email Zoning
+       button → opens a modal with agent picker + editable To/Address
+       fields → submit builds a mailto: URL with subject/body pre-filled.
+       ========================================================= */
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest && e.target.closest('[data-email-zoning]');
+      if (!btn) return;
+      const city = btn.getAttribute('data-email-zoning') || 'nashville';
+      const addr = btn.getAttribute('data-address') || '';
+      const meta = CITY_META[city] || CITY_META['nashville'];
+      // Populate modal fields
+      const cityLabel = document.getElementById('ez-city-label');
+      if (cityLabel) cityLabel.textContent = meta.label;
+      document.getElementById('ez-to').value = meta.zoningEmail || '';
+      document.getElementById('ez-address').value = addr;
+      // Default agent = current land agent if we know it
+      const agentSel = document.getElementById('ez-agent');
+      if (agentSel && window.CURRENT_LAND_AGENT && LAND_AGENT_EMAILS[window.CURRENT_LAND_AGENT]) {
+        agentSel.value = window.CURRENT_LAND_AGENT;
+      } else if (agentSel) {
+        agentSel.selectedIndex = 0;
+      }
+      _ezRefreshPreview();
+      _openMiniModal('ez-modal');
+    });
+    // Live-refresh the subject/body previews as the agent or address changes
+    ['ez-agent', 'ez-address'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', _ezRefreshPreview);
+      if (el) el.addEventListener('change', _ezRefreshPreview);
+    });
+    // Submit → open mailto: link in the user's default mail app
+    const ezForm = document.getElementById('ez-form');
+    if (ezForm) ezForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const to      = document.getElementById('ez-to').value.trim();
+      const agent   = document.getElementById('ez-agent').value.trim();
+      const address = document.getElementById('ez-address').value.trim();
+      if (!to || !agent || !address) return;
+      const subject = _ezComposeSubject(address);
+      const body    = _ezComposeBody(agent, address);
+      const url = 'mailto:' + encodeURIComponent(to)
+                + '?subject=' + encodeURIComponent(subject)
+                + '&body=' + encodeURIComponent(body);
+      location.href = url;
+      _closeMiniModal('ez-modal');
+    });
 
     /* =========================================================
        LAND COMP GENERATOR — Nashville
