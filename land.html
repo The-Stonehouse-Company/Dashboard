@@ -1628,10 +1628,31 @@
           land_comps:             deal.landComps || '',
           additional_notes:       composedNotes
         };
+        // Google Form number-type questions reject commas / $ / letters —
+        // sanitize numeric passthrough fields so bad legacy values (e.g.
+        // "0.25 acres") don't 400 the whole submission.
+        const NUMERIC_FIELDS_PIPE = new Set([
+          'asking_price', 'contract_price', 'lot_size',
+          'setback_front', 'setback_rear', 'setback_interior', 'setback_road_side',
+          'dim_front', 'dim_side_left', 'dim_rear', 'dim_side_right'
+        ]);
+        const cleanNumberPipe = (v) => {
+          const s = String(v || '').replace(/[^\d.]/g, '');
+          const parts = s.split('.');
+          return parts.length <= 1 ? s : parts[0] + '.' + parts.slice(1).join('');
+        };
         const body = new URLSearchParams();
         Object.keys(payload).forEach(k => {
           const key = INTAKE_FORM.MAP[k];
-          if (key && payload[k] !== '' && payload[k] != null) body.append(key, String(payload[k]));
+          if (!key) return;
+          let val = payload[k];
+          if (val === '' || val == null) return;
+          val = String(val);
+          if (NUMERIC_FIELDS_PIPE.has(k)) {
+            val = cleanNumberPipe(val);
+            if (!val) return;
+          }
+          body.append(key, val);
         });
         console.log('[Pipeline Update] Submitting to', INTAKE_FORM.URL, 'with payload:', payload);
         await fetch(INTAKE_FORM.URL, { method: 'POST', mode: 'no-cors', body });

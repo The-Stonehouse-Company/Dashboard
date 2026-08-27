@@ -287,7 +287,7 @@
         <div class="form-grid">
           <div>
             <label for="if-lot-size">Lot Size</label>
-            <input id="if-lot-size" name="lot_size" type="text" placeholder="e.g. 0.25 acres" />
+            <input id="if-lot-size" name="lot_size" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.25" />
           </div>
           <div>
             <label for="if-topography">Topography</label>
@@ -540,11 +540,32 @@
         submitBtn.textContent = 'Submitting…';
 
         try {
+          // Google Form number-type questions reject any value with commas,
+          // dollar signs, or letters. Sanitize known numeric fields — strip
+          // everything except digits + one decimal — and skip if empty.
+          const NUMERIC_FIELDS = new Set([
+            'asking_price', 'contract_price', 'lot_size',
+            'setback_front', 'setback_rear', 'setback_interior', 'setback_road_side',
+            'dim_front', 'dim_side_left', 'dim_rear', 'dim_side_right'
+          ]);
+          const cleanNumber = (v) => {
+            const s = String(v || '').replace(/[^\d.]/g, '');
+            // Collapse multiple dots to one (keep the first)
+            const parts = s.split('.');
+            return parts.length <= 1 ? s : parts[0] + '.' + parts.slice(1).join('');
+          };
           const fd = new FormData(form);
           const body = new URLSearchParams();
           for (const [k, v] of fd.entries()) {
             const entry = FIELD_MAP[k];
-            if (entry) body.append(entry, v);
+            if (!entry) continue;
+            let val = String(v || '').trim();
+            if (!val) continue;      // skip empty — form question stays blank
+            if (NUMERIC_FIELDS.has(k)) {
+              val = cleanNumber(val);
+              if (!val) continue;    // user typed only text like "acres" → skip
+            }
+            body.append(entry, val);
           }
 
           await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body });
