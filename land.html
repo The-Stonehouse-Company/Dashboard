@@ -2818,20 +2818,13 @@
           _plRow('Side', side != null ? side + ' ft' : '—')
         ));
 
-        // === ZONING — city-aware ===
+        // === ZONING — city-aware. Show only the zoning code; agent verifies
+        // setbacks / min lot / max height with the city (via the Email Zoning
+        // button below the results). ===
         if (city === 'nashville') {
-          const setbacks = NASHVILLE_SETBACKS[zoneCode];
           cards.push(_plCard('Zoning',
             _plRow('Zone', zoneCode || '—') +
-            (setbacks ? (
-              _plRow('Front setback', setbacks.front + ' ft') +
-              _plRow('Rear setback',  setbacks.rear + ' ft') +
-              _plRow('Side setback',  setbacks.side + ' ft each') +
-              _plRow('Min lot', setbacks.minLot) +
-              _plRow('Max height', setbacks.maxHeight + ' ft')
-            ) : (zoneCode
-              ? _plRow('Setbacks', 'Zone ' + esc(zoneCode) + ' not in our setback table — verify with Metro Codes.')
-              : ''))
+            `<div style="grid-column:1/-1; font-size:11px; line-height:1.5; color:var(--text-muted); padding:6px 0 0;">Verify setbacks + max height with Metro Codes — use the <b>Email Zoning</b> button below.</div>`
           ));
         } else if (city === 'oak-hill' || city === 'forest-hills') {
           cards.push(_plCard('Zoning (' + esc(meta.label) + ')',
@@ -2897,18 +2890,27 @@
         ));
       }
 
-      // Bottom action row — Email Zoning to Verify
+      // Cache the current lookup for the Client Report button (built below)
+      window._plLastLookup = { geo, parcel, flood, slope, city, meta };
+
+      // Bottom action row — Email Zoning + Generate Client Report
       const fullAddrForEmail = (geo && geo.address) ? geo.address : '';
       cards.push(`
         <article style="grid-column:1/-1; background:var(--panel); border:1px solid var(--accent); padding:14px 18px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
           <div>
-            <div style="font-family:var(--font-display); font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:2px;">Verify with the City</div>
-            <div style="font-size:11px; color:var(--text-muted);">Auto-drafts a zoning-verification email to ${esc(meta.label)} using the address above.</div>
+            <div style="font-family:var(--font-display); font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:2px;">Actions</div>
+            <div style="font-size:11px; color:var(--text-muted);">Verify with the city or send this research to a client.</div>
           </div>
-          <button type="button" data-email-zoning="${esc(city)}" data-address="${esc(fullAddrForEmail)}"
-                  style="padding:10px 18px; font-family:var(--font-body); font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:700; background:var(--accent); color:#000; border:0; cursor:pointer;">
-            ✉ Email Zoning to Verify
-          </button>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" data-email-zoning="${esc(city)}" data-address="${esc(fullAddrForEmail)}"
+                    style="padding:10px 18px; font-family:var(--font-body); font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:700; background:transparent; color:var(--accent); border:1px solid var(--accent); cursor:pointer;">
+              ✉ Email Zoning
+            </button>
+            <button type="button" id="pl-client-report-btn"
+                    style="padding:10px 18px; font-family:var(--font-body); font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:700; background:var(--accent); color:#000; border:0; cursor:pointer;">
+              📄 Generate Client Report
+            </button>
+          </div>
         </article>
       `);
 
@@ -3014,6 +3016,151 @@
                 + '&body=' + encodeURIComponent(f.body);
       window.open(url, '_blank', 'noopener');
       _closeMiniModal('ez-modal');
+    });
+
+    /* =========================================================
+       CLIENT REPORT — one-click PDF of the current Property Lookup
+       results, branded, ready to send to a client. Uses html2canvas
+       + pdf-lib on demand (loaded once, cached).
+       ========================================================= */
+    const _PL_H2C_URL    = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    const _PL_PDFLIB_URL = 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js';
+    function _plLoadScript(src) {
+      return new Promise((resolve, reject) => {
+        if (document.querySelector('script[src="' + src + '"]')) return resolve();
+        const s = document.createElement('script');
+        s.src = src; s.async = true;
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error('Failed to load ' + src));
+        document.head.appendChild(s);
+      });
+    }
+
+    // Build the report DOM off-screen — html2canvas snapshots this, then
+    // we drop it into a letter-portrait PDF.
+    function _plBuildReportDOM(data) {
+      const { geo, parcel, flood, slope, city, meta } = data;
+      const addr = (geo && geo.address) ? geo.address : '';
+      const today = new Date().toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+      const p = (parcel && parcel.attributes) || {};
+      const parcelId = p.APN || '';
+      const situs    = p.PropAddr || '';
+      const owner    = p.Owner || '';
+      const acres    = p.Acres != null ? Number(p.Acres).toFixed(3) : '';
+      const front    = (p.Front != null && p.Front > 0) ? p.Front + ' ft' : '—';
+      const side     = (p.Side  != null && p.Side  > 0) ? p.Side  + ' ft' : '—';
+      const zoneCode = (p.Zoning || '').trim() || '—';
+      const f = (flood && flood.attributes) || {};
+      const fzone   = f.FLD_ZONE || 'X';
+      const fsub    = f.ZONE_SUBTY || '';
+      const isFlood = fzone && !/^X/i.test(fzone);
+      const s = slope || null;
+      const div = document.createElement('div');
+      div.style.cssText = 'position:fixed; top:-10000px; left:0; width:800px; padding:56px 56px 48px; background:#000; color:#fff; font-family:Mulish,Helvetica,Arial,sans-serif;';
+      const row = (label, value) => value
+        ? `<div style="display:grid; grid-template-columns:180px 1fr; gap:14px; padding:8px 0; border-bottom:1px solid #222;">
+             <div style="font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#8a8579; font-weight:700;">${label}</div>
+             <div style="font-size:13px; color:#fff;">${value}</div>
+           </div>`
+        : '';
+      const section = (title, body) => `
+        <div style="margin-top:26px;">
+          <div style="font-family:Aboreto,serif; font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:#eae2d3; border-bottom:1px solid #eae2d3; padding-bottom:6px; margin-bottom:6px;">${title}</div>
+          ${body}
+        </div>`;
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:baseline; padding-bottom:16px; border-bottom:2px solid #eae2d3;">
+          <div>
+            <div style="font-size:10px; letter-spacing:.26em; text-transform:uppercase; color:#eae2d3;">Land Acquisition · Research Report</div>
+            <div style="font-family:Aboreto,serif; font-size:22px; letter-spacing:.14em; color:#fff; margin-top:6px;">THE STONEHOUSE COMPANY</div>
+          </div>
+          <div style="text-align:right; font-size:10px; letter-spacing:.14em; color:#8a8579;">${today}</div>
+        </div>
+        <div style="margin-top:22px;">
+          <div style="font-size:9px; letter-spacing:.24em; text-transform:uppercase; color:#8a8579;">${meta.label}</div>
+          <div style="font-family:Aboreto,serif; font-size:22px; letter-spacing:.06em; color:#fff; margin-top:6px; line-height:1.2;">${addr || '—'}</div>
+        </div>
+        ${parcel ? section('Parcel',
+          row('Parcel ID',  parcelId) +
+          row('Owner',      owner) +
+          row('Situs',      situs) +
+          row('Acres',      acres) +
+          row('Frontage',   front) +
+          row('Side',       side)
+        ) : ''}
+        ${section('Zoning',
+          row('Zoning Code', zoneCode) +
+          `<div style="font-size:11px; color:#8a8579; padding-top:6px; line-height:1.5;">Setbacks and max-height regulations vary by district. Verify with the city before contracting.</div>`
+        )}
+        ${s ? section('Slope Analysis',
+          row('Slope',            s.slopePct.toFixed(1) + '%') +
+          row('Rating',           s.score ? s.score.label : '') +
+          row('Elevation Range',  s.range.toFixed(1) + ' ft') +
+          row('Low Point',        s.min.toFixed(1) + ' ft') +
+          row('High Point',       s.max.toFixed(1) + ' ft') +
+          `<div style="font-size:11px; color:#eae2d3; padding-top:6px; line-height:1.5;">${s.score ? s.score.note : ''}</div>` +
+          `<div style="font-size:10px; color:#8a8579; padding-top:4px;">Source: USGS 3DEP LiDAR (${s.sampleCount} sample points)</div>`
+        ) : ''}
+        ${section('FEMA Flood Zone',
+          row('Zone',       fzone) +
+          (fsub ? row('Subtype', fsub) : '') +
+          row('Flood Risk', isFlood ? '⚠ Yes — Special Flood Hazard Area' : '✓ No — outside SFHA')
+        )}
+        <div style="margin-top:36px; padding-top:14px; border-top:1px solid #333; font-size:9px; letter-spacing:.14em; color:#666;">
+          Data sources: Metro Nashville Cadastral & Zoning · USGS 3DEP · FEMA NFHL · Municipal records.
+          This report is a working reference — verify all values with the applicable municipality before contracting.
+        </div>`;
+      return div;
+    }
+
+    async function _plGenerateClientReport() {
+      const data = window._plLastLookup;
+      if (!data) { alert('Look up a property first.'); return; }
+      const btn = document.getElementById('pl-client-report-btn');
+      const orig = btn ? btn.textContent : '';
+      if (btn) { btn.disabled = true; btn.textContent = 'Building…'; }
+      try {
+        if (!window.html2canvas) await _plLoadScript(_PL_H2C_URL);
+        if (!window.PDFLib) await _plLoadScript(_PL_PDFLIB_URL);
+        const dom = _plBuildReportDOM(data);
+        document.body.appendChild(dom);
+        // Wait for fonts to settle
+        if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (_) {} }
+        const canvas = await window.html2canvas(dom, { scale: 2, backgroundColor: '#000000', useCORS: true, logging: false });
+        document.body.removeChild(dom);
+        const { PDFDocument, rgb } = window.PDFLib;
+        const pdf = await PDFDocument.create();
+        const pngBytes = await (await fetch(canvas.toDataURL('image/png'))).arrayBuffer();
+        const img = await pdf.embedPng(pngBytes);
+        const pageW = 612, pageH = 792, margin = 20;
+        const ratio = img.width / img.height;
+        const contentW = pageW - margin * 2, contentH = pageH - margin * 2;
+        let drawW = contentW, drawH = contentW / ratio;
+        if (drawH > contentH) { drawH = contentH; drawW = contentH * ratio; }
+        const page = pdf.addPage([pageW, pageH]);
+        page.drawRectangle({ x: 0, y: 0, width: pageW, height: pageH, color: rgb(0,0,0) });
+        page.drawImage(img, {
+          x: (pageW - drawW) / 2, y: (pageH - drawH) / 2,
+          width: drawW, height: drawH
+        });
+        const bytes = await pdf.save();
+        const blob = new Blob([bytes], { type: 'application/pdf' });
+        const addr = (data.geo && data.geo.address) ? data.geo.address : 'Property';
+        const filename = 'Stonehouse-Land-Report-' + addr.replace(/[^\w-]+/g, '-') + '.pdf';
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click();
+        setTimeout(() => { try { document.body.removeChild(a); } catch(_){} URL.revokeObjectURL(url); }, 500);
+      } catch (err) {
+        console.error('Client Report failed:', err);
+        alert('Could not build report: ' + (err.message || err));
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = orig; }
+      }
+    }
+    document.addEventListener('click', (e) => {
+      if (e.target.closest && e.target.closest('#pl-client-report-btn')) _plGenerateClientReport();
     });
 
     // Fallback → mailto: for anyone who prefers their OS mail app
