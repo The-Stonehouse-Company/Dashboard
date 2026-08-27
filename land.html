@@ -978,12 +978,13 @@
               </label>
             </div>
             <div style="font-size:11px; color:var(--text-dim); margin-top:6px; line-height:1.5;">
-              Clicking Send opens your default mail app (Mail, Outlook, or Gmail if you've set it as the browser handler) with the recipient, subject, and body pre-filled. Double-check the recipient before sending — Forest Hills / Brentwood contacts are best-guess and may need updating.
+              Opens Gmail's web composer in a new tab with everything pre-filled — sends from whichever Google account you're currently signed into. Make sure you're logged into your <b>@thestonehouseco.com</b> Google account, then just hit Send in Gmail. (If you want your OS mail app instead, use the "mailto:" fallback.) Double-check the recipient — Forest Hills / Brentwood contacts are best-guess and may need updating.
             </div>
             <div class="mini-modal-foot">
               <div style="flex:1;"></div>
               <button type="button" class="btn ghost" data-close-modal="ez-modal">Cancel</button>
-              <button type="submit" class="btn">✉ Open in Mail App</button>
+              <button type="button" class="btn ghost" id="ez-mailto">Open in Mail App</button>
+              <button type="submit" class="btn">✉ Open in Gmail</button>
             </div>
           </form>
         </div>
@@ -2988,19 +2989,41 @@
       if (el) el.addEventListener('input', _ezRefreshPreview);
       if (el) el.addEventListener('change', _ezRefreshPreview);
     });
-    // Submit → open mailto: link in the user's default mail app
-    const ezForm = document.getElementById('ez-form');
-    if (ezForm) ezForm.addEventListener('submit', (e) => {
-      e.preventDefault();
+    // Read the three fields and validate — used by both Gmail + mailto handlers
+    function _ezReadFields() {
       const to      = document.getElementById('ez-to').value.trim();
       const agent   = document.getElementById('ez-agent').value.trim();
       const address = document.getElementById('ez-address').value.trim();
-      if (!to || !agent || !address) return;
-      const subject = _ezComposeSubject(address);
-      const body    = _ezComposeBody(agent, address);
-      const url = 'mailto:' + encodeURIComponent(to)
-                + '?subject=' + encodeURIComponent(subject)
-                + '&body=' + encodeURIComponent(body);
+      if (!to || !agent || !address) return null;
+      return { to, agent, address,
+               subject: _ezComposeSubject(address),
+               body:    _ezComposeBody(agent, address) };
+    }
+
+    // Primary submit → open Gmail's web composer in a NEW TAB with everything
+    // pre-filled. Uses the account currently signed into Gmail in this browser.
+    // Zero setup required (no OS mail handler configuration).
+    const ezForm = document.getElementById('ez-form');
+    if (ezForm) ezForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const f = _ezReadFields();
+      if (!f) return;
+      const url = 'https://mail.google.com/mail/?view=cm&fs=1'
+                + '&to='   + encodeURIComponent(f.to)
+                + '&su='   + encodeURIComponent(f.subject)
+                + '&body=' + encodeURIComponent(f.body);
+      window.open(url, '_blank', 'noopener');
+      _closeMiniModal('ez-modal');
+    });
+
+    // Fallback → mailto: for anyone who prefers their OS mail app
+    const ezMailtoBtn = document.getElementById('ez-mailto');
+    if (ezMailtoBtn) ezMailtoBtn.addEventListener('click', () => {
+      const f = _ezReadFields();
+      if (!f) { alert('Fill in agent, recipient, and address first.'); return; }
+      const url = 'mailto:' + encodeURIComponent(f.to)
+                + '?subject=' + encodeURIComponent(f.subject)
+                + '&body='    + encodeURIComponent(f.body);
       location.href = url;
       _closeMiniModal('ez-modal');
     });
