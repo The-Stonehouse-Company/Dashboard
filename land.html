@@ -2936,17 +2936,13 @@
     // Williamson County parcel service — used for Brentwood comps.
     // Schema: Calculated=acres, CONSIDER_L=last sale price, IMP_ASSES=improvements.
     // No sale-date field exists in the public service — results are all-time.
-    let _brentwoodExtent = null;
+    // Williamson County's Municipalities layer went token-gated at some point,
+    // so we can no longer fetch Brentwood's polygon extent live. Hardcoded bbox
+    // covers the incorporated city limits with a small buffer. Comps returned
+    // via the Parcels spatial filter may include a handful of edge-of-city lots
+    // in Franklin or Nolensville — the address column shows which city.
     async function _lcGetBrentwoodExtent() {
-      if (_brentwoodExtent) return _brentwoodExtent;
-      const url = 'https://services8.arcgis.com/hkhKI6Qq7rjvBjZU/arcgis/rest/services/Municipalities/FeatureServer/0/query'
-        + "?where=NAME%3D'BRENTWOOD'"
-        + '&outFields=NAME&returnExtentOnly=true&outSR=4326&f=json';
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Municipality extent HTTP ' + res.status);
-      const data = await res.json();
-      _brentwoodExtent = data.extent;
-      return _brentwoodExtent;
+      return { xmin: -86.86, ymin: 35.95, xmax: -86.72, ymax: 36.06 };
     }
 
     async function _lcFindCompsBrentwood({ minAcres, maxAcres, cap, llcOnly }) {
