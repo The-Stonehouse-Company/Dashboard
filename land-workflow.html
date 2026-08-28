@@ -10,6 +10,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window['pdfjsLib']) {
+      window['pdfjsLib'].GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
   <style>
     :root {
       --ink: #0a0a0a;
@@ -458,7 +465,7 @@
       const LAND_AGENTS = [
         { name: 'Ryan Stonehouse',  role: 'Managing Broker', phone: '(615) 812-0066', email: 'ryan@thestonehouseco.com' },
         { name: 'Gabe Jeudy',       role: 'Land Agent',      phone: 'TBD',            email: 'gabe@thestonehouseco.com' },
-        { name: 'Kneeland Hibbett', role: 'Land Sourcing',   phone: 'TBD',            email: 'kneeland@thestonehouseco.com' },
+        { name: 'Kneeland Hibbett', role: 'Land Sourcing',   phone: '(256) 349-9624', email: 'kneeland@thestonehouseco.com' },
       ];
       const state = {
         cover: {}, land: {}, site: { photos: [] }, comps: [],
@@ -570,8 +577,14 @@
         state.comps.forEach((c, idx) => {
           const card = document.createElement('div');
           card.className = 'comp-card';
+          const photoHTML = c.photo && c.photo.data
+            ? `<div class="comp-photo" style="background:url('${c.photo.data}') center/cover no-repeat; height:140px; border:1px solid var(--panel-edge); margin-bottom:10px; position:relative;">
+                 <button type="button" class="del-photo" data-cp="${idx}" style="position:absolute; top:6px; right:6px;">×</button>
+               </div>`
+            : `<div class="drop-zone" data-comp-photo="${idx}" style="padding:20px; margin-bottom:10px; font-size:11px;">＋ Add Photo</div>`;
           card.innerHTML = `
             <button type="button" class="del-comp" data-idx="${idx}">Remove</button>
+            ${photoHTML}
             <div class="field"><label>Comp ${String(idx+1).padStart(2,'0')} · Address</label><input type="text" data-c="${idx}.address" value="${c.address || ''}" placeholder="1234 Example St" /></div>
             <div class="field"><label>Sale Price</label><input type="text" data-c="${idx}.price" value="${c.price || ''}" placeholder="$" /></div>
             <div class="field"><label>Square Feet</label><input type="text" data-c="${idx}.sqft" value="${c.sqft || ''}" /></div>
@@ -582,7 +595,7 @@
           `;
           list.appendChild(card);
         });
-        // Bind
+        // Text bindings
         list.querySelectorAll('input[data-c]').forEach(inp => {
           inp.addEventListener('input', () => {
             const [idx, k] = inp.dataset.c.split('.');
@@ -594,6 +607,30 @@
           btn.addEventListener('click', () => {
             state.comps.splice(+btn.dataset.idx, 1);
             renderComps(); save();
+          });
+        });
+        // Photo drop zones per comp
+        list.querySelectorAll('[data-comp-photo]').forEach(zone => {
+          const idx = +zone.dataset.compPhoto;
+          zone.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file'; input.accept = 'image/*';
+            input.addEventListener('change', async () => {
+              const f = input.files && input.files[0];
+              if (!f) return;
+              state.comps[idx].photo = { name: f.name, data: await fileToDataURL(f) };
+              save(); renderComps();
+            });
+            input.click();
+          });
+        });
+        // Photo delete
+        list.querySelectorAll('.del-photo[data-cp]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const i = +btn.dataset.cp;
+            delete state.comps[i].photo;
+            save(); renderComps();
           });
         });
       }
@@ -736,6 +773,16 @@
           <div style="font-family:${S.BODY}; font-size:14px; color:#fff; font-weight:500;">${value || '—'}</div>
         </div>`;
       const escapeHTML = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      // Format money: "1200000" or "$1,200,000" → "$1,200,000". Leaves non-numeric strings as-is.
+      const fmtMoney = (v) => {
+        if (v === null || v === undefined || v === '') return '';
+        const s = String(v).trim();
+        const cleaned = s.replace(/[$,\s]/g, '');
+        if (!/^-?\d+(?:\.\d+)?$/.test(cleaned)) return s;
+        const n = parseFloat(cleaned);
+        if (isNaN(n)) return s;
+        return (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 });
+      };
 
       function slideCover() {
         const bg = state.cover.photo && state.cover.photo.data
@@ -807,52 +854,114 @@
           </div>`;
       }
 
-      function slideSite() {
-        const photos = (state.site && state.site.photos) || [];
-        const grid = photos.slice(0, 6).map(p => `
-          <div style="background: url('${p.data}') center/cover no-repeat; height:100%; border:1px solid ${S.RULE};"></div>`).join('');
+      // Render the first page of the uploaded survey PDF to a data URL via PDF.js.
+      // Returns null on failure. Preserves original aspect ratio.
+      async function renderSurveyPreview(dataUrl) {
+        if (!dataUrl || !window.pdfjsLib) return null;
+        try {
+          const base64 = dataUrl.split(',')[1];
+          const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+          const doc = await window.pdfjsLib.getDocument({ data: bytes }).promise;
+          const page = await doc.getPage(1);
+          const targetH = 1100; // high-res so it looks crisp on the slide
+          const vpBase = page.getViewport({ scale: 1 });
+          const scale = targetH / vpBase.height;
+          const viewport = page.getViewport({ scale });
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width; canvas.height = viewport.height;
+          await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+          const url = canvas.toDataURL('image/jpeg', 0.92);
+          return { url, pages: doc.numPages, width: viewport.width, height: viewport.height };
+        } catch (e) {
+          console.warn('survey preview render failed', e);
+          return null;
+        }
+      }
+
+      function slideSite(surveyPreview) {
+        const S3 = state.site || {};
+        const cover = state.cover && state.cover.photo && state.cover.photo.data;
+        // Background: reuse cover photo (dark overlay) to keep visual continuity
+        const bg = cover
+          ? `<div style="position:absolute; inset:0; background:url('${cover}') center/cover no-repeat;"></div>
+             <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.85) 60%, rgba(0,0,0,.92) 100%);"></div>`
+          : `<div style="position:absolute; inset:0; background:linear-gradient(135deg, #1a1a1a, #050505);"></div>`;
+
+        // Center block: survey preview if available; else fallback to note or photo grid
+        let centerBlock;
+        if (surveyPreview && surveyPreview.url) {
+          // Aspect-preserving fit into a ~650px-tall frame
+          const maxH = 620, maxW = 900;
+          const ratio = surveyPreview.width / surveyPreview.height;
+          let h = maxH, w = h * ratio;
+          if (w > maxW) { w = maxW; h = w / ratio; }
+          centerBlock = `
+            <div style="display:flex; flex-direction:column; align-items:center;">
+              <div style="background:#fff; padding:14px; box-shadow:0 24px 60px rgba(0,0,0,.6); border:1px solid ${S.GOLD};">
+                <img src="${surveyPreview.url}" style="display:block; width:${w}px; height:${h}px; object-fit:contain; background:#fff;" alt="Survey preview" />
+              </div>
+              <div style="margin-top:22px; font-family:${S.BODY}; font-size:11px; letter-spacing:.28em; color:${S.GOLD}; text-transform:uppercase;">
+                Boundary Survey · Page 1 of ${surveyPreview.pages}${S3.survey ? '  ·  ' + escapeHTML(S3.survey.name) : ''}
+              </div>
+            </div>`;
+        } else if ((S3.photos || []).length) {
+          const photos = S3.photos.slice(0, 4);
+          const grid = photos.map(p => `<div style="background:url('${p.data}') center/cover no-repeat; height:280px; border:1px solid ${S.RULE};"></div>`).join('');
+          centerBlock = `
+            <div>
+              <div style="font-family:${S.BODY}; font-size:11px; letter-spacing:.28em; color:${S.MUTE}; text-transform:uppercase; margin-bottom:14px;">Site Photos</div>
+              <div style="display:grid; grid-template-columns:repeat(${photos.length}, 1fr); gap:12px;">${grid}</div>
+            </div>`;
+        } else {
+          centerBlock = `<div style="color:${S.MUTE}; font-size:14px; text-align:center;">Upload a survey PDF on the workflow to display it here.</div>`;
+        }
+
         return `
-          <div style="padding:64px 88px; height:100%;">
-            ${slideBase(state.cover.date)}
-            ${slideHeader('Section Three', 'Site + Survey')}
-            ${photos.length ? `
-              <div style="display:grid; grid-template-columns:repeat(3, 1fr); grid-template-rows:repeat(2, 1fr); gap:14px; height:600px;">
-                ${grid}
-              </div>` : `
-              <div style="color:${S.MUTE}; font-size:14px;">No site photos attached.</div>`}
-            ${state.site && state.site.survey ? `
-              <div style="margin-top:30px; padding:16px 24px; border:1px solid ${S.GOLD}; color:${S.GOLD}; font-family:${S.BODY}; font-size:12px; letter-spacing:.18em; text-transform:uppercase;">
-                ✓ Survey attached · ${escapeHTML(state.site.survey.name)}
-              </div>` : ''}
+          <div style="position:relative; padding:64px 88px 44px; height:100%; overflow:hidden;">
+            ${bg}
+            <div style="position:relative; z-index:2; height:100%; display:flex; flex-direction:column;">
+              ${slideBase(state.cover.date)}
+              ${slideHeader('Section Three', 'Site + Survey')}
+              <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+                ${centerBlock}
+              </div>
+            </div>
           </div>`;
       }
 
       function slideComps() {
         const comps = state.comps || [];
-        const money = v => (v && !isNaN(parseFloat(String(v).replace(/[$,]/g,''))))
-          ? '$' + parseFloat(String(v).replace(/[$,]/g,'')).toLocaleString() : (v || '—');
+        const money = v => fmtMoney(v) || '—';
         const ppsf = c => {
           const p = parseFloat(String(c.price || '').replace(/[$,]/g,''));
           const s = parseFloat(String(c.sqft || '').replace(/[$,]/g,''));
           return (p && s) ? '$' + Math.round(p / s) : '—';
         };
-        const cards = comps.slice(0, 4).map((c, i) => `
-          <div style="background:#0f0f0f; border:1px solid ${S.RULE}; padding:20px;">
-            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
-              <div style="font-family:${S.BODY}; font-size:10px; letter-spacing:.24em; color:${S.MUTE};">COMP ${String(i+1).padStart(2,'0')}</div>
-              <div style="font-family:${S.BODY}; font-size:9px; letter-spacing:.22em; color:${S.MUTE};">PRICE PER SQ FT</div>
+        const cards = comps.slice(0, 4).map((c, i) => {
+          const photoBlock = c.photo && c.photo.data
+            ? `<div style="height:180px; background:url('${c.photo.data}') center/cover no-repeat; border-bottom:1px solid ${S.RULE};"></div>`
+            : `<div style="height:180px; background:linear-gradient(135deg, #1a1a1a, #0a0a0a); border-bottom:1px solid ${S.RULE}; display:flex; align-items:center; justify-content:center; color:${S.DIM}; font-family:${S.BODY}; font-size:10px; letter-spacing:.22em; text-transform:uppercase;">no photo</div>`;
+          return `
+          <div style="background:#0f0f0f; border:1px solid ${S.RULE}; display:flex; flex-direction:column; overflow:hidden;">
+            ${photoBlock}
+            <div style="padding:18px 18px 20px;">
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
+                <div style="font-family:${S.BODY}; font-size:10px; letter-spacing:.24em; color:${S.MUTE};">COMP ${String(i+1).padStart(2,'0')}</div>
+                <div style="font-family:${S.BODY}; font-size:9px; letter-spacing:.22em; color:${S.MUTE};">PRICE PER SQ FT</div>
+              </div>
+              <div style="text-align:right; font-family:${S.DISPLAY}; font-size:36px; color:#fff; line-height:1;">${ppsf(c)}</div>
+              <div style="margin-top:14px; font-family:${S.DISPLAY}; font-size:14px; color:#fff; letter-spacing:.02em; line-height:1.25;">${escapeHTML(c.address || 'Address TBD').toUpperCase()}</div>
+              <div style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:6px 16px;">
+                <div><div style="font-size:8px; letter-spacing:.2em; color:${S.MUTE};">SALE PRICE</div><div style="font-size:12px; color:#fff; margin-top:2px;">${money(c.price)}</div></div>
+                <div><div style="font-size:8px; letter-spacing:.2em; color:${S.MUTE};">SQUARE FEET</div><div style="font-size:12px; color:#fff; margin-top:2px;">${escapeHTML(c.sqft) || '—'}</div></div>
+                <div><div style="font-size:8px; letter-spacing:.2em; color:${S.MUTE};">LOT SIZE</div><div style="font-size:12px; color:#fff; margin-top:2px;">${escapeHTML(c.lot) || '—'}</div></div>
+                <div><div style="font-size:8px; letter-spacing:.2em; color:${S.MUTE};">BEDS/BATHS</div><div style="font-size:12px; color:#fff; margin-top:2px;">${escapeHTML(c.beds_baths) || '—'}</div></div>
+                <div><div style="font-size:8px; letter-spacing:.2em; color:${S.MUTE};">CLOSED</div><div style="font-size:12px; color:#fff; margin-top:2px;">${escapeHTML(c.closed) || '—'}</div></div>
+                <div><div style="font-size:8px; letter-spacing:.2em; color:${S.MUTE};">DAYS ON MKT</div><div style="font-size:12px; color:#fff; margin-top:2px;">${escapeHTML(c.dom) || '—'}</div></div>
+              </div>
             </div>
-            <div style="text-align:right; font-family:${S.DISPLAY}; font-size:44px; color:#fff; line-height:1;">${ppsf(c)}</div>
-            <div style="margin-top:20px; font-family:${S.DISPLAY}; font-size:16px; color:#fff; letter-spacing:.02em;">${escapeHTML(c.address || 'Address TBD').toUpperCase()}</div>
-            <div style="margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:8px 16px;">
-              <div><div style="font-size:9px; letter-spacing:.2em; color:${S.MUTE};">SALE PRICE</div><div style="font-size:13px; color:#fff; margin-top:2px;">${money(c.price)}</div></div>
-              <div><div style="font-size:9px; letter-spacing:.2em; color:${S.MUTE};">SQUARE FEET</div><div style="font-size:13px; color:#fff; margin-top:2px;">${escapeHTML(c.sqft) || '—'}</div></div>
-              <div><div style="font-size:9px; letter-spacing:.2em; color:${S.MUTE};">LOT SIZE</div><div style="font-size:13px; color:#fff; margin-top:2px;">${escapeHTML(c.lot) || '—'}</div></div>
-              <div><div style="font-size:9px; letter-spacing:.2em; color:${S.MUTE};">BEDS/BATHS</div><div style="font-size:13px; color:#fff; margin-top:2px;">${escapeHTML(c.beds_baths) || '—'}</div></div>
-              <div><div style="font-size:9px; letter-spacing:.2em; color:${S.MUTE};">CLOSED</div><div style="font-size:13px; color:#fff; margin-top:2px;">${escapeHTML(c.closed) || '—'}</div></div>
-              <div><div style="font-size:9px; letter-spacing:.2em; color:${S.MUTE};">DAYS ON MKT</div><div style="font-size:13px; color:#fff; margin-top:2px;">${escapeHTML(c.dom) || '—'}</div></div>
-            </div>
-          </div>`).join('');
+          </div>`;
+        }).join('');
         // Averages
         const priced = comps.filter(c => parseFloat(String(c.price||'').replace(/[$,]/g,'')));
         const avgPPSF = (() => {
@@ -898,9 +1007,11 @@
               </div>
 
               <!-- The number -->
-              <div style="font-family:${S.DISPLAY}; font-size:${(C.offering_price && C.offering_price.length > 10) ? '116px' : '148px'}; color:#fff; line-height:.95; letter-spacing:.03em; text-align:center;">
-                ${escapeHTML(C.offering_price) || '$—'}
-              </div>
+              ${(() => {
+                const priceStr = fmtMoney(C.offering_price);
+                const size = priceStr.length > 12 ? '96px' : priceStr.length > 10 ? '116px' : '148px';
+                return `<div style="font-family:${S.DISPLAY}; font-size:${size}; color:#fff; line-height:.95; letter-spacing:.03em; text-align:center;">${escapeHTML(priceStr) || '$—'}</div>`;
+              })()}
 
               <!-- Property line beneath -->
               <div style="font-family:${S.BODY}; font-size:14px; letter-spacing:.28em; color:${S.MUTE}; text-transform:uppercase; margin-top:32px; text-align:center;">
@@ -916,9 +1027,9 @@
               <div style="margin-top:32px; padding:24px 32px; background:linear-gradient(180deg, rgba(198,166,100,.04), rgba(198,166,100,0)); border-top:1px solid ${S.RULE};">
                 <div style="font-family:${S.BODY}; font-size:9px; letter-spacing:.32em; color:${S.GOLD}; text-transform:uppercase; margin-bottom:16px; text-align:center;">Deal Terms · If Under Contract</div>
                 <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:32px; text-align:center;">
-                  ${termStat('Contract Price', C.price)}
-                  ${termStat('Earnest Money', C.em)}
-                  ${termStat('Closing Costs', C.closing_costs)}
+                  ${termStat('Contract Price', fmtMoney(C.price))}
+                  ${termStat('Earnest Money', fmtMoney(C.em))}
+                  ${termStat('Closing Costs', fmtMoney(C.closing_costs))}
                   ${termStat('Under Contract', C.contract_date)}
                   ${termStat('DD Ends', C.dd_end)}
                   ${termStat('Closing', C.close_date)}
@@ -1039,7 +1150,19 @@
         const origLabel = btn.textContent;
         btn.textContent = 'Rendering…';
         try {
-          const slides = [slideCover(), slideLand(), slideSite(), slideComps(), slideCost(), slideTeam(), slideHood()];
+          // Pre-render survey preview so it can be embedded on the Site+Survey slide (no page-size mismatch)
+          btn.textContent = 'Preparing survey…';
+          const surveyPreview = await renderSurveyPreview(state.site && state.site.survey && state.site.survey.data);
+
+          const slides = [
+            slideCover(),
+            slideLand(),
+            slideSite(surveyPreview),
+            slideComps(),
+            slideCost(),
+            slideTeam(),
+            slideHood(),
+          ];
           const { jsPDF } = window.jspdf;
           // 16:9 landscape at 1600×900 → export at 800×450 pt so slide fills page perfectly.
           const pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: [800, 450] });
@@ -1050,43 +1173,7 @@
             btn.textContent = `Rendering ${i+1} / ${slides.length}…`;
           }
           const addr = (state.cover.address || 'Property').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '');
-
-          // ---- If a survey PDF is attached, merge its pages in AFTER slide 3 (Site + Survey) ----
-          const survey = state.site && state.site.survey;
-          let outBytes;
-          if (survey && survey.data && window.PDFLib) {
-            btn.textContent = 'Merging survey…';
-            const slidesBytes = pdf.output('arraybuffer');
-            const { PDFDocument } = window.PDFLib;
-            const merged = await PDFDocument.create();
-            const slidesDoc  = await PDFDocument.load(slidesBytes);
-            const surveyBase64 = survey.data.split(',')[1];
-            const surveyBytes  = Uint8Array.from(atob(surveyBase64), c => c.charCodeAt(0));
-            let surveyDoc = null;
-            try { surveyDoc = await PDFDocument.load(surveyBytes); }
-            catch (e) { try { surveyDoc = await PDFDocument.load(surveyBytes, { ignoreEncryption: true }); } catch { console.warn('survey PDF unreadable'); } }
-
-            // Copy all slide pages first
-            const slidePages = await merged.copyPages(slidesDoc, slidesDoc.getPageIndices());
-            // Order: Cover(0) Land(1) Site+Survey(2) — then insert survey pages — then Comps(3) Cost(4) Team(5) Hood(6)
-            const INSERT_AFTER = 3; // after slide index 2 (Site+Survey)
-            for (let i = 0; i < INSERT_AFTER; i++) merged.addPage(slidePages[i]);
-            if (surveyDoc) {
-              const surveyPages = await merged.copyPages(surveyDoc, surveyDoc.getPageIndices());
-              surveyPages.forEach(p => merged.addPage(p));
-            }
-            for (let i = INSERT_AFTER; i < slidePages.length; i++) merged.addPage(slidePages[i]);
-
-            outBytes = await merged.save();
-            const blob = new Blob([outBytes], { type: 'application/pdf' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = `Stonehouse-Land-Memo-${addr}.pdf`;
-            document.body.appendChild(a); a.click();
-            setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
-          } else {
-            pdf.save(`Stonehouse-Land-Memo-${addr}.pdf`);
-          }
+          pdf.save(`Stonehouse-Land-Memo-${addr}.pdf`);
           document.getElementById('pdf-stage').innerHTML = '';
           btn.textContent = '✓ Exported';
           setTimeout(() => { btn.textContent = origLabel; btn.disabled = false; }, 2000);
