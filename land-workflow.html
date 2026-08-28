@@ -584,7 +584,10 @@
             ? `<div class="comp-photo" style="background:url('${c.photo.data}') center/cover no-repeat; height:140px; border:1px solid var(--panel-edge); margin-bottom:10px; position:relative;">
                  <button type="button" class="del-photo" data-cp="${idx}" style="position:absolute; top:6px; right:6px;">×</button>
                </div>`
-            : `<div class="drop-zone" data-comp-photo="${idx}" style="padding:20px; margin-bottom:10px; font-size:11px;">＋ Add Photo</div>`;
+            : `<label class="drop-zone" style="padding:20px; margin-bottom:10px; font-size:11px; display:block; cursor:pointer;">
+                 <span data-comp-photo-label="${idx}">+ Add Photo</span>
+                 <input type="file" accept="image/*" style="display:none;" data-comp-photo="${idx}" />
+               </label>`;
           card.innerHTML = `
             <button type="button" class="del-comp" data-idx="${idx}">Remove</button>
             ${photoHTML}
@@ -613,25 +616,24 @@
           });
         });
         // Photo drop zones per comp
-        list.querySelectorAll('[data-comp-photo]').forEach(zone => {
-          const idx = +zone.dataset.compPhoto;
-          zone.addEventListener('click', () => {
-            const input = document.createElement('input');
-            input.type = 'file'; input.accept = 'image/*';
-            input.addEventListener('change', async () => {
-              const f = input.files && input.files[0];
-              if (!f) return;
-              zone.textContent = 'Uploading…';
-              try {
-                const data = await fileToShrunkDataURL(f);
-                state.comps[idx].photo = { name: f.name, data };
-                save(); renderComps();
-              } catch (err) {
-                console.error('comp photo upload failed', err);
-                zone.textContent = 'Upload failed — try a smaller file';
-              }
-            });
-            input.click();
+        // Comp photo file inputs live inside <label> so the label click triggers
+        // the picker natively — no synthetic .click() needed. Bind change events.
+        list.querySelectorAll('input[type="file"][data-comp-photo]').forEach(input => {
+          const idx = +input.dataset.compPhoto;
+          const label = document.querySelector(`[data-comp-photo-label="${idx}"]`);
+          input.addEventListener('change', async () => {
+            const f = input.files && input.files[0];
+            if (!f) return;
+            if (label) label.textContent = 'Uploading…';
+            try {
+              const data = await fileToShrunkDataURL(f);
+              state.comps[idx].photo = { name: f.name, data };
+              save();
+              renderComps();
+            } catch (err) {
+              console.error('comp photo upload failed', err);
+              if (label) label.textContent = 'Upload failed — try again';
+            }
           });
         });
         // Photo delete
