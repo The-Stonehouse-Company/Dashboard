@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
       --ink: #0a0a0a;
@@ -241,6 +243,9 @@
   </style>
 </head>
 <body>
+  <!-- Hidden PDF render stage (16:9 landscape) — one slide populated at a time, snapshotted to canvas, added to jsPDF page. -->
+  <div id="pdf-stage" style="position:fixed; left:-10000px; top:0; width:1600px; height:900px; background:#0a0a0a; color:#f4efe4; font-family:'Montserrat', sans-serif; overflow:hidden;"></div>
+
   <!-- ============ Top bar ============ -->
   <header class="topbar">
     <div class="topbar-left">
@@ -700,6 +705,307 @@
         localStorage.removeItem(STORAGE_KEY);
         location.reload();
       });
+
+      /* ================================================================
+         PDF Export — 16:9 landscape, one slide per section, OM aesthetic
+         ================================================================ */
+      const S = {
+        BG: '#0a0a0a', INK: '#f4efe4', MUTE: '#a8a49b', DIM: '#6a675f',
+        RULE: '#262626', ACCENT: '#EAE2D3', GOLD: '#c6a664',
+        DISPLAY: "'Aboreto', serif",
+        BODY: "'Montserrat', -apple-system, sans-serif",
+      };
+      const slideBase = (dateStr) => `
+        <div style="position:absolute; top:32px; right:44px; font-family:${S.BODY}; font-size:12px; letter-spacing:.18em; color:${S.DIM};">${dateStr || ''}</div>
+      `;
+      const slideHeader = (eyebrow, title) => `
+        <div style="font-family:${S.BODY}; font-size:12px; letter-spacing:.28em; text-transform:uppercase; color:${S.DIM}; margin-bottom:8px;">${eyebrow}</div>
+        <div style="font-family:${S.DISPLAY}; font-size:56px; color:#fff; letter-spacing:.02em; line-height:1;">${title.toUpperCase()}</div>
+        <div style="width:70px; height:2px; background:${S.ACCENT}; margin:16px 0 40px;"></div>
+      `;
+      const bigStat = (num, label) => `
+        <div style="text-align:center;">
+          <div style="font-family:${S.DISPLAY}; font-size:56px; color:#fff; line-height:1;">${num}</div>
+          <div style="font-family:${S.BODY}; font-size:11px; letter-spacing:.24em; color:${S.MUTE}; text-transform:uppercase; margin-top:10px;">${label}</div>
+        </div>`;
+      const dataRow = (label, value) => `
+        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid ${S.RULE};">
+          <div style="font-family:${S.BODY}; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:${S.MUTE};">${label}</div>
+          <div style="font-family:${S.BODY}; font-size:14px; color:#fff; font-weight:500;">${value || '—'}</div>
+        </div>`;
+      const escapeHTML = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+      function slideCover() {
+        const bg = state.cover.photo && state.cover.photo.data
+          ? `background: url('${state.cover.photo.data}') center/cover no-repeat;`
+          : `background: linear-gradient(135deg, #1a1a1a, #050505);`;
+        const agentLine = (state.team && state.team.agents || []).join('  ·  ');
+        return `
+          <div style="position:absolute; inset:0; ${bg}"></div>
+          <div style="position:absolute; inset:0; background:linear-gradient(90deg, rgba(0,0,0,.85) 0%, rgba(0,0,0,.55) 55%, rgba(0,0,0,.25) 100%);"></div>
+          <div style="position:relative; padding:80px 88px; height:100%; display:flex; flex-direction:column; justify-content:space-between; color:#fff;">
+            <div>
+              <div style="font-family:${S.BODY}; font-size:13px; letter-spacing:.32em; text-transform:uppercase; color:${S.MUTE};">Land Acquisition Memo</div>
+              <div style="font-family:${S.DISPLAY}; font-size:96px; line-height:1; margin-top:22px; letter-spacing:.02em;">${escapeHTML(state.cover.address || 'Address TBD').toUpperCase()}</div>
+              <div style="font-family:${S.BODY}; font-size:18px; color:${S.MUTE}; margin-top:20px; font-weight:300;">${escapeHTML(state.cover.tagline || '')}</div>
+            </div>
+            <div>
+              <div style="width:100%; height:1px; background:${S.RULE}; margin-bottom:22px;"></div>
+              <div style="display:flex; justify-content:space-between; align-items:end;">
+                <div style="font-family:${S.BODY}; font-size:12px; letter-spacing:.24em; text-transform:uppercase; color:${S.MUTE};">
+                  ${escapeHTML(state.cover.submarket || '')}
+                </div>
+                <div style="font-family:${S.BODY}; font-size:12px; letter-spacing:.18em; color:${S.MUTE}; text-align:right;">
+                  ${agentLine ? `<div style="color:#fff;">${escapeHTML(agentLine)}</div>` : ''}
+                  <div style="margin-top:4px;">${escapeHTML(state.cover.date || '')}</div>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      function slideLand() {
+        const L = state.land || {};
+        return `
+          <div style="padding:64px 88px; height:100%;">
+            ${slideBase(state.cover.date)}
+            ${slideHeader('Section Two', 'Land')}
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:60px;">
+              <div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 40px;">
+                  ${dataRow('Lot Size (Acres)', L.lot_acres)}
+                  ${dataRow('Frontage', L.frontage)}
+                  ${dataRow('Depth', L.depth)}
+                  ${dataRow('Zoning', L.zoning)}
+                  ${dataRow('Front Setback', L.setback_front)}
+                  ${dataRow('Side Setback', L.setback_side)}
+                  ${dataRow('Rear Setback', L.setback_rear)}
+                  ${dataRow('Max Height', L.max_height)}
+                </div>
+              </div>
+              <div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 40px;">
+                  ${dataRow('FEMA Zone', L.fema)}
+                  ${dataRow('Elevation (ft)', L.elevation)}
+                  ${dataRow('Water', L.water)}
+                  ${dataRow('Sewer', L.sewer)}
+                  ${dataRow('Electric', L.electric)}
+                  ${dataRow('Gas', L.gas)}
+                </div>
+                <div style="margin-top:24px;">
+                  ${dataRow('HOA', L.hoa)}
+                </div>
+                ${L.notes ? `
+                  <div style="margin-top:32px; padding-top:20px; border-top:1px solid ${S.RULE};">
+                    <div style="font-family:${S.BODY}; font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:${S.DIM}; margin-bottom:10px;">Notes</div>
+                    <div style="font-family:${S.BODY}; font-size:13px; color:${S.INK}; line-height:1.6;">${escapeHTML(L.notes)}</div>
+                  </div>` : ''}
+              </div>
+            </div>
+          </div>`;
+      }
+
+      function slideSite() {
+        const photos = (state.site && state.site.photos) || [];
+        const grid = photos.slice(0, 6).map(p => `
+          <div style="background: url('${p.data}') center/cover no-repeat; height:100%; border:1px solid ${S.RULE};"></div>`).join('');
+        return `
+          <div style="padding:64px 88px; height:100%;">
+            ${slideBase(state.cover.date)}
+            ${slideHeader('Section Three', 'Site + Survey')}
+            ${photos.length ? `
+              <div style="display:grid; grid-template-columns:repeat(3, 1fr); grid-template-rows:repeat(2, 1fr); gap:14px; height:600px;">
+                ${grid}
+              </div>` : `
+              <div style="color:${S.MUTE}; font-size:14px;">No site photos attached.</div>`}
+            ${state.site && state.site.survey ? `
+              <div style="margin-top:30px; padding:16px 24px; border:1px solid ${S.GOLD}; color:${S.GOLD}; font-family:${S.BODY}; font-size:12px; letter-spacing:.18em; text-transform:uppercase;">
+                ✓ Survey attached · ${escapeHTML(state.site.survey.name)}
+              </div>` : ''}
+          </div>`;
+      }
+
+      function slideComps() {
+        const comps = state.comps || [];
+        const money = v => (v && !isNaN(parseFloat(String(v).replace(/[$,]/g,''))))
+          ? '$' + parseFloat(String(v).replace(/[$,]/g,'')).toLocaleString() : (v || '—');
+        const ppsf = c => {
+          const p = parseFloat(String(c.price || '').replace(/[$,]/g,''));
+          const s = parseFloat(String(c.sqft || '').replace(/[$,]/g,''));
+          return (p && s) ? '$' + Math.round(p / s) : '—';
+        };
+        const cards = comps.slice(0, 4).map((c, i) => `
+          <div style="background:#0f0f0f; border:1px solid ${S.RULE}; padding:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
+              <div style="font-family:${S.BODY}; font-size:10px; letter-spacing:.24em; color:${S.MUTE};">COMP ${String(i+1).padStart(2,'0')}</div>
+              <div style="font-family:${S.BODY}; font-size:9px; letter-spacing:.22em; color:${S.MUTE};">PRICE PER SQ FT</div>
+            </div>
+            <div style="text-align:right; font-family:${S.DISPLAY}; font-size:44px; color:#fff; line-height:1;">${ppsf(c)}</div>
+            <div style="margin-top:20px; font-family:${S.DISPLAY}; font-size:16px; color:#fff; letter-spacing:.02em;">${escapeHTML(c.address || 'Address TBD').toUpperCase()}</div>
+            <div style="margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:8px 16px;">
+              <div><div style="font-size:9px; letter-spacing:.2em; color:${S.MUTE};">SALE PRICE</div><div style="font-size:13px; color:#fff; margin-top:2px;">${money(c.price)}</div></div>
+              <div><div style="font-size:9px; letter-spacing:.2em; color:${S.MUTE};">SQUARE FEET</div><div style="font-size:13px; color:#fff; margin-top:2px;">${escapeHTML(c.sqft) || '—'}</div></div>
+              <div><div style="font-size:9px; letter-spacing:.2em; color:${S.MUTE};">LOT SIZE</div><div style="font-size:13px; color:#fff; margin-top:2px;">${escapeHTML(c.lot) || '—'}</div></div>
+              <div><div style="font-size:9px; letter-spacing:.2em; color:${S.MUTE};">BEDS/BATHS</div><div style="font-size:13px; color:#fff; margin-top:2px;">${escapeHTML(c.beds_baths) || '—'}</div></div>
+              <div><div style="font-size:9px; letter-spacing:.2em; color:${S.MUTE};">CLOSED</div><div style="font-size:13px; color:#fff; margin-top:2px;">${escapeHTML(c.closed) || '—'}</div></div>
+              <div><div style="font-size:9px; letter-spacing:.2em; color:${S.MUTE};">DAYS ON MKT</div><div style="font-size:13px; color:#fff; margin-top:2px;">${escapeHTML(c.dom) || '—'}</div></div>
+            </div>
+          </div>`).join('');
+        // Averages
+        const priced = comps.filter(c => parseFloat(String(c.price||'').replace(/[$,]/g,'')));
+        const avgPPSF = (() => {
+          const vals = comps.map(c => {
+            const p = parseFloat(String(c.price||'').replace(/[$,]/g,''));
+            const s = parseFloat(String(c.sqft||'').replace(/[$,]/g,''));
+            return (p && s) ? p/s : null;
+          }).filter(v => v);
+          return vals.length ? '$' + Math.round(vals.reduce((a,b)=>a+b,0)/vals.length) : '—';
+        })();
+        return `
+          <div style="padding:64px 88px; height:100%;">
+            ${slideBase(state.cover.date)}
+            ${slideHeader('Section Four', 'Comparables')}
+            ${comps.length ? `
+              <div style="display:grid; grid-template-columns:repeat(${Math.min(comps.length, 4)}, 1fr); gap:14px;">${cards}</div>
+              <div style="margin-top:32px; padding:14px 22px; background:#111; border-top:1px solid ${S.RULE}; display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-family:${S.BODY}; font-size:10px; letter-spacing:.24em; color:${S.MUTE};">AVERAGE  ·  ${priced.length}-COMP SET</div>
+                <div style="font-family:${S.DISPLAY}; font-size:22px; color:#fff;">${avgPPSF}  /  SQ FT</div>
+              </div>` : `
+              <div style="color:${S.MUTE};">No comparables entered.</div>`}
+          </div>`;
+      }
+
+      function slideCost() {
+        const C = state.cost || {};
+        return `
+          <div style="padding:64px 88px; height:100%;">
+            ${slideBase(state.cover.date)}
+            ${slideHeader('Section Five', 'Land Cost')}
+            <div style="text-align:center; margin-bottom:60px;">
+              <div style="font-family:${S.BODY}; font-size:11px; letter-spacing:.32em; color:${S.GOLD}; text-transform:uppercase;">Offering Price</div>
+              <div style="font-family:${S.DISPLAY}; font-size:112px; color:#fff; margin-top:10px; line-height:1;">${escapeHTML(C.offering_price) || '$—'}</div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0 60px;">
+              <div>
+                <div style="font-family:${S.BODY}; font-size:10px; letter-spacing:.24em; color:${S.DIM}; margin-bottom:12px;">DEAL TERMS</div>
+                ${dataRow('Contract Price', C.price)}
+                ${dataRow('Earnest Money', C.em)}
+                ${dataRow('Closing Costs', C.closing_costs)}
+              </div>
+              <div>
+                <div style="font-family:${S.BODY}; font-size:10px; letter-spacing:.24em; color:${S.DIM}; margin-bottom:12px;">TIMELINE</div>
+                ${dataRow('Contract (UC)', C.contract_date)}
+                ${dataRow('DD Ends', C.dd_end)}
+                ${dataRow('Closing', C.close_date)}
+              </div>
+              <div>
+                <div style="font-family:${S.BODY}; font-size:10px; letter-spacing:.24em; color:${S.DIM}; margin-bottom:12px;">NOTES</div>
+                <div style="font-family:${S.BODY}; font-size:13px; color:${S.INK}; line-height:1.6;">${escapeHTML(C.notes) || '—'}</div>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      function slideTeam() {
+        const agents = (state.team && state.team.agents) || [];
+        const chips = agents.map(name => {
+          const a = LAND_AGENTS.find(x => x.name === name) || { name, role: '' };
+          return `
+            <div style="padding:34px 44px; background:#0f0f0f; border:1px solid ${S.RULE}; text-align:center;">
+              <div style="font-family:${S.DISPLAY}; font-size:28px; color:#fff; letter-spacing:.02em;">${escapeHTML(a.name).toUpperCase()}</div>
+              <div style="font-family:${S.BODY}; font-size:10px; letter-spacing:.24em; color:${S.MUTE}; margin-top:8px; text-transform:uppercase;">${escapeHTML(a.role)}</div>
+              <div style="width:40px; height:1px; background:${S.ACCENT}; margin:18px auto 0;"></div>
+              <div style="font-family:${S.BODY}; font-size:11px; letter-spacing:.14em; color:${S.MUTE}; margin-top:14px;">The Stonehouse Company</div>
+            </div>`;
+        }).join('');
+        return `
+          <div style="padding:64px 88px; height:100%;">
+            ${slideBase(state.cover.date)}
+            ${slideHeader('Section Six', 'Team')}
+            ${agents.length ? `
+              <div style="display:grid; grid-template-columns:repeat(${Math.min(agents.length, 3)}, 1fr); gap:24px; max-width:1100px; margin-top:60px;">${chips}</div>` : `
+              <div style="color:${S.MUTE};">No agents selected.</div>`}
+            <div style="margin-top:80px; padding-top:24px; border-top:1px solid ${S.RULE};">
+              <div style="font-family:${S.BODY}; font-size:10px; letter-spacing:.24em; color:${S.DIM};">CONTACT</div>
+              <div style="font-family:${S.BODY}; font-size:13px; color:${S.MUTE}; margin-top:6px;">acquisitions@thestonehouseco.com  ·  (615) 812-0066</div>
+            </div>
+          </div>`;
+      }
+
+      function slideHood() {
+        const H = state.hood || {};
+        return `
+          <div style="padding:64px 88px; height:100%;">
+            ${slideBase(state.cover.date)}
+            ${slideHeader('Section Seven', 'Neighborhood')}
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px;">
+              <div>
+                ${H.map && H.map.data ? `<div style="background:url('${H.map.data}') center/cover no-repeat; height:480px; border:1px solid ${S.RULE};"></div>` : `
+                <div style="height:480px; border:1px dashed ${S.RULE}; display:flex; align-items:center; justify-content:center; color:${S.DIM}; font-size:12px;">No map attached</div>`}
+              </div>
+              <div>
+                ${H.thesis ? `
+                  <div style="font-family:${S.BODY}; font-size:10px; letter-spacing:.24em; color:${S.DIM}; text-transform:uppercase;">Corridor Thesis</div>
+                  <div style="font-family:${S.BODY}; font-size:14px; color:${S.INK}; line-height:1.7; margin-top:12px; margin-bottom:28px;">${escapeHTML(H.thesis)}</div>` : ''}
+                ${H.amenities ? `
+                  <div style="font-family:${S.BODY}; font-size:10px; letter-spacing:.24em; color:${S.DIM}; text-transform:uppercase;">Nearby Amenities</div>
+                  <div style="font-family:${S.BODY}; font-size:14px; color:${S.INK}; line-height:1.7; margin-top:12px;">${escapeHTML(H.amenities)}</div>` : ''}
+              </div>
+            </div>
+          </div>`;
+      }
+
+      async function renderSlide(html) {
+        const stage = document.getElementById('pdf-stage');
+        stage.innerHTML = '';
+        stage.style.background = S.BG;
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'position:relative; width:1600px; height:900px;';
+        wrap.innerHTML = html;
+        stage.appendChild(wrap);
+        await document.fonts.ready;
+        await new Promise(r => setTimeout(r, 60));
+        const canvas = await html2canvas(wrap, {
+          backgroundColor: S.BG, scale: 2, useCORS: true, logging: false,
+          width: 1600, height: 900,
+        });
+        return canvas.toDataURL('image/jpeg', 0.92);
+      }
+
+      async function exportPDF() {
+        const btn = document.getElementById('btn-export');
+        btn.disabled = true;
+        const origLabel = btn.textContent;
+        btn.textContent = 'Rendering…';
+        try {
+          const slides = [slideCover(), slideLand(), slideSite(), slideComps(), slideCost(), slideTeam(), slideHood()];
+          const { jsPDF } = window.jspdf;
+          // 16:9 landscape at 1600×900 → US Letter landscape 11×8.5" is 11:8.5 ≈ 1.29 (not 16:9)
+          // Use custom page size that matches 16:9 exactly so slide fills page perfectly.
+          const pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: [800, 450] });
+          for (let i = 0; i < slides.length; i++) {
+            const img = await renderSlide(slides[i]);
+            if (i > 0) pdf.addPage([800, 450], 'landscape');
+            pdf.addImage(img, 'JPEG', 0, 0, 800, 450);
+            btn.textContent = `Rendering ${i+1} / ${slides.length}…`;
+          }
+          const addr = (state.cover.address || 'Property').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '');
+          pdf.save(`Stonehouse-Land-Memo-${addr}.pdf`);
+          document.getElementById('pdf-stage').innerHTML = '';
+          btn.textContent = '✓ Exported';
+          setTimeout(() => { btn.textContent = origLabel; btn.disabled = false; }, 2000);
+        } catch (e) {
+          console.error('PDF export failed', e);
+          alert('PDF export failed: ' + e.message + '\nCheck the browser console for details.');
+          btn.textContent = origLabel;
+          btn.disabled = false;
+        }
+      }
+      document.getElementById('btn-export').addEventListener('click', exportPDF);
+      // Always allow export attempts (drop the disabled gate) — the button was
+      // gated by "finish workflow" but users may want to preview PDFs anytime.
+      document.getElementById('btn-export').disabled = false;
+      document.getElementById('btn-export').removeAttribute('title');
 
       /* ---- Boot ---- */
       load();
