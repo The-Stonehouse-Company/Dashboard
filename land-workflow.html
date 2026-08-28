@@ -483,6 +483,9 @@
         } catch (e) {
           setSaveState('error');
           console.error('save failed', e);
+          if (e && (e.name === 'QuotaExceededError' || String(e).includes('quota'))) {
+            alert("Browser storage is full. If you're uploading big photos, they were auto-shrunk — but you may have too many. Try removing some site photos or clearing this draft (New Memo) if you're re-testing.");
+          }
         }
       }
       function load() {
@@ -618,8 +621,15 @@
             input.addEventListener('change', async () => {
               const f = input.files && input.files[0];
               if (!f) return;
-              state.comps[idx].photo = { name: f.name, data: await fileToDataURL(f) };
-              save(); renderComps();
+              zone.textContent = 'Uploading…';
+              try {
+                const data = await fileToShrunkDataURL(f);
+                state.comps[idx].photo = { name: f.name, data };
+                save(); renderComps();
+              } catch (err) {
+                console.error('comp photo upload failed', err);
+                zone.textContent = 'Upload failed — try a smaller file';
+              }
             });
             input.click();
           });
@@ -669,6 +679,28 @@
           r.readAsDataURL(file);
         });
       }
+      // Downscale a photo to keep localStorage tiny + speeds up canvas render.
+      // Returns a JPEG data URL capped at maxDim on the longest side.
+      async function fileToShrunkDataURL(file, maxDim = 1400, quality = 0.85) {
+        // PDFs and non-image files skip the shrink
+        if (!file.type.startsWith('image/')) return fileToDataURL(file);
+        const url = await fileToDataURL(file);
+        return new Promise((res) => {
+          const img = new Image();
+          img.onload = () => {
+            const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+            const w = Math.round(img.width * scale);
+            const h = Math.round(img.height * scale);
+            const c = document.createElement('canvas');
+            c.width = w; c.height = h;
+            c.getContext('2d').drawImage(img, 0, 0, w, h);
+            try { res(c.toDataURL('image/jpeg', quality)); }
+            catch { res(url); } // fall back to original if canvas is tainted
+          };
+          img.onerror = () => res(url);
+          img.src = url;
+        });
+      }
       function bindDropZones() {
         document.querySelectorAll('[data-drop]').forEach(zone => {
           const key = zone.dataset.drop;
@@ -682,16 +714,17 @@
               if (!files.length) return;
               if (key === 'site.photos') {
                 if (!state.site.photos) state.site.photos = [];
-                for (const f of files) state.site.photos.push({ name: f.name, data: await fileToDataURL(f) });
+                for (const f of files) state.site.photos.push({ name: f.name, data: await fileToShrunkDataURL(f) });
                 renderSitePhotos();
               } else if (key === 'site.survey') {
+                // Surveys stay as-is (PDF) so pdf.js can render pages faithfully
                 state.site.survey = { name: files[0].name, data: await fileToDataURL(files[0]) };
                 document.getElementById('survey-status').textContent = '✓ ' + files[0].name + ' attached';
               } else if (key === 'cover.photo') {
-                state.cover.photo = { name: files[0].name, data: await fileToDataURL(files[0]) };
+                state.cover.photo = { name: files[0].name, data: await fileToShrunkDataURL(files[0], 1800, 0.88) };
                 renderCoverPhoto();
               } else if (key === 'hood.map') {
-                state.hood.map = { name: files[0].name, data: await fileToDataURL(files[0]) };
+                state.hood.map = { name: files[0].name, data: await fileToShrunkDataURL(files[0]) };
                 renderHoodMap();
               }
               save();
