@@ -106,12 +106,16 @@
       list-style: none;
       cursor: pointer;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 6px 12px;
-      font-family: var(--font-display);
-      font-size: 10px; letter-spacing: .28em; text-transform: uppercase;
-      color: #fff;
+      /* Match .nav-item so every sidebar row shares the same type + rhythm */
+      padding: 10px 12px;
+      font-family: var(--font-body);
+      font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+      font-weight: 500;
+      color: var(--text-muted);
       user-select: none;
     }
+    .sidenav .nav-group > summary:hover,
+    .sidenav .nav-subgroup > summary:hover { color: #fff; background: #141414; }
     .sidenav .nav-group > summary::-webkit-details-marker,
     .sidenav .nav-subgroup > summary::-webkit-details-marker { display: none; }
     .sidenav .nav-group > summary::after,
@@ -122,21 +126,29 @@
     .sidenav .nav-subgroup[open] > summary::after {
       content: '−';
     }
+    /* Children of a parent nav-group are indented so hierarchy reads at a glance */
+    .sidenav .nav-group > .nav-item {
+      padding-left: 26px; font-size: 12px;
+    }
+    .sidenav .nav-group > .nav-item.is-active {
+      padding-left: 24px;
+    }
     .sidenav .nav-subgroup {
       margin: 4px 0 4px 8px;
     }
     .sidenav .nav-subgroup > summary {
-      font-family: var(--font-body); font-size: 11px;
-      letter-spacing: .18em; color: var(--text-muted);
-      padding: 6px 10px;
+      /* Same font as nav-item, slight indent to show subordinate level */
+      font-family: var(--font-body); font-size: 12px;
+      letter-spacing: .16em; color: var(--text-muted);
+      padding: 8px 12px 8px 20px;
     }
     /* Nested county → city sub-items in the sidenav */
     .sidenav .nav-sub {
-      padding-left: 26px; font-size: 11px; color: var(--text-muted);
+      padding-left: 34px; font-size: 12px; color: var(--text-muted);
     }
     .sidenav .nav-sub::before { content: '· '; color: var(--text-dim); margin-right: 4px; }
     .sidenav .nav-sub.is-active {
-      padding-left: 24px; color: #fff; background: #141414;
+      padding-left: 32px; color: #fff; background: #141414;
       border-left: 2px solid var(--accent);
     }
 
@@ -355,18 +367,22 @@
     <aside class="sidenav" role="tablist" aria-label="Land Acquisition sections">
       <div class="section-label">Land Acquisition</div>
       <button type="button" class="nav-item is-active" data-panel="overview">Overview</button>
-      <button type="button" class="nav-item" data-panel="pipeline">Active Pipeline</button>
-      <button type="button" class="nav-item" data-panel="hotleads">Hot Leads</button>
-      <button type="button" class="nav-item" data-panel="buyboxes">Buy Boxes</button>
+
+      <details class="nav-group">
+        <summary>Pipeline</summary>
+        <button type="button" class="nav-item" data-panel="pipeline">Active Pipeline</button>
+        <button type="button" class="nav-item" data-panel="hotleads">Hot Leads</button>
+        <button type="button" class="nav-item" data-panel="buyboxes">Buy Boxes</button>
+      </details>
 
       <details class="nav-group">
         <summary>Tools</summary>
         <button type="button" class="nav-item" data-panel="tools">Fee Calc · Intake · One-Pager</button>
       </details>
 
-      <details class="nav-group" open>
+      <details class="nav-group">
         <summary>Research</summary>
-        <details class="nav-subgroup" open>
+        <details class="nav-subgroup">
           <summary>Davidson County</summary>
           <button type="button" class="nav-item nav-sub" data-panel="research-nashville">Nashville</button>
           <button type="button" class="nav-item nav-sub" data-panel="research-oak-hill">Oak Hill</button>
@@ -1155,6 +1171,9 @@
         const key = btn.getAttribute('data-panel');
         nav.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('is-active', b === btn));
         panels.forEach(p => p.classList.toggle('is-active', p.id === 'panel-' + key));
+        // Ensure any collapsed parent groups are opened so the active item stays visible
+        let d = btn.closest('details');
+        while (d) { d.open = true; d = d.parentElement.closest('details'); }
         history.replaceState(null, '', '#' + key);
       });
       const hash = (location.hash || '').replace(/^#/, '');
