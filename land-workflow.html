@@ -179,23 +179,23 @@
     }
     .add-comp-btn:hover { border-color: var(--accent); color: #fff; }
 
-    /* ============ Team rows ============ */
-    .team-row {
-      display: grid; grid-template-columns: 200px 1fr 1fr 1fr;
-      gap: 12px; padding: 16px 0;
-      border-bottom: 1px solid var(--panel-edge);
+    /* ============ Team agent chips ============ */
+    .agent-chip {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 20px; border: 1px solid var(--panel-edge);
+      background: #0f0f0f; color: var(--text-muted);
+      font-family: var(--font-body); font-size: 13px;
+      letter-spacing: .04em; cursor: pointer; user-select: none;
+      transition: all .15s;
     }
-    .team-row .role {
-      font-family: var(--font-body); font-size: 10px;
-      letter-spacing: .22em; text-transform: uppercase;
-      color: var(--text-muted); align-self: center;
+    .agent-chip:hover { border-color: var(--text-muted); color: #fff; }
+    .agent-chip.is-on {
+      background: var(--accent); color: #111; border-color: var(--accent);
     }
-    .team-row input {
-      background: transparent; border: 0; border-bottom: 1px solid var(--panel-edge);
-      color: var(--text); padding: 8px 4px; font-family: var(--font-body);
-      font-size: 13px; outline: none;
+    .agent-chip .role-badge {
+      font-size: 9px; letter-spacing: .18em; text-transform: uppercase;
+      opacity: .6;
     }
-    .team-row input:focus { border-bottom-color: var(--accent); }
 
     /* ============ Footer nav ============ */
     .footer-nav {
@@ -228,6 +228,10 @@
       overflow: hidden;
     }
     .photo-tile img { width: 100%; height: 100%; object-fit: cover; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234,226,211,0); }
+      50% { transform: scale(1.05); box-shadow: 0 0 24px 4px rgba(234,226,211,.4); }
+    }
     .photo-tile .del-photo {
       position: absolute; top: 6px; right: 6px;
       background: rgba(0,0,0,.75); color: #fff; border: 0;
@@ -363,12 +367,23 @@
       <button type="button" class="add-comp-btn" id="add-comp">＋ Add Comparable</button>
     </section>
 
-    <!-- ---- Land Cost ---- -->
+    <!-- ---- Land Cost / Offering ---- -->
     <section class="section" id="section-cost" style="display:none;">
       <div class="section-eyebrow">Section Five</div>
       <h1 class="section-title">Land Cost</h1>
       <div class="section-rule"></div>
-      <p class="section-intro">Facts only — what the deal costs, what's under contract, and when it closes. No projections, no build costs.</p>
+      <p class="section-intro">The price we're offering the land to potential builders at, plus deal terms if the site is already under contract by Stonehouse. The Offering Price is the headline number on the memo — everything else is optional context.</p>
+
+      <div style="padding:28px; background:#0f0f0f; border:1px solid var(--gold); margin-bottom:32px;">
+        <div style="font-family:var(--font-body); font-size:10px; letter-spacing:.28em; color:var(--gold); text-transform:uppercase; margin-bottom:8px;">Headline · Sent to Builders</div>
+        <div class="field">
+          <label>Offering Price</label>
+          <input type="text" data-key="cost.offering_price" placeholder="$" style="font-size:22px; font-family:var(--font-display); padding:16px;" />
+          <div class="hint">What we're asking the builder to pay us for the deal / assignment.</div>
+        </div>
+      </div>
+
+      <div style="font-family:var(--font-body); font-size:10px; letter-spacing:.28em; color:var(--text-dim); text-transform:uppercase; margin-bottom:12px;">Deal Terms · If Under Contract</div>
       <div class="field-grid cols-3">
         <div class="field"><label>Contract Price</label><input type="text" data-key="cost.price" placeholder="$" /></div>
         <div class="field"><label>Earnest Money</label><input type="text" data-key="cost.em" placeholder="$" /></div>
@@ -376,18 +391,23 @@
         <div class="field"><label>Contract (UC) Date</label><input type="text" data-key="cost.contract_date" placeholder="MMM D, YYYY" /></div>
         <div class="field"><label>Due Diligence Ends</label><input type="text" data-key="cost.dd_end" placeholder="MMM D, YYYY" /></div>
         <div class="field"><label>Closing Date</label><input type="text" data-key="cost.close_date" placeholder="MMM D, YYYY" /></div>
-        <div class="field span-3"><label>Seller / Owner of Record</label><input type="text" data-key="cost.seller" placeholder="Seller name (as on contract)" /></div>
         <div class="field span-3"><label>Notes / Deal Structure</label><textarea data-key="cost.notes" placeholder="Assignable, subject-to, seller-financed, credits, contingencies. Anything material about the terms."></textarea></div>
       </div>
     </section>
 
-    <!-- ---- Team + Contacts ---- -->
+    <!-- ---- Team ---- -->
     <section class="section" id="section-team" style="display:none;">
       <div class="section-eyebrow">Section Six</div>
-      <h1 class="section-title">Team + Contacts</h1>
+      <h1 class="section-title">Team</h1>
       <div class="section-rule"></div>
-      <p class="section-intro">Everyone involved in the transaction. Same layout as the closing packet team card.</p>
-      <div id="team-rows"></div>
+      <p class="section-intro">Which Stonehouse Land Acquisition agents are on this deal. Pick one or more — appears on the memo cover and back page.</p>
+      <div class="field-grid">
+        <div class="field span-2">
+          <label>Land Acquisition Agents on This Deal</label>
+          <div id="team-agents" style="display:flex; flex-wrap:wrap; gap:12px; margin-top:8px;"></div>
+          <div class="hint">Click to toggle each agent on/off.</div>
+        </div>
+      </div>
     </section>
 
     <!-- ---- Neighborhood ---- -->
@@ -426,17 +446,16 @@
        ================================================================== */
     (function () {
       const STEPS = ['cover', 'land', 'site', 'comps', 'cost', 'team', 'neighborhood'];
-      const TEAM_ROLES = [
-        "Buyer's Agent",
-        "Seller / Owner",
-        "Listing Agent",
-        "Closing Attorney",
-        "Lender (if applicable)",
-        "Surveyor",
+      // Land Acquisition roster — pulled from company team. Kneeland is
+      // Land-only + unlicensed but valid on Land memos.
+      const LAND_AGENTS = [
+        { name: 'Ryan Stonehouse',  role: 'Land Agent' },
+        { name: 'Gabe Jeudy',       role: 'Land Agent' },
+        { name: 'Kneeland Hibbett', role: 'Land Sourcing' },
       ];
       const state = {
         cover: {}, land: {}, site: { photos: [] }, comps: [],
-        cost: {}, team: [], hood: {},
+        cost: {}, team: { agents: [] }, hood: {},
       };
       let currentStep = 'cover';
       let saveTimer = null;
@@ -503,6 +522,7 @@
         });
         history.replaceState(null, '', '#' + step);
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (typeof refreshNextButton === 'function') refreshNextButton();
       }
       document.getElementById('stepper').addEventListener('click', e => {
         const step = e.target.closest('.step');
@@ -515,8 +535,26 @@
       document.getElementById('btn-next').addEventListener('click', () => {
         save();
         const i = STEPS.indexOf(currentStep);
-        if (i < STEPS.length - 1) goStep(STEPS[i + 1]);
+        if (i < STEPS.length - 1) {
+          goStep(STEPS[i + 1]);
+        } else {
+          // Last step — mark done, flash confirmation, jump focus to Export
+          const el = document.getElementById('save-state');
+          el.textContent = '✓ All 7 sections saved · Ready to export';
+          el.classList.add('saved');
+          const exp = document.getElementById('btn-export');
+          exp.disabled = false;
+          exp.removeAttribute('title');
+          exp.style.animation = 'pulse 1s ease-in-out 2';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       });
+      // Update the button label depending on which step you're on
+      function refreshNextButton() {
+        const next = document.getElementById('btn-next');
+        const i = STEPS.indexOf(currentStep);
+        next.textContent = (i === STEPS.length - 1) ? 'Save + Finish ✓' : 'Save + Next →';
+      }
 
       /* ---- Comps ---- */
       function renderComps() {
@@ -559,28 +597,22 @@
 
       /* ---- Team ---- */
       function renderTeam() {
-        const wrap = document.getElementById('team-rows');
+        const wrap = document.getElementById('team-agents');
+        if (!wrap) return;
         wrap.innerHTML = '';
-        // Ensure we have a row for each fixed role
-        TEAM_ROLES.forEach((role, idx) => {
-          if (!state.team[idx]) state.team[idx] = { role };
-          state.team[idx].role = role;
-          const row = document.createElement('div');
-          row.className = 'team-row';
-          row.innerHTML = `
-            <div class="role">${role}</div>
-            <input type="text" data-t="${idx}.name"  value="${state.team[idx].name  || ''}" placeholder="Name" />
-            <input type="text" data-t="${idx}.phone" value="${state.team[idx].phone || ''}" placeholder="Phone" />
-            <input type="text" data-t="${idx}.email" value="${state.team[idx].email || ''}" placeholder="Email" />
-          `;
-          wrap.appendChild(row);
-        });
-        wrap.querySelectorAll('input[data-t]').forEach(inp => {
-          inp.addEventListener('input', () => {
-            const [idx, k] = inp.dataset.t.split('.');
-            state.team[+idx][k] = inp.value;
-            debouncedSave();
+        if (!state.team || !Array.isArray(state.team.agents)) state.team = { agents: [] };
+        LAND_AGENTS.forEach(a => {
+          const on = state.team.agents.includes(a.name);
+          const chip = document.createElement('div');
+          chip.className = 'agent-chip' + (on ? ' is-on' : '');
+          chip.innerHTML = `<span>${a.name}</span><span class="role-badge">${a.role}</span>`;
+          chip.addEventListener('click', () => {
+            const i = state.team.agents.indexOf(a.name);
+            if (i >= 0) state.team.agents.splice(i, 1);
+            else state.team.agents.push(a.name);
+            renderTeam(); save();
           });
+          wrap.appendChild(chip);
         });
       }
 
@@ -681,6 +713,7 @@
       if (state.site.survey) document.getElementById('survey-status').textContent = '✓ ' + state.site.survey.name + ' attached';
       const hash = (location.hash || '').replace(/^#/, '');
       if (hash && STEPS.includes(hash)) goStep(hash);
+      refreshNextButton();
     })();
   </script>
 </body>
