@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Land Acquisition Memo — The Stonehouse Company</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0a0a0a;
+      --ink-2: #111;
+      --panel: #141414;
+      --panel-edge: #262626;
+      --text: #f4efe4;
+      --text-muted: #a8a49b;
+      --text-dim: #6a675f;
+      --accent: #EAE2D3;
+      --gold: #c6a664;
+      --danger: #d64545;
+      --font-display: 'Aboreto', serif;
+      --font-body: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--ink); color: var(--text);
+      font-family: var(--font-body); font-size: 14px; line-height: 1.5;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: #fff; }
+
+    /* ============ Top bar ============ */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 32px; border-bottom: 1px solid var(--panel-edge);
+      background: #000; position: sticky; top: 0; z-index: 10;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 18px; }
+    .arch { width: 32px; height: 32px; }
+    .wordmark {
+      font-family: var(--font-display); font-size: 15px;
+      letter-spacing: .22em; color: #fff;
+    }
+    .memo-title {
+      font-family: var(--font-body); font-size: 11px;
+      letter-spacing: .28em; text-transform: uppercase;
+      color: var(--text-muted); border-left: 1px solid var(--panel-edge);
+      padding-left: 18px;
+    }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: 1px solid var(--panel-edge);
+      background: transparent; color: var(--text); font-family: var(--font-body);
+      font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+      cursor: pointer; font-weight: 500;
+    }
+    .btn:hover { border-color: var(--accent); color: #fff; }
+    .btn-primary {
+      background: var(--accent); color: #111; border-color: var(--accent);
+    }
+    .btn-primary:hover { background: #fff; }
+    .btn-ghost { border-color: transparent; color: var(--text-muted); }
+    .btn-ghost:hover { color: #fff; }
+
+    /* ============ Stepper ============ */
+    .stepper-wrap {
+      background: #050505; border-bottom: 1px solid var(--panel-edge);
+      padding: 22px 32px;
+    }
+    .stepper {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .step {
+      cursor: pointer; padding-top: 14px;
+      border-top: 2px solid var(--panel-edge);
+      transition: border-color .2s;
+    }
+    .step .num {
+      font-family: var(--font-body); font-size: 10px;
+      letter-spacing: .18em; color: var(--text-dim);
+    }
+    .step .label {
+      font-family: var(--font-display); font-size: 15px;
+      color: var(--text-muted); margin-top: 4px;
+    }
+    .step:hover .label { color: #fff; }
+    .step.is-active { border-top-color: var(--accent); }
+    .step.is-active .num { color: var(--accent); }
+    .step.is-active .label { color: #fff; }
+    .step.is-done { border-top-color: var(--gold); }
+    .step.is-done .num::before { content: '✓ '; color: var(--gold); }
+
+    /* ============ Main pane ============ */
+    .pane {
+      max-width: 1200px; margin: 0 auto; padding: 48px 32px 120px;
+    }
+    .section-eyebrow {
+      font-family: var(--font-body); font-size: 11px;
+      letter-spacing: .28em; text-transform: uppercase;
+      color: var(--text-dim); margin-bottom: 10px;
+    }
+    .section-title {
+      font-family: var(--font-display); font-size: 48px;
+      color: #fff; margin: 0 0 6px; letter-spacing: .02em;
+    }
+    .section-rule {
+      width: 60px; height: 2px; background: var(--accent);
+      margin: 12px 0 32px;
+    }
+    .section-intro {
+      color: var(--text-muted); font-size: 14px; line-height: 1.6;
+      max-width: 720px; margin: 0 0 40px;
+    }
+
+    /* ============ Form fields ============ */
+    .field-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px 32px;
+      max-width: 900px;
+    }
+    .field-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .field-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+    .field-grid.full { max-width: none; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.span-2 { grid-column: span 2; }
+    .field.span-3 { grid-column: span 3; }
+    .field.span-4 { grid-column: span 4; }
+    .field label {
+      font-family: var(--font-body); font-size: 10px;
+      letter-spacing: .22em; text-transform: uppercase;
+      color: var(--text-dim); font-weight: 600;
+    }
+    .field input, .field textarea, .field select {
+      background: #0f0f0f; border: 1px solid var(--panel-edge);
+      color: var(--text); padding: 12px 14px; font-family: var(--font-body);
+      font-size: 14px; outline: none;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus {
+      border-color: var(--accent);
+    }
+    .field textarea { min-height: 100px; resize: vertical; }
+    .field .hint { color: var(--text-dim); font-size: 11px; margin-top: 4px; }
+
+    /* ============ Address search block ============ */
+    .lookup-block {
+      display: flex; gap: 12px; align-items: end; margin-bottom: 32px;
+      padding: 24px; background: #0f0f0f; border: 1px solid var(--panel-edge);
+    }
+    .lookup-block .field { flex: 1; }
+    .lookup-block .lookup-status {
+      font-size: 11px; color: var(--text-dim); margin-top: 8px;
+      letter-spacing: .1em;
+    }
+    .lookup-status.ok { color: var(--gold); }
+    .lookup-status.err { color: var(--danger); }
+
+    /* ============ Comp cards ============ */
+    .comps-list {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .comp-card {
+      background: #0f0f0f; border: 1px solid var(--panel-edge);
+      padding: 20px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .comp-card .del-comp {
+      align-self: flex-end; background: transparent; border: 0;
+      color: var(--text-dim); cursor: pointer; font-size: 11px;
+      letter-spacing: .18em; text-transform: uppercase;
+    }
+    .comp-card .del-comp:hover { color: var(--danger); }
+    .add-comp-btn {
+      background: transparent; border: 1px dashed var(--panel-edge);
+      color: var(--text-muted); padding: 40px; cursor: pointer;
+      font-family: var(--font-body); font-size: 12px;
+      letter-spacing: .18em; text-transform: uppercase;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .add-comp-btn:hover { border-color: var(--accent); color: #fff; }
+
+    /* ============ Team rows ============ */
+    .team-row {
+      display: grid; grid-template-columns: 200px 1fr 1fr 1fr;
+      gap: 12px; padding: 16px 0;
+      border-bottom: 1px solid var(--panel-edge);
+    }
+    .team-row .role {
+      font-family: var(--font-body); font-size: 10px;
+      letter-spacing: .22em; text-transform: uppercase;
+      color: var(--text-muted); align-self: center;
+    }
+    .team-row input {
+      background: transparent; border: 0; border-bottom: 1px solid var(--panel-edge);
+      color: var(--text); padding: 8px 4px; font-family: var(--font-body);
+      font-size: 13px; outline: none;
+    }
+    .team-row input:focus { border-bottom-color: var(--accent); }
+
+    /* ============ Footer nav ============ */
+    .footer-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #000; border-top: 1px solid var(--panel-edge);
+      padding: 16px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-nav .save-state {
+      font-size: 11px; color: var(--text-dim);
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    .footer-nav .save-state.saved { color: var(--gold); }
+    .footer-actions { display: flex; gap: 12px; }
+
+    /* Photo drop zone */
+    .drop-zone {
+      border: 1px dashed var(--panel-edge); padding: 40px;
+      text-align: center; color: var(--text-muted);
+      font-size: 13px; cursor: pointer;
+    }
+    .drop-zone:hover { border-color: var(--accent); color: #fff; }
+    .photo-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px; margin-top: 16px;
+    }
+    .photo-tile {
+      position: relative; aspect-ratio: 4/3;
+      background: #0f0f0f; border: 1px solid var(--panel-edge);
+      overflow: hidden;
+    }
+    .photo-tile img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-tile .del-photo {
+      position: absolute; top: 6px; right: 6px;
+      background: rgba(0,0,0,.75); color: #fff; border: 0;
+      width: 24px; height: 24px; cursor: pointer;
+      font-size: 14px; line-height: 1;
+    }
+  </style>
+</head>
+<body>
+  <!-- ============ Top bar ============ -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <img class="arch" src="assets/icon-arch-transparent.png" alt="Stonehouse arch" />
+      <div class="wordmark">THE STONEHOUSE COMPANY</div>
+      <div class="memo-title">Land Acquisition Memo</div>
+    </div>
+    <div class="topbar-right">
+      <a href="land.html#workflow" class="btn btn-ghost">← Back to Dashboard</a>
+      <button type="button" class="btn" id="btn-new">New Memo</button>
+      <button type="button" class="btn btn-primary" id="btn-export" disabled title="Available after all sections are filled">Export PDF</button>
+    </div>
+  </header>
+
+  <!-- ============ Progress stepper ============ -->
+  <div class="stepper-wrap">
+    <nav class="stepper" id="stepper">
+      <div class="step is-active" data-step="cover"><div class="num">01</div><div class="label">Cover</div></div>
+      <div class="step" data-step="land"><div class="num">02</div><div class="label">Land</div></div>
+      <div class="step" data-step="site"><div class="num">03</div><div class="label">Site + Survey</div></div>
+      <div class="step" data-step="comps"><div class="num">04</div><div class="label">Comparables</div></div>
+      <div class="step" data-step="cost"><div class="num">05</div><div class="label">Land Cost</div></div>
+      <div class="step" data-step="team"><div class="num">06</div><div class="label">Team</div></div>
+      <div class="step" data-step="neighborhood"><div class="num">07</div><div class="label">Neighborhood</div></div>
+    </nav>
+  </div>
+
+  <!-- ============ Main pane ============ -->
+  <main class="pane">
+    <!-- ---- Cover ---- -->
+    <section class="section" id="section-cover">
+      <div class="section-eyebrow">Section One</div>
+      <h1 class="section-title">Cover</h1>
+      <div class="section-rule"></div>
+      <p class="section-intro">Basic identity of the memo — property, submarket, and date. Everything on the OM cover page is driven from these fields.</p>
+      <div class="field-grid">
+        <div class="field span-2">
+          <label>Property Address</label>
+          <input type="text" data-key="cover.address" placeholder="e.g. 607 Davis Dr, Brentwood, TN 37027" />
+          <div class="hint">Used on the cover + auto-fills the Land section lookup below.</div>
+        </div>
+        <div class="field">
+          <label>Submarket / Neighborhood</label>
+          <input type="text" data-key="cover.submarket" placeholder="Carondelet · Brentwood" />
+        </div>
+        <div class="field">
+          <label>Memo Date</label>
+          <input type="text" data-key="cover.date" placeholder="Aug 2026" />
+        </div>
+        <div class="field span-2">
+          <label>Positioning Line</label>
+          <input type="text" data-key="cover.tagline" placeholder="e.g. Luxury Spec Home Development Opportunity" />
+          <div class="hint">Optional. Appears as the subhead under the address on the cover page.</div>
+        </div>
+        <div class="field span-2">
+          <label>Cover Photo</label>
+          <div class="drop-zone" data-drop="cover.photo">Click to upload · JPG or PNG</div>
+          <div id="cover-photo-preview" class="photo-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- Land ---- -->
+    <section class="section" id="section-land" style="display:none;">
+      <div class="section-eyebrow">Section Two</div>
+      <h1 class="section-title">Land</h1>
+      <div class="section-rule"></div>
+      <p class="section-intro">Parcel + regulatory facts. Enter the address to auto-populate lot size, zoning, setbacks, FEMA zone, and utilities from the same lookup used in the dashboard.</p>
+      <div class="lookup-block">
+        <div class="field">
+          <label>Property Address</label>
+          <input type="text" id="land-lookup-address" placeholder="Enter street address" />
+        </div>
+        <button type="button" class="btn btn-primary" id="btn-lookup">Look Up</button>
+        <div class="lookup-status" id="land-lookup-status">— Enter address, then click Look Up —</div>
+      </div>
+      <div class="field-grid cols-4">
+        <div class="field"><label>Lot Size (Acres)</label><input type="text" data-key="land.lot_acres" /></div>
+        <div class="field"><label>Frontage (ft)</label><input type="text" data-key="land.frontage" /></div>
+        <div class="field"><label>Depth (ft)</label><input type="text" data-key="land.depth" /></div>
+        <div class="field"><label>Zoning</label><input type="text" data-key="land.zoning" /></div>
+        <div class="field"><label>Front Setback</label><input type="text" data-key="land.setback_front" /></div>
+        <div class="field"><label>Side Setback</label><input type="text" data-key="land.setback_side" /></div>
+        <div class="field"><label>Rear Setback</label><input type="text" data-key="land.setback_rear" /></div>
+        <div class="field"><label>Max Height</label><input type="text" data-key="land.max_height" /></div>
+        <div class="field"><label>FEMA Zone</label><input type="text" data-key="land.fema" placeholder="e.g. X (outside floodplain)" /></div>
+        <div class="field"><label>Elevation (ft)</label><input type="text" data-key="land.elevation" /></div>
+        <div class="field"><label>Water</label><input type="text" data-key="land.water" placeholder="Metro / Well" /></div>
+        <div class="field"><label>Sewer</label><input type="text" data-key="land.sewer" placeholder="Metro / Septic" /></div>
+        <div class="field"><label>Electric</label><input type="text" data-key="land.electric" placeholder="NES / MTEMC" /></div>
+        <div class="field"><label>Gas</label><input type="text" data-key="land.gas" placeholder="Piedmont / None" /></div>
+        <div class="field span-2"><label>HOA</label><input type="text" data-key="land.hoa" placeholder="None, or name + monthly dues" /></div>
+        <div class="field span-4"><label>Notes</label><textarea data-key="land.notes" placeholder="Dimensions, walk-out potential, buildable envelope math, any variance/assemblage notes."></textarea></div>
+      </div>
+    </section>
+
+    <!-- ---- Site + Survey ---- -->
+    <section class="section" id="section-site" style="display:none;">
+      <div class="section-eyebrow">Section Three</div>
+      <h1 class="section-title">Site + Survey</h1>
+      <div class="section-rule"></div>
+      <p class="section-intro">Site photos and the attached survey PDF. These are attached to the final PDF as-is.</p>
+      <div class="field-grid full">
+        <div class="field span-2">
+          <label>Site Photos</label>
+          <div class="drop-zone" data-drop="site.photos">Click to upload — you can add multiple</div>
+          <div id="site-photos-preview" class="photo-grid"></div>
+        </div>
+        <div class="field span-2">
+          <label>Survey PDF</label>
+          <div class="drop-zone" data-drop="site.survey">Click to upload survey PDF</div>
+          <div id="survey-status" style="margin-top:8px; font-size:12px; color:var(--text-dim);"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- Comparables ---- -->
+    <section class="section" id="section-comps" style="display:none;">
+      <div class="section-eyebrow">Section Four</div>
+      <h1 class="section-title">Comparables</h1>
+      <div class="section-rule"></div>
+      <p class="section-intro">Enter 3–4 sold comparables from within the immediate submarket. Auto-search from MLS will be wired in a follow-up — for now, enter manually.</p>
+      <div class="comps-list" id="comps-list"></div>
+      <button type="button" class="add-comp-btn" id="add-comp">＋ Add Comparable</button>
+    </section>
+
+    <!-- ---- Land Cost ---- -->
+    <section class="section" id="section-cost" style="display:none;">
+      <div class="section-eyebrow">Section Five</div>
+      <h1 class="section-title">Land Cost</h1>
+      <div class="section-rule"></div>
+      <p class="section-intro">Facts only — what the deal costs, what's under contract, and when it closes. No projections, no build costs.</p>
+      <div class="field-grid cols-3">
+        <div class="field"><label>Contract Price</label><input type="text" data-key="cost.price" placeholder="$" /></div>
+        <div class="field"><label>Earnest Money</label><input type="text" data-key="cost.em" placeholder="$" /></div>
+        <div class="field"><label>Closing Costs (est.)</label><input type="text" data-key="cost.closing_costs" placeholder="$" /></div>
+        <div class="field"><label>Contract (UC) Date</label><input type="text" data-key="cost.contract_date" placeholder="MMM D, YYYY" /></div>
+        <div class="field"><label>Due Diligence Ends</label><input type="text" data-key="cost.dd_end" placeholder="MMM D, YYYY" /></div>
+        <div class="field"><label>Closing Date</label><input type="text" data-key="cost.close_date" placeholder="MMM D, YYYY" /></div>
+        <div class="field span-3"><label>Seller / Owner of Record</label><input type="text" data-key="cost.seller" placeholder="Seller name (as on contract)" /></div>
+        <div class="field span-3"><label>Notes / Deal Structure</label><textarea data-key="cost.notes" placeholder="Assignable, subject-to, seller-financed, credits, contingencies. Anything material about the terms."></textarea></div>
+      </div>
+    </section>
+
+    <!-- ---- Team + Contacts ---- -->
+    <section class="section" id="section-team" style="display:none;">
+      <div class="section-eyebrow">Section Six</div>
+      <h1 class="section-title">Team + Contacts</h1>
+      <div class="section-rule"></div>
+      <p class="section-intro">Everyone involved in the transaction. Same layout as the closing packet team card.</p>
+      <div id="team-rows"></div>
+    </section>
+
+    <!-- ---- Neighborhood ---- -->
+    <section class="section" id="section-neighborhood" style="display:none;">
+      <div class="section-eyebrow">Section Seven</div>
+      <h1 class="section-title">Neighborhood</h1>
+      <div class="section-rule"></div>
+      <p class="section-intro">Optional context — map screenshot, nearby amenities, corridor pricing thesis.</p>
+      <div class="field-grid">
+        <div class="field span-2"><label>Corridor / Submarket Pricing Thesis</label><textarea data-key="hood.thesis" placeholder="e.g. Along Davis Drive and across Carondelet, new custom estates are trading in the mid-$4Ms."></textarea></div>
+        <div class="field span-2"><label>Nearby Amenities</label><textarea data-key="hood.amenities" placeholder="Country club, parks, retail, downtown drive time." rows="3"></textarea></div>
+        <div class="field span-2">
+          <label>Neighborhood Map / Photo</label>
+          <div class="drop-zone" data-drop="hood.map">Click to upload map screenshot</div>
+          <div id="hood-map-preview" class="photo-grid"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ Footer nav ============ -->
+  <footer class="footer-nav">
+    <div class="save-state" id="save-state">Draft — nothing saved yet</div>
+    <div class="footer-actions">
+      <button type="button" class="btn" id="btn-prev">← Previous</button>
+      <button type="button" class="btn btn-primary" id="btn-next">Save + Next →</button>
+    </div>
+  </footer>
+
+  <script>
+    /* ====================================================================
+       Land Acquisition Memo Workflow — client-side state + step nav
+       -------------------------------------------------------------------
+       v1: form scaffold + IndexedDB persistence.  Property-lookup, CMA,
+       and PDF gen wire in follow-up tasks (2-5 in the parent todo list).
+       ================================================================== */
+    (function () {
+      const STEPS = ['cover', 'land', 'site', 'comps', 'cost', 'team', 'neighborhood'];
+      const TEAM_ROLES = [
+        "Buyer's Agent",
+        "Seller / Owner",
+        "Listing Agent",
+        "Closing Attorney",
+        "Lender (if applicable)",
+        "Surveyor",
+      ];
+      const state = {
+        cover: {}, land: {}, site: { photos: [] }, comps: [],
+        cost: {}, team: [], hood: {},
+      };
+      let currentStep = 'cover';
+      let saveTimer = null;
+
+      /* ---- Persistence (IndexedDB via localStorage fallback for v1) ---- */
+      const STORAGE_KEY = 'stonehouse-land-workflow-draft';
+      function save() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          setSaveState('saved');
+        } catch (e) {
+          setSaveState('error');
+          console.error('save failed', e);
+        }
+      }
+      function load() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          Object.assign(state, JSON.parse(raw));
+        } catch (e) { console.warn('load failed', e); }
+      }
+      function setSaveState(status) {
+        const el = document.getElementById('save-state');
+        if (!el) return;
+        if (status === 'saved') {
+          el.textContent = 'Saved · ' + new Date().toLocaleTimeString();
+          el.classList.add('saved');
+        } else if (status === 'error') {
+          el.textContent = 'Save failed — check console';
+          el.classList.remove('saved');
+        }
+      }
+      function debouncedSave() {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(save, 400);
+      }
+
+      /* ---- Field binding: input change → state ---- */
+      function bindInputs() {
+        document.querySelectorAll('[data-key]').forEach(el => {
+          const [group, key] = el.dataset.key.split('.');
+          // Restore
+          if (state[group] && state[group][key] != null) el.value = state[group][key];
+          // Persist
+          el.addEventListener('input', () => {
+            if (!state[group]) state[group] = {};
+            state[group][key] = el.value;
+            debouncedSave();
+          });
+        });
+      }
+
+      /* ---- Step navigation ---- */
+      function goStep(step) {
+        if (!STEPS.includes(step)) return;
+        currentStep = step;
+        STEPS.forEach(s => {
+          const sec = document.getElementById('section-' + s);
+          if (sec) sec.style.display = s === step ? '' : 'none';
+        });
+        document.querySelectorAll('.step').forEach(el => {
+          el.classList.toggle('is-active', el.dataset.step === step);
+        });
+        history.replaceState(null, '', '#' + step);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      document.getElementById('stepper').addEventListener('click', e => {
+        const step = e.target.closest('.step');
+        if (step) goStep(step.dataset.step);
+      });
+      document.getElementById('btn-prev').addEventListener('click', () => {
+        const i = STEPS.indexOf(currentStep);
+        if (i > 0) goStep(STEPS[i - 1]);
+      });
+      document.getElementById('btn-next').addEventListener('click', () => {
+        save();
+        const i = STEPS.indexOf(currentStep);
+        if (i < STEPS.length - 1) goStep(STEPS[i + 1]);
+      });
+
+      /* ---- Comps ---- */
+      function renderComps() {
+        const list = document.getElementById('comps-list');
+        list.innerHTML = '';
+        state.comps.forEach((c, idx) => {
+          const card = document.createElement('div');
+          card.className = 'comp-card';
+          card.innerHTML = `
+            <button type="button" class="del-comp" data-idx="${idx}">Remove</button>
+            <div class="field"><label>Comp ${String(idx+1).padStart(2,'0')} · Address</label><input type="text" data-c="${idx}.address" value="${c.address || ''}" placeholder="1234 Example St" /></div>
+            <div class="field"><label>Sale Price</label><input type="text" data-c="${idx}.price" value="${c.price || ''}" placeholder="$" /></div>
+            <div class="field"><label>Square Feet</label><input type="text" data-c="${idx}.sqft" value="${c.sqft || ''}" /></div>
+            <div class="field"><label>Lot Size (acres)</label><input type="text" data-c="${idx}.lot" value="${c.lot || ''}" /></div>
+            <div class="field"><label>Beds / Baths</label><input type="text" data-c="${idx}.beds_baths" value="${c.beds_baths || ''}" placeholder="5 BR · 6/2 BA" /></div>
+            <div class="field"><label>Closed Date</label><input type="text" data-c="${idx}.closed" value="${c.closed || ''}" placeholder="MM/DD/YYYY" /></div>
+            <div class="field"><label>Days on Market</label><input type="text" data-c="${idx}.dom" value="${c.dom || ''}" /></div>
+          `;
+          list.appendChild(card);
+        });
+        // Bind
+        list.querySelectorAll('input[data-c]').forEach(inp => {
+          inp.addEventListener('input', () => {
+            const [idx, k] = inp.dataset.c.split('.');
+            state.comps[+idx][k] = inp.value;
+            debouncedSave();
+          });
+        });
+        list.querySelectorAll('.del-comp').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.comps.splice(+btn.dataset.idx, 1);
+            renderComps(); save();
+          });
+        });
+      }
+      document.getElementById('add-comp').addEventListener('click', () => {
+        state.comps.push({});
+        renderComps(); save();
+      });
+
+      /* ---- Team ---- */
+      function renderTeam() {
+        const wrap = document.getElementById('team-rows');
+        wrap.innerHTML = '';
+        // Ensure we have a row for each fixed role
+        TEAM_ROLES.forEach((role, idx) => {
+          if (!state.team[idx]) state.team[idx] = { role };
+          state.team[idx].role = role;
+          const row = document.createElement('div');
+          row.className = 'team-row';
+          row.innerHTML = `
+            <div class="role">${role}</div>
+            <input type="text" data-t="${idx}.name"  value="${state.team[idx].name  || ''}" placeholder="Name" />
+            <input type="text" data-t="${idx}.phone" value="${state.team[idx].phone || ''}" placeholder="Phone" />
+            <input type="text" data-t="${idx}.email" value="${state.team[idx].email || ''}" placeholder="Email" />
+          `;
+          wrap.appendChild(row);
+        });
+        wrap.querySelectorAll('input[data-t]').forEach(inp => {
+          inp.addEventListener('input', () => {
+            const [idx, k] = inp.dataset.t.split('.');
+            state.team[+idx][k] = inp.value;
+            debouncedSave();
+          });
+        });
+      }
+
+      /* ---- File / photo drops ---- */
+      function fileToDataURL(file) {
+        return new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = () => res(r.result);
+          r.onerror = rej;
+          r.readAsDataURL(file);
+        });
+      }
+      function bindDropZones() {
+        document.querySelectorAll('[data-drop]').forEach(zone => {
+          const key = zone.dataset.drop;
+          zone.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = key === 'site.survey' ? 'application/pdf' : 'image/*';
+            input.multiple = (key === 'site.photos');
+            input.addEventListener('change', async () => {
+              const files = Array.from(input.files || []);
+              if (!files.length) return;
+              if (key === 'site.photos') {
+                if (!state.site.photos) state.site.photos = [];
+                for (const f of files) state.site.photos.push({ name: f.name, data: await fileToDataURL(f) });
+                renderSitePhotos();
+              } else if (key === 'site.survey') {
+                state.site.survey = { name: files[0].name, data: await fileToDataURL(files[0]) };
+                document.getElementById('survey-status').textContent = '✓ ' + files[0].name + ' attached';
+              } else if (key === 'cover.photo') {
+                state.cover.photo = { name: files[0].name, data: await fileToDataURL(files[0]) };
+                renderCoverPhoto();
+              } else if (key === 'hood.map') {
+                state.hood.map = { name: files[0].name, data: await fileToDataURL(files[0]) };
+                renderHoodMap();
+              }
+              save();
+            });
+            input.click();
+          });
+        });
+      }
+      function renderCoverPhoto() {
+        const wrap = document.getElementById('cover-photo-preview');
+        wrap.innerHTML = state.cover.photo ? `
+          <div class="photo-tile">
+            <img src="${state.cover.photo.data}" alt="Cover" />
+            <button class="del-photo" onclick="__delCoverPhoto()">×</button>
+          </div>` : '';
+      }
+      window.__delCoverPhoto = () => { delete state.cover.photo; renderCoverPhoto(); save(); };
+      function renderSitePhotos() {
+        const wrap = document.getElementById('site-photos-preview');
+        wrap.innerHTML = '';
+        (state.site.photos || []).forEach((p, idx) => {
+          const t = document.createElement('div');
+          t.className = 'photo-tile';
+          t.innerHTML = `<img src="${p.data}" alt="${p.name}" /><button class="del-photo">×</button>`;
+          t.querySelector('.del-photo').addEventListener('click', () => {
+            state.site.photos.splice(idx, 1);
+            renderSitePhotos(); save();
+          });
+          wrap.appendChild(t);
+        });
+      }
+      function renderHoodMap() {
+        const wrap = document.getElementById('hood-map-preview');
+        wrap.innerHTML = state.hood.map ? `
+          <div class="photo-tile"><img src="${state.hood.map.data}" alt="Map" /></div>` : '';
+      }
+
+      /* ---- Property Lookup (stub — wire in Task #3) ---- */
+      document.getElementById('btn-lookup').addEventListener('click', () => {
+        const addr = document.getElementById('land-lookup-address').value.trim();
+        const status = document.getElementById('land-lookup-status');
+        if (!addr) { status.textContent = 'Enter an address first'; return; }
+        status.textContent = 'Property lookup wiring in progress — for now, enter the fields manually. See land.html Property Lookup for the live version.';
+        status.classList.remove('ok'); status.classList.add('err');
+      });
+
+      /* ---- New / Reset ---- */
+      document.getElementById('btn-new').addEventListener('click', () => {
+        if (!confirm('Start a new memo? Current draft will be cleared.')) return;
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+      });
+
+      /* ---- Boot ---- */
+      load();
+      bindInputs();
+      renderComps();
+      renderTeam();
+      bindDropZones();
+      renderCoverPhoto();
+      renderSitePhotos();
+      renderHoodMap();
+      if (state.site.survey) document.getElementById('survey-status').textContent = '✓ ' + state.site.survey.name + ' attached';
+      const hash = (location.hash || '').replace(/^#/, '');
+      if (hash && STEPS.includes(hash)) goStep(hash);
+    })();
+  </script>
+</body>
+</html>

@@ -367,6 +367,7 @@
     <aside class="sidenav" role="tablist" aria-label="Land Acquisition sections">
       <div class="section-label">Land Acquisition</div>
       <button type="button" class="nav-item is-active" data-panel="overview">Overview</button>
+      <button type="button" class="nav-item" data-panel="workflow">Workflow</button>
 
       <details class="nav-group">
         <summary>Pipeline</summary>
@@ -1146,6 +1147,37 @@
           </form>
         </div>
       </div>
+
+      <!-- Workflow -->
+      <section class="panel" id="panel-workflow" role="tabpanel">
+        <p class="panel-intro">A guided, hard-facts underwriting workflow for a land deal — Cover · Land · Site + Survey · Comparables · Land Cost · Team + Contacts · Neighborhood. Fill each section, then export an offer-memorandum-style presentation PDF.</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start;">
+          <div style="border:1px solid var(--panel-edge); padding:28px; background:#0a0a0a;">
+            <div style="font-size:10px; letter-spacing:.28em; color:var(--text-dim); text-transform:uppercase; margin-bottom:8px;">Start / Resume</div>
+            <h2 style="font-family:var(--font-display); font-size:28px; color:#fff; margin:0 0 14px;">Land Acquisition Memo</h2>
+            <p style="color:var(--text-muted); line-height:1.6; margin:0 0 20px; font-size:13px;">
+              Seven sections. No projections — just facts you can verify. The Land section auto-populates from Property Lookup (parcel, zoning, FEMA, setbacks). Comps come from a built-in CMA. Everything you enter is saved locally and to Google Sheets so any Land team member can pick it up.
+            </p>
+            <a href="land-workflow.html" target="_blank" rel="noopener" class="primary-action" style="display:inline-block; padding:12px 22px; text-decoration:none;">Launch Workflow →</a>
+          </div>
+          <div style="border:1px solid var(--panel-edge); padding:28px; background:#0a0a0a;">
+            <div style="font-size:10px; letter-spacing:.28em; color:var(--text-dim); text-transform:uppercase; margin-bottom:12px;">What's inside</div>
+            <ol style="color:var(--text-muted); line-height:1.9; margin:0; padding-left:18px; font-size:13px;">
+              <li><b style="color:#fff;">Cover</b> — property, address, memo date</li>
+              <li><b style="color:#fff;">Land</b> — lot size, zoning, setbacks, FEMA, utilities, HOA</li>
+              <li><b style="color:#fff;">Site + Survey</b> — photos + attached survey PDF</li>
+              <li><b style="color:#fff;">Comparables</b> — 3–4 sold comps with $/sqft breakdown</li>
+              <li><b style="color:#fff;">Land Cost</b> — contract price, EM, closing costs, DD + close dates</li>
+              <li><b style="color:#fff;">Team + Contacts</b> — buyer's agent, seller, listing agent, attorney</li>
+              <li><b style="color:#fff;">Neighborhood</b> — map + optional context</li>
+            </ol>
+          </div>
+        </div>
+        <div id="workflow-recent" style="margin-top:32px; border-top:1px solid var(--panel-edge); padding-top:24px;">
+          <div style="font-size:10px; letter-spacing:.28em; color:var(--text-dim); text-transform:uppercase; margin-bottom:12px;">Recent workflows</div>
+          <p style="color:var(--text-dim); font-size:12px; margin:0;">— None yet. Launch the workflow to start your first one. —</p>
+        </div>
+      </section>
 
       <!-- Settings -->
       <section class="panel" id="panel-settings" role="tabpanel">
