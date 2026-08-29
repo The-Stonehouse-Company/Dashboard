@@ -4,6 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>The Stonehouse Company — Internal Dashboard</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta name="description" content="Internal company dashboard for The Stonehouse Company. Four divisions, one workspace." />
 
   <!-- Home-screen / PWA -->
@@ -3966,10 +3969,24 @@
       </div>
       <div class="header-meta">
         <span>Internal Dashboard</span>
+        <button type="button" class="switch-division-btn" id="btn-refresh" title="Fetch the latest version (bust cache)" style="margin-right:8px;">↻ Refresh</button>
         <button type="button" class="switch-division-btn" id="switch-division-btn" title="Back to the division hub">◫ Switch Division</button>
       </div>
     </div>
   </header>
+  <script>
+    // Cache-bust refresh — appends ?v=timestamp so browsers + GitHub Pages
+    // edge caches serve the newest file.
+    (function () {
+      const b = document.getElementById('btn-refresh');
+      if (!b) return;
+      b.addEventListener('click', () => {
+        const u = new URL(location.href);
+        u.searchParams.set('v', Date.now());
+        location.replace(u.toString());
+      });
+    })();
+  </script>
 
   <!-- ========================= APP SHELL ========================= -->
   <div class="app-shell">

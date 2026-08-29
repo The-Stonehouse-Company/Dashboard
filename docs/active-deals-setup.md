@@ -17,7 +17,7 @@ Plan ~25 minutes for both sheets + forms.
 
 ### 1A. Create the Sheet
 
-1. Go to [sheets.new](https://sheets.new) logged in as `thestonehousecompanyadmin@gmail.com`.
+1. Go to [sheets.new](https://sheets.new) logged in as `admin@thestonehouseco.com`.
 2. Name it **Stonehouse Buyer Deals**.
 3. The default tab `"Sheet1"` stays for now — the Form will create a `"Form Responses 1"` tab when you link it in step 1C.
 4. **Share** → General access → **Anyone with the link → Viewer**. The dashboard's gviz read is anonymous; this is required.

@@ -14,7 +14,7 @@ Plan ~20 minutes end to end. Send me back three things at the end:
 
 ## 1 · Create the Sheet
 
-Log into Google as `thestonehousecompanyadmin@gmail.com`.
+Log into Google as `admin@thestonehouseco.com`.
 
 - Go to [sheets.new](https://sheets.new)
 - Rename to **Stonehouse Move-In Reports**
@@ -24,7 +24,7 @@ Log into Google as `thestonehousecompanyadmin@gmail.com`.
 
 - Inside the sheet: **Tools → Notification settings → Edit notifications**
 - New rule: **Any changes are made** → **Email — right away**
-- Save. Google will email `thestonehousecompanyadmin@gmail.com` every time a new row is added.
+- Save. Google will email `admin@thestonehouseco.com` every time a new row is added.
 
 ---
 

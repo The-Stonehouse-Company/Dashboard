@@ -37,7 +37,7 @@ cd "/Users/ryanstonehouse/The Stonehouse Company/The Stonehouse Company/Company/
 
 # If you've never used git on this Mac, tell git who you are first:
 git config --global user.name  "Ryan Stonehouse"
-git config --global user.email "thestonehousecompanyadmin@gmail.com"
+git config --global user.email "admin@thestonehouseco.com"
 
 # Initialize the repo
 git init -b main

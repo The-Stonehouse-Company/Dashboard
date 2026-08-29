@@ -20,7 +20,7 @@ The pattern is identical to the Commissions Tracker, Open House Sign-Ins, and La
 
 ## 1 · Create the Team Roster Sheet
 
-1. Go to [sheets.new](https://sheets.new) logged in as `thestonehousecompanyadmin@gmail.com`.
+1. Go to [sheets.new](https://sheets.new) logged in as `admin@thestonehouseco.com`.
 2. Rename the file: **Stonehouse Team Roster**.
 3. Rename the first tab: **Roster** (exact spelling — the loader is case-insensitive but the tab name needs to match `SHEET_TAB` in `TEAM_CONFIG`).
 4. Paste this header row into row 1:

@@ -13,7 +13,7 @@ Send me back three things at the end:
 
 ## 1 · Create the Sheet
 
-Log into Google as `thestonehousecompanyadmin@gmail.com`.
+Log into Google as `admin@thestonehouseco.com`.
 
 - Go to [sheets.new](https://sheets.new)
 - Rename to **Apeiron Project Timeline**

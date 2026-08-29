@@ -300,7 +300,7 @@ The PDF conversion needs the **Drive Advanced Service**:
 Google will prompt you to authorize the script:
 
 - Click **Review permissions**
-- Sign in as `thestonehousecompanyadmin@gmail.com`
+- Sign in as `admin@thestonehouseco.com`
 - You may see "Google hasn't verified this app" — click **Advanced → Go to Move-In Report Email (unsafe)**
   - This is normal for personal scripts; you're the author, so it's safe.
 - Click **Allow** to grant:

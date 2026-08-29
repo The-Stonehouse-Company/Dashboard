@@ -15,7 +15,7 @@ Plan ~20 minutes.
 
 ## 1 · Create the Sheet
 
-1. [sheets.new](https://sheets.new) (logged in as `thestonehousecompanyadmin@gmail.com`).
+1. [sheets.new](https://sheets.new) (logged in as `admin@thestonehouseco.com`).
 2. Rename: **Stonehouse Clients**
 3. Share → Anyone with the link → Viewer
 

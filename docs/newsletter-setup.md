@@ -21,7 +21,7 @@ Brevo (formerly Sendinblue) is built for this. Free tier covers 300 sends/day an
 ## 1 · Create your Brevo account
 
 1. Go to [brevo.com](https://www.brevo.com) → **Sign up free**
-2. Use `thestonehousecompanyadmin@gmail.com` (or your preferred admin email)
+2. Use `admin@thestonehouseco.com` (or your preferred admin email)
 3. Set up your company profile: **The Stonehouse Company** · 206 Ben Allen Rd #7, Nashville TN 37207 · real estate
 4. Skip the paid upsell on the way through — the free **Starter** plan is fine
 
