@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Land Acquisition · The Stonehouse Company</title>
   <meta name="theme-color" content="#000000" />
+  <!-- Do not cache the shell HTML — assets/data can cache normally.
+       Combined with the ↻ Refresh button, this keeps deployments fresh. -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <link rel="icon" type="image/png" sizes="32x32" href="assets/icon-arch-transparent.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -358,8 +363,18 @@
       <div class="name">Land Acquisition<small>The Stonehouse Company</small></div>
     </a>
     <div class="spacer"></div>
+    <button type="button" class="parent-link" id="btn-refresh" title="Fetch the latest version (bust cache)" style="background:transparent; border:1px solid transparent; cursor:pointer; margin-right:12px;">↻ Refresh</button>
     <a href="index.html?hub=1" class="parent-link">◫ Switch Division</a>
   </div>
+  <script>
+    // Cache-bust refresh — appends ?v=timestamp so browsers + GitHub Pages
+    // edge caches serve the newest file.
+    document.getElementById('btn-refresh').addEventListener('click', () => {
+      const u = new URL(location.href);
+      u.searchParams.set('v', Date.now());
+      location.replace(u.toString());
+    });
+  </script>
 
   <div class="shell">
 
