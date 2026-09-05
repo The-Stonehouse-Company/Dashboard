@@ -1524,23 +1524,21 @@
       if (!window.confirm('Delete this hot lead?\n\n' + propertyLabel + '\n\nThe row will be marked Deleted in the shared sheet (append-only history — the past rows stay for audit).')) return;
       const body = new URLSearchParams();
       const M = HOTLEAD_FORM.MAP;
-      const set = (k, v) => { const key = M[k]; if (key && v != null) body.append(key, String(v)); };
+      // The loader groups rows by lead_id and takes the latest row per ID,
+      // then filters out status='Deleted'. So a delete only needs three fields:
+      // lead_id (matches the row), status (marks Deleted), land_agent (keeps
+      // per-agent tab scoping). Sending fewer fields also avoids silent 400s
+      // when a legacy row has a range like "$900K - $1.3M" in a numeric column.
+      // Property address is included so the audit history shows what was deleted.
+      const set = (k, v) => {
+        const key = M[k]; if (!key) return;
+        const s = (v == null) ? '' : String(v).trim();
+        if (s) body.append(key, s);
+      };
       set('lead_id',          lead.id);
       set('property_address', lead.property);
-      set('neighborhood',     lead.neigh);
-      set('estimated_value',  lead.estVal);
-      set('owner_name',       lead.ownerName);
-      set('owner_phone',      lead.ownerPhone);
-      set('owner_email',      lead.ownerEmail);
-      set('source',           lead.source);
-      set('referred_by',      lead.referredBy);
-      set('heat_level',       lead.heat);
       set('status',           'Deleted');
       set('land_agent',       lead.agent);
-      set('last_touch',       _hlISODate(lead.lastTouch));
-      set('next_action_date', _hlISODate(lead.nextDate));
-      set('next_action',      lead.nextAction);
-      set('notes',            lead.notes);
       try {
         await fetch(HOTLEAD_FORM.URL, { method: 'POST', mode: 'no-cors', body });
         // Optimistic remove — then re-fetch to confirm
