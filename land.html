@@ -448,32 +448,252 @@
           </div>
         </div>
 
-        <!-- ============ Team Calendar (embedded from Ryan's Stonehouse cal) ============ -->
+        <!-- ============ Nashville Deal Calendar — curated industry events ============ -->
         <div style="margin-top:36px;">
-          <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:12px; border-bottom:1px solid var(--rule); margin-bottom:16px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:12px; border-bottom:1px solid var(--rule); margin-bottom:6px;">
             <div>
-              <div style="font-size:9px; letter-spacing:.24em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Team Calendar</div>
-              <div style="font-family:var(--font-display); font-size:18px; color:#fff; margin-top:4px; letter-spacing:.04em;">Upcoming Events</div>
+              <div style="font-size:9px; letter-spacing:.24em; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Middle Tennessee · This Month</div>
+              <div style="font-family:var(--font-display); font-size:22px; color:#fff; margin-top:4px; letter-spacing:.04em;">Nashville Deal Calendar</div>
             </div>
-            <a href="https://calendar.google.com/calendar/u/0/r?cid=ryan@thestonehouseco.com" target="_blank" rel="noopener"
-               style="font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--text-muted); text-decoration:none; padding:6px 14px; border:1px solid var(--rule);">
-              Open in Google Calendar →
-            </a>
+            <div style="text-align:right;">
+              <div style="font-size:10px; letter-spacing:.18em; color:var(--text-muted); text-transform:uppercase;" id="cal-updated">Loading…</div>
+              <div style="font-size:10px; letter-spacing:.14em; color:var(--text-dim); margin-top:2px;" id="cal-count"></div>
+            </div>
           </div>
+          <p style="font-size:12px; color:var(--text-muted); line-height:1.55; max-width:700px; margin:0 0 20px;">
+            Where the people who buy lots (builders, developers) and the people who fund or wholesale them (investors) will be in the room this month.
+            <span style="color:var(--accent);">Verified events</span> are worth blocking your calendar for.
+          </p>
+
+          <!-- Category filter chips -->
+          <div id="cal-cats" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;"></div>
           <!-- Google Calendar embed. AGENDA mode shows an upcoming-events list,
                which is what Ryan wants: what's next this week.
                To see events, the viewer must be signed into a Google account
                that has access to ryan@thestonehouseco.com's calendar (typically
                via Google Workspace domain sharing — set once in Calendar Settings). -->
-          <!-- Calendar placeholder — iframe embed pulled while Ryan explores a
-               better sync approach (scheduled task → Sheet, or client-side OAuth). -->
-          <div style="border:1px dashed var(--rule); padding:60px 32px; text-align:center; background:var(--panel);">
-            <div style="font-family:var(--font-display); font-size:16px; color:#fff; letter-spacing:.14em; margin-bottom:10px;">Calendar Coming Soon</div>
-            <p style="font-size:12px; color:var(--text-muted); max-width:440px; margin:0 auto; line-height:1.6;">
-              Team calendar view will land here once we settle on the right sync approach.
-              For now, use the button above to jump to Google Calendar.
-            </p>
-          </div>
+          <!-- Month-grid calendar view -->
+          <div id="team-cal" style="background:var(--panel); border:1px solid var(--rule); padding:20px; margin-bottom:20px;"></div>
+
+          <!-- Event card list (Nashville-artifact style) -->
+          <div id="cal-cards"></div>
+        </div>
+
+        <style>
+          /* ===== Deal Calendar ===== */
+          .cal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+          .cal-title { font-family:var(--font-display); font-size:16px; color:#fff; letter-spacing:.14em; }
+          .cal-nav { display:flex; gap:6px; }
+          .cal-nav button {
+            background:transparent; border:1px solid var(--rule); color:var(--text-muted);
+            font-family:var(--font-body); font-size:10px; letter-spacing:.18em; text-transform:uppercase;
+            padding:6px 12px; cursor:pointer;
+          }
+          .cal-nav button:hover { color:#fff; border-color:var(--accent); }
+          .cal-dow { display:grid; grid-template-columns:repeat(7, 1fr); gap:1px; background:#222; border:1px solid #222; }
+          .cal-dow > div { background:#0a0a0a; padding:8px 6px; text-align:center; font-size:9px; letter-spacing:.24em; color:var(--text-dim); text-transform:uppercase; }
+          .cal-grid { display:grid; grid-template-columns:repeat(7, 1fr); gap:1px; background:#222; border:1px solid #222; border-top:0; }
+          .cal-cell { background:#0a0a0a; min-height:88px; padding:6px 6px 4px; display:flex; flex-direction:column; gap:2px; overflow:hidden; }
+          .cal-cell.other { background:#050505; opacity:.4; }
+          .cal-cell.past  { opacity:.55; }
+          .cal-cell.today { outline:1px solid var(--accent); outline-offset:-1px; background:linear-gradient(180deg, rgba(234,226,211,.06), rgba(234,226,211,0)); }
+          .cal-daynum { font-family:var(--font-body); font-size:11px; color:var(--text-muted); letter-spacing:.06em; margin-bottom:2px; }
+          .cal-cell.today .cal-daynum { color:var(--accent); font-weight:700; }
+          .cal-event { border-left:2px solid var(--accent); padding:2px 6px; font-size:10px; line-height:1.25; color:#fff; background:#1a1a1a;
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+          .cal-event.priority { border-left-color:#f57c00; background:#231512; }
+          .cal-more { font-size:9px; letter-spacing:.16em; color:var(--text-dim); text-transform:uppercase; padding:2px 6px; }
+
+          /* ===== Category chips ===== */
+          .cat-chip {
+            padding:6px 14px; font-family:var(--font-body); font-size:10px;
+            letter-spacing:.2em; text-transform:uppercase; cursor:pointer;
+            border:1px solid var(--rule); color:var(--text-muted); background:transparent;
+            transition:all .15s;
+          }
+          .cat-chip:hover { color:#fff; border-color:var(--text-muted); }
+          .cat-chip.is-on { background:var(--accent); color:#111; border-color:var(--accent); }
+          .cat-chip .count { opacity:.6; margin-left:6px; }
+
+          /* ===== Event cards (artifact-style) ===== */
+          .ev-card {
+            display:grid; grid-template-columns:160px 1fr; gap:24px;
+            padding:22px 20px; background:var(--panel); border:1px solid var(--rule);
+            border-left:3px solid var(--rule); margin-bottom:10px;
+          }
+          .ev-card.priority { border-left-color:#f57c00; background:#151110; }
+          .ev-card.today    { border-left-color:var(--accent); }
+          .ev-card .ev-when {
+            font-family:var(--font-body); font-size:11px; color:var(--text-muted);
+            letter-spacing:.18em; text-transform:uppercase; line-height:1.55;
+          }
+          .ev-card .ev-when .day { color:#fff; font-weight:700; }
+          .ev-card .ev-title { font-family:var(--font-display); font-size:18px; color:#fff; letter-spacing:.02em; margin-bottom:4px; display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+          .ev-card .ev-tags { display:inline-flex; gap:6px; flex-wrap:wrap; }
+          .ev-tag { font-size:9px; letter-spacing:.22em; padding:2px 8px; text-transform:uppercase; border-radius:2px; }
+          .ev-tag.BUILDERS         { background:#1e3323; color:#8fd39c; }
+          .ev-tag.DEVELOPERS       { background:#33241e; color:#f0b48c; }
+          .ev-tag.INVESTORS        { background:#1e2933; color:#8fb5d3; }
+          .ev-tag.PLANNING         { background:#2a1e33; color:#c4a1e0; }
+          .ev-tag.AGENTS           { background:#332a1e; color:#e0c48c; }
+          .ev-verified { font-size:10px; color:#7fbf7f; letter-spacing:.08em; }
+          .ev-listed   { font-size:10px; color:var(--text-dim); letter-spacing:.08em; }
+          .ev-host { font-size:12px; color:var(--text-muted); margin-bottom:8px; }
+          .ev-host b { color:#fff; }
+          .ev-desc { font-size:13px; color:var(--text); line-height:1.6; margin-bottom:10px; }
+          .ev-meta { font-size:11px; color:var(--text-dim); line-height:1.7; }
+          .ev-meta .label { letter-spacing:.22em; text-transform:uppercase; color:var(--text-dim); margin-right:6px; }
+          .ev-meta a { color:var(--accent); text-decoration:none; }
+          .ev-meta a:hover { color:#fff; }
+        </style>
+
+        <script>
+          /* ==== Nashville Deal Calendar ==== */
+          (function () {
+            const grid = document.getElementById('team-cal');
+            const cards = document.getElementById('cal-cards');
+            const cats = document.getElementById('cal-cats');
+            const updated = document.getElementById('cal-updated');
+            const countEl = document.getElementById('cal-count');
+            if (!grid || !cards) return;
+
+            const CATEGORIES = ['BUILDERS','DEVELOPERS','INVESTORS','PLANNING','AGENTS'];
+            const activeCats = new Set(CATEGORIES);
+            let events = [];
+            let viewDate = new Date(); viewDate.setDate(1);
+
+            const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+            const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            const fmtTime = (d) => d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' }).replace(':00', '').toLowerCase();
+            const sameDay = (a, b) => a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+            const esc = (s) => String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+            function filteredEvents() {
+              return events.filter(e => (e.categories||[]).some(c => activeCats.has(c)));
+            }
+
+            function renderChips() {
+              const counts = CATEGORIES.reduce((a,c)=>{ a[c] = events.filter(e => (e.categories||[]).includes(c)).length; return a; }, {});
+              cats.innerHTML = CATEGORIES.map(c => `
+                <button type="button" class="cat-chip ${activeCats.has(c)?'is-on':''}" data-cat="${c}">
+                  ${c}<span class="count">${counts[c]||0}</span>
+                </button>`).join('');
+              cats.querySelectorAll('[data-cat]').forEach(b => b.addEventListener('click', () => {
+                const c = b.dataset.cat;
+                if (activeCats.has(c) && activeCats.size === 1) return; // don't allow zero
+                if (activeCats.has(c)) activeCats.delete(c); else activeCats.add(c);
+                renderChips(); renderGrid(); renderCards();
+              }));
+            }
+
+            function renderGrid() {
+              const y = viewDate.getFullYear(), m = viewDate.getMonth();
+              const firstDow = new Date(y, m, 1).getDay();
+              const daysInMonth = new Date(y, m+1, 0).getDate();
+              const daysPrev = new Date(y, m, 0).getDate();
+              const today = new Date();
+              const es = filteredEvents();
+              const cells = [];
+              for (let i = 0; i < 42; i++) {
+                let date, cls = '';
+                if (i < firstDow) { date = new Date(y, m-1, daysPrev - (firstDow-1-i)); cls = 'other'; }
+                else if (i-firstDow+1 <= daysInMonth) { date = new Date(y, m, i-firstDow+1); }
+                else { date = new Date(y, m+1, i-firstDow-daysInMonth+1); cls = 'other'; }
+                if (date < new Date(today.getFullYear(), today.getMonth(), today.getDate())) cls += ' past';
+                if (sameDay(date, today)) cls += ' today';
+                const de = es.filter(ev => sameDay(ev.start, date)).sort((a,b)=>a.start-b.start);
+                cells.push({ date, cls, de });
+              }
+              grid.innerHTML = `
+                <div class="cal-head">
+                  <div class="cal-title">${MONTHS[m]} ${y}</div>
+                  <div class="cal-nav">
+                    <button type="button" data-nav="prev">← Prev</button>
+                    <button type="button" data-nav="today">Today</button>
+                    <button type="button" data-nav="next">Next →</button>
+                  </div>
+                </div>
+                <div class="cal-dow">${DOW.map(d => `<div>${d}</div>`).join('')}</div>
+                <div class="cal-grid">${cells.map(c => `
+                  <div class="cal-cell ${c.cls}">
+                    <div class="cal-daynum">${c.date.getDate()}</div>
+                    ${c.de.slice(0, 3).map(ev => `
+                      <div class="cal-event ${ev.priority ? 'priority':''}" title="${esc(ev.title)}${ev.allDay?'':' · '+fmtTime(ev.start)}">
+                        ${ev.allDay ? '' : `<span style="color:var(--text-muted); font-size:9px; margin-right:3px;">${fmtTime(ev.start)}</span>`}${esc(ev.title)}
+                      </div>`).join('')}
+                    ${c.de.length > 3 ? `<div class="cal-more">+ ${c.de.length - 3} more</div>` : ''}
+                  </div>`).join('')}</div>`;
+              grid.querySelectorAll('[data-nav]').forEach(b => b.addEventListener('click', () => {
+                const dir = b.dataset.nav;
+                if (dir === 'prev') viewDate.setMonth(viewDate.getMonth()-1);
+                else if (dir === 'next') viewDate.setMonth(viewDate.getMonth()+1);
+                else viewDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+                renderGrid();
+              }));
+            }
+
+            function renderCards() {
+              const es = filteredEvents().filter(e => e.start >= new Date(new Date().setHours(0,0,0,0)))
+                                          .sort((a,b) => a.start - b.start);
+              if (!es.length) {
+                cards.innerHTML = `<div style="padding:40px; text-align:center; color:var(--text-dim); font-size:12px;">No upcoming events match your filters.</div>`;
+                countEl.textContent = '0 upcoming events';
+                return;
+              }
+              countEl.textContent = `${es.length} upcoming event${es.length===1?'':'s'}`;
+              const today = new Date(); today.setHours(0,0,0,0);
+              cards.innerHTML = es.map(ev => {
+                const day = ev.start.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+                const time = ev.allDay ? 'all day' : (ev.endTime ? `${fmtTime(ev.start)}–${fmtTime(ev.endTime)}` : fmtTime(ev.start));
+                const cls = (ev.priority ? 'priority' : '') + (sameDay(ev.start, today) ? ' today' : '');
+                return `
+                  <div class="ev-card ${cls}">
+                    <div class="ev-when">
+                      <div class="day">${esc(day)}</div>
+                      <div>${esc(time)}</div>
+                    </div>
+                    <div>
+                      <div class="ev-title">
+                        ${esc(ev.title)}
+                        <span class="ev-tags">
+                          ${(ev.categories||[]).map(c => `<span class="ev-tag ${c}">${c}</span>`).join('')}
+                          ${ev.verified ? '<span class="ev-verified">✓ verified</span>' : '<span class="ev-listed">○ listed</span>'}
+                        </span>
+                      </div>
+                      ${ev.host ? `<div class="ev-host"><b>${esc(ev.host)}</b>${ev.location ? ' · ' + esc(ev.location) : ''}</div>` : ''}
+                      ${ev.description ? `<div class="ev-desc">${esc(ev.description)}</div>` : ''}
+                      <div class="ev-meta">
+                        ${ev.whosThere ? `<span class="label">Who's there:</span>${esc(ev.whosThere)}<br>` : ''}
+                        ${ev.cost ? `<span class="label">Cost:</span>${esc(ev.cost)}${ev.link ? ' · ' : ''}` : ''}
+                        ${ev.link ? `<a href="${esc(ev.link)}" target="_blank" rel="noopener">${esc(ev.linkLabel || 'RSVP →')}</a>` : ''}
+                      </div>
+                    </div>
+                  </div>`;
+              }).join('');
+            }
+
+            async function fetchEvents() {
+              try {
+                const res = await fetch('assets/deal-calendar.json?t=' + Date.now(), { cache:'no-store' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                events = (data.events || []).map(e => ({
+                  ...e,
+                  start: new Date(e.start),
+                  endTime: e.end ? new Date(e.end) : null,
+                }));
+                updated.textContent = 'Updated ' + new Date(data.updatedAt || Date.now()).toLocaleDateString('en-US', { month:'short', day:'numeric' });
+              } catch (err) {
+                events = [];
+                updated.textContent = 'No data yet';
+                console.warn('deal calendar fetch failed', err);
+              }
+              renderChips(); renderGrid(); renderCards();
+            }
+            fetchEvents();
+            setInterval(fetchEvents, 10 * 60 * 1000);
+          })();
+        </script>
         </div>
       </section>
 

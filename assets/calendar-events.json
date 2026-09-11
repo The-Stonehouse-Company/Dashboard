@@ -1,0 +1,233 @@
+{
+  "updatedAt": "2026-09-11T00:32:21.189333-05:00",
+  "events": [
+    {
+      "title": "Brentwood Site Walk",
+      "start": "2026-09-11T07:30:00-05:00",
+      "end": "2026-09-11T08:30:00-05:00",
+      "allDay": false
+    },
+    {
+      "title": "Clifton walk plumbing",
+      "start": "2026-09-11T08:30:00-05:00",
+      "end": "2026-09-11T09:30:00-05:00",
+      "allDay": false
+    },
+    {
+      "title": "606 Davis Dr. - Door Knock",
+      "start": "2026-09-11T12:00:00-05:00",
+      "end": "2026-09-11T13:00:00-05:00",
+      "allDay": false,
+      "attendees": [
+        "kneeland@thestonehouseco.com",
+        "ryan@thestonehouseco.com"
+      ]
+    },
+    {
+      "title": "Meeting with Agent",
+      "start": "2026-09-11T14:00:00-05:00",
+      "end": "2026-09-11T15:00:00-05:00",
+      "allDay": false
+    },
+    {
+      "title": "Matt White Meeting",
+      "start": "2026-09-11T16:00:00-05:00",
+      "end": "2026-09-11T17:00:00-05:00",
+      "allDay": false
+    },
+    {
+      "title": "Clifton Moving",
+      "start": "2026-09-12T07:00:00-05:00",
+      "end": "2026-09-12T10:00:00-05:00",
+      "allDay": false
+    },
+    {
+      "title": "Photos for 1219A Battlefield Dr. & 2003 Sweetbriar Ave",
+      "start": "2026-09-12T09:00:00-05:00",
+      "end": "2026-09-12T10:30:00-05:00",
+      "allDay": false,
+      "attendees": [
+        "benwllms18@gmail.com",
+        "ryan@thestonehouseco.com"
+      ]
+    },
+    {
+      "title": "Ava’s BDay Dinner @ Tony’s",
+      "start": "2026-09-13T18:00:00-05:00",
+      "end": "2026-09-13T19:00:00-05:00",
+      "allDay": false
+    },
+    {
+      "title": "Closing 607 Davis Dr",
+      "start": "2026-09-14",
+      "end": "2026-09-15",
+      "allDay": true
+    },
+    {
+      "title": "Closing Chester Stevens",
+      "start": "2026-09-14",
+      "end": "2026-09-15",
+      "allDay": true
+    },
+    {
+      "title": "Ryan x Blake Connect",
+      "start": "2026-09-14T07:30:00-05:00",
+      "end": "2026-09-14T08:30:00-05:00",
+      "allDay": false
+    },
+    {
+      "title": "Closings for Davis & Chester Steven",
+      "start": "2026-09-14T09:00:00-05:00",
+      "end": "2026-09-14T10:00:00-05:00",
+      "allDay": false
+    },
+    {
+      "title": "Golf w Dalton P",
+      "start": "2026-09-14T11:00:00-05:00",
+      "end": "2026-09-14T15:00:00-05:00",
+      "allDay": false
+    },
+    {
+      "title": "Weekly Lakeland Meeting",
+      "start": "2026-09-15T09:30:00-05:00",
+      "end": "2026-09-15T10:30:00-05:00",
+      "allDay": false,
+      "attendees": [
+        "kneeland@thestonehouseco.com",
+        "andrewfritts@lakelandbp.com",
+        "gabe@thestonehouseco.com",
+        "ryan@thestonehouseco.com",
+        "kennethstephens@lakelandbp.com"
+      ]
+    },
+    {
+      "title": "BG Home Furnishings Delivery",
+      "start": "2026-09-15T12:00:00-05:00",
+      "end": "2026-09-15T13:00:00-05:00",
+      "allDay": false
+    },
+    {
+      "title": "Closing Rodney Dr",
+      "start": "2026-09-18",
+      "end": "2026-09-19",
+      "allDay": true
+    },
+    {
+      "title": "Family in Town",
+      "start": "2026-09-18",
+      "end": "2026-09-23",
+      "allDay": true
+    },
+    {
+      "title": "Ryan x Blake Connect",
+      "start": "2026-09-21T07:30:00-05:00",
+      "end": "2026-09-21T08:30:00-05:00",
+      "allDay": false
+    },
+    {
+      "title": "Weekly Lakeland Meeting",
+      "start": "2026-09-22T09:30:00-05:00",
+      "end": "2026-09-22T10:30:00-05:00",
+      "allDay": false,
+      "attendees": [
+        "kneeland@thestonehouseco.com",
+        "andrewfritts@lakelandbp.com",
+        "gabe@thestonehouseco.com",
+        "ryan@thestonehouseco.com",
+        "kennethstephens@lakelandbp.com"
+      ]
+    },
+    {
+      "title": "Homes 4 Homes Dinner",
+      "start": "2026-09-23T18:00:00-05:00",
+      "end": "2026-09-23T19:00:00-05:00",
+      "allDay": false
+    },
+    {
+      "title": "Atti Wedding",
+      "start": "2026-09-24",
+      "end": "2026-09-25",
+      "allDay": true
+    },
+    {
+      "title": "Atti Wedding",
+      "start": "2026-09-25",
+      "end": "2026-09-26",
+      "allDay": true
+    },
+    {
+      "title": "Attis Wedding",
+      "start": "2026-09-26",
+      "end": "2026-09-27",
+      "allDay": true
+    },
+    {
+      "title": "Attis Wedding",
+      "start": "2026-09-27",
+      "end": "2026-09-28",
+      "allDay": true
+    },
+    {
+      "title": "Ryan x Blake Connect",
+      "start": "2026-09-28T07:30:00-05:00",
+      "end": "2026-09-28T08:30:00-05:00",
+      "allDay": false
+    },
+    {
+      "title": "Closing Brook Hollow",
+      "start": "2026-09-29",
+      "end": "2026-09-30",
+      "allDay": true
+    },
+    {
+      "title": "842 Brook Hollow Rd — Closing",
+      "start": "2026-09-29T09:00:00-05:00",
+      "end": "2026-09-29T09:30:00-05:00",
+      "allDay": false
+    },
+    {
+      "title": "Weekly Lakeland Meeting",
+      "start": "2026-09-29T09:30:00-05:00",
+      "end": "2026-09-29T10:30:00-05:00",
+      "allDay": false,
+      "attendees": [
+        "kneeland@thestonehouseco.com",
+        "andrewfritts@lakelandbp.com",
+        "gabe@thestonehouseco.com",
+        "ryan@thestonehouseco.com",
+        "kennethstephens@lakelandbp.com"
+      ]
+    },
+    {
+      "title": "Cobbs Wedding",
+      "start": "2026-10-03",
+      "end": "2026-10-04",
+      "allDay": true
+    },
+    {
+      "title": "Ryan x Blake Connect",
+      "start": "2026-10-05T07:30:00-05:00",
+      "end": "2026-10-05T08:30:00-05:00",
+      "allDay": false
+    },
+    {
+      "title": "Weekly Lakeland Meeting",
+      "start": "2026-10-06T09:30:00-05:00",
+      "end": "2026-10-06T10:30:00-05:00",
+      "allDay": false,
+      "attendees": [
+        "kneeland@thestonehouseco.com",
+        "andrewfritts@lakelandbp.com",
+        "gabe@thestonehouseco.com",
+        "ryan@thestonehouseco.com",
+        "kennethstephens@lakelandbp.com"
+      ]
+    },
+    {
+      "title": "Golf w Key",
+      "start": "2026-10-08",
+      "end": "2026-10-12",
+      "allDay": true
+    }
+  ]
+}
