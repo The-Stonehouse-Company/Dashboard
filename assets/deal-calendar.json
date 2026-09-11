@@ -1,12 +1,15 @@
 {
-  "updatedAt": "2026-09-11T00:00:00-05:00",
+  "updatedAt": "2026-09-11T00:51:19-05:00",
   "_note": "Auto-populated by the 'discover-nashville-deal-events' scheduled task each Monday. Add/remove/verify events manually here as needed — the task appends without deleting.",
   "events": [
     {
       "title": "Nashville's Best Real Estate Meetup",
       "start": "2026-09-02T17:30:00-05:00",
-      "end":   "2026-09-02T20:00:00-05:00",
-      "categories": ["AGENTS", "INVESTORS"],
+      "end": "2026-09-02T20:00:00-05:00",
+      "categories": [
+        "AGENTS",
+        "INVESTORS"
+      ],
       "verified": true,
       "priority": true,
       "host": "Nashville's Best Real Estate Meetup",
@@ -20,8 +23,10 @@
     {
       "title": "Developer Breakfast",
       "start": "2026-09-08T08:00:00-05:00",
-      "end":   "2026-09-08T09:00:00-05:00",
-      "categories": ["DEVELOPERS"],
+      "end": "2026-09-08T09:00:00-05:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
       "verified": true,
       "priority": true,
       "host": "Sapphire Group Real Estate",
@@ -35,8 +40,10 @@
     {
       "title": "HBAMT 2026 Fall Builders Show",
       "start": "2026-09-08T16:00:00-05:00",
-      "end":   "2026-09-08T18:00:00-05:00",
-      "categories": ["BUILDERS"],
+      "end": "2026-09-08T18:00:00-05:00",
+      "categories": [
+        "BUILDERS"
+      ],
       "verified": true,
       "priority": true,
       "host": "HBAMT",
@@ -50,8 +57,11 @@
     {
       "title": "City Planner Panel: Sumner & Robertson County",
       "start": "2026-09-09T11:00:00-05:00",
-      "end":   "2026-09-09T13:00:00-05:00",
-      "categories": ["PLANNING", "BUILDERS"],
+      "end": "2026-09-09T13:00:00-05:00",
+      "categories": [
+        "PLANNING",
+        "BUILDERS"
+      ],
       "verified": true,
       "priority": true,
       "host": "Women's Council of REALTORS Greater Nashville North",
@@ -65,8 +75,11 @@
     {
       "title": "RE Industry Night",
       "start": "2026-09-09T16:00:00-05:00",
-      "end":   "2026-09-09T19:00:00-05:00",
-      "categories": ["INVESTORS", "BUILDERS"],
+      "end": "2026-09-09T19:00:00-05:00",
+      "categories": [
+        "INVESTORS",
+        "BUILDERS"
+      ],
       "verified": true,
       "priority": true,
       "host": "TNREIA",
@@ -80,8 +93,10 @@
     {
       "title": "NEXT Lunch with a Leader: Adriane Harris",
       "start": "2026-09-10T11:30:00-05:00",
-      "end":   "2026-09-10T13:00:00-05:00",
-      "categories": ["DEVELOPERS"],
+      "end": "2026-09-10T13:00:00-05:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
       "verified": false,
       "priority": false,
       "host": "ULI Nashville",
@@ -93,10 +108,189 @@
       "linkLabel": "nashville.uli.org"
     },
     {
+      "title": "How to Read a City Council Before You Buy the Land",
+      "start": "2026-09-14T11:30:00-05:00",
+      "end": "2026-09-14T13:00:00-05:00",
+      "categories": [
+        "INVESTORS",
+        "PLANNING",
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "TNREIA",
+      "location": "Sportsman's Grille · 1640 Westgate Cir, Brentwood, TN 37027",
+      "description": "Practical session on how experienced developers read a city council and gauge entitlement risk before committing to a land purchase. Directly relevant to lot acquisition.",
+      "whosThere": "Garrett Stiles and Joey Locker, The Entitlement Group (founded by the Southern View Development team)",
+      "cost": "free for members and first-time guests · $22 non-members at the door",
+      "link": "https://www.tnreia.com/event-6829062",
+      "linkLabel": "tnreia.com"
+    },
+    {
+      "title": "CREDA September Membership Meeting: The Titans' Next Chapter",
+      "start": "2026-09-16T08:00:00-05:00",
+      "end": "2026-09-16T09:30:00-05:00",
+      "categories": [
+        "DEVELOPERS",
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "NAIOP Nashville / CREDA Middle Tennessee",
+      "location": "TBD — confirm on organizer page",
+      "description": "Monthly membership breakfast. Topic: \"The Titans' Next Chapter: Team Outlook and New Stadium Development.\"",
+      "whosThere": "CREDA / NAIOP Nashville commercial developers and investors",
+      "cost": "ticketed · registration via CREDA",
+      "link": "https://members.naiop-nashville.org/naiop-events-calendar/Details/september-membership-meeting-1501346?sourceTypeId=Website",
+      "linkLabel": "CREDA Middle TN"
+    },
+    {
+      "title": "ULI Nashville CONNECT: September New Member Orientation",
+      "start": "2026-09-17T08:30:00-05:00",
+      "end": "2026-09-17T09:30:00-05:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "ULI Nashville",
+      "location": "SESCO Lighting Nashville · 636 Grassmere Park, Ste. 105, Nashville, TN 37204",
+      "description": "New member orientation and intro to ULI Nashville programming. ULI member exclusive.",
+      "whosThere": "ULI Nashville staff and new members",
+      "cost": "ULI member exclusive",
+      "link": "https://nashville.uli.org/events/detail/5F912AA6-FF93-40DC-81DC-4BAE48E81E46",
+      "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "CREDA Comedy Night",
+      "start": "2026-09-17T16:30:00-05:00",
+      "end": "2026-09-17T21:00:00-05:00",
+      "categories": [
+        "DEVELOPERS",
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "NAIOP Nashville / CREDA Middle Tennessee",
+      "location": "OZ Arts Nashville · 6172 Cockrill Bend Cir",
+      "description": "Annual chapter social — large commercial real estate turnout, featuring comedian Jaron Myers.",
+      "whosThere": "CREDA / NAIOP Nashville members · Jaron Myers performing",
+      "cost": "ticketed",
+      "link": "https://members.naiop-nashville.org/naiop-events-calendar/Details/comedy-night-1722455?sourceTypeId=Website",
+      "linkLabel": "CREDA Middle TN"
+    },
+    {
+      "title": "City Planners Panel: Davidson, Rutherford & Williamson County",
+      "start": "2026-09-18T11:00:00-05:00",
+      "end": "2026-09-18T13:00:00-05:00",
+      "categories": [
+        "PLANNING",
+        "AGENTS",
+        "BUILDERS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "Women's Council of REALTORS Greater Nashville North",
+      "location": "4540 Trousdale Dr, Nashville",
+      "description": "Companion panel to the Sumner/Robertson session — zoning, infrastructure and current projects across the three core counties. NOTE: wcr.org lists this as Sep 17 while the Eventbrite listing says Fri, Sep 18 — confirm the date before blocking time.",
+      "whosThere": "Davidson, Rutherford and Williamson county/city planners",
+      "cost": "ticketed",
+      "link": "https://www.wcr.org/event/city-planners-panel-davidson-rutherford-and-williamson-county/",
+      "linkLabel": "wcr.org"
+    },
+    {
+      "title": "HBAMT 2nd Annual Sporting Clay Shoot",
+      "start": "2026-09-22T11:00:00-05:00",
+      "end": "2026-09-22T16:00:00-05:00",
+      "categories": [
+        "BUILDERS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "HBAMT",
+      "location": "Nashville Gun Club",
+      "description": "Registration 11:00 a.m., tournament 12:00 p.m. Full-day builder/associate networking outing.",
+      "whosThere": "HBAMT builder and associate members · registration through Cindy Nicley, cnicley@hbamt.org",
+      "cost": "shooter and sponsor registration forms on the HBAMT events page",
+      "link": "https://hbamtmembers.org/hbamt-events/",
+      "linkLabel": "hbamtmembers.org"
+    },
+    {
+      "title": "ULI Nashville Young Leader Leadership Lunch",
+      "start": "2026-09-22T11:30:00-05:00",
+      "end": "2026-09-22T13:00:00-05:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "ULI Nashville",
+      "location": "Hardaway Construction · 3011 Armory Dr, Nashville, TN 37204",
+      "description": "\"Leadership Now: Authority and Command as the Youngest in the Room.\" Young Leaders Group lunch program.",
+      "whosThere": "ULI Nashville Young Leaders",
+      "cost": "ticketed",
+      "link": "https://nashville.uli.org/events/detail/61235407-7504-4123-BCA4-27B83ED6837B",
+      "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "ULI Nashville Next Act — SAGE Event for 45+ Members",
+      "start": "2026-09-23T16:30:00-05:00",
+      "end": "2026-09-23T18:30:00-05:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "ULI Nashville",
+      "location": "ServisFirst Bank · 1600 West End Ave, #200, Nashville, TN 37203",
+      "description": "SAGE (senior housing / active adult) affinity group evening event for members 45+.",
+      "whosThere": "ULI Nashville SAGE members",
+      "cost": "ticketed",
+      "link": "https://nashville.uli.org/events/detail/976E5F8F-7032-496D-8E3A-4B84F3239E69",
+      "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "ULI Nashville Pathways Fall Social",
+      "start": "2026-09-24T16:30:00-05:00",
+      "end": "2026-09-24T18:00:00-05:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "ULI Nashville",
+      "location": "Choate Construction · 500 11th Ave N, Ste 350, Nashville, TN 37203",
+      "description": "Pathways to Inclusion fall networking social.",
+      "whosThere": "ULI Nashville members",
+      "cost": "ticketed",
+      "link": "https://nashville.uli.org/events/detail/ADB2B65B-C2AC-45EF-850A-24180FB3D917",
+      "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "Properties & Pastries: Making Generational Wealth",
+      "start": "2026-09-25T08:30:00-05:00",
+      "end": "2026-09-25T10:00:00-05:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "TNREIA",
+      "location": "1321 Murfreesboro Pike, 1st Floor, Nashville, TN 37217",
+      "description": "Monthly morning discussion on building and passing on wealth through real estate.",
+      "whosThere": "TNREIA members and first-time guests · 26 spaces left as of listing",
+      "cost": "free for members and first-time guests · $22 non-members at the door",
+      "link": "https://www.tnreia.com/event-6741334",
+      "linkLabel": "tnreia.com"
+    },
+    {
       "title": "HBAMT Infill Builders Council + Metro Nashville Chapter",
       "start": "2026-09-30T12:00:00-05:00",
-      "end":   "2026-09-30T13:30:00-05:00",
-      "categories": ["BUILDERS", "PLANNING"],
+      "end": "2026-09-30T13:30:00-05:00",
+      "categories": [
+        "BUILDERS",
+        "PLANNING"
+      ],
       "verified": true,
       "priority": true,
       "host": "HBAMT",
@@ -106,6 +300,131 @@
       "cost": "TBD",
       "link": "https://hbamtmembers.org/",
       "linkLabel": "hbamtmembers.org"
+    },
+    {
+      "title": "Opportunities in Senior Housing: Is the Silver Tsunami Finally Here?",
+      "start": "2026-10-05T11:30:00-05:00",
+      "end": "2026-10-05T13:00:00-05:00",
+      "categories": [
+        "INVESTORS",
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "TNREIA",
+      "location": "Sportsman's Grille · 1640 Westgate Cir, Brentwood, TN 37027",
+      "description": "Lunch & learn on demand drivers and emerging opportunities in senior housing.",
+      "whosThere": "TNREIA members and guests · speaker not yet named",
+      "cost": "free for members and first-time guests · $22 non-members at the door",
+      "link": "https://www.tnreia.com/event-6829063",
+      "linkLabel": "tnreia.com"
+    },
+    {
+      "title": "ULI Nashville UrbanPlan Volunteer Training",
+      "start": "2026-10-08T10:00:00-05:00",
+      "end": "2026-10-08T14:00:00-05:00",
+      "categories": [
+        "DEVELOPERS",
+        "PLANNING"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "ULI Nashville",
+      "location": "FSA Lighting · 618 Grassmere Park, Ste. 18, Nashville, TN 37211",
+      "description": "Training for volunteers facilitating ULI's UrbanPlan land-use curriculum in schools. Good room of planners and developers.",
+      "whosThere": "ULI Nashville UrbanPlan volunteers",
+      "cost": "free for volunteers",
+      "link": "https://nashville.uli.org/events/detail/8AE5FE4A-2C79-4167-B35B-124EFF4D664C",
+      "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "RE Industry Night",
+      "start": "2026-10-14T16:00:00-05:00",
+      "end": "2026-10-14T19:00:00-05:00",
+      "categories": [
+        "INVESTORS",
+        "BUILDERS",
+        "AGENTS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "TNREIA",
+      "location": "Noble's Central · 2292 Rosa L Parks Blvd, Nashville, TN 37228",
+      "description": "Monthly mixed networking evening — investors, agents, lenders, contractors, wholesalers. Sponsored this month by Rain City Capital.",
+      "whosThere": "TNREIA members and guests · Rain City Capital sponsoring",
+      "cost": "free first-time guests · $22 non-members",
+      "link": "https://www.tnreia.com/event-6741296",
+      "linkLabel": "tnreia.com"
+    },
+    {
+      "title": "Beyond the Rate Sheet: A Builder's Guide to Fix & Flip Profitability",
+      "start": "2026-10-19T11:30:00-05:00",
+      "end": "2026-10-19T13:00:00-05:00",
+      "categories": [
+        "BUILDERS",
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "TNREIA",
+      "location": "Sportsman's Grille · 1640 Westgate Cir, Brentwood, TN 37027",
+      "description": "Construction-cost and margin control from a builder's perspective — renovation budgeting, avoiding surprises, protecting the bottom line.",
+      "whosThere": "Caleb Gaw, Lakeland Builders",
+      "cost": "free for members and first-time guests · $22 non-members at the door",
+      "link": "https://www.tnreia.com/event-6829065",
+      "linkLabel": "tnreia.com"
+    },
+    {
+      "title": "CREDA October Membership Meeting: From Deal to District",
+      "start": "2026-10-21T08:00:00-05:00",
+      "end": "2026-10-21T09:30:00-05:00",
+      "categories": [
+        "DEVELOPERS",
+        "PLANNING"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "NAIOP Nashville / CREDA Middle Tennessee",
+      "location": "TBD — confirm on organizer page",
+      "description": "Monthly membership breakfast. Topic: \"From Deal to District: The Making of Rivergate's Mixed-Use Future.\"",
+      "whosThere": "CREDA / NAIOP Nashville members · Rivergate redevelopment team",
+      "cost": "ticketed · registration via CREDA",
+      "link": "https://members.naiop-nashville.org/naiop-events-calendar/Details/october-membership-meeting-1501348?sourceTypeId=Website",
+      "linkLabel": "CREDA Middle TN"
+    },
+    {
+      "title": "WCR Greater Nashville North CE Class",
+      "start": "2026-10-22T11:00:00-05:00",
+      "end": "2026-10-22T13:00:00-05:00",
+      "categories": [
+        "AGENTS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Women's Council of REALTORS Greater Nashville North",
+      "location": "TBD — confirm on organizer page",
+      "description": "Continuing education class for the Greater Nashville North network. Topic and venue not yet posted.",
+      "whosThere": "WCR Greater Nashville North members and guests",
+      "cost": "TBD",
+      "link": "https://www.wcr.org/event/ce-class/",
+      "linkLabel": "wcr.org"
+    },
+    {
+      "title": "Real Estate Horror Stories",
+      "start": "2026-10-26T11:30:00-05:00",
+      "end": "2026-10-26T13:00:00-05:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "TNREIA",
+      "location": "Sportsman's Grille · 1640 Westgate Cir, Brentwood, TN 37027",
+      "description": "Experienced investors share deals that went wrong and the lessons that came out of them.",
+      "whosThere": "TNREIA members and guests",
+      "cost": "free for members and first-time guests · $22 non-members at the door",
+      "link": "https://www.tnreia.com/event-6710109",
+      "linkLabel": "tnreia.com"
     }
   ]
 }
