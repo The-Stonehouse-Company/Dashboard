@@ -2247,9 +2247,16 @@
     function parseGvizDate(cell) {
       if (!cell || cell.v == null) return null;
       const v = cell.v;
+      // gviz format: Date(YYYY,MM,DD[,hh,mm,ss[,ms]]) — parse EVERY arg present,
+      // otherwise multiple rows from the same day collapse to identical timestamps
+      // and the dedup-by-latest breaks (e.g. hot lead delete never wins).
       if (typeof v === 'string' && /^Date\(/.test(v)) {
-        const m = v.match(/Date\((\d+),(\d+),(\d+)/);
-        if (m) return new Date(+m[1], +m[2], +m[3]);
+        const m = v.match(/Date\(([\d,\s]+)\)/);
+        if (m) {
+          const parts = m[1].split(',').map(s => parseInt(s.trim(), 10));
+          const [yy, mo, dd, hh=0, mm=0, ss=0, ms=0] = parts;
+          return new Date(yy, mo, dd, hh, mm, ss, ms);
+        }
       }
       const d = new Date(v);
       return isNaN(d.getTime()) ? null : d;
