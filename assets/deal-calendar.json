@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-09-11T00:51:19-05:00",
-  "_note": "Auto-populated by the 'discover-nashville-deal-events' scheduled task each Monday. Add/remove/verify events manually here as needed — the task appends without deleting.",
+  "updatedAt": "2026-09-28T06:25:24-05:00",
+  "_note": "Auto-populated by the 'discover-nashville-deal-events' scheduled task each Monday. Add/remove/verify events manually here as needed \u2014 the task appends without deleting.",
   "events": [
     {
       "title": "Nashville's Best Real Estate Meetup",
@@ -14,7 +14,7 @@
       "priority": true,
       "host": "Nashville's Best Real Estate Meetup",
       "location": "TBD",
-      "description": "No-pitch meetup, doors 5:30, program at 6:15. This month's guest built hundreds of homes and thousands of multifamily units in Nashville — a developer with a network of lot buyers.",
+      "description": "No-pitch meetup, doors 5:30, program at 6:15. This month's guest built hundreds of homes and thousands of multifamily units in Nashville \u2014 a developer with a network of lot buyers.",
       "whosThere": "Ted J. Bertuca (The Bertuca Organization / BMK Building Group, developer of Forest Hills, Green Hills)",
       "cost": "free",
       "link": "https://www.meetup.com/",
@@ -30,9 +30,9 @@
       "verified": true,
       "priority": true,
       "host": "Sapphire Group Real Estate",
-      "location": "Ugly Mugs · 1886 Eastland Ave",
+      "location": "Ugly Mugs \u00b7 1886 Eastland Ave",
       "description": "Casual monthly coffee for developers, experienced and aspiring.",
-      "whosThere": "Host Joséphine Saffert (Sapphire Group, runs a Developer Academy) · small group, list not public",
+      "whosThere": "Host Jos\u00e9phine Saffert (Sapphire Group, runs a Developer Academy) \u00b7 small group, list not public",
       "cost": "free",
       "link": "https://www.eventbrite.com/",
       "linkLabel": "Eventbrite"
@@ -47,9 +47,9 @@
       "verified": true,
       "priority": true,
       "host": "HBAMT",
-      "location": "HBAMT HQ · 9007 Overlook Blvd, Brentwood",
+      "location": "HBAMT HQ \u00b7 9007 Overlook Blvd, Brentwood",
       "description": "Fall Builders Show itself (not a chapter meeting). Exhibit booths, builders bar, door prizes, cash raffle, food and drinks. Builders attend free; associates exhibit.",
-      "whosThere": "HBAMT builder members · booth and RSVP through Cindy Nicley, cnicley@hbamt.org",
+      "whosThere": "HBAMT builder members \u00b7 booth and RSVP through Cindy Nicley, cnicley@hbamt.org",
       "cost": "builders free w/ RSVP",
       "link": "https://hbamtmembers.org/",
       "linkLabel": "hbamtmembers.org"
@@ -67,8 +67,8 @@
       "host": "Women's Council of REALTORS Greater Nashville North",
       "location": "1598 Green Lea Blvd, Gallatin",
       "description": "Zoning updates, infrastructure plans, current projects. \"Who should attend: REALTORS, affiliates, builders, developers.\" Lunch provided.",
-      "whosThere": "Sumner and Robertson county/city planners on panel · WCR Greater Nash North members",
-      "cost": "ticketed · refunds to 7 days prior",
+      "whosThere": "Sumner and Robertson county/city planners on panel \u00b7 WCR Greater Nash North members",
+      "cost": "ticketed \u00b7 refunds to 7 days prior",
       "link": "https://www.eventbrite.com/",
       "linkLabel": "Eventbrite"
     },
@@ -83,10 +83,10 @@
       "verified": true,
       "priority": true,
       "host": "TNREIA",
-      "location": "Noble's Central · 2292 Rosa L Parks Blvd",
+      "location": "Noble's Central \u00b7 2292 Rosa L Parks Blvd",
       "description": "Real estate industry night hosted by TNREIA.",
-      "whosThere": "Hosts Jennifer Hamrick and Wyatt W. · 8 RSVPs on Meetup as of Sep 1 (group has 2,051 members; names hidden unless logged in)",
-      "cost": "free first-time guests · $22 non-members",
+      "whosThere": "Hosts Jennifer Hamrick and Wyatt W. \u00b7 8 RSVPs on Meetup as of Sep 1 (group has 2,051 members; names hidden unless logged in)",
+      "cost": "free first-time guests \u00b7 $22 non-members",
       "link": "https://www.tnreia.com/",
       "linkLabel": "tnreia.com"
     },
@@ -100,7 +100,7 @@
       "verified": false,
       "priority": false,
       "host": "ULI Nashville",
-      "location": "FSA Lighting · 618 Grassmere Park",
+      "location": "FSA Lighting \u00b7 618 Grassmere Park",
       "description": "ULI Nashville NEXT (young leaders) lunch series with a Nashville development leader.",
       "whosThere": "Adriane Harris + ULI NEXT members",
       "cost": "ticketed",
@@ -119,10 +119,10 @@
       "verified": false,
       "priority": true,
       "host": "TNREIA",
-      "location": "Sportsman's Grille · 1640 Westgate Cir, Brentwood, TN 37027",
+      "location": "Sportsman's Grille \u00b7 1640 Westgate Cir, Brentwood, TN 37027",
       "description": "Practical session on how experienced developers read a city council and gauge entitlement risk before committing to a land purchase. Directly relevant to lot acquisition.",
       "whosThere": "Garrett Stiles and Joey Locker, The Entitlement Group (founded by the Southern View Development team)",
-      "cost": "free for members and first-time guests · $22 non-members at the door",
+      "cost": "free for members and first-time guests \u00b7 $22 non-members at the door",
       "link": "https://www.tnreia.com/event-6829062",
       "linkLabel": "tnreia.com"
     },
@@ -137,10 +137,10 @@
       "verified": false,
       "priority": true,
       "host": "NAIOP Nashville / CREDA Middle Tennessee",
-      "location": "TBD — confirm on organizer page",
+      "location": "TBD \u2014 confirm on organizer page",
       "description": "Monthly membership breakfast. Topic: \"The Titans' Next Chapter: Team Outlook and New Stadium Development.\"",
       "whosThere": "CREDA / NAIOP Nashville commercial developers and investors",
-      "cost": "ticketed · registration via CREDA",
+      "cost": "ticketed \u00b7 registration via CREDA",
       "link": "https://members.naiop-nashville.org/naiop-events-calendar/Details/september-membership-meeting-1501346?sourceTypeId=Website",
       "linkLabel": "CREDA Middle TN"
     },
@@ -154,7 +154,7 @@
       "verified": false,
       "priority": false,
       "host": "ULI Nashville",
-      "location": "SESCO Lighting Nashville · 636 Grassmere Park, Ste. 105, Nashville, TN 37204",
+      "location": "SESCO Lighting Nashville \u00b7 636 Grassmere Park, Ste. 105, Nashville, TN 37204",
       "description": "New member orientation and intro to ULI Nashville programming. ULI member exclusive.",
       "whosThere": "ULI Nashville staff and new members",
       "cost": "ULI member exclusive",
@@ -172,9 +172,9 @@
       "verified": false,
       "priority": false,
       "host": "NAIOP Nashville / CREDA Middle Tennessee",
-      "location": "OZ Arts Nashville · 6172 Cockrill Bend Cir",
-      "description": "Annual chapter social — large commercial real estate turnout, featuring comedian Jaron Myers.",
-      "whosThere": "CREDA / NAIOP Nashville members · Jaron Myers performing",
+      "location": "OZ Arts Nashville \u00b7 6172 Cockrill Bend Cir",
+      "description": "Annual chapter social \u2014 large commercial real estate turnout, featuring comedian Jaron Myers.",
+      "whosThere": "CREDA / NAIOP Nashville members \u00b7 Jaron Myers performing",
       "cost": "ticketed",
       "link": "https://members.naiop-nashville.org/naiop-events-calendar/Details/comedy-night-1722455?sourceTypeId=Website",
       "linkLabel": "CREDA Middle TN"
@@ -192,11 +192,28 @@
       "priority": true,
       "host": "Women's Council of REALTORS Greater Nashville North",
       "location": "4540 Trousdale Dr, Nashville",
-      "description": "Companion panel to the Sumner/Robertson session — zoning, infrastructure and current projects across the three core counties. NOTE: wcr.org lists this as Sep 17 while the Eventbrite listing says Fri, Sep 18 — confirm the date before blocking time.",
+      "description": "Companion panel to the Sumner/Robertson session \u2014 zoning, infrastructure and current projects across the three core counties. NOTE: wcr.org lists this as Sep 17 while the Eventbrite listing says Fri, Sep 18 \u2014 confirm the date before blocking time.",
       "whosThere": "Davidson, Rutherford and Williamson county/city planners",
       "cost": "ticketed",
       "link": "https://www.wcr.org/event/city-planners-panel-davidson-rutherford-and-williamson-county/",
       "linkLabel": "wcr.org"
+    },
+    {
+      "title": "Market Shift Alert: Navigating Current Events in Your Lease Up Strategy",
+      "start": "2026-09-21T11:30:00-05:00",
+      "end": "2026-09-21T13:00:00-05:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "TNREIA",
+      "location": "Sportsman's Grille \u00b7 1640 Westgate Cir, Brentwood, TN 37027",
+      "description": "Lunch & learn on adapting lease-up strategy to a softer rental market \u2014 pricing, presentation and timing when listings sit longer. Rental-operations focused rather than acquisition.",
+      "whosThere": "TNREIA members and first-time guests \u00b7 25 spaces left as of listing",
+      "cost": "free for members and first-time guests \u00b7 $22 non-members at the door",
+      "link": "https://www.tnreia.com/event-6844861",
+      "linkLabel": "tnreia.com"
     },
     {
       "title": "HBAMT 2nd Annual Sporting Clay Shoot",
@@ -210,7 +227,7 @@
       "host": "HBAMT",
       "location": "Nashville Gun Club",
       "description": "Registration 11:00 a.m., tournament 12:00 p.m. Full-day builder/associate networking outing.",
-      "whosThere": "HBAMT builder and associate members · registration through Cindy Nicley, cnicley@hbamt.org",
+      "whosThere": "HBAMT builder and associate members \u00b7 registration through Cindy Nicley, cnicley@hbamt.org",
       "cost": "shooter and sponsor registration forms on the HBAMT events page",
       "link": "https://hbamtmembers.org/hbamt-events/",
       "linkLabel": "hbamtmembers.org"
@@ -225,7 +242,7 @@
       "verified": false,
       "priority": false,
       "host": "ULI Nashville",
-      "location": "Hardaway Construction · 3011 Armory Dr, Nashville, TN 37204",
+      "location": "Hardaway Construction \u00b7 3011 Armory Dr, Nashville, TN 37204",
       "description": "\"Leadership Now: Authority and Command as the Youngest in the Room.\" Young Leaders Group lunch program.",
       "whosThere": "ULI Nashville Young Leaders",
       "cost": "ticketed",
@@ -233,7 +250,24 @@
       "linkLabel": "nashville.uli.org"
     },
     {
-      "title": "ULI Nashville Next Act — SAGE Event for 45+ Members",
+      "title": "REIN Murfreesboro Networking Lunch",
+      "start": "2026-09-23T12:00:00-05:00",
+      "end": "2026-09-23T13:00:00-05:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Real Estate Investors of Nashville (REIN)",
+      "location": "TBD \u2014 confirm on organizer page",
+      "description": "Casual monthly investor networking lunch for the Rutherford County market. Open to non-members.",
+      "whosThere": "REIN members and guests investing around Murfreesboro",
+      "cost": "free \u00b7 open to all",
+      "link": "https://www.reintn.net/Events.aspx?ID=Murfreesboro-Networking-Lunch-158-9-23-2026",
+      "linkLabel": "reintn.net"
+    },
+    {
+      "title": "ULI Nashville Next Act \u2014 SAGE Event for 45+ Members",
       "start": "2026-09-23T16:30:00-05:00",
       "end": "2026-09-23T18:30:00-05:00",
       "categories": [
@@ -242,12 +276,29 @@
       "verified": false,
       "priority": false,
       "host": "ULI Nashville",
-      "location": "ServisFirst Bank · 1600 West End Ave, #200, Nashville, TN 37203",
+      "location": "ServisFirst Bank \u00b7 1600 West End Ave, #200, Nashville, TN 37203",
       "description": "SAGE (senior housing / active adult) affinity group evening event for members 45+.",
       "whosThere": "ULI Nashville SAGE members",
       "cost": "ticketed",
       "link": "https://nashville.uli.org/events/detail/976E5F8F-7032-496D-8E3A-4B84F3239E69",
       "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "REIN Davidson-Williamson County Networking Lunch",
+      "start": "2026-09-24T13:00:00-05:00",
+      "end": "2026-09-24T14:00:00-05:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Real Estate Investors of Nashville (REIN)",
+      "location": "TBD \u2014 confirm on organizer page",
+      "description": "Casual investor networking lunch covering the two core counties for lot acquisition. Open to non-members.",
+      "whosThere": "REIN members and guests investing in Davidson and Williamson counties",
+      "cost": "free \u00b7 open to all",
+      "link": "https://www.reintn.net/Events.aspx?ID=Davidson-Willamson-County-Networking-Lunch-158-9-24-2026",
+      "linkLabel": "reintn.net"
     },
     {
       "title": "ULI Nashville Pathways Fall Social",
@@ -259,7 +310,7 @@
       "verified": false,
       "priority": false,
       "host": "ULI Nashville",
-      "location": "Choate Construction · 500 11th Ave N, Ste 350, Nashville, TN 37203",
+      "location": "Choate Construction \u00b7 500 11th Ave N, Ste 350, Nashville, TN 37203",
       "description": "Pathways to Inclusion fall networking social.",
       "whosThere": "ULI Nashville members",
       "cost": "ticketed",
@@ -278,10 +329,115 @@
       "host": "TNREIA",
       "location": "1321 Murfreesboro Pike, 1st Floor, Nashville, TN 37217",
       "description": "Monthly morning discussion on building and passing on wealth through real estate.",
-      "whosThere": "TNREIA members and first-time guests · 26 spaces left as of listing",
-      "cost": "free for members and first-time guests · $22 non-members at the door",
+      "whosThere": "TNREIA members and first-time guests \u00b7 26 spaces left as of listing",
+      "cost": "free for members and first-time guests \u00b7 $22 non-members at the door",
       "link": "https://www.tnreia.com/event-6741334",
       "linkLabel": "tnreia.com"
+    },
+    {
+      "title": "From Concept to Community: Mastering Grants and Partnerships for Income-Aligned Housing",
+      "start": "2026-09-28T11:30:00-05:00",
+      "end": "2026-09-28T13:00:00-05:00",
+      "categories": [
+        "INVESTORS",
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "TNREIA",
+      "location": "Sportsman's Grille \u00b7 1640 Westgate Cir, Brentwood, TN 37027",
+      "description": "How to take an idea for income-aligned housing and actually get it funded and built \u2014 identifying grant funding, building partnerships, moving a housing project from concept to delivery.",
+      "whosThere": "Courtney McCoy, Developer/Founder & CEO of Urban Axis Group \u00b7 34 spaces left as of listing",
+      "cost": "free for members and first-time guests \u00b7 $22 non-members at the door",
+      "link": "https://www.tnreia.com/event-6842232",
+      "linkLabel": "tnreia.com"
+    },
+    {
+      "title": "REIN Putnam County Investors Meeting",
+      "start": "2026-09-28T18:30:00-05:00",
+      "end": "2026-09-28T20:00:00-05:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Real Estate Investors of Nashville (REIN)",
+      "location": "Putnam County / Cookeville area, TN (venue TBD \u2014 confirm on organizer page)",
+      "description": "Casual networking meeting for investors active in the Cookeville area.",
+      "whosThere": "REIN Putnam County sub-group members",
+      "cost": "TBD \u2014 confirm on organizer page",
+      "link": "https://www.reintn.net/Calendar.aspx",
+      "linkLabel": "reintn.net"
+    },
+    {
+      "title": "CREDA Sponsor's Coffee",
+      "start": "2026-09-29T09:00:00-05:00",
+      "end": "2026-09-29T10:00:00-05:00",
+      "categories": [
+        "DEVELOPERS",
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "NAIOP Nashville / CREDA Middle Tennessee",
+      "location": "Officeworks office \u2014 street address not posted; confirm on organizer page",
+      "description": "Coffee hosted at the Officeworks office to thank CREDA sponsors. Sponsor-exclusive, so not an open-door networking room.",
+      "whosThere": "CREDA Middle TN sponsors and staff",
+      "cost": "sponsor exclusive \u00b7 registration via CREDA",
+      "link": "https://members.naiop-nashville.org/naiop-events-calendar/Details/creda-sponsor-s-coffee-1890991?sourceTypeId=Website",
+      "linkLabel": "CREDA Middle TN"
+    },
+    {
+      "title": "REIN Ladies Real Estate Investing Meeting",
+      "start": "2026-09-29T10:30:00-05:00",
+      "end": "2026-09-29T12:00:00-05:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Real Estate Investors of Nashville (REIN)",
+      "location": "TBD \u2014 confirm on organizer page",
+      "description": "Networking plus a \"Haves & Wants\" round \u2014 members put live needs and opportunities in the room. Small-group deal-flow format.",
+      "whosThere": "REIN members and guests",
+      "cost": "TBD \u2014 confirm on organizer page",
+      "link": "https://www.reintn.net/Events.aspx?ID=Ladies-Real-Estate-Investing-Meeting-158-9-29-2026",
+      "linkLabel": "reintn.net"
+    },
+    {
+      "title": "HBAMT Maury County Chapter: 2026 Congressional Candidates Panel",
+      "start": "2026-09-29T11:30:00-05:00",
+      "end": "2026-09-29T13:00:00-05:00",
+      "categories": [
+        "BUILDERS",
+        "PLANNING"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "HBAMT (Maury County Chapter)",
+      "location": "Los Potros Taco Shop \u00b7 106 E. 8th Street, Columbia, TN",
+      "description": "Two-man panel with the 2026 Fifth District Congressional candidates on issues affecting Middle Tennessee and the homebuilding industry. Note: Columbia/Maury County sits south of the core acquisition counties.",
+      "whosThere": "Dr. Charlie Hatcher and Chaz Holder (2026 Fifth District Congressional candidates) \u00b7 HBAMT Maury County builders \u00b7 sponsored by James Hardie Building Products",
+      "cost": "FREE w/ RSVP to cnicley@hbamt.org \u00b7 $20 without RSVP",
+      "link": "https://hbamtmembers.org/hbamt-events/",
+      "linkLabel": "hbamtmembers.org"
+    },
+    {
+      "title": "ULI Nashville: Chattanooga Member Sponsor Social",
+      "start": "2026-09-29T16:30:00-04:00",
+      "end": "2026-09-29T18:00:00-04:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "ULI Nashville",
+      "location": "Black Creek Club \u00b7 4700 Cummings Cove Dr, Chattanooga, TN 37419",
+      "description": "Member and sponsor networking social for ULI Nashville's Chattanooga contingent. Note: Eastern time (listed America/New_York on the ULI calendar).",
+      "whosThere": "ULI Nashville members and sponsors in the Chattanooga market",
+      "cost": "ticketed",
+      "link": "https://nashville.uli.org/events/detail/5C3970DD-CC7A-4841-BE8F-366FDA9EAD14",
+      "linkLabel": "nashville.uli.org"
     },
     {
       "title": "HBAMT Infill Builders Council + Metro Nashville Chapter",
@@ -302,6 +458,40 @@
       "linkLabel": "hbamtmembers.org"
     },
     {
+      "title": "REIN Sumner County Networking Lunch",
+      "start": "2026-09-30T12:00:00-05:00",
+      "end": "2026-09-30T13:00:00-05:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Real Estate Investors of Nashville (REIN)",
+      "location": "TBD \u2014 confirm on organizer page",
+      "description": "Casual investor networking lunch for the Sumner County market. Open to non-members.",
+      "whosThere": "REIN members and guests investing around Gallatin/Hendersonville",
+      "cost": "free \u00b7 open to all",
+      "link": "https://www.reintn.net/Events.aspx?ID=Sumner-County-Networking-Lunch-158-9-30-2026",
+      "linkLabel": "reintn.net"
+    },
+    {
+      "title": "REIN Multi Family Investors Meeting",
+      "start": "2026-10-01T14:00:00-05:00",
+      "end": "2026-10-01T15:30:00-05:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Real Estate Investors of Nashville (REIN)",
+      "location": "TBD \u2014 confirm on organizer page",
+      "description": "Monthly focus group for investors active in or moving into multifamily \u2014 networking, education and performance benchmarking.",
+      "whosThere": "REIN multifamily focus group members and guests",
+      "cost": "TBD \u2014 confirm on organizer page",
+      "link": "https://www.reintn.net/Events.aspx?ID=Multi-Family-Investors-Meeting-158-10-1-2026",
+      "linkLabel": "reintn.net"
+    },
+    {
       "title": "Opportunities in Senior Housing: Is the Silver Tsunami Finally Here?",
       "start": "2026-10-05T11:30:00-05:00",
       "end": "2026-10-05T13:00:00-05:00",
@@ -312,12 +502,29 @@
       "verified": false,
       "priority": false,
       "host": "TNREIA",
-      "location": "Sportsman's Grille · 1640 Westgate Cir, Brentwood, TN 37027",
+      "location": "Sportsman's Grille \u00b7 1640 Westgate Cir, Brentwood, TN 37027",
       "description": "Lunch & learn on demand drivers and emerging opportunities in senior housing.",
-      "whosThere": "TNREIA members and guests · speaker not yet named",
-      "cost": "free for members and first-time guests · $22 non-members at the door",
+      "whosThere": "TNREIA members and guests \u00b7 speaker not yet named",
+      "cost": "free for members and first-time guests \u00b7 $22 non-members at the door",
       "link": "https://www.tnreia.com/event-6829063",
       "linkLabel": "tnreia.com"
+    },
+    {
+      "title": "ULI Nashville Annual Member Recruitment Event",
+      "start": "2026-10-07T16:30:00-05:00",
+      "end": "2026-10-07T18:00:00-05:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "ULI Nashville",
+      "location": "T3 Wedgewood Houston \u00b7 1234 Martin St, Nashville, TN 37203",
+      "description": "Annual recruitment social \u2014 the one ULI Nashville evening explicitly aimed at non-members, so the room is open rather than member-gated.",
+      "whosThere": "ULI Nashville members plus prospective members",
+      "cost": "not posted \u2014 confirm on organizer page",
+      "link": "https://nashville.uli.org/events/detail/35F7F3CC-B133-4DC2-A322-D01FEEDF9748",
+      "linkLabel": "nashville.uli.org"
     },
     {
       "title": "ULI Nashville UrbanPlan Volunteer Training",
@@ -330,12 +537,46 @@
       "verified": false,
       "priority": false,
       "host": "ULI Nashville",
-      "location": "FSA Lighting · 618 Grassmere Park, Ste. 18, Nashville, TN 37211",
+      "location": "FSA Lighting \u00b7 618 Grassmere Park, Ste. 18, Nashville, TN 37211",
       "description": "Training for volunteers facilitating ULI's UrbanPlan land-use curriculum in schools. Good room of planners and developers.",
       "whosThere": "ULI Nashville UrbanPlan volunteers",
       "cost": "free for volunteers",
       "link": "https://nashville.uli.org/events/detail/8AE5FE4A-2C79-4167-B35B-124EFF4D664C",
       "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "TNREIA: Risk Management \u2014 Investment Coverage, Common Claims, and Subject-To Considerations",
+      "start": "2026-10-12T11:30:00-05:00",
+      "end": "2026-10-12T13:00:00-05:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "TNREIA",
+      "location": "Sportsman's Grille \u00b7 1640 Westgate Cir, Brentwood, TN 37027",
+      "description": "Weekly TNREIA lunch session on investment property insurance coverage, common claims, and subject-to deal considerations.",
+      "whosThere": "Speaker Nathan Guthrie, National Real Estate Insurance Group",
+      "cost": "free first-time guests/members \u00b7 $22 non-members",
+      "link": "https://www.tnreia.com/events",
+      "linkLabel": "tnreia.com"
+    },
+    {
+      "title": "REIN October Main Event",
+      "start": "2026-10-12T17:00:00-05:00",
+      "end": "2026-10-12T21:00:00-05:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Real Estate Investors of Nashville (REIN)",
+      "location": "Woodmont Hills \u00b7 3710 Franklin Pike, Nashville, TN 37204",
+      "description": "REIN's monthly main meeting (2nd Monday). October topic not yet posted \u2014 the reintn.net calendar had not published October detail at scan time; confirm topic and time on the organizer page.",
+      "whosThere": "REIN members and guests",
+      "cost": "TBD \u2014 confirm on organizer page",
+      "link": "https://www.reintn.net/Calendar.aspx",
+      "linkLabel": "reintn.net"
     },
     {
       "title": "RE Industry Night",
@@ -349,12 +590,30 @@
       "verified": false,
       "priority": true,
       "host": "TNREIA",
-      "location": "Noble's Central · 2292 Rosa L Parks Blvd, Nashville, TN 37228",
-      "description": "Monthly mixed networking evening — investors, agents, lenders, contractors, wholesalers. Sponsored this month by Rain City Capital.",
-      "whosThere": "TNREIA members and guests · Rain City Capital sponsoring",
-      "cost": "free first-time guests · $22 non-members",
+      "location": "Noble's Central \u00b7 2292 Rosa L Parks Blvd, Nashville, TN 37228",
+      "description": "Monthly mixed networking evening \u2014 investors, agents, lenders, contractors, wholesalers. Sponsored this month by Rain City Capital.",
+      "whosThere": "TNREIA members and guests \u00b7 Rain City Capital sponsoring",
+      "cost": "free first-time guests \u00b7 $22 non-members",
       "link": "https://www.tnreia.com/event-6741296",
       "linkLabel": "tnreia.com"
+    },
+    {
+      "title": "Bisnow: Beyond Nashville \u2014 CRE Opportunities in Knoxville, Franklin & Chattanooga",
+      "start": "2026-10-15T08:00:00-05:00",
+      "end": "2026-10-15T11:00:00-05:00",
+      "categories": [
+        "DEVELOPERS",
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Bisnow",
+      "location": "Nashville \u2014 venue not posted; confirm on organizer page",
+      "description": "Commercial real estate half-day on secondary Tennessee markets. Franklin is in-market for lot acquisition; Knoxville and Chattanooga are not. End time assumed \u2014 confirm on organizer page.",
+      "whosThere": "Bisnow CRE audience \u00b7 speaker list not yet posted",
+      "cost": "ticketed",
+      "link": "https://www.bisnow.com/events/nashville/state-of-market/beyond-nashville-exploring-cre-opportunities-in-knoxville-franklin-and-chattanooga-10246",
+      "linkLabel": "bisnow.com"
     },
     {
       "title": "Beyond the Rate Sheet: A Builder's Guide to Fix & Flip Profitability",
@@ -367,10 +626,10 @@
       "verified": false,
       "priority": true,
       "host": "TNREIA",
-      "location": "Sportsman's Grille · 1640 Westgate Cir, Brentwood, TN 37027",
-      "description": "Construction-cost and margin control from a builder's perspective — renovation budgeting, avoiding surprises, protecting the bottom line.",
+      "location": "Sportsman's Grille \u00b7 1640 Westgate Cir, Brentwood, TN 37027",
+      "description": "Construction-cost and margin control from a builder's perspective \u2014 renovation budgeting, avoiding surprises, protecting the bottom line.",
       "whosThere": "Caleb Gaw, Lakeland Builders",
-      "cost": "free for members and first-time guests · $22 non-members at the door",
+      "cost": "free for members and first-time guests \u00b7 $22 non-members at the door",
       "link": "https://www.tnreia.com/event-6829065",
       "linkLabel": "tnreia.com"
     },
@@ -385,12 +644,47 @@
       "verified": false,
       "priority": true,
       "host": "NAIOP Nashville / CREDA Middle Tennessee",
-      "location": "TBD — confirm on organizer page",
+      "location": "TBD \u2014 confirm on organizer page",
       "description": "Monthly membership breakfast. Topic: \"From Deal to District: The Making of Rivergate's Mixed-Use Future.\"",
-      "whosThere": "CREDA / NAIOP Nashville members · Rivergate redevelopment team",
-      "cost": "ticketed · registration via CREDA",
+      "whosThere": "CREDA / NAIOP Nashville members \u00b7 Rivergate redevelopment team",
+      "cost": "ticketed \u00b7 registration via CREDA",
       "link": "https://members.naiop-nashville.org/naiop-events-calendar/Details/october-membership-meeting-1501348?sourceTypeId=Website",
       "linkLabel": "CREDA Middle TN"
+    },
+    {
+      "title": "ULI Nashville: Knoxville Tour of Emory Place",
+      "start": "2026-10-21T16:30:00-04:00",
+      "end": "2026-10-21T18:00:00-04:00",
+      "categories": [
+        "DEVELOPERS",
+        "PLANNING"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "ULI Nashville",
+      "location": "Emory Place \u00b7 23 Emory Place, Knoxville, TN 37917",
+      "description": "Walking tour of the Emory Place redevelopment in Knoxville. Note: Eastern time (listed America/New_York on the ULI calendar).",
+      "whosThere": "ULI Nashville members \u00b7 Emory Place development team",
+      "cost": "ticketed",
+      "link": "https://nashville.uli.org/events/detail/3CA809BA-D399-421B-A4A8-C9D9D32DC7C4",
+      "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "New Nissan Stadium Tour",
+      "start": "2026-10-22T10:00:00-05:00",
+      "end": "2026-10-22T11:00:00-05:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "CREDA Middle Tennessee",
+      "location": "Nissan Stadium, Nashville, TN",
+      "description": "Tour of the new Nissan Stadium (opening spring 2027), listed on CREDA's events calendar. Note: a similarly named ACEC Tennessee tour occurred Sept 25 and sold out \u2014 confirm this is a separate CREDA-specific date before relying on it.",
+      "whosThere": "CREDA Middle Tennessee members",
+      "cost": "TBD \u2014 confirm on organizer page",
+      "link": "https://www.credatn.org/events-calendar/",
+      "linkLabel": "credatn.org"
     },
     {
       "title": "WCR Greater Nashville North CE Class",
@@ -402,12 +696,29 @@
       "verified": false,
       "priority": false,
       "host": "Women's Council of REALTORS Greater Nashville North",
-      "location": "TBD — confirm on organizer page",
+      "location": "TBD \u2014 confirm on organizer page",
       "description": "Continuing education class for the Greater Nashville North network. Topic and venue not yet posted.",
       "whosThere": "WCR Greater Nashville North members and guests",
       "cost": "TBD",
       "link": "https://www.wcr.org/event/ce-class/",
       "linkLabel": "wcr.org"
+    },
+    {
+      "title": "HBAMT Haunted Golf Tournament",
+      "start": "2026-10-26T09:00:00-05:00",
+      "end": "2026-10-26T10:00:00-05:00",
+      "categories": [
+        "BUILDERS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "HBAMT",
+      "location": "Towhee Golf Course \u00b7 3901 Kedron Rd, Spring Hill, TN 37174",
+      "description": "HBAMT golf tournament fundraiser with sponsorship opportunities. (time TBD \u2014 confirm on organizer page)",
+      "whosThere": "HBAMT builder/associate members \u00b7 contact cnicley@hbamt.org to register",
+      "cost": "contact cnicley@hbamt.org for pricing",
+      "link": "https://hbamtmembers.org/hbamt-events/",
+      "linkLabel": "hbamtmembers.org"
     },
     {
       "title": "Real Estate Horror Stories",
@@ -419,11 +730,81 @@
       "verified": false,
       "priority": false,
       "host": "TNREIA",
-      "location": "Sportsman's Grille · 1640 Westgate Cir, Brentwood, TN 37027",
+      "location": "Sportsman's Grille \u00b7 1640 Westgate Cir, Brentwood, TN 37027",
       "description": "Experienced investors share deals that went wrong and the lessons that came out of them.",
       "whosThere": "TNREIA members and guests",
-      "cost": "free for members and first-time guests · $22 non-members at the door",
+      "cost": "free for members and first-time guests \u00b7 $22 non-members at the door",
       "link": "https://www.tnreia.com/event-6710109",
+      "linkLabel": "tnreia.com"
+    },
+    {
+      "title": "Properties & Pastries: Making Generational Wealth",
+      "start": "2026-10-30T08:30:00-05:00",
+      "end": "2026-10-30T10:00:00-05:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "TNREIA",
+      "location": "1321 Murfreesboro Pike, 1st Floor, Nashville, TN 37217",
+      "description": "Monthly morning discussion on long-term wealth building through real estate and intentional planning.",
+      "whosThere": "TNREIA members and first-time guests \u00b7 27 spaces left as of listing",
+      "cost": "free for members and first-time guests \u00b7 $22 non-members at the door",
+      "link": "https://www.tnreia.com/event-6741336",
+      "linkLabel": "tnreia.com"
+    },
+    {
+      "title": "Economic Policy: Q&A with the Federal Reserve",
+      "start": "2026-11-02T11:30:00-06:00",
+      "end": "2026-11-02T13:00:00-06:00",
+      "categories": [
+        "INVESTORS",
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "TNREIA",
+      "location": "Sportsman's Grille \u00b7 1640 Westgate Cir, Brentwood, TN 37027",
+      "description": "Annual open Q&A on rates, inflation, jobs and growth across Tennessee and the Southeast. TNREIA calls it one of its strongest-drawing sessions of the year. Note: CST (-06:00) \u2014 DST ends Nov 1.",
+      "whosThere": "Justin Shadley, Federal Reserve Bank of Atlanta \u00b7 35 spaces left as of listing",
+      "cost": "free for members and first-time guests \u00b7 $22 non-members at the door",
+      "link": "https://www.tnreia.com/event-6826278",
+      "linkLabel": "tnreia.com"
+    },
+    {
+      "title": "ULI Nashville CONNECT: November New Member Orientation",
+      "start": "2026-11-05T14:00:00-06:00",
+      "end": "2026-11-05T15:00:00-06:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "ULI Nashville",
+      "location": "Bell & McCoy \u00b7 618 Grassmere Park, Ste 17, Nashville, TN 37211",
+      "description": "New member orientation and intro to ULI Nashville programming. ULI member exclusive. Note: CST (-06:00) \u2014 DST ends Nov 1.",
+      "whosThere": "ULI Nashville staff and new members",
+      "cost": "ULI member exclusive",
+      "link": "https://nashville.uli.org/events/detail/D02C7118-539D-4375-9DA7-3F4D905F9088",
+      "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "RE Industry Night",
+      "start": "2026-11-11T16:00:00-06:00",
+      "end": "2026-11-11T19:00:00-06:00",
+      "categories": [
+        "INVESTORS",
+        "BUILDERS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "TNREIA",
+      "location": "Noble's Central \u00b7 2292 Rosa L Parks Blvd, Nashville, TN 37228",
+      "description": "Monthly networking night bringing together investors, agents, lenders, and contractors.",
+      "whosThere": "TNREIA members and industry professionals",
+      "cost": "TBD \u2014 confirm on organizer page",
+      "link": "https://www.tnreia.com/events",
       "linkLabel": "tnreia.com"
     }
   ]
