@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-05T07:37:20-05:00",
+  "updatedAt": "2026-10-12T09:25:15-05:00",
   "_note": "Auto-populated by the 'discover-nashville-deal-events' scheduled task each Monday. Add/remove/verify events manually here as needed — the task appends without deleting.",
   "events": [
     {
@@ -910,6 +910,23 @@
       "linkLabel": "tnreia.com"
     },
     {
+      "title": "ULI Nashville: WLI Studio After Dark - Who's in Your Corner? (Germantown)",
+      "start": "2026-11-04T18:00:00-06:00",
+      "end": "2026-11-04T19:30:00-06:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "ULI Nashville",
+      "location": "Germantown, Nashville (address not listed)",
+      "description": "Women's Leadership Initiative evening on building a personal board of directors. ULI member exclusive.",
+      "whosThere": "ULI Nashville WLI members",
+      "cost": "ULI member exclusive",
+      "link": "https://nashville.uli.org/events/detail/5A7AD09A-A880-4377-A3D8-D0412543BC1A",
+      "linkLabel": "nashville.uli.org"
+    },
+    {
       "title": "ULI Nashville CONNECT: November New Member Orientation",
       "start": "2026-11-05T14:00:00-06:00",
       "end": "2026-11-05T15:00:00-06:00",
@@ -924,6 +941,23 @@
       "whosThere": "ULI Nashville staff and new members",
       "cost": "ULI member exclusive",
       "link": "https://nashville.uli.org/events/detail/D02C7118-539D-4375-9DA7-3F4D905F9088",
+      "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "ULI Nashville: WLI Studio After Dark - Who's in Your Corner? (West Nashville)",
+      "start": "2026-11-05T18:00:00-06:00",
+      "end": "2026-11-05T19:30:00-06:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "ULI Nashville",
+      "location": "West Nashville (address not listed)",
+      "description": "Women's Leadership Initiative evening on building a personal board of directors. ULI member exclusive.",
+      "whosThere": "ULI Nashville WLI members",
+      "cost": "ULI member exclusive",
+      "link": "https://nashville.uli.org/events/detail/16B277F1-B8EB-410B-92AE-05975E1393AE",
       "linkLabel": "nashville.uli.org"
     },
     {
@@ -944,6 +978,23 @@
       "linkLabel": "CREDA"
     },
     {
+      "title": "ULI Nashville: Midlife Mingle, Coffee Edition (SAGE 45+)",
+      "start": "2026-11-10T08:00:00-06:00",
+      "end": "2026-11-10T09:30:00-06:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "ULI Nashville",
+      "location": "JE Dunn Construction, Nashville",
+      "description": "Coffee networking event hosted by SAGE for ULI members 45+.",
+      "whosThere": "ULI Nashville SAGE members",
+      "cost": "ULI member exclusive",
+      "link": "https://nashville.uli.org/events/detail/6E2AFBAB-AB65-4656-83C5-748E29067606",
+      "linkLabel": "nashville.uli.org"
+    },
+    {
       "title": "RE Industry Night",
       "start": "2026-11-11T16:00:00-06:00",
       "end": "2026-11-11T19:00:00-06:00",
@@ -960,6 +1011,58 @@
       "cost": "TBD — confirm on organizer page",
       "link": "https://www.tnreia.com/events",
       "linkLabel": "tnreia.com"
+    },
+    {
+      "title": "ULI Nashville: Chattanooga Tour of Central Crossing",
+      "start": "2026-11-12T16:30:00-05:00",
+      "end": "2026-11-12T18:00:00-05:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "ULI Nashville",
+      "location": "Central Crossing, Chattanooga, TN",
+      "description": "Site tour of the Central Crossing development. Note: Eastern time (listed on ULI calendar).",
+      "whosThere": "ULI Nashville members",
+      "cost": "ticketed — confirm on organizer page",
+      "link": "https://nashville.uli.org/events/detail/8DDE8886-639B-40E5-ABD3-B5A2343B5A32",
+      "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "ULI Nashville: WLI Studio After Dark - Who's in Your Corner? (Franklin)",
+      "start": "2026-11-16T18:00:00-06:00",
+      "end": "2026-11-16T19:30:00-06:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "ULI Nashville",
+      "location": "Franklin, TN (address not listed)",
+      "description": "Women's Leadership Initiative evening on building a personal board of directors. ULI member exclusive.",
+      "whosThere": "ULI Nashville WLI members",
+      "cost": "ULI member exclusive",
+      "link": "https://nashville.uli.org/events/detail/DF09B7E8-3315-408B-ACB4-5A7FA19F3DE1",
+      "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "ULI Nashville Emerging Trends in Real Estate 2027 Breakfast",
+      "start": "2026-11-18T07:30:00-06:00",
+      "end": "2026-11-18T10:00:00-06:00",
+      "categories": [
+        "DEVELOPERS",
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "ULI Nashville",
+      "location": "Country Music Hall of Fame and Museum, Nashville",
+      "description": "Annual flagship ULI breakfast presenting the Emerging Trends in Real Estate 2027 outlook for capital, development and markets.",
+      "whosThere": "ULI Nashville members, developers, investors, lenders",
+      "cost": "ticketed — confirm on organizer page",
+      "link": "https://nashville.uli.org/events/detail/EBDAC694-467A-4ACC-A7FD-AC475A1971D7",
+      "linkLabel": "nashville.uli.org"
     }
   ]
 }
