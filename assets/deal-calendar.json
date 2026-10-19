@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-12T09:25:15-05:00",
+  "updatedAt": "2026-10-19T06:15:58-05:00",
   "_note": "Auto-populated by the 'discover-nashville-deal-events' scheduled task each Monday. Add/remove/verify events manually here as needed — the task appends without deleting.",
   "events": [
     {
@@ -668,6 +668,24 @@
       "linkLabel": "tnreia.com"
     },
     {
+      "title": "HBAMT Williamson County Chapter Meeting: State Sen. Jack Johnson",
+      "start": "2026-10-20T11:30:00-05:00",
+      "end": "2026-10-20T13:00:00-05:00",
+      "categories": [
+        "BUILDERS",
+        "PLANNING"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "HBAMT (Williamson County Chapter)",
+      "location": "HBAMT HQ · 9007 Overlook Blvd, Brentwood, TN 37027",
+      "description": "Lunch and discussion with State Senator Jack Johnson on local district issues and their effect on builders and developers. (end time assumed — confirm on organizer page)",
+      "whosThere": "State Sen. Jack Johnson · Williamson County builders",
+      "cost": "Free w/ RSVP (pending sponsorship) · $20 without; RSVP cnicley@hbamt.org",
+      "link": "https://hbamtmembers.org/hbamt-events/",
+      "linkLabel": "hbamtmembers.org"
+    },
+    {
       "title": "CREDA October Membership Meeting: From Deal to District",
       "start": "2026-10-21T08:00:00-05:00",
       "end": "2026-10-21T09:30:00-05:00",
@@ -855,6 +873,24 @@
       "cost": "Not specified",
       "link": "https://www.reintn.net/Events.aspx?ID=Sumner-County-Networking-Lunch-158-10-28-2026",
       "linkLabel": "reintn.net"
+    },
+    {
+      "title": "CREDA Developing Leader 12 South Tour",
+      "start": "2026-10-29T16:00:00-05:00",
+      "end": "2026-10-29T18:00:00-05:00",
+      "categories": [
+        "DEVELOPERS",
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "NAIOP Nashville / CREDA Middle Tennessee",
+      "location": "New building at 2908 12th Ave S (12 South); happy hour after at Embers Ski Lodge",
+      "description": "Tour of a new 12 South building followed by a happy hour. Address inferred from listing — confirm on organizer page.",
+      "whosThere": "CREDA Developing Leaders members",
+      "cost": "TBD — registration via CREDA",
+      "link": "https://members.naiop-nashville.org/naiop-events-calendar/Details/developing-leader-12-south-tour-1952245?sourceTypeId=Website",
+      "linkLabel": "CREDA Middle TN"
     },
     {
       "title": "Properties & Pastries: Making Generational Wealth",
@@ -1047,6 +1083,24 @@
       "linkLabel": "nashville.uli.org"
     },
     {
+      "title": "CREDA November Membership Meeting",
+      "start": "2026-11-17T08:00:00-06:00",
+      "end": "2026-11-17T09:30:00-06:00",
+      "categories": [
+        "DEVELOPERS",
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "NAIOP Nashville / CREDA Middle Tennessee",
+      "location": "TBD — confirm on organizer page",
+      "description": "Monthly CREDA membership breakfast; topic not yet posted.",
+      "whosThere": "CREDA / NAIOP Nashville commercial developers and investors",
+      "cost": "TBD — registration via CREDA",
+      "link": "https://members.naiop-nashville.org/naiop-events-calendar/Details/november-membership-meeting-1501349?sourceTypeId=Website",
+      "linkLabel": "CREDA Middle TN"
+    },
+    {
       "title": "ULI Nashville Emerging Trends in Real Estate 2027 Breakfast",
       "start": "2026-11-18T07:30:00-06:00",
       "end": "2026-11-18T10:00:00-06:00",
@@ -1063,6 +1117,24 @@
       "cost": "ticketed — confirm on organizer page",
       "link": "https://nashville.uli.org/events/detail/EBDAC694-467A-4ACC-A7FD-AC475A1971D7",
       "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "CREDA Holiday Sponsor Social",
+      "start": "2026-12-02T16:00:00-06:00",
+      "end": "2026-12-02T18:00:00-06:00",
+      "categories": [
+        "DEVELOPERS",
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "NAIOP Nashville / CREDA Middle Tennessee",
+      "location": "TBD — confirm on organizer page",
+      "description": "Year-end holiday social for CREDA sponsors; sponsor-focused.",
+      "whosThere": "CREDA sponsors and members",
+      "cost": "TBD",
+      "link": "https://members.naiop-nashville.org/naiop-events-calendar/Details/creda-holiday-sponsor-social-1735237?sourceTypeId=Website",
+      "linkLabel": "CREDA Middle TN"
     }
   ]
 }
