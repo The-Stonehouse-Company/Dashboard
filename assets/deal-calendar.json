@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-19T06:15:58-05:00",
+  "updatedAt": "2026-10-26T06:10:00-05:00",
   "_note": "Auto-populated by the 'discover-nashville-deal-events' scheduled task each Monday. Add/remove/verify events manually here as needed — the task appends without deleting.",
   "events": [
     {
@@ -893,6 +893,23 @@
       "linkLabel": "CREDA Middle TN"
     },
     {
+      "title": "Haves and Wants + PropSwap Online",
+      "start": "2026-10-30T08:00:00-05:00",
+      "end": "2026-10-30T11:00:00-05:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Real Estate Investors of Nashville (REIN)",
+      "location": "Online",
+      "description": "Online buy/sell/trade meeting where investors share live needs and opportunities.",
+      "whosThere": "REIN members and guests",
+      "cost": "not listed — confirm on organizer page",
+      "link": "https://www.reintn.net/Events.aspx?ID=Haves-and-Wants-PropSwap-Online-158-10-30-2026",
+      "linkLabel": "reintn.net"
+    },
+    {
       "title": "Properties & Pastries: Making Generational Wealth",
       "start": "2026-10-30T08:30:00-05:00",
       "end": "2026-10-30T10:00:00-05:00",
@@ -944,6 +961,24 @@
       "cost": "free for members and first-time guests · $22 non-members at the door",
       "link": "https://www.tnreia.com/event-6826278",
       "linkLabel": "tnreia.com"
+    },
+    {
+      "title": "The Road Ahead: Coffee & Conversation with NDOT Director Ryan Lynch",
+      "start": "2026-11-04T08:30:00-06:00",
+      "end": "2026-11-04T09:30:00-06:00",
+      "categories": [
+        "DEVELOPERS",
+        "PLANNING"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "ULI Nashville",
+      "location": "KCI Technologies · 500 11th Ave N, Ste 290, Nashville, TN 37203",
+      "description": "Coffee conversation with Nashville DOT Director on transportation and infrastructure direction affecting development.",
+      "whosThere": "Ryan Lynch, NDOT Director · ULI Nashville members",
+      "cost": "not listed — confirm on organizer page",
+      "link": "https://nashville.uli.org/events/detail/483F2BA6-9DDB-416D-A58A-9074BBEDCCD9",
+      "linkLabel": "nashville.uli.org"
     },
     {
       "title": "ULI Nashville: WLI Studio After Dark - Who's in Your Corner? (Germantown)",
@@ -1135,6 +1170,40 @@
       "cost": "TBD",
       "link": "https://members.naiop-nashville.org/naiop-events-calendar/Details/creda-holiday-sponsor-social-1735237?sourceTypeId=Website",
       "linkLabel": "CREDA Middle TN"
+    },
+    {
+      "title": "Using Your Self Directed IRA to Buy Real Estate",
+      "start": "2026-12-07T11:30:00-06:00",
+      "end": "2026-12-07T13:00:00-06:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "TNREIA",
+      "location": "Sportsman's Grille · 1640 Westgate Cir, Brentwood, TN 37027",
+      "description": "How Self-Directed IRAs can fund real estate investing, including what is and isn't allowed.",
+      "whosThere": "Chris Atlakson",
+      "cost": "free for members and first-time guests · $22 non-members at the door",
+      "link": "https://www.tnreia.com/event-6859313",
+      "linkLabel": "tnreia.com"
+    },
+    {
+      "title": "ULI Nashville: Holiday Social for Young Leader / NEXT Mid-Career Members",
+      "start": "2026-12-08T17:00:00-06:00",
+      "end": "2026-12-08T19:00:00-06:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "ULI Nashville",
+      "location": "Music City Work Club - The Nations · 4909 Alabama Ave, Nashville, TN 37209",
+      "description": "Holiday networking social for ULI young leader and mid-career members.",
+      "whosThere": "ULI Nashville Young Leader / NEXT members",
+      "cost": "not listed — confirm on organizer page",
+      "link": "https://nashville.uli.org/events/detail/02264E37-B474-458D-A38F-1411E764F091",
+      "linkLabel": "nashville.uli.org"
     }
   ]
 }
