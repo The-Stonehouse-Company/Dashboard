@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-26T06:10:00-05:00",
+  "updatedAt": "2026-11-02T08:10:00-06:00",
   "_note": "Auto-populated by the 'discover-nashville-deal-events' scheduled task each Monday. Add/remove/verify events manually here as needed — the task appends without deleting.",
   "events": [
     {
@@ -963,6 +963,23 @@
       "linkLabel": "tnreia.com"
     },
     {
+      "title": "Market Cycle: How to Make Great Money When Prices are Flat and Falling",
+      "start": "2026-11-02T11:30:00-06:00",
+      "end": "2026-11-02T13:00:00-06:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "TNREIA",
+      "location": "Sportsman's Grille · 1640 Westgate Cir, Brentwood, TN 37027",
+      "description": "How market cycles affect investing and how to adjust strategy when prices slow or decline. (Note: calendar already has another 11:30 listing this date — confirm which is correct.)",
+      "whosThere": "TNREIA members and guests",
+      "cost": "free for members and first-time guests · $22 non-members at the door",
+      "link": "https://www.tnreia.com/events",
+      "linkLabel": "tnreia.com"
+    },
+    {
       "title": "The Road Ahead: Coffee & Conversation with NDOT Director Ryan Lynch",
       "start": "2026-11-04T08:30:00-06:00",
       "end": "2026-11-04T09:30:00-06:00",
@@ -1049,6 +1066,23 @@
       "linkLabel": "CREDA"
     },
     {
+      "title": "TNREIA Meeting: Topic TBD",
+      "start": "2026-11-09T11:30:00-06:00",
+      "end": "2026-11-09T13:00:00-06:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "TNREIA",
+      "location": "Sportsman's Grille · 1640 Westgate Cir, Brentwood, TN 37027",
+      "description": "Weekly TNREIA meeting; topic not yet announced.",
+      "whosThere": "TNREIA members and guests",
+      "cost": "free for members and first-time guests · $22 non-members at the door",
+      "link": "https://www.tnreia.com/events",
+      "linkLabel": "tnreia.com"
+    },
+    {
       "title": "ULI Nashville: Midlife Mingle, Coffee Edition (SAGE 45+)",
       "start": "2026-11-10T08:00:00-06:00",
       "end": "2026-11-10T09:30:00-06:00",
@@ -1064,6 +1098,23 @@
       "cost": "ULI member exclusive",
       "link": "https://nashville.uli.org/events/detail/6E2AFBAB-AB65-4656-83C5-748E29067606",
       "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "Developer Breakfast",
+      "start": "2026-11-10T08:00:00-06:00",
+      "end": "2026-11-10T09:00:00-06:00",
+      "categories": [
+        "DEVELOPERS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "Sapphire Group Real Estate (per prior listing)",
+      "location": "Ugly Mugs Coffee & Tea, Nashville",
+      "description": "Casual monthly coffee for developers, experienced and aspiring.",
+      "whosThere": "Small group, list not public",
+      "cost": "free (per prior listing)",
+      "link": "https://www.eventbrite.com/d/tn--nashville/real-estate/",
+      "linkLabel": "Eventbrite"
     },
     {
       "title": "RE Industry Night",
@@ -1084,6 +1135,59 @@
       "linkLabel": "tnreia.com"
     },
     {
+      "title": "Real Estate and Business Networking | Elevating Your Potential - Nashville",
+      "start": "2026-11-11T18:00:00-06:00",
+      "end": "2026-11-11T20:00:00-06:00",
+      "categories": [
+        "AGENTS",
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Not listed",
+      "location": "Love and Exile Bar, Nashville",
+      "description": "Real estate and business networking mixer. (end time assumed)",
+      "whosThere": "Not listed",
+      "cost": "Not listed",
+      "link": "https://www.eventbrite.com/d/tn--nashville/real-estate/",
+      "linkLabel": "Eventbrite"
+    },
+    {
+      "title": "Realtor Ride CE",
+      "start": "2026-11-12T09:30:00-06:00",
+      "end": "2026-11-12T11:30:00-06:00",
+      "categories": [
+        "AGENTS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Not listed",
+      "location": "1321 Murfreesboro Pike, Nashville",
+      "description": "Realtor continuing-ed ride-along event. (end time assumed)",
+      "whosThere": "Not listed",
+      "cost": "Not listed",
+      "link": "https://www.eventbrite.com/d/tn--nashville/real-estate/",
+      "linkLabel": "Eventbrite"
+    },
+    {
+      "title": "Multifamily, Industrial & Commercial Inspections",
+      "start": "2026-11-12T11:00:00-06:00",
+      "end": "2026-11-12T12:30:00-06:00",
+      "categories": [
+        "DEVELOPERS",
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Not listed",
+      "location": "Nashville Entrepreneur Center, Nashville",
+      "description": "Session on inspections for multifamily, industrial and commercial property. (end time assumed)",
+      "whosThere": "Not listed",
+      "cost": "Not listed",
+      "link": "https://www.eventbrite.com/d/tn--nashville/real-estate/",
+      "linkLabel": "Eventbrite"
+    },
+    {
       "title": "ULI Nashville: Chattanooga Tour of Central Crossing",
       "start": "2026-11-12T16:30:00-05:00",
       "end": "2026-11-12T18:00:00-05:00",
@@ -1099,6 +1203,40 @@
       "cost": "ticketed — confirm on organizer page",
       "link": "https://nashville.uli.org/events/detail/8DDE8886-639B-40E5-ABD3-B5A2343B5A32",
       "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "Real Estate Investor Networking Nashville | Property Deal Network (PDN)",
+      "start": "2026-11-12T19:00:00-06:00",
+      "end": "2026-11-12T21:00:00-06:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Property Deal Network",
+      "location": "Love and Exile Bar, Nashville",
+      "description": "Recurring investor networking night (20 dates listed). (end time assumed)",
+      "whosThere": "Not listed",
+      "cost": "Not listed",
+      "link": "https://www.eventbrite.com/d/tn--nashville/real-estate/",
+      "linkLabel": "Eventbrite"
+    },
+    {
+      "title": "Click Wisely: Protecting Your Real Estate Business from Online Theft",
+      "start": "2026-11-16T11:30:00-06:00",
+      "end": "2026-11-16T13:00:00-06:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "TNREIA",
+      "location": "Sportsman's Grille · 1640 Westgate Cir, Brentwood, TN 37027",
+      "description": "Sean Peters on online theft risks for real estate professionals and how to protect your business.",
+      "whosThere": "Sean Peters",
+      "cost": "free for members and first-time guests · $22 non-members at the door",
+      "link": "https://www.tnreia.com/events",
+      "linkLabel": "tnreia.com"
     },
     {
       "title": "ULI Nashville: WLI Studio After Dark - Who's in Your Corner? (Franklin)",
@@ -1154,6 +1292,42 @@
       "linkLabel": "nashville.uli.org"
     },
     {
+      "title": "Nashville Law, Real Estate & Construction Networking Event",
+      "start": "2026-11-19T19:00:00-06:00",
+      "end": "2026-11-19T21:00:00-06:00",
+      "categories": [
+        "BUILDERS",
+        "DEVELOPERS",
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Not listed",
+      "location": "Standard Proof Whiskey Co., Nashville",
+      "description": "Cross-industry networking for law, real estate and construction. (end time assumed)",
+      "whosThere": "Not listed",
+      "cost": "Not listed",
+      "link": "https://www.eventbrite.com/d/tn--nashville/real-estate/",
+      "linkLabel": "Eventbrite"
+    },
+    {
+      "title": "TNREIA Meeting: Topic TBD",
+      "start": "2026-11-30T11:30:00-06:00",
+      "end": "2026-11-30T13:00:00-06:00",
+      "categories": [
+        "INVESTORS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "TNREIA",
+      "location": "Sportsman's Grille · 1640 Westgate Cir, Brentwood, TN 37027",
+      "description": "Weekly TNREIA meeting; topic not yet announced.",
+      "whosThere": "TNREIA members and guests",
+      "cost": "free for members and first-time guests · $22 non-members at the door",
+      "link": "https://www.tnreia.com/events",
+      "linkLabel": "tnreia.com"
+    },
+    {
       "title": "CREDA Holiday Sponsor Social",
       "start": "2026-12-02T16:00:00-06:00",
       "end": "2026-12-02T18:00:00-06:00",
@@ -1170,6 +1344,24 @@
       "cost": "TBD",
       "link": "https://members.naiop-nashville.org/naiop-events-calendar/Details/creda-holiday-sponsor-social-1735237?sourceTypeId=Website",
       "linkLabel": "CREDA Middle TN"
+    },
+    {
+      "title": "Sleigh All Day (TNREIA Christmas Party)",
+      "start": "2026-12-02T16:00:00-06:00",
+      "end": "2026-12-02T19:00:00-06:00",
+      "categories": [
+        "INVESTORS",
+        "BUILDERS"
+      ],
+      "verified": false,
+      "priority": true,
+      "host": "TNREIA",
+      "location": "Electronic Express · 1735 Galleria Blvd #1000, Franklin, TN 37067",
+      "description": "TNREIA's annual Christmas party, hosted by sponsor Electronic Express.",
+      "whosThere": "TNREIA members, investors, industry pros",
+      "cost": "free",
+      "link": "https://www.tnreia.com/events",
+      "linkLabel": "tnreia.com"
     },
     {
       "title": "Using Your Self Directed IRA to Buy Real Estate",
@@ -1204,6 +1396,23 @@
       "cost": "not listed — confirm on organizer page",
       "link": "https://nashville.uli.org/events/detail/02264E37-B474-458D-A38F-1411E764F091",
       "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "Home Inspections on New Construction",
+      "start": "2026-12-10T11:00:00-06:00",
+      "end": "2026-12-10T12:30:00-06:00",
+      "categories": [
+        "BUILDERS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Not listed",
+      "location": "Nashville Entrepreneur Center, Nashville",
+      "description": "Session on inspections for new-construction homes. (end time assumed)",
+      "whosThere": "Not listed",
+      "cost": "Not listed",
+      "link": "https://www.eventbrite.com/d/tn--nashville/real-estate/",
+      "linkLabel": "Eventbrite"
     }
   ]
 }
