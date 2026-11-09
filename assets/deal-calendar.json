@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-02T08:10:00-06:00",
+  "updatedAt": "2026-11-09T06:01:51-06:00",
   "_note": "Auto-populated by the 'discover-nashville-deal-events' scheduled task each Monday. Add/remove/verify events manually here as needed — the task appends without deleting.",
   "events": [
     {
@@ -1066,6 +1066,23 @@
       "linkLabel": "CREDA"
     },
     {
+      "title": "Breakthrough 120",
+      "start": "2026-11-09T09:00:00-06:00",
+      "end": "2026-11-09T10:00:00-06:00",
+      "categories": [
+        "AGENTS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Keller Williams Realty (Mt. Juliet)",
+      "location": "Mt. Juliet · Keller Williams Realty",
+      "description": "Agent business-planning session listed on Eventbrite (+4 more dates). (end time TBD — confirm on organizer page)",
+      "whosThere": "Keller Williams agents",
+      "cost": "TBD — confirm on organizer page",
+      "link": "https://www.eventbrite.com/e/breakthrough-120-tickets-2003670831394",
+      "linkLabel": "Eventbrite"
+    },
+    {
       "title": "TNREIA Meeting: Topic TBD",
       "start": "2026-11-09T11:30:00-06:00",
       "end": "2026-11-09T13:00:00-06:00",
@@ -1290,6 +1307,40 @@
       "cost": "ticketed — confirm on organizer page",
       "link": "https://nashville.uli.org/events/detail/EBDAC694-467A-4ACC-A7FD-AC475A1971D7",
       "linkLabel": "nashville.uli.org"
+    },
+    {
+      "title": "Friendsgiving (MTAR)",
+      "start": "2026-11-18T11:00:00-06:00",
+      "end": "2026-11-18T13:00:00-06:00",
+      "categories": [
+        "AGENTS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Middle Tennessee Association of REALTORS (MTAR)",
+      "location": "Murfreesboro · MTAR Event Center",
+      "description": "Holiday networking event at the MTAR Event Center. (end time TBD — confirm on organizer page)",
+      "whosThere": "Rutherford County REALTORS",
+      "cost": "TBD — confirm on organizer page",
+      "link": "https://www.eventbrite.com/e/friendsgiving-tickets-2003355166231",
+      "linkLabel": "Eventbrite"
+    },
+    {
+      "title": "Winning in a Shifting Market | Real Estate CE Course",
+      "start": "2026-11-19T10:00:00-06:00",
+      "end": "2026-11-19T12:00:00-06:00",
+      "categories": [
+        "AGENTS"
+      ],
+      "verified": false,
+      "priority": false,
+      "host": "Lending Hand Mortgage",
+      "location": "Madison · Lending Hand Mortgage Office",
+      "description": "Real estate CE course on market-shift strategy. (end time TBD — confirm on organizer page)",
+      "whosThere": "Local agents",
+      "cost": "TBD — confirm on organizer page",
+      "link": "https://www.eventbrite.com/e/winning-in-a-shifting-market-real-estate-ce-course-tickets-2003745079472",
+      "linkLabel": "Eventbrite"
     },
     {
       "title": "Nashville Law, Real Estate & Construction Networking Event",
